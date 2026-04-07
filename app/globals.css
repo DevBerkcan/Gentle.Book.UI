@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Klaro Cookie Consent CSS */
+@import url('https://cdn.jsdelivr.net/npm/klaro@0.7.18/dist/klaro.min.css');
+
+@layer base {
+  :root {
+    /* New Corporate Colors */
+    --corporate-rose: #E8C7C3;
+    --corporate-charcoal: #1E1E1E;
+    --corporate-beige: #F5EDEB;
+    --corporate-white: #FFFFFF;
+    --corporate-grey: #8A8A8A;
+    
+    /* Legacy colors (keeping for backward compatibility) */
+    --barber-red: #dc2626;
+    --barber-dark-red: #991b1b;
+    --barber-gold: #d4af37;
+  }
+
+  body {
+    @apply bg-[#F5EDEB] text-[#1E1E1E] antialiased;
+  }
+
+  * {
+    @apply focus-visible:outline-[#E8C7C3] focus-visible:outline-2 focus-visible:outline-offset-2;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

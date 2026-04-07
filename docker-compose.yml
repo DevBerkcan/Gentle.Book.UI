@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Next.js Application
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_ONETRUST_DOMAIN_ID=${NEXT_PUBLIC_ONETRUST_DOMAIN_ID}
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Varnish Cache
+  varnish:
+    image: varnish:7.4
+    ports:
+      - "80:80"
+    volumes:
+      - ./varnish/default.vcl:/etc/varnish/default.vcl:ro
+    environment:
+      - VARNISH_SIZE=256M
+    command:
+      - "-p"
+      - "default_ttl=600"
+      - "-p"
+      - "default_grace=3600"
+    networks:
+      - app-network
+    depends_on:
+      - nextjs
+    restart: unless-stopped
+
+  # Optional: Redis für Session Storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis-data:
