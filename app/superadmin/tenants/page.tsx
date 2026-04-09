@@ -52,6 +52,7 @@ const DEFAULT_NEW = {
   adminLastName: '',
   adminEmail: '',
   adminPassword: '',
+  sendWelcomeEmail: true,
 };
 
 function generateSlug(name: string) {
@@ -89,7 +90,7 @@ export default function TenantsPage() {
   }
 
   async function createTenant() {
-    if (!newTenant.name || !newTenant.slug || !newTenant.adminEmail || !newTenant.adminPassword) return;
+    if (!newTenant.name || !newTenant.slug || !newTenant.adminEmail) return;
     setCreating(true);
     setError('');
     try {
@@ -100,11 +101,11 @@ export default function TenantsPage() {
         currency: newTenant.currency,
         timeZone: newTenant.timeZone,
         adminEmail: newTenant.adminEmail,
-        adminPassword: newTenant.adminPassword,
+        adminPassword: newTenant.adminPassword || undefined,
         adminFirstName: newTenant.adminFirstName || newTenant.name,
         adminLastName: newTenant.adminLastName || 'Admin',
+        sendWelcomeEmail: newTenant.sendWelcomeEmail,
       });
-      // Update branding color
       setShowAddForm(false);
       setNewTenant(DEFAULT_NEW);
       await load();
@@ -273,15 +274,29 @@ export default function TenantsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Admin Passwort *</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Admin Passwort <span className="text-gray-400">(optional — wird auto-generiert)</span></label>
               <input
                 type="password"
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-400"
-                placeholder="Mindestens 8 Zeichen"
+                placeholder="Leer lassen = automatisch generiert"
                 value={newTenant.adminPassword}
                 onChange={e => setNewTenant(p => ({ ...p, adminPassword: e.target.value }))}
               />
             </div>
+          </div>
+
+          {/* Einladungsmail-Option */}
+          <div className="mt-3 flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
+            <input
+              type="checkbox"
+              id="sendWelcomeEmail"
+              checked={newTenant.sendWelcomeEmail}
+              onChange={e => setNewTenant(p => ({ ...p, sendWelcomeEmail: e.target.checked }))}
+              className="w-4 h-4 accent-blue-600"
+            />
+            <label htmlFor="sendWelcomeEmail" className="text-sm text-blue-800 cursor-pointer">
+              Zugangsdaten per E-Mail an <strong>{newTenant.adminEmail || 'Admin'}</strong> senden
+            </label>
           </div>
 
           {error && (
@@ -297,7 +312,7 @@ export default function TenantsPage() {
             </button>
             <button
               onClick={createTenant}
-              disabled={creating || !newTenant.name || !newTenant.slug || !newTenant.adminEmail || !newTenant.adminPassword}
+              disabled={creating || !newTenant.name || !newTenant.slug || !newTenant.adminEmail}
               className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {creating ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}

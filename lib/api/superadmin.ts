@@ -34,6 +34,7 @@ export interface CreateTenantPayload {
   adminPassword?: string;
   adminFirstName?: string;
   adminLastName?: string;
+  sendWelcomeEmail?: boolean;
 }
 
 export interface UpdateTenantSettingsPayload {

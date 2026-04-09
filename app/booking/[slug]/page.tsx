@@ -1,267 +1,138 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
-
-import { ServiceSelector } from "@/components/booking/ServiceSelector";
-import { EmployeeSelector } from "@/components/booking/EmployeeSelector";
-import { DateTimePicker } from "@/components/booking/DateTimePicker";
-import { ContactForm } from "@/components/booking/ContactForm";
-
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import {
-  getServices,
-  getAvailability,
-  createBooking,
-  type Service,
-  type TimeSlot,
-  type CustomerInfo,
-  type Employee,
-} from "@/lib/api/booking";
-import { BookingEvents } from "@/lib/tracking";
+  Calendar, Instagram, MessageCircle, MapPin, Facebook, Youtube,
+  Globe, Phone, Mail, ExternalLink, Loader2
+} from "lucide-react";
+import { getTenantInfo, getTenantLinks, type TenantLink } from "@/lib/api/booking";
 
-const TOTAL_STEPS = 4;
+const ICON_MAP: Record<string, React.ReactNode> = {
+  Booking:    <Calendar size={20} />,
+  Instagram:  <Instagram size={20} />,
+  WhatsApp:   <MessageCircle size={20} />,
+  GoogleMaps: <MapPin size={20} />,
+  Facebook:   <Facebook size={20} />,
+  TikTok:     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>,
+  YouTube:    <Youtube size={20} />,
+  Website:    <Globe size={20} />,
+  Phone:      <Phone size={20} />,
+  Email:      <Mail size={20} />,
+  Custom:     <ExternalLink size={20} />,
+};
 
-export default function TenantBookingPage() {
+export default function TenantLinktreePage() {
   const { slug } = useParams<{ slug: string }>();
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [tenantName, setTenantName] = useState<string>('');
-  const [primaryColor, setPrimaryColor] = useState<string>('#E8C7C3');
-
-  const [services, setServices] = useState<Service[]>([]);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    firstName: "", lastName: "", email: "", phone: "",
-  });
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitAttempted, setSubmitAttempted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [tenantName, setTenantName] = useState("");
+  const [tagline, setTagline] = useState<string | null>(null);
+  const [primaryColor, setPrimaryColor] = useState("#E8C7C3");
+  const [links, setLinks] = useState<TenantLink[]>([]);
+  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
 
-    // Load tenant info + services in parallel
-    const apiBase = process.env.NEXT_PUBLIC_API_URL;
-
-    fetch(`${apiBase}/booking/${slug}/info`)
-      .then((r) => {
-        if (r.status === 404) { setNotFound(true); return null; }
-        return r.json();
-      })
-      .then((info) => {
-        if (!info) return;
-        setTenantName(info.companyName ?? info.name ?? slug);
-        if (info.primaryColor) setPrimaryColor(info.primaryColor);
-      })
-      .catch(() => setTenantName(slug));
-
-    getServices(slug)
-      .then(setServices)
-      .catch(() => setError("Fehler beim Laden der Services"));
+    Promise.all([
+      getTenantInfo(slug),
+      getTenantLinks(slug),
+    ]).then(([info, tenantLinks]) => {
+      if (!info || !info.name) {
+        setNotFound(true);
+        return;
+      }
+      setTenantName(info.companyName ?? info.name ?? slug);
+      setTagline(info.tagline ?? null);
+      if (info.primaryColor) setPrimaryColor(info.primaryColor);
+      setLinks(tenantLinks);
+    }).catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
   }, [slug]);
 
-  const handleLoadSlots = async (date: string, employeeId?: string) => {
-    if (!selectedService) return;
-    const empId = employeeId || selectedEmployee?.id;
-    if (!empId) return;
-    setLoadingSlots(true);
-    setSelectedTime(null);
-    try {
-      const data = await getAvailability(selectedService.id, date, empId, slug);
-      setAvailableSlots(data.availableSlots);
-      BookingEvents.dateSelected(date);
-    } catch {
-      setError("Fehler beim Laden der Verfügbarkeit");
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
-  const handleServiceSelect = (service: Service) => {
-    setSelectedService(service);
-    BookingEvents.serviceSelected(service.name, service.price);
-  };
-
-  const handleEmployeeSelect = (employee: Employee) => {
-    if (selectedEmployee?.id !== employee.id) {
-      setAvailableSlots([]);
-      setSelectedDate(null);
-      setSelectedTime(null);
-    }
-    setSelectedEmployee(employee);
-  };
-
-  const handleSubmit = async () => {
-    setSubmitAttempted(true);
-    if (!selectedService || !selectedDate || !selectedTime) {
-      setError("Bitte alle Felder ausfüllen");
-      return;
-    }
-    if (!privacyAccepted) {
-      setError("Bitte stimmen Sie den Datenschutzbestimmungen zu");
-      return;
-    }
-    const hasErrors =
-      !customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
-      !customerInfo.email.trim() || !customerInfo.phone.trim();
-    if (hasErrors) return;
-
-    setSubmitting(true);
-    setError(null);
-    try {
-      const booking = await createBooking({
-        serviceId: selectedService.id,
-        bookingDate: selectedDate,
-        startTime: selectedTime,
-        customer: customerInfo,
-        employeeId: selectedEmployee?.id ?? null,
-      }, slug);
-      BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {});
-      router.push(`/booking/confirmation/${booking.id}`);
-    } catch (err: any) {
-      setError(err.message || "Fehler beim Buchen. Bitte versuchen Sie es erneut.");
-      setSubmitting(false);
-    }
-  };
-
-  const next = () => setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS));
-  const back = () => setCurrentStep((s) => Math.max(s - 1, 1));
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#F5EDEB] to-white">
+        <Loader2 className="animate-spin text-[#E8C7C3]" size={32} />
+      </div>
+    );
+  }
 
   if (notFound) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
-          <p className="text-2xl font-bold text-gray-800 mb-2">Buchungssystem nicht gefunden</p>
-          <p className="text-gray-500">Der Link <span className="font-mono">/booking/{slug}</span> ist nicht gültig.</p>
+          <p className="text-2xl font-bold text-gray-800 mb-2">Profil nicht gefunden</p>
+          <p className="text-gray-500">Der Link <span className="font-mono">/booking/{slug}</span> existiert nicht.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] via-[#F5EDEB] to-white">
-      {/* Header */}
-      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: primaryColor }} />
-          <div>
-            <p className="font-bold text-gray-900 text-sm leading-tight">
-              {tenantName || slug}
-            </p>
-            <p className="text-xs text-gray-400">Online-Buchung</p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#F5EDEB] to-white">
+      <div className="max-w-md mx-auto px-4 py-12 flex flex-col items-center gap-6">
 
-      <div className="max-w-3xl mx-auto px-4 py-8 sm:py-10">
-        {/* Step indicators */}
-        <div className="mb-8 flex justify-center items-center gap-2 sm:gap-4">
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((step) => (
-            <div key={step} className="flex items-center">
-              <div
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                  currentStep > step
-                    ? "text-white"
-                    : currentStep === step
-                    ? "text-white ring-4 ring-opacity-20"
-                    : "bg-[#F0E6E4] text-[#8A8A8A]"
-                }`}
-                style={currentStep >= step ? { backgroundColor: primaryColor } : {}}
+        {/* Profile Card */}
+        <div className="flex flex-col items-center gap-3 text-center">
+          {/* Avatar */}
+          <div
+            className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg"
+            style={{ backgroundColor: primaryColor }}
+          >
+            {tenantName.charAt(0).toUpperCase()}
+          </div>
+          <h1 className="text-2xl font-bold text-[#1E1E1E]">{tenantName}</h1>
+          {tagline && (
+            <p className="text-sm text-[#8A8A8A] max-w-xs">{tagline}</p>
+          )}
+        </div>
+
+        {/* Links */}
+        <div className="w-full flex flex-col gap-3 mt-2">
+          {/* Booking button — always first, always shown */}
+          <Link
+            href={`/booking/${slug}/book`}
+            className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-white font-bold text-base shadow-lg transition-all hover:scale-[1.02] active:scale-95"
+            style={{ background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc)` }}
+          >
+            <span className="flex-shrink-0 bg-white/20 p-2 rounded-xl">
+              <Calendar size={20} />
+            </span>
+            <span className="flex-1">Termin buchen</span>
+            <span className="text-white/60 text-sm">→</span>
+          </Link>
+
+          {/* Custom links */}
+          {links.map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl bg-white border border-gray-100 text-[#1E1E1E] font-semibold text-base shadow-sm transition-all hover:scale-[1.02] hover:shadow-md active:scale-95"
+            >
+              <span
+                className="flex-shrink-0 p-2 rounded-xl text-white"
+                style={{ backgroundColor: primaryColor }}
               >
-                {currentStep > step ? <Check size={18} /> : step}
-              </div>
-              {step < TOTAL_STEPS && (
-                <div
-                  className="w-8 sm:w-12 h-1 mx-1 sm:mx-2 rounded transition-all"
-                  style={{ backgroundColor: currentStep > step ? primaryColor : '#F0E6E4' }}
-                />
-              )}
-            </div>
+                {ICON_MAP[link.iconType] ?? <ExternalLink size={20} />}
+              </span>
+              <span className="flex-1">{link.title}</span>
+              <ExternalLink size={14} className="text-gray-300" />
+            </a>
           ))}
         </div>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 ring-1 ring-[#E8C7C3]/20">
-          <AnimatePresence mode="wait">
-            {currentStep === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <ServiceSelector
-                  services={services}
-                  selectedService={selectedService}
-                  onSelect={handleServiceSelect}
-                  onNext={next}
-                />
-              </motion.div>
-            )}
-            {currentStep === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <EmployeeSelector
-                  selectedEmployee={selectedEmployee}
-                  onSelect={handleEmployeeSelect}
-                  onNext={next}
-                  onBack={back}
-                  selectedService={selectedService}
-                  tenantSlug={slug}
-                />
-              </motion.div>
-            )}
-            {currentStep === 3 && selectedService && (
-              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <DateTimePicker
-                  service={selectedService}
-                  selectedEmployee={selectedEmployee}
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
-                  availableSlots={availableSlots}
-                  onDateSelect={setSelectedDate}
-                  onTimeSelect={(t) => { setSelectedTime(t); BookingEvents.timeSlotSelected(t); }}
-                  onLoadSlots={handleLoadSlots}
-                  onNext={next}
-                  onBack={back}
-                  loading={loadingSlots}
-                />
-              </motion.div>
-            )}
-            {currentStep === 4 && selectedService && selectedDate && selectedTime && (
-              <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <ContactForm
-                  service={selectedService}
-                  selectedDate={selectedDate}
-                  selectedTime={selectedTime}
-                  customerInfo={customerInfo}
-                  onCustomerInfoChange={setCustomerInfo}
-                  privacyAccepted={privacyAccepted}
-                  onPrivacyChange={setPrivacyAccepted}
-                  selectedEmployee={selectedEmployee}
-                  onSubmitAttempt={submitAttempted}
-                  onBack={back}
-                  onSubmit={handleSubmit}
-                  submitting={submitting}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-300">
+            Powered by{" "}
+            <span className="font-semibold" style={{ color: primaryColor }}>
+              GentleBook
+            </span>
+          </p>
         </div>
       </div>
     </div>

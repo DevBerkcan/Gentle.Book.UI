@@ -166,10 +166,24 @@ export async function getServices(tenantSlug?: string): Promise<Service[]> {
 }
 
 export async function getTenantInfo(tenantSlug: string): Promise<{
-  name: string; primaryColor?: string; tagline?: string; welcomeMessage?: string;
+  name: string; companyName?: string; primaryColor?: string; tagline?: string; welcomeMessage?: string;
 }> {
   const res = await fetch(`${API_BASE_URL}/booking/${tenantSlug}/info`);
   if (!res.ok) return { name: tenantSlug };
+  return res.json();
+}
+
+export interface TenantLink {
+  id: string;
+  title: string;
+  url: string;
+  iconType: string;
+  displayOrder: number;
+}
+
+export async function getTenantLinks(tenantSlug: string): Promise<TenantLink[]> {
+  const res = await fetch(`${API_BASE_URL}/booking/${tenantSlug}/links`);
+  if (!res.ok) return [];
   return res.json();
 }
 

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BarChart3, Ban, LogOut,
-  Menu, X, Users, ChevronDown, Scissors, Settings, CreditCard
+  Menu, X, Users, ChevronDown, Scissors, Settings, CreditCard, Link2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -36,6 +36,7 @@ export function AdminNav() {
 
   // TenantAdmin gets extra nav items
   const adminOnlyItems = isTenantAdmin ? [
+    { href: "/admin/links", label: "Meine Links", icon: Link2 },
     { href: "/admin/settings", label: "Einstellungen", icon: Settings },
     { href: "/admin/subscription", label: "Abo", icon: CreditCard },
   ] : [];
