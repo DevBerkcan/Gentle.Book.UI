@@ -243,13 +243,13 @@ export default function AdminDashboardPage() {
                     <div className="text-xl sm:text-2xl font-bold text-[#017172]">{today.completedBookings}</div>
                     <div className="text-xs sm:text-sm text-[#8A8A8A]">Erledigt</div>
                   </div>
-                  <div className="text-center p-3 sm:p-4 bg-[#F5EDEB] rounded-lg border border-[#D8B0AC]/30">
-                    <div className="text-xl sm:text-2xl font-bold text-[#D8B0AC]">{today.pendingBookings}</div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A]">Ausstehend</div>
+                  <div className="text-center p-3 sm:p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <div className="text-xl sm:text-2xl font-bold text-amber-600">{today.pendingBookings}</div>
+                    <div className="text-xs sm:text-sm text-amber-500 font-medium">Ausstehend</div>
                   </div>
-                  <div className="text-center p-3 sm:p-4 bg-[#F5EDEB] rounded-lg border border-[#E8C7C3]/30">
-                    <div className="text-xl sm:text-2xl font-bold text-[#8A8A8A]">{today.cancelledBookings}</div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A]">Storniert</div>
+                  <div className="text-center p-3 sm:p-4 bg-red-50 rounded-lg border border-red-100">
+                    <div className="text-xl sm:text-2xl font-bold text-red-400">{today.cancelledBookings}</div>
+                    <div className="text-xs sm:text-sm text-red-400 font-medium">Storniert</div>
                   </div>
                 </div>
 
@@ -364,16 +364,10 @@ export default function AdminDashboardPage() {
                             {service.bookingCount} Buchungen
                           </div>
                         </div>
-                        <div className="font-bold text-[#017172] text-sm sm:text-base whitespace-nowrap">
-                          {service.revenueCHF > 0 && (
-                            <div className="text-right">
-                              {formatPrice(service.revenueCHF, "CHF")}
-                            </div>
-                          )}
-                          {service.revenueEUR > 0 && (
-                            <div className="text-right text-sm sm:text-base">
-                              {formatPrice(service.revenueEUR, "EUR")}
-                            </div>
+                        <div className="font-bold text-[#017172] text-sm sm:text-base whitespace-nowrap text-right">
+                          {formatPrice(
+                            defaultCurrency === "CHF" ? service.revenueCHF : service.revenueEUR,
+                            defaultCurrency
                           )}
                         </div>
                       </div>

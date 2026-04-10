@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BarChart3, Ban, LogOut,
@@ -82,29 +81,21 @@ export function AdminNav() {
     <nav className="bg-[#1E1E1E] text-white shadow-lg sticky top-0 z-50">
       <div className="flex items-center h-24 px-4 sm:px-6 lg:px-8">
         {/* Logo - Far left */}
-        <Link href="/admin/dashboard" className="flex items-center gap-3 shrink-0 -ml-4 sm:-ml-6 lg:-ml-8">
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28">
-            {tenantLogoUrl ? (
-              <img
-                src={tenantLogoUrl}
-                alt={tenantCompanyName ?? 'Logo'}
-                className="w-full h-full object-contain rounded-xl"
-              />
-            ) : (
-              <Image
-                src="/icon.png"
-                alt="GentleBook"
-                fill
-                sizes="(max-width: 640px) 80px, (max-width: 768px) 96px, 112px"
-                className="rounded-xl object-contain brightness-0 invert"
-                priority
-              />
-            )}
-          </div>
+        <Link href="/admin/dashboard" className="flex items-center gap-3 shrink-0 -ml-4 sm:-ml-6 lg:-ml-8 pl-4 sm:pl-6 lg:pl-8">
+          {tenantLogoUrl ? (
+            <img
+              src={tenantLogoUrl}
+              alt={tenantCompanyName ?? 'Logo'}
+              className="w-10 h-10 object-contain rounded-xl"
+            />
+          ) : null}
           {tenantCompanyName && (
-            <span className="hidden lg:block text-white font-semibold text-sm leading-tight max-w-[120px] truncate">
+            <span className="text-white font-bold text-sm leading-tight max-w-[160px] truncate">
               {tenantCompanyName}
             </span>
+          )}
+          {!tenantLogoUrl && !tenantCompanyName && (
+            <span className="text-white font-bold text-sm">Dashboard</span>
           )}
         </Link>
 
