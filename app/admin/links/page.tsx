@@ -8,8 +8,9 @@ import {
   Phone, Mail, Edit2, Check, X, Eye, CheckCircle2, AlertCircle,
   ArrowUp, ArrowDown, Palette, Loader2, Sparkles, ChevronDown,
   Circle, Grid3x3, Minus, Type, Pipette, LayoutList, LayoutGrid,
-  Zap, Wind, Square, Smile,
+  Zap, Wind, Smile, QrCode, Download, Copy, Check as CheckIcon,
 } from "lucide-react";
+import QRCodeSVG from "react-qr-code";
 import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
@@ -147,6 +148,10 @@ export default function AdminLinksPage() {
   const [designOpen, setDesignOpen] = useState(false);
   const [designSaving, setDesignSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // QR modal
+  const [showQR, setShowQR] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Toast
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -334,6 +339,83 @@ export default function AdminLinksPage() {
         </AnimatePresence>
       </div>
 
+      {/* ── QR Modal ── */}
+      <AnimatePresence>
+        {showQR && tenantSlug && (() => {
+          const bookingUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/booking/${tenantSlug}`;
+          const handleCopy = () => {
+            navigator.clipboard.writeText(bookingUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          };
+          const handleDownload = () => {
+            const svg = document.getElementById("qr-svg");
+            if (!svg) return;
+            const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
+            const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+            a.download = `${tenantSlug}-qrcode.svg`; a.click();
+          };
+          return (
+            <motion.div
+              key="qr-backdrop"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowQR(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 26 }}
+                className="bg-white rounded-3xl shadow-2xl p-7 w-full max-w-sm flex flex-col items-center gap-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div>
+                    <p className="font-bold text-[#1E1E1E] text-lg">QR-Code</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Zum Scannen &amp; Teilen</p>
+                  </div>
+                  <button onClick={() => setShowQR(false)} className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-xl transition-colors">
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* QR Code */}
+                <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-inner">
+                  <QRCodeSVG
+                    id="qr-svg"
+                    value={bookingUrl}
+                    size={200}
+                    fgColor="#1E1E1E"
+                    bgColor="#ffffff"
+                    level="M"
+                  />
+                </div>
+
+                {/* URL */}
+                <div className="w-full bg-gray-50 rounded-xl px-3 py-2.5 flex items-center gap-2">
+                  <p className="flex-1 text-xs text-gray-500 truncate font-mono">{bookingUrl}</p>
+                  <button onClick={handleCopy}
+                    className="flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+                    style={{ background: copied ? "#D1FAE5" : "#F5EDEB", color: copied ? "#065F46" : "#D8B0AC" }}
+                  >
+                    {copied ? <><CheckIcon size={12} /> Kopiert</> : <><Copy size={12} /> Kopieren</>}
+                  </button>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 w-full">
+                  <button onClick={handleDownload}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#E8C7C3] text-white hover:bg-[#D8B0AC] transition-colors">
+                    <Download size={14} /> SVG herunterladen
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
       <div className="max-w-2xl mx-auto">
 
         {/* ── Header ── */}
@@ -343,6 +425,12 @@ export default function AdminLinksPage() {
             <p className="text-sm text-[#8A8A8A] mt-1">Profil & Design deiner öffentlichen Seite</p>
           </div>
           <div className="flex gap-2">
+            {tenantSlug && (
+              <button onClick={() => setShowQR(true)}
+                className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+                <QrCode size={15} /><span className="hidden sm:inline">QR-Code</span>
+              </button>
+            )}
             {tenantSlug && (
               <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">

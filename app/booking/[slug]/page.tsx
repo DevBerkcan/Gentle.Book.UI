@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import {
   Calendar, Instagram, MessageCircle, MapPin, Facebook, Youtube,
   Globe, Phone, Mail, ExternalLink, Loader2, ChevronRight, Sparkles,
@@ -259,6 +259,7 @@ export default function TenantLinktreePage() {
   const [links,      setLinks]         = useState<TenantLink[]>([]);
   const [loading,    setLoading]       = useState(true);
   const [notFound,   setNotFound]      = useState(false);
+  const [showFloating, setShowFloating] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -280,6 +281,13 @@ export default function TenantLinktreePage() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  // Scroll → show floating pill after 260px
+  useEffect(() => {
+    const handler = () => setShowFloating(window.scrollY > 260);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   // Confetti handler
   const handleCtaClick = useCallback(async (e: React.MouseEvent) => {
@@ -497,6 +505,35 @@ export default function TenantLinktreePage() {
           </p>
         </motion.div>
       </div>
+
+      {/* ── Floating CTA pill ── */}
+      <AnimatePresence>
+        {showFloating && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 320, damping: 28 }}
+            className="fixed bottom-6 left-0 right-0 flex justify-center z-50 px-4 pointer-events-none"
+          >
+            {cfg.confetti ? (
+              <button onClick={handleCtaClick}
+                className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
+                style={{ background: ctaBg, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${t.ctaShadow}` }}
+              >
+                <Calendar size={16} />{ctaText}
+              </button>
+            ) : (
+              <a href={`/booking/${slug}/book`}
+                className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
+                style={{ background: ctaBg, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${t.ctaShadow}` }}
+              >
+                <Calendar size={16} />{ctaText}
+              </a>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

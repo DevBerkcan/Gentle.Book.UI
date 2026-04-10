@@ -125,7 +125,7 @@ export default function TenantBookingPage() {
         employeeId: selectedEmployee?.id ?? null,
       }, slug);
       BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {});
-      router.push(`/booking/confirmation/${booking.id}`);
+      router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
     } catch (err: any) {
       setError(err.message || "Fehler beim Buchen. Bitte versuchen Sie es erneut.");
       setSubmitting(false);
