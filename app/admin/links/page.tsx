@@ -1,93 +1,59 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Link2, Plus, Trash2, GripVertical, ExternalLink, Calendar,
   Instagram, MessageCircle, MapPin, Facebook, Youtube, Globe,
   Phone, Mail, Edit2, Check, X, Eye, CheckCircle2, AlertCircle,
-  ArrowUp, ArrowDown, Palette, Loader2,
+  ArrowUp, ArrowDown, Palette, Loader2, Sparkles, ChevronDown,
+  Circle, Grid3x3, Minus, Type, Pipette,
 } from "lucide-react";
 import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
-// ── Theme Picker ─────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 type Theme = "gradient" | "dark" | "minimal" | "bold" | "glass";
+type BgPattern = "none" | "dots" | "waves" | "grid" | "circles";
+type ButtonStyle = "rounded" | "pill" | "square";
 
-const THEMES: { value: Theme; label: string; desc: string; preview: { bg: string; card: string; text: string } }[] = [
-  {
-    value: "gradient",
-    label: "Gradient",
-    desc: "Sanfter Farbverlauf",
-    preview: { bg: "linear-gradient(135deg, #fde8e8 0%, #fff 100%)", card: "#ffffff", text: "#1a1a1a" },
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    desc: "Dunkles Design",
-    preview: { bg: "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%)", card: "rgba(255,255,255,0.08)", text: "#ffffff" },
-  },
-  {
-    value: "minimal",
-    label: "Minimal",
-    desc: "Klares Weiß",
-    preview: { bg: "#ffffff", card: "#f8f8f8", text: "#111111" },
-  },
-  {
-    value: "bold",
-    label: "Bold",
-    desc: "Vollfarbe",
-    preview: { bg: "linear-gradient(135deg, #E8C7C3 0%, #D8B0AC 100%)", card: "rgba(255,255,255,0.9)", text: "#1a1a1a" },
-  },
-  {
-    value: "glass",
-    label: "Glass",
-    desc: "Milchglas-Effekt",
-    preview: { bg: "linear-gradient(135deg, #f5c5c0 0%, #fde8e8 100%)", card: "rgba(255,255,255,0.45)", text: "#1a1a1a" },
-  },
+interface LinktreeConfig {
+  ctaText: string;
+  bgPattern: BgPattern;
+  buttonStyle: ButtonStyle;
+}
+
+const DEFAULT_CONFIG: LinktreeConfig = {
+  ctaText: "Termin buchen",
+  bgPattern: "none",
+  buttonStyle: "rounded",
+};
+
+// ── Industry Presets ──────────────────────────────────────────────────────────
+
+const INDUSTRY_PRESETS: Record<string, { color: string; style: Theme; emoji: string; label: string; ctaText: string; bgPattern: BgPattern; buttonStyle: ButtonStyle }> = {
+  Hairdresser: { color: "#C9A96E", style: "bold",     emoji: "✂️",  label: "Friseur",        ctaText: "Friseurtermin buchen",   bgPattern: "waves",   buttonStyle: "rounded" },
+  Beauty:      { color: "#E8C7C3", style: "gradient",  emoji: "💄",  label: "Beauty",         ctaText: "Beauty-Termin buchen",   bgPattern: "dots",    buttonStyle: "pill"    },
+  Barbershop:  { color: "#2C3E50", style: "dark",      emoji: "🪒",  label: "Barbershop",     ctaText: "Barber-Termin buchen",   bgPattern: "grid",    buttonStyle: "square"  },
+  Massage:     { color: "#6B8E7F", style: "minimal",   emoji: "💆",  label: "Massage",        ctaText: "Massage buchen",         bgPattern: "circles", buttonStyle: "pill"    },
+  Nail:        { color: "#D4A5C9", style: "glass",     emoji: "💅",  label: "Nails",          ctaText: "Nail-Termin buchen",     bgPattern: "dots",    buttonStyle: "pill"    },
+  Physio:      { color: "#4A90D9", style: "minimal",   emoji: "🏋️", label: "Physiotherapie", ctaText: "Termin vereinbaren",     bgPattern: "none",    buttonStyle: "rounded" },
+  Tattoo:      { color: "#1A1A2E", style: "dark",      emoji: "🎨",  label: "Tattoo",         ctaText: "Studio-Termin buchen",   bgPattern: "grid",    buttonStyle: "square"  },
+  Other:       { color: "#E8C7C3", style: "gradient",  emoji: "📅",  label: "Andere",         ctaText: "Termin buchen",          bgPattern: "none",    buttonStyle: "rounded" },
+};
+
+// ── Themes ────────────────────────────────────────────────────────────────────
+
+const THEMES: { value: Theme; label: string; desc: string }[] = [
+  { value: "gradient", label: "Gradient", desc: "Sanfter Verlauf" },
+  { value: "dark",     label: "Dark",     desc: "Dunkles Design"  },
+  { value: "minimal",  label: "Minimal",  desc: "Klares Weiß"     },
+  { value: "bold",     label: "Bold",     desc: "Vollfarbe"       },
+  { value: "glass",    label: "Glass",    desc: "Milchglas"       },
 ];
 
-function ThemePicker({ current, primaryColor, onChange }: { current: Theme; primaryColor: string; onChange: (t: Theme) => void }) {
-  return (
-    <div className="grid grid-cols-5 gap-2">
-      {THEMES.map((theme) => {
-        // Use primary color for bold/gradient previews
-        const bgStyle = theme.value === "bold"
-          ? `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}bb 100%)`
-          : theme.value === "gradient"
-          ? `linear-gradient(135deg, ${primaryColor}33 0%, #fff 100%)`
-          : theme.value === "glass"
-          ? `linear-gradient(135deg, ${primaryColor}55 0%, ${primaryColor}22 100%)`
-          : theme.preview.bg;
-
-        return (
-          <button
-            key={theme.value}
-            onClick={() => onChange(theme.value)}
-            className={`relative flex flex-col items-center gap-1.5 p-1 rounded-xl transition-all ${
-              current === theme.value ? "ring-2 ring-offset-1 ring-[#E8C7C3]" : "hover:opacity-80"
-            }`}
-            title={theme.desc}
-          >
-            {/* Mini preview */}
-            <div className="w-full h-14 rounded-lg overflow-hidden relative" style={{ background: bgStyle }}>
-              <div className="absolute inset-x-2 top-2 h-2.5 rounded-full"
-                style={{ background: theme.preview.card, opacity: 0.9 }} />
-              <div className="absolute inset-x-2 top-5.5 h-2 rounded-full mt-1"
-                style={{ background: theme.preview.card, opacity: 0.7 }} />
-              <div className="absolute inset-x-2 bottom-2 h-2 rounded-full"
-                style={{ background: theme.preview.card, opacity: 0.5 }} />
-            </div>
-            <span className={`text-[10px] font-semibold ${current === theme.value ? "text-[#E8C7C3]" : "text-gray-500"}`}>
-              {theme.label}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const ICON_OPTIONS = [
   { value: "Instagram",  label: "Instagram",   icon: <Instagram size={16} /> },
@@ -116,6 +82,8 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Custom:     <ExternalLink size={18} />,
 };
 
+// ── Link Item ─────────────────────────────────────────────────────────────────
+
 interface LinkItem {
   id: string;
   title: string;
@@ -125,36 +93,41 @@ interface LinkItem {
   isActive: boolean;
 }
 
-type Toast = { id: number; type: "success" | "error"; message: string };
+// ── Toast ─────────────────────────────────────────────────────────────────────
 
+type Toast = { id: number; type: "success" | "error"; message: string };
 let toastCounter = 0;
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminLinksPage() {
   const { user } = useAuth();
+  const tenantSlug = (user as any)?.tenantSlug;
+
+  // Links state
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  // New link form
   const [newTitle, setNewTitle] = useState("");
   const [newUrl, setNewUrl] = useState("");
   const [newIcon, setNewIcon] = useState("Instagram");
-
-  // Edit form
   const [editTitle, setEditTitle] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [editIcon, setEditIcon] = useState("");
 
-  const tenantSlug = (user as any)?.tenantSlug;
-
-  // Theme state
+  // Design state
   const [theme, setTheme] = useState<Theme>("gradient");
   const [primaryColor, setPrimaryColor] = useState("#E8C7C3");
-  const [themeOpen, setThemeOpen] = useState(false);
-  const [themeSaving, setThemeSaving] = useState(false);
+  const [config, setConfig] = useState<LinktreeConfig>(DEFAULT_CONFIG);
+  const [industryType, setIndustryType] = useState<string>("Other");
+  const [designOpen, setDesignOpen] = useState(false);
+  const [designSaving, setDesignSaving] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Toast
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     const id = ++toastCounter;
@@ -162,39 +135,97 @@ export default function AdminLinksPage() {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
   }, []);
 
+  // ── Load data ───────────────────────────────────────────────────────────────
+
   useEffect(() => {
     loadLinks();
-    // Load current theme + primary color from settings
     api.get("/tenant/settings").then((res) => {
       const d = res.data?.data ?? res.data;
       if (d?.linktreeStyle) setTheme(d.linktreeStyle as Theme);
       if (d?.primaryColor) setPrimaryColor(d.primaryColor);
+      if (d?.linktreeConfig) {
+        try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(d.linktreeConfig) }); } catch {}
+      }
     }).catch(() => {});
-  }, []);
 
-  async function handleThemeChange(newTheme: Theme) {
-    setTheme(newTheme);
-    setThemeSaving(true);
-    try {
-      await api.put("/tenant/settings", { linktreeStyle: newTheme });
-      showToast("success", `Theme „${THEMES.find(t => t.value === newTheme)?.label}" gespeichert`);
-    } catch {
-      showToast("error", "Theme konnte nicht gespeichert werden");
-    } finally {
-      setThemeSaving(false);
+    // Get industry type from auth user or tenant info
+    const slug = tenantSlug;
+    if (slug) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/${slug}/info`)
+        .then(r => r.json()).then(d => { if (d?.industryType) setIndustryType(d.industryType); })
+        .catch(() => {});
     }
+  }, [tenantSlug]);
+
+  // ── Save design (debounced) ──────────────────────────────────────────────────
+
+  const saveDesign = useCallback(async (
+    newTheme: Theme,
+    newColor: string,
+    newConfig: LinktreeConfig,
+    silent = false
+  ) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      setDesignSaving(true);
+      try {
+        await api.put("/tenant/settings", {
+          primaryColor: newColor,
+          linktreeStyle: newTheme,
+          linktreeConfig: JSON.stringify(newConfig),
+        });
+        if (!silent) showToast("success", "Design gespeichert");
+      } catch {
+        showToast("error", "Design konnte nicht gespeichert werden");
+      } finally {
+        setDesignSaving(false);
+      }
+    }, 600);
+  }, [showToast]);
+
+  // ── Apply preset ────────────────────────────────────────────────────────────
+
+  async function applyPreset(key: string) {
+    const preset = INDUSTRY_PRESETS[key] ?? INDUSTRY_PRESETS.Other;
+    const newConfig: LinktreeConfig = {
+      ctaText: preset.ctaText,
+      bgPattern: preset.bgPattern,
+      buttonStyle: preset.buttonStyle,
+    };
+    setTheme(preset.style);
+    setPrimaryColor(preset.color);
+    setConfig(newConfig);
+    await saveDesign(preset.style, preset.color, newConfig, false);
+    showToast("success", `Vorlage „${preset.label}" angewendet ✓`);
   }
+
+  // ── Update config field ──────────────────────────────────────────────────────
+
+  function updateConfig(field: keyof LinktreeConfig, value: string) {
+    const next = { ...config, [field]: value };
+    setConfig(next);
+    saveDesign(theme, primaryColor, next, true);
+  }
+
+  function updateTheme(t: Theme) {
+    setTheme(t);
+    saveDesign(t, primaryColor, config, true);
+  }
+
+  function updateColor(c: string) {
+    setPrimaryColor(c);
+    saveDesign(theme, c, config, true);
+  }
+
+  // ── Links CRUD ──────────────────────────────────────────────────────────────
 
   async function loadLinks() {
     setLoading(true);
     try {
       const res = await api.get("/admin/links");
       setLinks(res.data);
-    } catch {
-      showToast("error", "Fehler beim Laden der Links");
-    } finally {
-      setLoading(false);
-    }
+    } catch { showToast("error", "Fehler beim Laden der Links"); }
+    finally { setLoading(false); }
   }
 
   async function handleCreate() {
@@ -210,11 +241,8 @@ export default function AdminLinksPage() {
       setNewTitle(""); setNewUrl(""); setNewIcon("Instagram");
       setShowAddForm(false);
       showToast("success", `„${newTitle.trim()}" wurde hinzugefügt`);
-    } catch {
-      showToast("error", "Fehler beim Anlegen des Links");
-    } finally {
-      setSaving(false);
-    }
+    } catch { showToast("error", "Fehler beim Anlegen des Links"); }
+    finally { setSaving(false); }
   }
 
   async function handleDelete(id: string, title: string) {
@@ -223,34 +251,22 @@ export default function AdminLinksPage() {
       await api.delete(`/admin/links/${id}`);
       setLinks((prev) => prev.filter((l) => l.id !== id));
       showToast("success", `„${title}" wurde gelöscht`);
-    } catch {
-      showToast("error", "Fehler beim Löschen");
-    }
+    } catch { showToast("error", "Fehler beim Löschen"); }
   }
 
   function startEdit(link: LinkItem) {
-    setEditingId(link.id);
-    setEditTitle(link.title);
-    setEditUrl(link.url);
-    setEditIcon(link.iconType);
+    setEditingId(link.id); setEditTitle(link.title); setEditUrl(link.url); setEditIcon(link.iconType);
   }
 
   async function handleSaveEdit(id: string) {
     setSaving(true);
     try {
-      const res = await api.put(`/admin/links/${id}`, {
-        title: editTitle.trim(),
-        url: editUrl.trim(),
-        iconType: editIcon,
-      });
+      const res = await api.put(`/admin/links/${id}`, { title: editTitle.trim(), url: editUrl.trim(), iconType: editIcon });
       setLinks((prev) => prev.map((l) => (l.id === id ? res.data : l)));
       setEditingId(null);
       showToast("success", "Link wurde gespeichert");
-    } catch {
-      showToast("error", "Fehler beim Speichern");
-    } finally {
-      setSaving(false);
-    }
+    } catch { showToast("error", "Fehler beim Speichern"); }
+    finally { setSaving(false); }
   }
 
   async function handleToggleActive(link: LinkItem) {
@@ -258,9 +274,7 @@ export default function AdminLinksPage() {
       const res = await api.put(`/admin/links/${link.id}`, { isActive: !link.isActive });
       setLinks((prev) => prev.map((l) => (l.id === link.id ? res.data : l)));
       showToast("success", link.isActive ? "Link deaktiviert" : "Link aktiviert");
-    } catch {
-      showToast("error", "Fehler beim Aktualisieren");
-    }
+    } catch { showToast("error", "Fehler beim Aktualisieren"); }
   }
 
   async function moveLink(index: number, direction: "up" | "down") {
@@ -269,35 +283,29 @@ export default function AdminLinksPage() {
     if (swapIndex < 0 || swapIndex >= newLinks.length) return;
     [newLinks[index], newLinks[swapIndex]] = [newLinks[swapIndex], newLinks[index]];
     setLinks(newLinks);
-    try {
-      await api.patch("/admin/links/reorder", newLinks.map((l) => l.id));
-    } catch {
-      showToast("error", "Fehler beim Sortieren");
-    }
+    try { await api.patch("/admin/links/reorder", newLinks.map((l) => l.id)); }
+    catch { showToast("error", "Fehler beim Sortieren"); }
   }
+
+  // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#F5EDEB] p-4 sm:p-6">
-      {/* ── Toast Stack ────────────────────────────────────────────── */}
+
+      {/* ── Toast Stack ── */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
-            <motion.div
-              key={toast.id}
+            <motion.div key={toast.id}
               initial={{ opacity: 0, x: 60, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 60, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
               className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-sm font-medium pointer-events-auto max-w-xs ${
-                toast.type === "success"
-                  ? "bg-white border border-green-100 text-green-800"
-                  : "bg-white border border-red-100 text-red-700"
+                toast.type === "success" ? "bg-white border border-green-100 text-green-800" : "bg-white border border-red-100 text-red-700"
               }`}
             >
-              {toast.type === "success"
-                ? <CheckCircle2 size={16} className="text-green-500 shrink-0" />
-                : <AlertCircle size={16} className="text-red-500 shrink-0" />
-              }
+              {toast.type === "success" ? <CheckCircle2 size={16} className="text-green-500 shrink-0" /> : <AlertCircle size={16} className="text-red-500 shrink-0" />}
               {toast.message}
             </motion.div>
           ))}
@@ -306,70 +314,199 @@ export default function AdminLinksPage() {
 
       <div className="max-w-2xl mx-auto">
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
+        {/* ── Header ── */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-[#1E1E1E]">Meine Links</h1>
-            <p className="text-sm text-[#8A8A8A] mt-1">Verwalte dein öffentliches Profil</p>
+            <p className="text-sm text-[#8A8A8A] mt-1">Profil & Design deiner öffentlichen Seite</p>
           </div>
           <div className="flex gap-2">
             {tenantSlug && (
-              <a
-                href={`/booking/${tenantSlug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <Eye size={15} />
-                <span className="hidden sm:inline">Vorschau</span>
+              <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+                <Eye size={15} /><span className="hidden sm:inline">Vorschau</span>
               </a>
             )}
-            <button
-              onClick={() => { setShowAddForm(true); setEditingId(null); }}
-              className="flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors"
-            >
-              <Plus size={16} />
-              Link hinzufügen
+            <button onClick={() => { setShowAddForm(true); setEditingId(null); }}
+              className="flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors">
+              <Plus size={16} />Link hinzufügen
             </button>
           </div>
         </div>
 
-        {/* ── Theme Picker ────────────────────────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════
+            DESIGN SECTION
+        ══════════════════════════════════════════════════════════════ */}
         <div className="mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <button
-            onClick={() => setThemeOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-3.5 text-sm hover:bg-gray-50 transition-colors"
-          >
+          <button onClick={() => setDesignOpen((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-4 text-sm hover:bg-gray-50 transition-colors">
             <div className="flex items-center gap-2.5">
               <Palette size={16} className="text-[#E8C7C3]" />
               <span className="font-semibold text-[#1E1E1E]">Seiten-Design</span>
-              <span className="text-xs text-[#8A8A8A] bg-[#F5EDEB] px-2 py-0.5 rounded-lg font-medium">
-                {THEMES.find(t => t.value === theme)?.label ?? "Gradient"}
-              </span>
-              {themeSaving && <Loader2 size={12} className="animate-spin text-[#E8C7C3]" />}
+              {designSaving && <Loader2 size={12} className="animate-spin text-[#E8C7C3]" />}
             </div>
-            <span className={`text-gray-400 transition-transform duration-200 ${themeOpen ? "rotate-180" : ""}`}>▾</span>
+            <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
           </button>
+
           <AnimatePresence>
-            {themeOpen && (
+            {designOpen && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.22 }}
                 className="overflow-hidden"
               >
-                <div className="px-4 pb-4 pt-1">
-                  <p className="text-xs text-[#8A8A8A] mb-3">Wähle das visuelle Design deiner öffentlichen Profilseite</p>
-                  <ThemePicker current={theme} primaryColor={primaryColor} onChange={handleThemeChange} />
+                <div className="px-4 pb-5 space-y-5 border-t border-gray-50">
+
+                  {/* ── Branchenvorlagen ── */}
+                  <div className="pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Branchenvorlage</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {Object.entries(INDUSTRY_PRESETS).map(([key, preset]) => {
+                        const isActive = key === industryType;
+                        return (
+                          <button key={key} onClick={() => applyPreset(key)}
+                            className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all text-center ${
+                              isActive
+                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3]"
+                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            {/* Color dot */}
+                            <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-sm"
+                              style={{ background: preset.color }}>
+                            </div>
+                            <span className="text-lg leading-none">{preset.emoji}</span>
+                            <span className="text-[10px] font-medium text-gray-600 leading-tight">{preset.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2">Klicke auf eine Vorlage um Farbe, Theme und Design automatisch anzupassen</p>
+                  </div>
+
+                  {/* ── Theme ── */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2">Hintergrund-Theme</p>
+                    <div className="grid grid-cols-5 gap-1.5">
+                      {THEMES.map((t) => {
+                        const bgPrev = t.value === "dark"
+                          ? "linear-gradient(135deg, #0f0f1a, #1a1a2e)"
+                          : t.value === "minimal" ? "#ffffff"
+                          : t.value === "bold" ? `linear-gradient(135deg, ${primaryColor}, ${primaryColor}99)`
+                          : t.value === "glass" ? `linear-gradient(135deg, ${primaryColor}44, ${primaryColor}22)`
+                          : `linear-gradient(135deg, ${primaryColor}33, #fff)`;
+                        return (
+                          <button key={t.value} onClick={() => updateTheme(t.value)}
+                            className={`flex flex-col items-center gap-1 p-1 rounded-xl transition-all ${
+                              theme === t.value ? "ring-2 ring-[#E8C7C3] ring-offset-1" : "hover:opacity-75"
+                            }`}>
+                            <div className="w-full h-10 rounded-lg" style={{ background: bgPrev, border: t.value === "minimal" ? "1px solid #eee" : "none" }} />
+                            <span className={`text-[10px] font-semibold ${theme === t.value ? "text-[#E8C7C3]" : "text-gray-400"}`}>{t.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ── Primärfarbe ── */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <Pipette size={12} /> Primärfarbe
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <input type="color" value={primaryColor}
+                          onChange={(e) => updateColor(e.target.value)}
+                          className="w-10 h-10 rounded-xl cursor-pointer border-2 border-white shadow-sm overflow-hidden"
+                          style={{ padding: "2px" }}
+                        />
+                      </div>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {["#E8C7C3","#C9A96E","#2C3E50","#6B8E7F","#D4A5C9","#4A90D9","#1A1A2E","#E74C3C","#2ECC71","#9B59B6","#F39C12","#1ABC9C"].map((c) => (
+                          <button key={c} onClick={() => updateColor(c)}
+                            className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${primaryColor === c ? "border-gray-400 scale-110" : "border-white shadow-sm"}`}
+                            style={{ background: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── Hintergrundmuster ── */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2">Hintergrundmuster</p>
+                    <div className="flex gap-2">
+                      {([
+                        { v: "none",    icon: <Minus size={14} />,     label: "Keins"   },
+                        { v: "dots",    icon: <Circle size={14} />,    label: "Punkte"  },
+                        { v: "waves",   icon: <span className="text-xs">〜</span>, label: "Wellen" },
+                        { v: "grid",    icon: <Grid3x3 size={14} />,   label: "Raster"  },
+                        { v: "circles", icon: <Circle size={16} />,    label: "Kreise"  },
+                      ] as const).map(({ v, icon, label }) => (
+                        <button key={v}
+                          onClick={() => updateConfig("bgPattern", v)}
+                          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-medium border transition-all ${
+                            config.bgPattern === v
+                              ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                              : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          {icon}<span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Button-Form ── */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2">Button-Form</p>
+                    <div className="flex gap-2">
+                      {([
+                        { v: "rounded", label: "Abgerundet", preview: "rounded-xl" },
+                        { v: "pill",    label: "Pill",        preview: "rounded-full" },
+                        { v: "square",  label: "Eckig",       preview: "rounded-none" },
+                      ] as const).map(({ v, label, preview }) => (
+                        <button key={v}
+                          onClick={() => updateConfig("buttonStyle", v)}
+                          className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 border transition-all text-xs font-medium ${
+                            preview
+                          } ${
+                            config.buttonStyle === v
+                              ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                              : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          <div className={`w-14 h-5 ${preview}`} style={{ background: primaryColor, opacity: 0.7 }} />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Button-Text ── */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                      <Type size={12} /> CTA-Text (Buchungsbutton)
+                    </p>
+                    <input
+                      type="text"
+                      value={config.ctaText}
+                      onChange={(e) => updateConfig("ctaText", e.target.value)}
+                      placeholder="Termin buchen"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
+                    />
+                  </div>
+
+                  {/* Vorschau-Link */}
                   {tenantSlug && (
-                    <a
-                      href={`/booking/${tenantSlug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 flex items-center gap-1.5 text-xs text-[#E8C7C3] hover:underline"
-                    >
-                      <Eye size={12} /> Vorschau anzeigen
+                    <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-[#E8C7C3] hover:underline font-medium">
+                      <Eye size={12} /> Vorschau öffnen
                     </a>
                   )}
                 </div>
@@ -378,7 +515,9 @@ export default function AdminLinksPage() {
           </AnimatePresence>
         </div>
 
-        {/* ── Add Link Form ───────────────────────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════
+            ADD LINK FORM
+        ══════════════════════════════════════════════════════════════ */}
         <AnimatePresence>
           {showAddForm && (
             <motion.div
@@ -390,53 +529,26 @@ export default function AdminLinksPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <p className="font-semibold text-[#1E1E1E]">Neuer Link</p>
-                <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600">
-                  <X size={16} />
-                </button>
+                <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex gap-2">
-                  <select
-                    value={newIcon}
-                    onChange={(e) => setNewIcon(e.target.value)}
-                    className="flex-shrink-0 border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                  >
-                    {ICON_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
+                  <select value={newIcon} onChange={(e) => setNewIcon(e.target.value)}
+                    className="flex-shrink-0 border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50">
+                    {ICON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
-                  <input
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="Titel (z.B. Instagram)"
-                    autoFocus
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                  />
+                  <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Titel (z.B. Instagram)" autoFocus
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50" />
                 </div>
-                <input
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://www.instagram.com/..."
+                <input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="https://www.instagram.com/..."
                   onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                />
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50" />
                 <div className="flex gap-2 justify-end pt-1">
-                  <button
-                    onClick={() => { setShowAddForm(false); setNewTitle(""); setNewUrl(""); }}
-                    className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium"
-                  >
-                    Abbrechen
-                  </button>
-                  <button
-                    onClick={handleCreate}
-                    disabled={saving || !newTitle.trim() || !newUrl.trim()}
-                    className="px-5 py-2 text-sm rounded-xl bg-[#E8C7C3] text-white font-semibold hover:bg-[#D8B0AC] disabled:opacity-40 transition-colors flex items-center gap-1.5"
-                  >
-                    {saving ? (
-                      <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                    ) : (
-                      <Plus size={14} />
-                    )}
+                  <button onClick={() => { setShowAddForm(false); setNewTitle(""); setNewUrl(""); }}
+                    className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium">Abbrechen</button>
+                  <button onClick={handleCreate} disabled={saving || !newTitle.trim() || !newUrl.trim()}
+                    className="px-5 py-2 text-sm rounded-xl bg-[#E8C7C3] text-white font-semibold hover:bg-[#D8B0AC] disabled:opacity-40 transition-colors flex items-center gap-1.5">
+                    {saving ? <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Plus size={14} />}
                     Hinzufügen
                   </button>
                 </div>
@@ -445,53 +557,45 @@ export default function AdminLinksPage() {
           )}
         </AnimatePresence>
 
-        {/* ── Fixed Booking Button ────────────────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════
+            FIXED BOOKING BUTTON
+        ══════════════════════════════════════════════════════════════ */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 overflow-hidden">
           <div className="flex items-center gap-3 px-4 py-3.5">
-            <div className="flex-shrink-0 text-gray-200">
-              <GripVertical size={16} />
-            </div>
-            <div className="flex-shrink-0 p-2 rounded-xl bg-[#E8C7C3] text-white">
-              <Calendar size={16} />
-            </div>
+            <div className="flex-shrink-0 text-gray-200"><GripVertical size={16} /></div>
+            <div className="flex-shrink-0 p-2 rounded-xl bg-[#E8C7C3] text-white"><Calendar size={16} /></div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-[#1E1E1E] text-sm">Termin buchen</p>
+              <p className="font-semibold text-[#1E1E1E] text-sm">{config.ctaText || "Termin buchen"}</p>
               <p className="text-xs text-[#8A8A8A]">Immer erster Link · automatisch</p>
             </div>
             <span className="text-xs bg-[#F5EDEB] text-[#D8B0AC] px-2.5 py-1 rounded-lg font-semibold">Fest</span>
           </div>
         </div>
 
-        {/* ── Links list ──────────────────────────────────────────────── */}
+        {/* ══════════════════════════════════════════════════════════════
+            LINKS LIST
+        ══════════════════════════════════════════════════════════════ */}
         {loading ? (
           <div className="text-center py-16 text-[#8A8A8A]">
             <div className="inline-block w-6 h-6 border-2 border-[#E8C7C3]/40 border-t-[#E8C7C3] rounded-full animate-spin mb-3" />
             <p className="text-sm">Lade Links…</p>
           </div>
         ) : links.length === 0 && !showAddForm ? (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-14 bg-white rounded-2xl shadow-sm border border-dashed border-gray-200"
-          >
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="text-center py-14 bg-white rounded-2xl shadow-sm border border-dashed border-gray-200">
             <Link2 size={36} className="text-gray-200 mx-auto mb-3" />
             <p className="text-[#1E1E1E] font-semibold">Noch keine Links</p>
             <p className="text-sm text-gray-400 mt-1 mb-4">Füge Instagram, WhatsApp oder andere Links hinzu</p>
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="inline-flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors"
-            >
-              <Plus size={14} />
-              Ersten Link hinzufügen
+            <button onClick={() => setShowAddForm(true)}
+              className="inline-flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors">
+              <Plus size={14} />Ersten Link hinzufügen
             </button>
           </motion.div>
         ) : (
           <div className="flex flex-col gap-2">
             <AnimatePresence initial={false}>
               {links.map((link, i) => (
-                <motion.div
-                  key={link.id}
-                  layout
+                <motion.div key={link.id} layout
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: link.isActive ? 1 : 0.55, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -4 }}
@@ -499,104 +603,56 @@ export default function AdminLinksPage() {
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
                 >
                   {editingId === link.id ? (
-                    /* ── Edit form ── */
                     <div className="p-4 flex flex-col gap-3">
                       <div className="flex gap-2">
-                        <select
-                          value={editIcon}
-                          onChange={(e) => setEditIcon(e.target.value)}
-                          className="flex-shrink-0 border border-gray-200 rounded-xl px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                        >
-                          {ICON_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
+                        <select value={editIcon} onChange={(e) => setEditIcon(e.target.value)}
+                          className="flex-shrink-0 border border-gray-200 rounded-xl px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50">
+                          {ICON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                         </select>
-                        <input
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          placeholder="Titel"
-                          autoFocus
-                          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                        />
+                        <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Titel" autoFocus
+                          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50" />
                       </div>
-                      <input
-                        value={editUrl}
-                        onChange={(e) => setEditUrl(e.target.value)}
-                        placeholder="https://..."
+                      <input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="https://..."
                         onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(link.id)}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
-                      />
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50" />
                       <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium"
-                        >
-                          Abbrechen
-                        </button>
-                        <button
-                          onClick={() => handleSaveEdit(link.id)}
-                          disabled={saving}
-                          className="px-4 py-2 text-sm rounded-xl bg-[#E8C7C3] text-white font-semibold hover:bg-[#D8B0AC] disabled:opacity-40 flex items-center gap-1.5"
-                        >
-                          {saving
-                            ? <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                            : <Check size={14} />
-                          }
+                        <button onClick={() => setEditingId(null)}
+                          className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium">Abbrechen</button>
+                        <button onClick={() => handleSaveEdit(link.id)} disabled={saving}
+                          className="px-4 py-2 text-sm rounded-xl bg-[#E8C7C3] text-white font-semibold hover:bg-[#D8B0AC] disabled:opacity-40 flex items-center gap-1.5">
+                          {saving ? <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Check size={14} />}
                           Speichern
                         </button>
                       </div>
                     </div>
                   ) : (
-                    /* ── View row ── */
                     <div className="flex items-center gap-3 px-4 py-3.5">
-                      {/* Reorder */}
                       <div className="flex flex-col gap-0.5 flex-shrink-0">
-                        <button
-                          onClick={() => moveLink(i, "up")}
-                          disabled={i === 0}
-                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 transition-colors"
-                        >
-                          <ArrowUp size={13} />
-                        </button>
-                        <button
-                          onClick={() => moveLink(i, "down")}
-                          disabled={i === links.length - 1}
-                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 transition-colors"
-                        >
-                          <ArrowDown size={13} />
-                        </button>
+                        <button onClick={() => moveLink(i, "up")} disabled={i === 0}
+                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 transition-colors"><ArrowUp size={13} /></button>
+                        <button onClick={() => moveLink(i, "down")} disabled={i === links.length - 1}
+                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 transition-colors"><ArrowDown size={13} /></button>
                       </div>
-                      {/* Icon */}
                       <div className="flex-shrink-0 p-2 rounded-xl bg-[#E8C7C3]/15 text-[#D8B0AC]">
                         {ICON_MAP[link.iconType] ?? <ExternalLink size={18} />}
                       </div>
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-[#1E1E1E] text-sm truncate">{link.title}</p>
                         <p className="text-xs text-[#8A8A8A] truncate">{link.url}</p>
                       </div>
-                      {/* Actions */}
                       <div className="flex items-center gap-1 flex-shrink-0">
-                        <button
-                          onClick={() => handleToggleActive(link)}
+                        <button onClick={() => handleToggleActive(link)}
                           className={`text-xs px-2.5 py-1 rounded-lg font-semibold transition-colors ${
-                            link.isActive
-                              ? "bg-green-50 text-green-600 hover:bg-green-100"
-                              : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-                          }`}
-                        >
+                            link.isActive ? "bg-green-50 text-green-600 hover:bg-green-100" : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                          }`}>
                           {link.isActive ? "Aktiv" : "Aus"}
                         </button>
-                        <button
-                          onClick={() => startEdit(link)}
-                          className="p-1.5 text-gray-400 hover:text-[#E8C7C3] transition-colors rounded-lg hover:bg-[#E8C7C3]/10"
-                        >
+                        <button onClick={() => startEdit(link)}
+                          className="p-1.5 text-gray-400 hover:text-[#E8C7C3] transition-colors rounded-lg hover:bg-[#E8C7C3]/10">
                           <Edit2 size={14} />
                         </button>
-                        <button
-                          onClick={() => handleDelete(link.id, link.title)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
-                        >
+                        <button onClick={() => handleDelete(link.id, link.title)}
+                          className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -608,7 +664,6 @@ export default function AdminLinksPage() {
           </div>
         )}
 
-        {/* ── Link count ─────────────────────────────────────────────── */}
         {links.length > 0 && (
           <p className="text-xs text-center text-gray-400 mt-4">
             {links.filter((l) => l.isActive).length} von {links.length} Links aktiv

@@ -25,6 +25,18 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Custom:     <ExternalLink size={20} />,
 };
 
+// ── Industry Emoji Map ────────────────────────────────────────────────────────
+const INDUSTRY_EMOJI: Record<string, string> = {
+  Hairdresser: "✂️",
+  Beauty:      "💄",
+  Barbershop:  "🪒",
+  Massage:     "💆",
+  Nail:        "💅",
+  Physio:      "🏋️",
+  Tattoo:      "🎨",
+  Other:       "📅",
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function hexToRgb(hex: string) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -45,111 +57,143 @@ function withAlpha(hex: string, alpha: number) {
   } catch { return hex; }
 }
 
+// ── Button radius from buttonStyle ────────────────────────────────────────────
+function getBorderRadius(style?: string) {
+  if (style === "pill")   return "9999px";
+  if (style === "square") return "4px";
+  return "16px"; // rounded (default)
+}
+
+// ── Background Pattern SVG/CSS ────────────────────────────────────────────────
+function getBgPattern(pattern?: string, color?: string): React.ReactNode {
+  if (!pattern || pattern === "none") return null;
+  const c = color ? withAlpha(color, 0.08) : "rgba(0,0,0,0.06)";
+  const c2 = color ? withAlpha(color, 0.05) : "rgba(0,0,0,0.04)";
+
+  if (pattern === "dots") {
+    return (
+      <div
+        className="fixed inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          backgroundImage: `radial-gradient(circle, ${c} 1.5px, transparent 1.5px)`,
+          backgroundSize: "28px 28px",
+        }}
+      />
+    );
+  }
+  if (pattern === "grid") {
+    return (
+      <div
+        className="fixed inset-0 pointer-events-none"
+        aria-hidden
+        style={{
+          backgroundImage: `linear-gradient(${c} 1px, transparent 1px), linear-gradient(90deg, ${c} 1px, transparent 1px)`,
+          backgroundSize: "36px 36px",
+        }}
+      />
+    );
+  }
+  if (pattern === "waves") {
+    return (
+      <svg
+        className="fixed inset-0 w-full h-full pointer-events-none"
+        aria-hidden
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <pattern id="waves" x="0" y="0" width="120" height="40" patternUnits="userSpaceOnUse">
+            <path d="M0 20 Q30 5 60 20 Q90 35 120 20" fill="none" stroke={c} strokeWidth="1.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#waves)" />
+      </svg>
+    );
+  }
+  if (pattern === "circles") {
+    return (
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
+        <div className="absolute top-[10%] right-[5%]  w-72 h-72 rounded-full" style={{ background: c }} />
+        <div className="absolute bottom-[15%] left-[8%] w-56 h-56 rounded-full" style={{ background: c2 }} />
+        <div className="absolute top-[55%] left-[60%]  w-40 h-40 rounded-full" style={{ background: c }} />
+      </div>
+    );
+  }
+  return null;
+}
+
 // ── Animation Variants ────────────────────────────────────────────────────────
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } } };
-const slideUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 280, damping: 22 } } };
-const fadeIn  = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.45 } } };
-const popIn   = { hidden: { opacity: 0, scale: 0.88 }, visible: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 320, damping: 20 } } };
-const blurIn  = { hidden: { opacity: 0, filter: "blur(8px)" }, visible: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5 } } };
+const stagger  = { hidden: {}, visible: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } } };
+const slideUp  = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 280, damping: 22 } } };
+const fadeIn   = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.45 } } };
+const popIn    = { hidden: { opacity: 0, scale: 0.88 }, visible: { opacity: 1, scale: 1, transition: { type: "spring", stiffness: 320, damping: 20 } } };
+const blurIn   = { hidden: { opacity: 0, filter: "blur(8px)" }, visible: { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5 } } };
 
 // ── Theme Definitions ─────────────────────────────────────────────────────────
 type Theme = "gradient" | "dark" | "minimal" | "bold" | "glass";
 
 function getThemeConfig(theme: Theme, primary: string) {
-  const light = lighten(primary, 0.88);
-  const mid   = lighten(primary, 0.65);
-  const alpha20 = withAlpha(primary, 0.2);
-  const alpha50 = withAlpha(primary, 0.5);
+  const light    = lighten(primary, 0.88);
+  const mid      = lighten(primary, 0.65);
+  const alpha20  = withAlpha(primary, 0.2);
+  const alpha50  = withAlpha(primary, 0.5);
 
   switch (theme) {
     case "dark":
       return {
         bg: "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)",
-        cardBg: "rgba(255,255,255,0.06)",
-        cardBorder: "rgba(255,255,255,0.1)",
-        cardHover: "rgba(255,255,255,0.1)",
-        textPrimary: "#ffffff",
-        textSecondary: "rgba(255,255,255,0.55)",
-        taglineCl: "rgba(255,255,255,0.5)",
-        footerCl: "rgba(255,255,255,0.25)",
+        cardBg: "rgba(255,255,255,0.06)", cardBorder: "rgba(255,255,255,0.1)", cardHover: "rgba(255,255,255,0.1)",
+        textPrimary: "#ffffff", textSecondary: "rgba(255,255,255,0.55)", taglineCl: "rgba(255,255,255,0.5)", footerCl: "rgba(255,255,255,0.25)",
         iconBg: `linear-gradient(135deg, ${primary}, ${withAlpha(primary, 0.7)})`,
         ctaBg: `linear-gradient(135deg, ${primary} 0%, ${withAlpha(primary, 0.8)} 100%)`,
-        ctaShadow: withAlpha(primary, 0.4),
-        avatarBorder: "rgba(255,255,255,0.15)",
-        itemVariant: slideUp,
-        glow: true,
+        ctaShadow: withAlpha(primary, 0.4), avatarBorder: "rgba(255,255,255,0.15)",
+        itemVariant: slideUp, glow: true,
       };
     case "minimal":
       return {
         bg: "#ffffff",
-        cardBg: "#ffffff",
-        cardBorder: "#f0f0f0",
-        cardHover: "#fafafa",
-        textPrimary: "#111111",
-        textSecondary: "#333333",
-        taglineCl: "#888888",
-        footerCl: "#cccccc",
-        iconBg: primary,
-        ctaBg: primary,
-        ctaShadow: alpha20,
-        avatarBorder: "#f0f0f0",
-        itemVariant: fadeIn,
-        glow: false,
+        cardBg: "#ffffff", cardBorder: "#f0f0f0", cardHover: "#fafafa",
+        textPrimary: "#111111", textSecondary: "#333333", taglineCl: "#888888", footerCl: "#cccccc",
+        iconBg: primary, ctaBg: primary, ctaShadow: alpha20, avatarBorder: "#f0f0f0",
+        itemVariant: fadeIn, glow: false,
       };
     case "bold":
       return {
         bg: `linear-gradient(160deg, ${primary} 0%, ${mid} 100%)`,
-        cardBg: "rgba(255,255,255,0.92)",
-        cardBorder: "rgba(255,255,255,0.6)",
-        cardHover: "#ffffff",
-        textPrimary: "#1a1a1a",
-        textSecondary: "#333333",
-        taglineCl: "rgba(255,255,255,0.85)",
-        footerCl: "rgba(255,255,255,0.5)",
-        iconBg: primary,
-        ctaBg: "#ffffff",
-        ctaShadow: "rgba(0,0,0,0.2)",
-        avatarBorder: "rgba(255,255,255,0.8)",
-        ctaTextColor: primary,
-        itemVariant: popIn,
-        glow: false,
+        cardBg: "rgba(255,255,255,0.92)", cardBorder: "rgba(255,255,255,0.6)", cardHover: "#ffffff",
+        textPrimary: "#1a1a1a", textSecondary: "#333333", taglineCl: "rgba(255,255,255,0.85)", footerCl: "rgba(255,255,255,0.5)",
+        iconBg: primary, ctaBg: "#ffffff", ctaShadow: "rgba(0,0,0,0.2)", avatarBorder: "rgba(255,255,255,0.8)",
+        ctaTextColor: primary, itemVariant: popIn, glow: false,
       };
     case "glass":
       return {
         bg: `linear-gradient(135deg, ${lighten(primary, 0.5)} 0%, ${lighten(primary, 0.7)} 40%, ${lighten(primary, 0.4)} 100%)`,
-        cardBg: "rgba(255,255,255,0.45)",
-        cardBorder: "rgba(255,255,255,0.7)",
-        cardHover: "rgba(255,255,255,0.65)",
-        textPrimary: "#1a1a1a",
-        textSecondary: "#333333",
-        taglineCl: "#555555",
-        footerCl: "rgba(0,0,0,0.35)",
+        cardBg: "rgba(255,255,255,0.45)", cardBorder: "rgba(255,255,255,0.7)", cardHover: "rgba(255,255,255,0.65)",
+        textPrimary: "#1a1a1a", textSecondary: "#333333", taglineCl: "#555555", footerCl: "rgba(0,0,0,0.35)",
         iconBg: `linear-gradient(135deg, ${primary}, ${withAlpha(primary, 0.75)})`,
         ctaBg: `linear-gradient(135deg, ${primary}, ${withAlpha(primary, 0.85)})`,
-        ctaShadow: alpha50,
-        avatarBorder: "rgba(255,255,255,0.9)",
-        itemVariant: blurIn,
-        glow: true,
-        blur: true,
+        ctaShadow: alpha50, avatarBorder: "rgba(255,255,255,0.9)",
+        itemVariant: blurIn, glow: true, blur: true,
       };
     default: // gradient
       return {
         bg: `linear-gradient(160deg, ${light} 0%, #ffffff 55%, ${lighten(primary, 0.72)} 100%)`,
-        cardBg: "rgba(255,255,255,0.85)",
-        cardBorder: "rgba(255,255,255,0.9)",
-        cardHover: "#ffffff",
-        textPrimary: "#1a1a1a",
-        textSecondary: "#333333",
-        taglineCl: "#777777",
-        footerCl: "#cccccc",
+        cardBg: "rgba(255,255,255,0.85)", cardBorder: "rgba(255,255,255,0.9)", cardHover: "#ffffff",
+        textPrimary: "#1a1a1a", textSecondary: "#333333", taglineCl: "#777777", footerCl: "#cccccc",
         iconBg: `linear-gradient(135deg, ${primary}, ${withAlpha(primary, 0.75)})`,
         ctaBg: `linear-gradient(135deg, ${primary}, ${withAlpha(primary, 0.8)})`,
-        ctaShadow: withAlpha(primary, 0.35),
-        avatarBorder: "#ffffff",
-        itemVariant: slideUp,
-        glow: true,
+        ctaShadow: withAlpha(primary, 0.35), avatarBorder: "#ffffff",
+        itemVariant: slideUp, glow: true,
       };
   }
+}
+
+// ── LinktreeConfig type ───────────────────────────────────────────────────────
+interface LinktreeConfig {
+  ctaText?: string;
+  bgPattern?: string;
+  buttonStyle?: string;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -160,6 +204,8 @@ export default function TenantLinktreePage() {
   const [primaryColor, setPrimary]    = useState("#E8C7C3");
   const [logoUrl, setLogoUrl]         = useState<string | null>(null);
   const [linktreeStyle, setStyle]     = useState<Theme>("gradient");
+  const [industryType, setIndustry]   = useState<string | null>(null);
+  const [cfg, setCfg]                 = useState<LinktreeConfig>({});
   const [links, setLinks]             = useState<TenantLink[]>([]);
   const [loading, setLoading]         = useState(true);
   const [notFound, setNotFound]       = useState(false);
@@ -172,8 +218,12 @@ export default function TenantLinktreePage() {
         setTenantName(info.companyName ?? info.name ?? slug);
         setTagline(info.tagline ?? null);
         if (info.primaryColor) setPrimary(info.primaryColor);
-        if (info.logoUrl) setLogoUrl(info.logoUrl);
-        if ((info as any).linktreeStyle) setStyle((info as any).linktreeStyle as Theme);
+        if (info.logoUrl)      setLogoUrl(info.logoUrl);
+        if (info.linktreeStyle) setStyle(info.linktreeStyle as Theme);
+        if (info.industryType)  setIndustry(info.industryType);
+        if (info.linktreeConfig) {
+          try { setCfg(JSON.parse(info.linktreeConfig)); } catch { /* ignore malformed JSON */ }
+        }
         setLinks(tenantLinks);
       })
       .catch(() => setNotFound(true))
@@ -201,15 +251,21 @@ export default function TenantLinktreePage() {
     );
   }
 
-  const t = getThemeConfig(linktreeStyle, primaryColor);
-  const logoSrc = logoUrl
+  const t         = getThemeConfig(linktreeStyle, primaryColor);
+  const logoSrc   = logoUrl
     ? (logoUrl.startsWith("http") ? logoUrl : `${process.env.NEXT_PUBLIC_API_URL}${logoUrl}`)
     : null;
+  const btnRadius  = getBorderRadius(cfg.buttonStyle);
+  const ctaText    = cfg.ctaText?.trim() || "Termin buchen";
+  const emoji      = industryType ? (INDUSTRY_EMOJI[industryType] ?? null) : null;
 
   return (
     <div className="min-h-screen" style={{ background: t.bg }}>
 
-      {/* Decorative background blobs */}
+      {/* ── Background patterns ── */}
+      {getBgPattern(cfg.bgPattern, primaryColor)}
+
+      {/* ── Decorative background blobs ── */}
       {t.glow && (
         <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-25 blur-3xl"
@@ -243,9 +299,13 @@ export default function TenantLinktreePage() {
                 className="relative w-24 h-24 rounded-full object-cover shadow-2xl border-4"
                 style={{ borderColor: t.avatarBorder }} />
             ) : (
-              <div className="relative w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-2xl border-4"
+              <div className="relative w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border-4"
                 style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`, borderColor: t.avatarBorder }}>
-                {tenantName.charAt(0).toUpperCase()}
+                {emoji ? (
+                  <span className="text-3xl leading-none">{emoji}</span>
+                ) : (
+                  <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
+                )}
               </div>
             )}
           </div>
@@ -281,17 +341,19 @@ export default function TenantLinktreePage() {
           {/* Booking CTA */}
           <motion.div variants={t.itemVariant}>
             <Link href={`/booking/${slug}/book`}
-              className="group w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-white font-bold text-base shadow-xl transition-transform active:scale-[0.97]"
+              className="group w-full flex items-center gap-3 px-5 py-4 font-bold text-base shadow-xl transition-transform active:scale-[0.97]"
               style={{
                 background: t.ctaBg,
                 boxShadow: `0 8px 30px ${t.ctaShadow}`,
                 color: (t as any).ctaTextColor ?? "#ffffff",
+                borderRadius: btnRadius,
               }}
             >
-              <span className="flex-shrink-0 bg-white/20 p-2 rounded-xl group-hover:bg-white/30 transition-colors">
+              <span className="flex-shrink-0 bg-white/20 p-2 group-hover:bg-white/30 transition-colors"
+                style={{ borderRadius: btnRadius }}>
                 <Calendar size={20} />
               </span>
-              <span className="flex-1">Termin buchen</span>
+              <span className="flex-1">{ctaText}</span>
               <motion.span
                 className="opacity-70"
                 animate={{ x: [0, 5, 0] }}
@@ -306,20 +368,21 @@ export default function TenantLinktreePage() {
           {links.map((link) => (
             <motion.div key={link.id} variants={t.itemVariant}>
               <a href={link.url} target="_blank" rel="noopener noreferrer"
-                className="group w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-semibold text-base shadow-sm transition-all active:scale-[0.97]"
+                className="group w-full flex items-center gap-3 px-5 py-4 font-semibold text-base shadow-sm transition-all active:scale-[0.97]"
                 style={{
-                  background: (t as any).blur ? `${t.cardBg} backdrop-filter: blur(12px)` : t.cardBg,
+                  background: (t as any).blur ? t.cardBg : t.cardBg,
                   backdropFilter: (t as any).blur ? "blur(16px)" : undefined,
                   WebkitBackdropFilter: (t as any).blur ? "blur(16px)" : undefined,
                   border: `1px solid ${t.cardBorder}`,
                   color: t.textSecondary,
                   boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
+                  borderRadius: btnRadius,
                 }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = t.cardHover; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = t.cardBg; }}
               >
-                <span className="flex-shrink-0 p-2 rounded-xl text-white transition-transform group-hover:scale-105"
-                  style={{ background: t.iconBg }}>
+                <span className="flex-shrink-0 p-2 text-white transition-transform group-hover:scale-105"
+                  style={{ background: t.iconBg, borderRadius: btnRadius }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={20} />}
                 </span>
                 <span className="flex-1" style={{ color: t.textPrimary }}>{link.title}</span>
