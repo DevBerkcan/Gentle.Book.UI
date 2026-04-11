@@ -1,12 +1,9 @@
-// app/admin/login/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardBody } from '@nextui-org/card';
-import { Input } from '@nextui-org/input';
-import { Button } from '@nextui-org/button';
-import { Lock, User, Eye, EyeOff, Mail, Building2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, User, Eye, EyeOff, Mail, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 
 type LoginMode = 'employee' | 'admin';
@@ -20,14 +17,9 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Employee login fields
   const [username, setUsername] = useState('');
-
-  // TenantAdmin login fields
   const [tenantSlug, setTenantSlug] = useState('');
   const [email, setEmail] = useState('');
-
-  // Shared
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -71,144 +63,195 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1E1E1E] to-[#2C2C2C] flex items-center justify-center px-4">
-      <Card className="max-w-md w-full border-2 border-[#E8C7C3]/20 shadow-2xl">
-        <CardBody className="p-8">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-              <Lock className="text-white" size={32} />
+    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden bg-[#0f0f1a]">
+
+      {/* Animated background blobs */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E8C7C3]/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#D8B0AC]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-2/3 left-1/2 w-56 h-56 bg-[#E8C7C3]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }} />
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+        className="relative w-full max-w-md"
+      >
+        {/* Glass card */}
+        <div className="bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8">
+
+          {/* Logo + title */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#E8C7C3]/20">
+              <Sparkles size={28} className="text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-[#1E1E1E]">GentleBook</h1>
-            <p className="text-[#8A8A8A] text-sm mt-1">Buchungssystem Administration</p>
+            <h1 className="text-2xl font-bold text-white">GentleBook</h1>
+            <p className="text-white/40 text-sm mt-1">Buchungssystem Administration</p>
           </div>
 
-          {/* Mode Tabs */}
-          <div className="flex rounded-lg overflow-hidden border border-[#E8C7C3]/30 mb-6">
-            <button
-              type="button"
-              onClick={() => { setMode('admin'); setError(''); }}
-              className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                mode === 'admin'
-                  ? 'bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white'
-                  : 'bg-white text-[#8A8A8A] hover:text-[#1E1E1E]'
-              }`}
-            >
-              <Building2 size={14} className="inline mr-1" />
-              Admin-Login
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode('employee'); setError(''); }}
-              className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                mode === 'employee'
-                  ? 'bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white'
-                  : 'bg-white text-[#8A8A8A] hover:text-[#1E1E1E]'
-              }`}
-            >
-              <User size={14} className="inline mr-1" />
-              Mitarbeiter-Login
-            </button>
+          {/* Mode tabs */}
+          <div className="relative flex rounded-xl overflow-hidden bg-white/5 border border-white/10 mb-6 p-1 gap-1">
+            {(['admin', 'employee'] as LoginMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => { setMode(m); setError(''); }}
+                className="relative flex-1 py-2 text-sm font-medium rounded-lg z-10 transition-colors"
+                style={{ color: mode === m ? '#1E1E1E' : 'rgba(255,255,255,0.45)' }}
+              >
+                {mode === m && (
+                  <motion.div
+                    layoutId="tab-indicator"
+                    className="absolute inset-0 bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] rounded-lg"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative flex items-center justify-center gap-1.5">
+                  {m === 'admin' ? <Building2 size={14} /> : <User size={14} />}
+                  {m === 'admin' ? 'Admin-Login' : 'Mitarbeiter'}
+                </span>
+              </button>
+            ))}
           </div>
 
+          {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
-            {mode === 'admin' ? (
-              <>
-                <Input
-                  type="text"
-                  label="Buchungssystem-ID"
-                  placeholder="z.B. barber-wagner"
-                  value={tenantSlug}
-                  onChange={(e) => setTenantSlug(e.target.value)}
-                  startContent={<Building2 size={18} className="text-[#8A8A8A]" />}
-                  autoComplete="off"
-                  autoFocus
-                  isRequired
-                  description="Die ID Ihres Buchungssystems"
-                  classNames={{
-                    input: "text-[#1E1E1E]",
-                    label: "text-[#8A8A8A]",
-                    inputWrapper: "bg-white border-2 border-[#E8C7C3]/30 hover:border-[#E8C7C3]",
-                  }}
-                />
-                <Input
-                  type="email"
-                  label="E-Mail"
-                  placeholder="admin@beispiel.de"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  startContent={<Mail size={18} className="text-[#8A8A8A]" />}
-                  autoComplete="email"
-                  isRequired
-                  classNames={{
-                    input: "text-[#1E1E1E]",
-                    label: "text-[#8A8A8A]",
-                    inputWrapper: "bg-white border-2 border-[#E8C7C3]/30 hover:border-[#E8C7C3]",
-                  }}
-                />
-              </>
-            ) : (
-              <Input
-                type="text"
-                label="Benutzername"
-                placeholder="benutzername"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                startContent={<User size={18} className="text-[#8A8A8A]" />}
-                autoComplete="username"
-                autoFocus
-                isRequired
-                classNames={{
-                  input: "text-[#1E1E1E]",
-                  label: "text-[#8A8A8A]",
-                  inputWrapper: "bg-white border-2 border-[#E8C7C3]/30 hover:border-[#E8C7C3]",
-                }}
-              />
-            )}
-
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              label="Passwort"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              startContent={<Lock size={18} className="text-[#8A8A8A]" />}
-              endContent={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="text-[#8A8A8A] hover:text-[#1E1E1E] transition-colors"
-                  tabIndex={-1}
+            <AnimatePresence mode="wait">
+              {mode === 'admin' ? (
+                <motion.div
+                  key="admin-fields"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.18 }}
+                  className="space-y-4"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              }
-              autoComplete="current-password"
-              isRequired
-              classNames={{
-                input: "text-[#1E1E1E]",
-                label: "text-[#8A8A8A]",
-                inputWrapper: "bg-white border-2 border-[#E8C7C3]/30 hover:border-[#E8C7C3]",
-              }}
-            />
+                  <InputField
+                    icon={<Building2 size={16} className="text-white/30" />}
+                    type="text"
+                    placeholder="Buchungssystem-ID (z.B. barber-wagner)"
+                    value={tenantSlug}
+                    onChange={(v) => setTenantSlug(v)}
+                    autoFocus
+                  />
+                  <InputField
+                    icon={<Mail size={16} className="text-white/30" />}
+                    type="email"
+                    placeholder="E-Mail"
+                    value={email}
+                    onChange={(v) => setEmail(v)}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="employee-fields"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <InputField
+                    icon={<User size={16} className="text-white/30" />}
+                    type="text"
+                    placeholder="Benutzername"
+                    value={username}
+                    onChange={(v) => setUsername(v)}
+                    autoFocus
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {error && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
+            {/* Password */}
+            <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#E8C7C3]/50 focus-within:bg-white/8 transition-all">
+              <Lock size={16} className="text-white/30 flex-shrink-0" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Passwort"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                className="flex-1 bg-transparent text-white placeholder-white/25 text-sm outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
 
-            <Button
+            {/* Error */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-red-500/10 border border-red-500/25 rounded-xl px-4 py-3 text-sm text-red-300"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit */}
+            <motion.button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white font-semibold shadow-lg"
-              size="lg"
-              isLoading={loading}
+              disabled={loading}
+              whileHover={{ scale: loading ? 1 : 1.01 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white text-sm shadow-lg shadow-[#E8C7C3]/15 transition-opacity disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #E8C7C3, #D8B0AC)' }}
             >
-              Anmelden
-            </Button>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  Anmeldung…
+                </span>
+              ) : (
+                <>Anmelden <ArrowRight size={15} /></>
+              )}
+            </motion.button>
           </form>
-        </CardBody>
-      </Card>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function InputField({
+  icon,
+  type,
+  placeholder,
+  value,
+  onChange,
+  autoFocus,
+}: {
+  icon: React.ReactNode;
+  type: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoFocus?: boolean;
+}) {
+  return (
+    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#E8C7C3]/50 focus-within:bg-white/8 transition-all">
+      <span className="flex-shrink-0">{icon}</span>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        autoFocus={autoFocus}
+        required
+        className="flex-1 bg-transparent text-white placeholder-white/25 text-sm outline-none"
+      />
     </div>
   );
 }

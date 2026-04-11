@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardBody } from "@nextui-org/card";
 import { User, Star, Loader2, MapPin, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import { getEmployeesByService, type Employee, type Service } from "@/lib/api/booking";
 
@@ -147,18 +146,18 @@ export function EmployeeSelector({
             const isSelected = selectedEmployee?.id === emp.id;
 
             return (
-              <Card
+              <motion.div
                 key={emp.id}
-                isPressable
-                onPress={() => handleSelect(emp)}
-                className={`w-full transition-all ${
+                onClick={() => handleSelect(emp)}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full cursor-pointer rounded-xl border-2 transition-colors ${
                   isSelected
-                    ? "ring-2 ring-[#E8C7C3] ring-offset-2"
-                    : "hover:ring-2 hover:ring-[#E8C7C3]/30 hover:ring-offset-1"
+                    ? "border-[#E8C7C3] bg-[#FDF7F6] shadow-md shadow-[#E8C7C3]/20"
+                    : "border-[#F0E6E4] bg-white hover:border-[#E8C7C3]/50 hover:bg-[#FDF7F6]/50"
                 }`}
-                fullWidth
               >
-                <CardBody className="p-3 sm:p-4 w-full">
+                <div className="p-3 sm:p-4 w-full">
                   <div className="flex items-start gap-3 sm:gap-4 w-full">
                     <div className={`flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors ${
                       isSelected ? "bg-[#E8C7C3]" : "bg-[#E8C7C3]/10"
@@ -222,8 +221,8 @@ export function EmployeeSelector({
                       </div>
                     </div>
                   </div>
-                </CardBody>
-              </Card>
+                </div>
+              </motion.div>
             );
           })}
         </div>
