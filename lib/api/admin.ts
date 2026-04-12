@@ -250,8 +250,25 @@ export async function getDashboard(all: boolean = false): Promise<DashboardOverv
 export async function getStatistics(all: boolean = false): Promise<DashboardStatistics> {
   const params = new URLSearchParams();
   if (all) params.append("all", "true");
-  
+
   const response = await api.get(`/admin/statistics${params.toString() ? `?${params}` : ''}`);
+  return response.data;
+}
+
+export interface OnboardingStatus {
+  hasLogo: boolean;
+  hasCompany: boolean;
+  hasServices: boolean;
+  hasEmployees: boolean;
+  hasHours: boolean;
+  hasBooking: boolean;
+  isComplete: boolean;
+  completedSteps: number;
+  totalSteps: number;
+}
+
+export async function getOnboardingStatus(): Promise<OnboardingStatus> {
+  const response = await api.get('/admin/onboarding');
   return response.data;
 }
 

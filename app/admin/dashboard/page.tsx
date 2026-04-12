@@ -6,9 +6,9 @@ import { motion } from "framer-motion";
 import {
   Calendar, Clock, TrendingUp, TrendingDown, Users,
   Euro, Copy, Check, ExternalLink, Sparkles,
-  ArrowUpRight, ChevronRight,
+  ArrowUpRight, ChevronRight, CheckCircle2, Circle, X,
 } from "lucide-react";
-import { getDashboard, type DashboardOverview } from "@/lib/api/admin";
+import { getDashboard, getOnboardingStatus, type DashboardOverview, type OnboardingStatus } from "@/lib/api/admin";
 import { formatPrice } from "@/lib/utils/currency";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
@@ -83,6 +83,8 @@ function StatCard({
 export default function AdminDashboardPage() {
   const { user, isTenantAdmin } = useAuth();
   const [dashboard,        setDashboard]       = useState<DashboardOverview | null>(null);
+  const [onboarding,       setOnboarding]      = useState<OnboardingStatus | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
   const [loading,          setLoading]          = useState(true);
   const [error,            setError]            = useState<string | null>(null);
   const [copied,           setCopied]           = useState(false);
@@ -94,13 +96,22 @@ export default function AdminDashboardPage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
 
+    if (isTenantAdmin) {
+      getOnboardingStatus().then(setOnboarding).catch(() => {});
+    }
+
     import("@/lib/api/client").then(({ default: api }) => {
       api.get("/tenant/settings").then((res) => {
         const d = res.data?.data ?? res.data;
         if (d?.defaultCurrency) setDefaultCurrency(d.defaultCurrency);
       }).catch(() => {});
     });
-  }, []);
+
+    // Persist dismiss in sessionStorage
+    if (typeof window !== "undefined" && sessionStorage.getItem("onboarding_dismissed")) {
+      setOnboardingDismissed(true);
+    }
+  }, [isTenantAdmin]);
 
   if (loading) {
     return (
@@ -190,6 +201,68 @@ export default function AdminDashboardPage() {
                   <ArrowUpRight size={14} /> Öffnen
                 </a>
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Onboarding Checklist ─────────────────────────────────── */}
+        {isTenantAdmin && onboarding && !onboarding.isComplete && !onboardingDismissed && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#017172]/10 flex items-center justify-center">
+                  <Sparkles size={16} className="text-[#017172]" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-[#1E1E1E]">Setup-Checkliste</p>
+                  <p className="text-xs text-[#8A8A8A]">{onboarding.completedSteps} von {onboarding.totalSteps} Schritten abgeschlossen</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1">
+                  {Array.from({ length: onboarding.totalSteps }).map((_, i) => (
+                    <div key={i} className={`h-1.5 w-6 rounded-full transition-colors ${i < onboarding.completedSteps ? 'bg-[#017172]' : 'bg-gray-100'}`} />
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setOnboardingDismissed(true);
+                    if (typeof window !== "undefined") sessionStorage.setItem("onboarding_dismissed", "1");
+                  }}
+                  className="text-gray-300 hover:text-gray-500 transition-colors p-1"
+                  title="Ausblenden"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {[
+                { done: onboarding.hasCompany,   label: "Firmenname eintragen",      href: "/admin/settings",   desc: "Name deines Studios festlegen" },
+                { done: onboarding.hasLogo,      label: "Logo hochladen",            href: "/admin/settings",   desc: "Dein Logo für Buchungsseite & E-Mails" },
+                { done: onboarding.hasHours,     label: "Öffnungszeiten festlegen",  href: "/admin/settings",   desc: "Wann ist dein Studio geöffnet?" },
+                { done: onboarding.hasServices,  label: "Ersten Service anlegen",    href: "/admin/services",   desc: "Welche Leistungen bietest du an?" },
+                { done: onboarding.hasEmployees, label: "Mitarbeiter hinzufügen",    href: "/admin/employees",  desc: "Wer führt die Termine durch?" },
+              ].map(({ done, label, href, desc }) => (
+                <a
+                  key={label}
+                  href={done ? undefined : href}
+                  className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${done ? 'opacity-60' : 'hover:bg-gray-50/70 cursor-pointer'}`}
+                >
+                  {done
+                    ? <CheckCircle2 size={18} className="text-[#017172] flex-shrink-0" />
+                    : <Circle size={18} className="text-gray-200 flex-shrink-0" />
+                  }
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium ${done ? 'line-through text-gray-400' : 'text-[#1E1E1E]'}`}>{label}</p>
+                    <p className="text-xs text-[#8A8A8A]">{desc}</p>
+                  </div>
+                  {!done && <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />}
+                </a>
+              ))}
             </div>
           </motion.div>
         )}
