@@ -507,11 +507,18 @@ export default function TenantLinktreePage() {
 
         {/* ── Footer ── */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
-          className="mt-6 flex items-center gap-1.5">
-          <Sparkles size={11} style={{ color: withAlpha(primaryColor, 0.5) }} />
-          <p className="text-xs" style={{ color: t.footerCl }}>
-            Powered by <span className="font-semibold" style={{ color: primaryColor }}>GentleBook</span>
-          </p>
+          className="mt-6 space-y-2">
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={11} style={{ color: withAlpha(primaryColor, 0.5) }} />
+            <p className="text-xs" style={{ color: t.footerCl }}>
+              Powered by <span className="font-semibold" style={{ color: primaryColor }}>GentleBook</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-80 transition-opacity" style={{ color: t.footerCl }}>Datenschutz</a>
+            <span className="text-[10px]" style={{ color: withAlpha(t.footerCl, 0.4) }}>·</span>
+            <a href="/impressum" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-80 transition-opacity" style={{ color: t.footerCl }}>Impressum</a>
+          </div>
         </motion.div>
       </div>
 
