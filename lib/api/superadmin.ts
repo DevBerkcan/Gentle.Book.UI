@@ -128,7 +128,68 @@ export const superAdminApi = {
       totalBookings: number;
     };
   },
+
+  // ── Email Logs ───────────────────────────────────────────────
+  async getEmailLogs(params?: { tenantId?: string; status?: string; emailType?: string; page?: number; pageSize?: number }) {
+    const { data } = await api.get('/superadmin/email-logs', { params });
+    return data as {
+      items: EmailLogItem[];
+      totalCount: number;
+      page: number;
+      pageSize: number;
+      sentCount: number;
+      failedCount: number;
+    };
+  },
+
+  // ── Tenant Stats ─────────────────────────────────────────────
+  async getTenantStats(id: string) {
+    const { data } = await api.get(`/superadmin/tenants/${id}/stats`);
+    return data as TenantStats;
+  },
+
+  // ── Activity Feed ────────────────────────────────────────────
+  async getActivity(limit = 30) {
+    const { data } = await api.get('/superadmin/activity', { params: { limit } });
+    return data as ActivityItem[];
+  },
 };
+
+// ── Extra Types ───────────────────────────────────────────────────────────────
+
+export interface EmailLogItem {
+  id: string;
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  recipientEmail: string;
+  subject: string;
+  emailType: string;
+  status: string;
+  sentAt?: string;
+  errorMessage?: string;
+  createdAt: string;
+}
+
+export interface TenantStats {
+  monthlyStats: { year: number; month: number; label: string; bookings: number; revenue: number }[];
+  totalBookings: number;
+  totalRevenue: number;
+  totalCustomers: number;
+  totalEmployees: number;
+  confirmedCount: number;
+  cancelledCount: number;
+  completedCount: number;
+}
+
+export interface ActivityItem {
+  type: string;
+  icon: string;
+  title: string;
+  detail: string;
+  tenantId?: string;
+  timestamp: string;
+}
 
 // ── SuperAdmin Login (uses separate secret) ───────────────────
 export async function superAdminLogin(email: string, password: string) {

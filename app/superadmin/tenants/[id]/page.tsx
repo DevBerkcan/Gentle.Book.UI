@@ -9,9 +9,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
-import { superAdminApi, UpdateTenantSettingsPayload } from '@/lib/api/superadmin';
+import { superAdminApi, UpdateTenantSettingsPayload, TenantStats } from '@/lib/api/superadmin';
+import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
 
-type Tab = 'branding' | 'users' | 'link' | 'subscription';
+type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats';
 
 export default function TenantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,9 @@ export default function TenantDetailPage() {
   const [logoError, setLogoError] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const [tenantStats, setTenantStats] = useState<TenantStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
 
   // New user form
   const [newUser, setNewUser] = useState({ email: '', password: '', firstName: '', lastName: '' });
@@ -166,11 +170,23 @@ export default function TenantDetailPage() {
   const sub = tenant.subscription;
   const bookingUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/booking/${tenant.slug}`;
 
+  // Load stats when stats tab is activated
+  async function loadStats() {
+    if (tenantStats) return;
+    setStatsLoading(true);
+    try {
+      const data = await superAdminApi.getTenantStats(id);
+      setTenantStats(data);
+    } catch (e) { console.error(e); }
+    setStatsLoading(false);
+  }
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'link', label: 'Buchungslink', icon: <Link2 size={15} /> },
     { key: 'branding', label: 'Branding', icon: <Palette size={15} /> },
     { key: 'users', label: 'Admin-User', icon: <Users size={15} /> },
     { key: 'subscription', label: 'Abo', icon: <CreditCard size={15} /> },
+    { key: 'stats', label: 'Statistiken', icon: <BarChart2 size={15} /> },
   ];
 
   return (
@@ -208,7 +224,7 @@ export default function TenantDetailPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats') loadStats(); }}
             className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
                 ? 'bg-white text-gray-900 shadow-sm'
@@ -579,6 +595,83 @@ export default function TenantDetailPage() {
             </>
           ) : (
             <p className="text-sm text-gray-400">Kein Abo gefunden.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Statistiken ───────────────────────────────────────────── */}
+      {activeTab === 'stats' && (
+        <div className="space-y-4">
+          {statsLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-24 bg-white rounded-xl animate-pulse border border-gray-100" />
+              ))}
+            </div>
+          ) : tenantStats ? (
+            <>
+              {/* KPI Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: 'Buchungen gesamt', value: tenantStats.totalBookings,  icon: <Calendar size={16} />,   color: '#3b82f6', bg: '#eff6ff' },
+                  { label: 'Kunden',           value: tenantStats.totalCustomers, icon: <UsersIcon2 size={16} />, color: '#8b5cf6', bg: '#f5f3ff' },
+                  { label: 'Mitarbeiter',      value: tenantStats.totalEmployees, icon: <UsersIcon2 size={16} />, color: '#06b6d4', bg: '#ecfeff' },
+                  { label: 'Abgeschlossen',    value: tenantStats.completedCount, icon: <TrendingUp size={16} />, color: '#22c55e', bg: '#f0fdf4' },
+                ].map(({ label, value, icon, color, bg }) => (
+                  <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: bg }}>
+                      <span style={{ color }}>{icon}</span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{value}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Booking Status Split */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 className="font-semibold text-gray-900 text-sm mb-4">Buchungsstatus</h3>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: 'Bestätigt',     value: tenantStats.confirmedCount, color: '#22c55e', bg: '#f0fdf4' },
+                    { label: 'Abgebrochen',   value: tenantStats.cancelledCount, color: '#ef4444', bg: '#fef2f2' },
+                    { label: 'Abgeschlossen', value: tenantStats.completedCount, color: '#3b82f6', bg: '#eff6ff' },
+                  ].map(({ label, value, color, bg }) => (
+                    <div key={label} className="rounded-xl p-4 text-center" style={{ background: bg }}>
+                      <p className="text-3xl font-black" style={{ color }}>{value}</p>
+                      <p className="text-xs mt-1" style={{ color }}>{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Monthly Chart (CSS bars, no library needed) */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 className="font-semibold text-gray-900 text-sm mb-4">Buchungen — letzte 6 Monate</h3>
+                {tenantStats.monthlyStats.every(m => m.bookings === 0) ? (
+                  <p className="text-sm text-gray-400 text-center py-6">Noch keine Buchungen in diesem Zeitraum</p>
+                ) : (
+                  <div className="flex items-end gap-2 h-32">
+                    {(() => {
+                      const maxVal = Math.max(...tenantStats.monthlyStats.map(m => m.bookings), 1);
+                      return tenantStats.monthlyStats.map((m, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <span className="text-xs font-semibold text-gray-600">{m.bookings > 0 ? m.bookings : ''}</span>
+                          <div className="w-full bg-blue-100 rounded-t-lg transition-all" style={{ height: `${Math.max(4, (m.bookings / maxVal) * 96)}px`, background: m.bookings > 0 ? '#3b82f6' : '#e5e7eb' }} />
+                          <span className="text-xs text-gray-400 text-center leading-tight">{m.label.split(' ')[0]}</span>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <BarChart2 size={32} className="mx-auto text-gray-200 mb-2" />
+              <p className="text-sm text-gray-400">Fehler beim Laden der Statistiken</p>
+              <button onClick={loadStats} className="mt-3 text-xs text-blue-500 hover:underline">Erneut versuchen</button>
+            </div>
           )}
         </div>
       )}

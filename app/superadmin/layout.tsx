@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity } from 'lucide-react';
 
 function useSuperAdminAuth() {
   const router = useRouter();
@@ -44,8 +44,10 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/superadmin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/superadmin/tenants', label: 'Buchungssysteme', icon: Building2 },
+    { href: '/superadmin/dashboard',  label: 'Dashboard',       icon: LayoutDashboard },
+    { href: '/superadmin/tenants',    label: 'Buchungssysteme', icon: Building2 },
+    { href: '/superadmin/email-logs', label: 'E-Mail Logs',     icon: Mail },
+    { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
   ];
 
   return (
