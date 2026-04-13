@@ -455,3 +455,12 @@ export async function trackLinkClick(data: {
 }): Promise<void> {
   await api.post('/admin/tracking/click', data).catch(() => {});
 }
+
+export async function resendConfirmation(bookingId: string): Promise<void> {
+  await api.post(`/bookings/${bookingId}/resend-confirmation`);
+}
+
+export function getBookingsExportUrl(): string {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? '';
+  return `${base}/bookings/export/csv`;
+}

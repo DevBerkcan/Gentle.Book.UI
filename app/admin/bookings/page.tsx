@@ -117,6 +117,28 @@ export default function AdminBookingsPage() {
     loadServicesForEmployee(employeeId);
   };
 
+  const handleExportCsv = async () => {
+    setExportLoading(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      const url = getBookingsExportUrl();
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Export fehlgeschlagen');
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `buchungen_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      /* silently ignore — network errors are rare here */
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
 
   const [bookingForm, setBookingForm] = useState<{
     serviceId: string;
