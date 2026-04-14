@@ -26,7 +26,6 @@ import {
   getServicesByEmployee,
   checkEmailConflict
 } from "@/lib/api/admin";
-import api from "@/lib/api/client";
 import { getAvailability, getEmployees, type TimeSlot, type Employee } from "@/lib/api/booking";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useConfirm } from "@/components/ConfirmDialog";
@@ -116,29 +115,6 @@ export default function AdminBookingsPage() {
     setBookingForm(prev => ({ ...prev, serviceId: '' }));
     loadServicesForEmployee(employeeId);
   };
-
-  const handleExportCsv = async () => {
-    setExportLoading(true);
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-      const url = getBookingsExportUrl();
-      const res = await fetch(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error('Export fehlgeschlagen');
-      const blob = await res.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `buchungen_${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    } catch {
-      /* silently ignore — network errors are rare here */
-    } finally {
-      setExportLoading(false);
-    }
-  };
-
 
   const [bookingForm, setBookingForm] = useState<{
     serviceId: string;
@@ -483,9 +459,13 @@ export default function AdminBookingsPage() {
   async function handleExportCsv() {
     setExportLoading(true);
     try {
-      const url = await getBookingsExportUrl({ status: filter.status, fromDate: filter.fromDate, toDate: filter.toDate });
-      const response = await api.get(url, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      const url = getBookingsExportUrl();
+      const res = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Export fehlgeschlagen');
+      const blob = await res.blob();
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `buchungen_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -494,7 +474,7 @@ export default function AdminBookingsPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (err: any) {
-      alert("Export fehlgeschlagen: " + err.message);
+      alert('Export fehlgeschlagen: ' + err.message);
     } finally {
       setExportLoading(false);
     }

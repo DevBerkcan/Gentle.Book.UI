@@ -1,5 +1,4 @@
 // lib/api/admin.ts
-import { get } from 'http';
 import api from './client';
 
 export const adminApi = {
@@ -316,15 +315,6 @@ export async function resendConfirmation(
   return response.data;
 }
 
-export async function getBookingsExportUrl(filter: Pick<BookingFilter, 'status' | 'fromDate' | 'toDate'>): Promise<string> {
-  const params = new URLSearchParams();
-  if (filter.status) params.append('status', filter.status);
-  if (filter.fromDate) params.append('fromDate', filter.fromDate);
-  if (filter.toDate) params.append('toDate', filter.toDate);
-  // Return the full URL; caller will use axios with responseType: 'blob'
-  return `/admin/bookings/export?${params}`;
-}
-
 // ── Manual booking ────────────────────────────────────────────────────────────
 
 export async function createManualBooking(
@@ -454,10 +444,6 @@ export async function trackLinkClick(data: {
   sessionId?: string;
 }): Promise<void> {
   await api.post('/admin/tracking/click', data).catch(() => {});
-}
-
-export async function resendConfirmation(bookingId: string): Promise<void> {
-  await api.post(`/bookings/${bookingId}/resend-confirmation`);
 }
 
 export function getBookingsExportUrl(): string {
