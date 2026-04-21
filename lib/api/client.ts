@@ -56,8 +56,9 @@ api.interceptors.response.use(
     }
 
     if (status === 402) {
-      // Trial expired — redirect to subscription info page (future)
-      console.warn('Subscription expired or trial ended.');
+      if (!path.includes('/admin/subscription') && !path.includes('/admin/login')) {
+        window.location.href = '/admin/subscription';
+      }
     }
 
     return Promise.reject(error);
