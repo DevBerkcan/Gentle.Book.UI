@@ -41,6 +41,9 @@ interface LinktreeConfig {
   serviceLayout?: "list" | "cards";
   showPrices?: boolean;
   ctaBadge?: string;
+  // Templates
+  pageTemplate?: "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate" | "organic";
+  colorScheme?: string;
 }
 
 const DEFAULT_CONFIG: LinktreeConfig = {
@@ -59,6 +62,8 @@ const DEFAULT_CONFIG: LinktreeConfig = {
   serviceLayout: "list",
   showPrices: true,
   ctaBadge: "",
+  pageTemplate: "classic",
+  colorScheme: "auto",
 };
 
 // ── Industry Presets ──────────────────────────────────────────────────────────
@@ -73,6 +78,42 @@ const INDUSTRY_PRESETS: Record<string, { color: string; style: Theme; emoji: str
   Tattoo:      { color: "#1A1A2E", style: "dark",      emoji: "🎨",  label: "Tattoo",         ctaText: "Studio-Termin buchen",   bgPattern: "grid",    buttonStyle: "square"  },
   Other:       { color: "#E8C7C3", style: "gradient",  emoji: "📅",  label: "Andere",         ctaText: "Termin buchen",          bgPattern: "none",    buttonStyle: "rounded" },
 };
+
+// ── Color Palettes ────────────────────────────────────────────────────────────
+
+const COLOR_PALETTES: { key: string; name: string; primary: string; bg: string; theme: Theme }[] = [
+  { key: "blossom",  name: "Blossom",   primary: "#E8C7C3", bg: "#FDF6F5", theme: "gradient" },
+  { key: "ocean",    name: "Ocean",     primary: "#4A90D9", bg: "#EFF6FF", theme: "minimal"  },
+  { key: "forest",   name: "Forest",    primary: "#6B8E7F", bg: "#F0F7F4", theme: "minimal"  },
+  { key: "gold",     name: "Gold",      primary: "#C9A96E", bg: "#FDFAF5", theme: "bold"     },
+  { key: "lavender", name: "Lavendel",  primary: "#A78BFA", bg: "#FAF5FD", theme: "glass"    },
+  { key: "midnight", name: "Midnight",  primary: "#818CF8", bg: "#0f0f1a", theme: "dark"     },
+  { key: "ember",    name: "Ember",     primary: "#F97316", bg: "#FFF7ED", theme: "gradient" },
+  { key: "obsidian", name: "Obsidian",  primary: "#E74C3C", bg: "#1A1A2E", theme: "dark"     },
+  { key: "rose",     name: "Rose",      primary: "#F43F5E", bg: "#FFF1F2", theme: "glass"    },
+  { key: "slate",    name: "Slate",     primary: "#64748B", bg: "#F8FAFC", theme: "minimal"  },
+  { key: "mint",     name: "Mint",      primary: "#10B981", bg: "#F0FDF4", theme: "minimal"  },
+  { key: "noir",     name: "Noir",      primary: "#ffffff", bg: "#0a0a0a", theme: "dark"     },
+];
+
+// ── Page Templates ─────────────────────────────────────────────────────────────
+
+const PAGE_TEMPLATES: {
+  key: string; name: string; desc: string;
+  plan: "starter" | "pro" | "business";
+  emoji: string;
+}[] = [
+  { key: "classic",   name: "Classic",   desc: "Zentriert, zeitlos",    plan: "starter",  emoji: "⭐" },
+  { key: "soft",      name: "Soft",      desc: "Pastell, weich",        plan: "starter",  emoji: "🌸" },
+  { key: "hero",      name: "Hero",      desc: "Großes Header-Banner",  plan: "starter",  emoji: "🦸" },
+  { key: "neon",      name: "Neon",      desc: "Dunkel & leuchtend",    plan: "pro",      emoji: "⚡" },
+  { key: "magazine",  name: "Magazine",  desc: "Redaktionell, kühl",    plan: "pro",      emoji: "📰" },
+  { key: "split",     name: "Split",     desc: "Zweispaltig, modern",   plan: "pro",      emoji: "⬛" },
+  { key: "corporate", name: "Corporate", desc: "Sachlich, professionell",plan: "business", emoji: "🏢" },
+  { key: "organic",   name: "Organic",   desc: "Fließend, organisch",   plan: "business", emoji: "🌿" },
+];
+
+const PLAN_ORDER = { starter: 0, pro: 1, business: 2 };
 
 // ── Themes ────────────────────────────────────────────────────────────────────
 
@@ -157,6 +198,9 @@ export default function AdminLinksPage() {
   const [designSaving, setDesignSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Subscription plan (for template gating)
+  const [tenantPlan, setTenantPlan] = useState<"starter" | "pro" | "business">("starter");
+
   // QR modal
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -187,13 +231,21 @@ export default function AdminLinksPage() {
       }
     }).catch(() => {});
 
-    // Get industry type from auth user or tenant info
+    // Get industry type
     const slug = tenantSlug;
     if (slug) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/${slug}/info`)
         .then(r => r.json()).then(d => { if (d?.industryType) setIndustryType(d.industryType); })
         .catch(() => {});
     }
+
+    // Get subscription plan for template gating
+    api.get("/tenant/subscription").then((res) => {
+      const plan = res.data?.plan?.toLowerCase() ?? "starter";
+      if (plan.includes("business")) setTenantPlan("business");
+      else if (plan.includes("pro"))  setTenantPlan("pro");
+      else                            setTenantPlan("starter");
+    }).catch(() => {});
   }, [tenantSlug]);
 
   // ── Save design (debounced) ──────────────────────────────────────────────────
@@ -237,6 +289,16 @@ export default function AdminLinksPage() {
     setConfig(newConfig);
     await saveDesign(preset.style, preset.color, newConfig, false);
     showToast("success", `Vorlage „${preset.label}" angewendet ✓`);
+  }
+
+  // ── Apply color palette ──────────────────────────────────────────────────────
+
+  function applyColorScheme(palette: typeof COLOR_PALETTES[number]) {
+    const next = { ...config, colorScheme: palette.key };
+    setConfig(next);
+    setPrimaryColor(palette.primary);
+    setTheme(palette.theme);
+    saveDesign(palette.theme, palette.primary, next, true);
   }
 
   // ── Update config field ──────────────────────────────────────────────────────
@@ -496,6 +558,72 @@ export default function AdminLinksPage() {
                 className="overflow-hidden"
               >
                 <div className="px-4 pb-5 space-y-5 border-t border-gray-50">
+
+                  {/* ── Template Gallery ── */}
+                  <div className="pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <LayoutGrid size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Seitenvorlage</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {PAGE_TEMPLATES.map((tpl) => {
+                        const isActive = (config.pageTemplate ?? "classic") === tpl.key;
+                        const isLocked = PLAN_ORDER[tpl.plan] > PLAN_ORDER[tenantPlan];
+                        return (
+                          <button key={tpl.key}
+                            onClick={() => !isLocked && updateConfig("pageTemplate", tpl.key)}
+                            disabled={isLocked}
+                            title={isLocked ? `Erfordert ${tpl.plan.charAt(0).toUpperCase() + tpl.plan.slice(1)}-Plan` : tpl.desc}
+                            className={`relative flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all text-center ${
+                              isActive
+                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3]"
+                                : isLocked
+                                ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
+                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-xl leading-none">{tpl.emoji}</span>
+                            <span className="text-[10px] font-semibold text-gray-700 leading-tight">{tpl.name}</span>
+                            <span className="text-[9px] text-gray-400 leading-tight">{tpl.desc}</span>
+                            {isLocked && (
+                              <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold bg-gray-800 text-white px-1.5 py-0.5 rounded-full leading-none">
+                                {tpl.plan === "pro" ? "PRO" : "BIZ"}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2">Wähle das Layout deiner öffentlichen Buchungsseite</p>
+                  </div>
+
+                  {/* ── Farbpaletten ── */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Pipette size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Farbpalette</span>
+                    </div>
+                    <div className="grid grid-cols-6 gap-2">
+                      {COLOR_PALETTES.map((palette) => {
+                        const isActive = (config.colorScheme ?? "auto") === palette.key;
+                        return (
+                          <button key={palette.key} onClick={() => applyColorScheme(palette)}
+                            title={palette.name}
+                            className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl border transition-all ${
+                              isActive
+                                ? "border-[#E8C7C3] ring-1 ring-[#E8C7C3] bg-[#F5EDEB]"
+                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                              style={{ background: palette.primary }} />
+                            <span className="text-[9px] font-medium text-gray-500 leading-tight truncate w-full text-center">{palette.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2">Oder wähle unten eine eigene Farbe</p>
+                  </div>
 
                   {/* ── Branchenvorlagen ── */}
                   <div className="pt-4">

@@ -8,6 +8,9 @@ import {
   Globe, Phone, Mail, ExternalLink, Loader2, ChevronRight, Sparkles,
 } from "lucide-react";
 import { getTenantInfo, getTenantLinks, type TenantLink } from "@/lib/api/booking";
+import { SoftTemplate } from "./templates/soft";
+import { HeroTemplate } from "./templates/hero";
+import { NeonTemplate } from "./templates/neon";
 
 // ── Icon Map ──────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -58,6 +61,12 @@ interface LinktreeConfig {
   animationSpeed?: string;
   showWelcome?:    boolean;
   confetti?:       boolean;
+  bookingTheme?:   string;
+  serviceLayout?:  string;
+  showPrices?:     boolean;
+  ctaBadge?:       string;
+  pageTemplate?:   string;
+  colorScheme?:    string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -332,6 +341,17 @@ export default function TenantLinktreePage() {
   const cardS       = resolveCardStyle(cfg.cardStyle, t.cardBg, t.cardBorder, primaryColor);
   const { container, item: itemVariant } = buildAnimVariants(cfg.animationSpeed);
   const isGrid      = cfg.layoutMode === "grid";
+
+  // ── Template dispatch ──────────────────────────────────────────────────────
+  const templateProps = {
+    slug, tenantName, tagline, welcomeMsg, primaryColor, logoSrc,
+    linktreeStyle, industryType, cfg,
+    links: links as any,
+    handleCtaClick, showFloating,
+  };
+  if (cfg.pageTemplate === "soft")    return <SoftTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "hero")    return <HeroTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "neon")    return <NeonTemplate {...templateProps} />;
 
   return (
     <div className="min-h-screen" style={{ background: t.bg, fontFamily }}>
