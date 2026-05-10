@@ -15,6 +15,7 @@ export interface AdminService {
   name: string;
   description: string | null;
   durationMinutes: number;
+  bufferTimeMinutes: number;
   price: number;
   currency: string;
   displayOrder: number;
@@ -40,12 +41,13 @@ export interface CreateServiceData {
   name: string;
   description?: string | null;
   durationMinutes: number;
+  bufferTimeMinutes: number;
   price: number;
   currency: string;
   displayOrder: number;
   categoryId: string;
-  employeeIds?: string[] | null;  
-  employeeId?: string | null;  
+  employeeIds?: string[] | null;
+  employeeId?: string | null;
 }
 
 // Updated to use array of employee IDs with backward compatibility
@@ -53,6 +55,7 @@ export interface UpdateServiceData {
   name: string;
   description?: string | null;
   durationMinutes: number;
+  bufferTimeMinutes: number;
   price: number;
   currency: string;
   displayOrder: number;

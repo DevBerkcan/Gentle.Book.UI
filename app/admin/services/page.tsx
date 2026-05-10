@@ -121,6 +121,7 @@ export default function AdminServicesPage() {
         name: "",
         description: "",
         durationMinutes: 30,
+        bufferTimeMinutes: 0,
         price: 0,
         displayOrder: 0,
         categoryId: "",
@@ -213,6 +214,7 @@ export default function AdminServicesPage() {
                 name: serviceForm.name,
                 description: serviceForm.description || null,
                 durationMinutes: serviceForm.durationMinutes!,
+                bufferTimeMinutes: serviceForm.bufferTimeMinutes ?? 0,
                 price: serviceForm.price!,
                 currency: serviceForm.currency!,
                 displayOrder: serviceForm.displayOrder!,
@@ -236,11 +238,12 @@ export default function AdminServicesPage() {
                 name: serviceForm.name!,
                 description: serviceForm.description || null,
                 durationMinutes: serviceForm.durationMinutes!,
+                bufferTimeMinutes: serviceForm.bufferTimeMinutes ?? 0,
                 price: serviceForm.price!,
                 currency: serviceForm.currency!,
                 displayOrder: serviceForm.displayOrder!,
                 categoryId: serviceForm.categoryId!,
-                employeeIds: serviceForm.employeeIds || [], // Pass array instead of single ID
+                employeeIds: serviceForm.employeeIds || [],
                 isActive: selectedItem.isActive,
             });
             setServices(services.map(s => s.id === updated.id ? updated : s));
@@ -352,10 +355,11 @@ export default function AdminServicesPage() {
             name: "",
             description: "",
             durationMinutes: 30,
+            bufferTimeMinutes: 0,
             price: 0,
             displayOrder: 0,
             categoryId: "",
-            employeeIds: [], // Changed to empty array
+            employeeIds: [],
         });
         setCategoryForm({
             name: "",
@@ -387,13 +391,11 @@ export default function AdminServicesPage() {
 
             // Get the employee IDs
             const employeeIds = service.assignedEmployees?.map(emp => emp.id) || [];
-            console.log('Setting employee IDs:', employeeIds);
-            console.log('Current employees:', employees); // This might still be empty due to async
-
             setServiceForm({
                 name: service.name,
                 description: service.description,
                 durationMinutes: service.durationMinutes,
+                bufferTimeMinutes: service.bufferTimeMinutes ?? 0,
                 price: service.price,
                 currency: service.currency,
                 displayOrder: service.displayOrder,
@@ -1328,6 +1330,17 @@ function ServiceModals({
                                         isRequired
                                         isDisabled={submitting}
                                         endContent={<Clock size={16} className="text-[#8A8A8A]" />}
+                                        classNames={inputClassNames}
+                                    />
+                                    <Input
+                                        label="Pufferzeit (Min)"
+                                        type="number"
+                                        min={0}
+                                        max={120}
+                                        value={(serviceForm.bufferTimeMinutes ?? 0).toString()}
+                                        onChange={(e) => setServiceForm({ ...serviceForm, bufferTimeMinutes: parseInt(e.target.value) || 0 })}
+                                        isDisabled={submitting}
+                                        description="Pause nach dem Termin"
                                         classNames={inputClassNames}
                                     />
 

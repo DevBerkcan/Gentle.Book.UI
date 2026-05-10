@@ -148,6 +148,7 @@ export interface Service {
   price: number;
   currency: string;
   durationMinutes: number;
+  bufferTimeMinutes: number;
   isActive: boolean;
 }
 

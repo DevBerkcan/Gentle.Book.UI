@@ -79,6 +79,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
 
   const primary   = tenantInfo?.primaryColor ?? "#E8C7C3";
   const lightBg   = lighten(primary, 0.88);
+  const name      = tenantInfo?.companyName ?? tenantInfo?.name ?? null;
 
   function copyBookingNumber() {
     if (!booking) return;
@@ -121,7 +122,6 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
   const logoSrc   = tenantInfo?.logoUrl
     ? (tenantInfo.logoUrl.startsWith("http") ? tenantInfo.logoUrl : `${API_URL}${tenantInfo.logoUrl}`)
     : null;
-  const name      = tenantInfo?.companyName ?? tenantInfo?.name ?? null;
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr + "T00:00:00").toLocaleDateString("de-DE", {

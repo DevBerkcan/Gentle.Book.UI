@@ -109,10 +109,13 @@ export default function TenantBookingPage() {
       setError("Bitte stimmen Sie den Datenschutzbestimmungen zu");
       return;
     }
-    const hasErrors =
-      !customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
-      !customerInfo.email.trim() || !customerInfo.phone.trim();
-    if (hasErrors) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
+        !customerInfo.email.trim() || !customerInfo.phone.trim()) return;
+    if (!emailRegex.test(customerInfo.email.trim())) {
+      setError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      return;
+    }
 
     setSubmitting(true);
     setError(null);

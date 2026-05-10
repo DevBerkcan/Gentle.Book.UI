@@ -1416,7 +1416,6 @@ export default function AdminBookingsPage() {
                                         className={`w-full text-left p-3 hover:bg-[#F5EDEB] transition-colors border-b border-[#E8C7C3]/10 last:border-0 ${bookingForm.serviceId === service.id ? 'bg-[#017172]/5' : ''
                                           }`}
                                         onClick={() => {
-                                          console.log('Setting service ID:', service.id);
                                           setBookingForm(prev => ({ ...prev, serviceId: service.id }));
                                           setSearchTerm('');
                                           setIsServicePopoverOpen(false);

@@ -8,6 +8,7 @@ import { Button } from "@nextui-org/button";
 import { Chip } from "@nextui-org/chip";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/modal";
 import { Calendar, Mail, AlertCircle, X } from "lucide-react";
+import { toast } from "sonner";
 import { getBookingsByEmail, cancelBooking, type BookingResponse } from "@/lib/api/booking";
 
 export default function MyBookingsPage() {
@@ -53,9 +54,10 @@ export default function MyBookingsPage() {
           b.id === selectedBooking.id ? { ...b, status: "Cancelled" } : b
         )
       );
+      toast.success("Buchung wurde erfolgreich storniert.");
       onClose();
     } catch (err: any) {
-      alert("Fehler beim Stornieren: " + err.message);
+      toast.error("Fehler beim Stornieren: " + err.message);
     } finally {
       setCancelling(false);
     }

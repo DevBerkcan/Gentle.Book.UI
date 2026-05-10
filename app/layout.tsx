@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Suspense } from "react";
 import { NextUIProvider } from "@nextui-org/react";
+import { Toaster } from "sonner";
 import { KlaroCookieConsent } from "@/components/KlaroCookieConsent";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { TrackingProvider } from "@/components/analytics/TrackingProvider";
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <GoogleAnalytics />
         <NextUIProvider>
+          <Toaster position="top-right" richColors closeButton />
           <Suspense fallback={null}>
             <TrackingProvider>
               <KlaroCookieConsent />
