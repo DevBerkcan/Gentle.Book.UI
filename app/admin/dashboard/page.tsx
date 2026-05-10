@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, Clock, TrendingUp, TrendingDown, Users,
   Euro, Copy, Check, ExternalLink, Sparkles,
-  ArrowUpRight, ChevronRight, CheckCircle2, Circle, X,
+  ArrowUpRight, ChevronRight, CheckCircle2, Circle, X, BarChart2, AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboard, getOnboardingStatus, type DashboardOverview, type OnboardingStatus } from "@/lib/api/admin";
@@ -90,6 +90,7 @@ export default function AdminDashboardPage() {
   const [error,            setError]            = useState<string | null>(null);
   const [copied,           setCopied]           = useState(false);
   const [defaultCurrency,  setDefaultCurrency]  = useState("EUR");
+  const [usage,            setUsage]            = useState<any>(null);
 
   useEffect(() => {
     getDashboard()
@@ -106,6 +107,9 @@ export default function AdminDashboardPage() {
         const d = res.data?.data ?? res.data;
         if (d?.defaultCurrency) setDefaultCurrency(d.defaultCurrency);
       }).catch(() => {});
+      if (isTenantAdmin) {
+        api.get("/tenant/usage").then((res) => setUsage(res.data)).catch(() => {});
+      }
     });
 
     // Persist dismiss in sessionStorage
@@ -295,6 +299,50 @@ export default function AdminDashboardPage() {
             accent="#8B5CF6"
           />
         </motion.div>
+
+        {/* ── Usage Meter ─────────────────────────────────────────── */}
+        {usage && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BarChart2 size={16} className="text-[#017172]" />
+                <span className="text-sm font-semibold text-[#1E1E1E]">Plan-Nutzung ({usage.planDisplayName})</span>
+              </div>
+              <Link href="/admin/subscription" className="text-xs text-[#017172] hover:underline">Upgraden →</Link>
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: 'Mitarbeiter', data: usage.employees },
+                { label: 'Services',   data: usage.services   },
+              ].map(({ label, data }) => {
+                if (!data) return null;
+                const pct = data.isUnlimited ? 10 : Math.min(data.percentage, 100);
+                const color = data.percentage >= 100 ? 'bg-red-500' : data.percentage >= 80 ? 'bg-amber-500' : 'bg-[#017172]';
+                return (
+                  <div key={label} className="space-y-1">
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>{label}</span>
+                      <span className="font-medium text-gray-800">{data.current} / {data.isUnlimited ? '∞' : data.limit}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+              {(usage.employees?.percentage >= 80 || usage.services?.percentage >= 80) && (
+                <div className="flex items-center gap-2 pt-1 text-xs text-amber-700">
+                  <AlertTriangle size={13} />
+                  Sie nähern sich dem Limit Ihres Plans.
+                  <Link href="/admin/subscription" className="font-semibold underline">Upgrade</Link>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Quick Actions ────────────────────────────────────────── */}
         <motion.div

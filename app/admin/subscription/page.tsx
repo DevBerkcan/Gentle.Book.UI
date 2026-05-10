@@ -1,11 +1,11 @@
-// app/admin/subscription/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  CreditCard, Clock, CheckCircle, XCircle, AlertTriangle,
-  Check, MessageCircle, Mail, Zap, Users, Star, Shield, RefreshCw,
+  Clock, CheckCircle, XCircle, AlertTriangle,
+  Check, MessageCircle, Mail, Zap, Users, Star, Shield,
+  BarChart2, Globe, ArrowRight,
 } from 'lucide-react';
 import api from '@/lib/api/client';
 
@@ -21,224 +21,331 @@ interface Subscription {
   currentPeriodEnd?: string;
 }
 
+interface Usage {
+  plan: string;
+  planDisplayName: string;
+  employees: { current: number; limit: number; isUnlimited: boolean; percentage: number };
+  services: { current: number; limit: number; isUnlimited: boolean; percentage: number };
+}
+
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; icon: any }> = {
-  Trial:     { label: 'Testphase',        bg: 'bg-amber-50',  text: 'text-amber-700',  icon: Clock },
-  Active:    { label: 'Aktiv',            bg: 'bg-green-50',  text: 'text-green-700',  icon: CheckCircle },
-  PastDue:   { label: 'Zahlung offen',    bg: 'bg-red-50',    text: 'text-red-700',    icon: AlertTriangle },
-  Cancelled: { label: 'Gekündigt',        bg: 'bg-gray-100',  text: 'text-gray-600',   icon: XCircle },
-  Expired:   { label: 'Abgelaufen',       bg: 'bg-red-50',    text: 'text-red-700',    icon: XCircle },
+  Trial:     { label: 'Testphase',      bg: 'bg-amber-50',  text: 'text-amber-700',  icon: Clock },
+  Active:    { label: 'Aktiv',          bg: 'bg-green-50',  text: 'text-green-700',  icon: CheckCircle },
+  PastDue:   { label: 'Zahlung offen',  bg: 'bg-red-50',    text: 'text-red-700',    icon: AlertTriangle },
+  Cancelled: { label: 'Gekündigt',      bg: 'bg-gray-100',  text: 'text-gray-600',   icon: XCircle },
+  Expired:   { label: 'Abgelaufen',     bg: 'bg-red-50',    text: 'text-red-700',    icon: XCircle },
 };
 
-const FEATURES = [
-  { icon: Zap,        text: 'Unbegrenzte Buchungen' },
-  { icon: Users,      text: 'Mehrere Mitarbeiter-Konten' },
-  { icon: Mail,       text: 'Automatische E-Mail-Bestätigungen' },
-  { icon: Star,       text: 'Professionelle Buchungsseite' },
-  { icon: Shield,     text: 'Priority Support & Wartung' },
-  { icon: RefreshCw,  text: 'Alle zukünftigen Updates' },
+const PLANS = [
+  {
+    name: 'Starter',
+    price: 29,
+    key: 'Starter',
+    color: 'border-gray-200',
+    highlight: false,
+    employees: 2,
+    services: 15,
+    features: [
+      '2 Mitarbeiter-Konten',
+      'Bis zu 15 Services',
+      'Automatische Buchungsbestätigungen',
+      'Professionelle Buchungsseite',
+      'E-Mail-Erinnerungen',
+      'Standard Support',
+    ],
+  },
+  {
+    name: 'Pro',
+    price: 59,
+    key: 'Professional',
+    color: 'border-[#017172]',
+    highlight: true,
+    employees: 10,
+    services: 50,
+    features: [
+      '10 Mitarbeiter-Konten',
+      'Bis zu 50 Services',
+      'Automatische Buchungsbestätigungen',
+      'Professionelle Buchungsseite',
+      'Analytics & Umsatzberichte',
+      'E-Mail-Erinnerungen',
+      'Priority Support',
+      'Alle zukünftigen Updates',
+    ],
+  },
+  {
+    name: 'Business',
+    price: 99,
+    key: 'Agency',
+    color: 'border-gray-200',
+    highlight: false,
+    employees: null,
+    services: null,
+    features: [
+      'Unbegrenzte Mitarbeiter',
+      'Unbegrenzte Services',
+      'Alles aus Pro',
+      'Dedizierter Account Manager',
+      'API-Zugang',
+      'White-Label Option',
+      'SLA Garantie',
+    ],
+  },
 ];
 
-const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.07 } } };
-const fadeUp  = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } } };
+const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } } };
+const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
+
+function UsageBar({ label, current, limit, isUnlimited, percentage }: { label: string; current: number; limit: number; isUnlimited: boolean; percentage: number }) {
+  const color = percentage >= 100 ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-[#017172]';
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-600">{label}</span>
+        <span className="font-medium text-gray-900">
+          {current} / {isUnlimited ? '∞' : limit}
+        </span>
+      </div>
+      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: isUnlimited ? '10%' : `${Math.min(percentage, 100)}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function AdminSubscriptionPage() {
-  const [sub, setSub]       = useState<Subscription | null>(null);
+  const [sub, setSub] = useState<Subscription | null>(null);
+  const [usage, setUsage] = useState<Usage | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/tenant/subscription')
-      .then((res) => setSub(res.data?.data ?? res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null),
+      api.get('/tenant/usage').then(r => r.data).catch(() => null),
+    ]).then(([subData, usageData]) => {
+      setSub(subData);
+      setUsage(usageData);
+    }).finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F2EFED] flex items-center justify-center">
-        <div className="w-10 h-10 rounded-full border-4 border-[#017172] border-t-transparent animate-spin" />
+      <div className="p-8 space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-24 bg-gray-100 rounded-2xl animate-pulse" />
+        ))}
       </div>
     );
   }
 
-  const statusCfg   = STATUS_CONFIG[sub?.status ?? 'Trial'] ?? STATUS_CONFIG['Trial'];
-  const StatusIcon  = statusCfg.icon;
-  const trialEnd    = sub?.trialEndsAt    ? new Date(sub.trialEndsAt)    : null;
-  const trialStart  = sub?.trialStartedAt ? new Date(sub.trialStartedAt) : null;
-  const TOTAL_DAYS  = 14;
-  const usedDays    = Math.max(0, TOTAL_DAYS - (sub?.trialDaysRemaining ?? 0));
-  const pct         = Math.min((usedDays / TOTAL_DAYS) * 100, 100);
-  const isUrgent    = (sub?.trialDaysRemaining ?? 0) <= 3 && (sub?.isInTrial ?? false);
-  const isWarning   = (sub?.trialDaysRemaining ?? 0) <= 7 && (sub?.trialDaysRemaining ?? 0) > 3 && (sub?.isInTrial ?? false);
-  const barColor    = isUrgent ? '#ef4444' : isWarning ? '#f59e0b' : '#017172';
-  const isExpired   = sub?.status === 'Expired' || sub?.isAccessAllowed === false;
+  const statusCfg = STATUS_CONFIG[sub?.status ?? 'Trial'];
+  const StatusIcon = statusCfg?.icon ?? Clock;
+  const currentPlanKey = sub?.plan ?? 'Trial';
+  const isExpired = sub?.status === 'Expired';
 
   return (
-    <div className="min-h-screen bg-[#F2EFED] p-4 sm:p-6">
-      <div className="max-w-2xl mx-auto space-y-4">
+    <motion.div
+      className="p-6 max-w-5xl mx-auto space-y-8"
+      variants={stagger}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header */}
+      <motion.div variants={fadeUp}>
+        <h1 className="text-2xl font-bold text-gray-900">Abonnement & Plan</h1>
+        <p className="text-gray-500 mt-1">Verwalten Sie Ihren Plan und sehen Sie Ihre aktuelle Nutzung</p>
+      </motion.div>
 
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#017172] to-[#01a0a2] rounded-xl flex items-center justify-center">
-              <CreditCard size={20} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-[#1E1E1E]">Abonnement</h1>
-              <p className="text-[#8A8A8A] text-sm">Ihr aktueller Plan & Upgrade-Optionen</p>
-            </div>
+      {/* Expired Warning */}
+      {isExpired && (
+        <motion.div variants={fadeUp} className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-4">
+          <XCircle className="text-red-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-red-800">Ihr Testzeitraum ist abgelaufen</p>
+            <p className="text-red-600 text-sm mt-1">
+              Wählen Sie unten einen Plan, um Ihr Studio wieder zu aktivieren.
+            </p>
           </div>
         </motion.div>
+      )}
 
-        <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-4">
-
-          {/* Status Card */}
-          {sub && (
-            <motion.div variants={fadeUp} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-5">
-                  <div>
-                    <p className="text-xs text-[#8A8A8A] mb-1 uppercase tracking-wide font-medium">Aktueller Status</p>
-                    <h2 className="text-xl font-bold text-[#1E1E1E]">
-                      {sub.isInTrial ? `${sub.trialDaysRemaining} Tage Testphase verbleibend` : statusCfg.label}
-                    </h2>
-                  </div>
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${statusCfg.bg} ${statusCfg.text}`}>
-                    <StatusIcon size={13} />
-                    {statusCfg.label}
-                  </span>
-                </div>
-
-                {/* Trial progress */}
-                {sub.isInTrial && (
-                  <div className="mb-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-[#1E1E1E] flex items-center gap-1.5">
-                        {isUrgent && (
-                          <span className="inline-flex items-center gap-1 bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                            Dringend
-                          </span>
-                        )}
-                        Testphase
-                      </span>
-                      <span className="text-sm font-semibold" style={{ color: barColor }}>
-                        {sub.trialDaysRemaining} Tag{sub.trialDaysRemaining !== 1 ? 'e' : ''} verbleibend
-                      </span>
-                    </div>
-                    <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                        transition={{ duration: 1.1, ease: 'easeOut', delay: 0.3 }}
-                        className="h-full rounded-full"
-                        style={{ background: barColor }}
-                      />
-                    </div>
-                    <div className="flex justify-between mt-1.5 text-xs text-[#8A8A8A]">
-                      <span>{usedDays} von {TOTAL_DAYS} Tagen genutzt</span>
-                      {trialEnd && <span>Endet {trialEnd.toLocaleDateString('de-DE')}</span>}
-                    </div>
-                  </div>
-                )}
-
-                {/* Expired warning */}
-                {isExpired && (
-                  <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <XCircle size={16} className="text-red-600" />
-                      <span className="font-semibold text-red-800 text-sm">Zugang gesperrt</span>
-                    </div>
-                    <p className="text-red-700 text-sm">Ihr Testzeitraum ist abgelaufen. Upgraden Sie, um wieder Zugang zu erhalten.</p>
-                  </div>
-                )}
-
-                {/* Date grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {trialStart && (
-                    <div className="bg-[#F5EDEB] rounded-2xl p-3">
-                      <p className="text-xs text-[#8A8A8A] mb-0.5">Teststart</p>
-                      <p className="font-semibold text-[#1E1E1E] text-sm">{trialStart.toLocaleDateString('de-DE')}</p>
-                    </div>
-                  )}
-                  {trialEnd && (
-                    <div className="bg-[#F5EDEB] rounded-2xl p-3">
-                      <p className="text-xs text-[#8A8A8A] mb-0.5">Testende</p>
-                      <p className="font-semibold text-[#1E1E1E] text-sm">{trialEnd.toLocaleDateString('de-DE')}</p>
-                    </div>
-                  )}
-                </div>
+      {/* Status Card */}
+      {sub && (
+        <motion.div variants={fadeUp} className={`rounded-2xl border p-6 ${statusCfg?.bg ?? 'bg-gray-50'}`}>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-xl bg-white/60`}>
+                <StatusIcon size={20} className={statusCfg?.text} />
               </div>
-            </motion.div>
-          )}
-
-          {/* Pricing Card */}
-          <motion.div
-            variants={fadeUp}
-            className="relative overflow-hidden rounded-3xl shadow-xl"
-            style={{ background: 'linear-gradient(135deg, #0f0f1a 0%, #1e1e2e 50%, #17171f 100%)' }}
-          >
-            {/* Decorative blobs */}
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20" style={{ background: '#C09995', transform: 'translate(30%, -30%)' }} />
-            <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-15" style={{ background: '#017172', transform: 'translate(-30%, 30%)' }} />
-
-            <div className="relative p-7 sm:p-8">
-              {/* Plan header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 bg-[#C09995]/20 border border-[#C09995]/30 text-[#C09995] text-xs font-bold px-3 py-1 rounded-full mb-3">
-                    <Star size={11} fill="currentColor" /> GentleBook Pro
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-6xl font-black text-white leading-none">€49</span>
-                    <div>
-                      <span className="text-2xl font-bold text-white">,99</span>
-                      <span className="text-white/50 text-base font-medium block">/Monat</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-[#C09995] text-white text-xs font-bold px-3 py-1.5 rounded-xl text-center leading-tight">
-                  inkl. Support<br />& Wartung
-                </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-gray-500 font-medium">Aktueller Status</p>
+                <p className={`font-bold text-lg ${statusCfg?.text}`}>{statusCfg?.label}</p>
               </div>
-
-              {/* Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-7">
-                {FEATURES.map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-[#C09995]/20 flex items-center justify-center flex-shrink-0">
-                      <Check size={12} className="text-[#C09995]" />
-                    </div>
-                    <span className="text-sm text-white/80">{text}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a
-                  href="https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20GentleBook%20upgraden"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm text-white transition-all hover:opacity-90 active:scale-[0.97]"
-                  style={{ background: '#25D366' }}
-                >
-                  <MessageCircle size={18} /> WhatsApp
-                </a>
-                <a
-                  href="mailto:support@gentlegroup.de?subject=Upgrade GentleBook Pro"
-                  className="flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl font-bold text-sm text-white border border-white/15 transition-all hover:bg-white/10 active:scale-[0.97]"
-                >
-                  <Mail size={18} /> E-Mail senden
-                </a>
-              </div>
-
-              <p className="text-white/30 text-xs text-center mt-4">
-                Monatlich kündbar · Keine versteckten Kosten · Sofort aktiviert
-              </p>
             </div>
-          </motion.div>
+            {sub.isInTrial && (
+              <div className="text-right">
+                <p className="text-xs text-gray-500">Testphase endet</p>
+                <p className="font-semibold text-gray-800">
+                  {new Date(sub.trialEndsAt).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+                <p className={`text-sm font-medium ${sub.trialDaysRemaining <= 3 ? 'text-red-600' : sub.trialDaysRemaining <= 7 ? 'text-amber-600' : 'text-gray-600'}`}>
+                  noch {sub.trialDaysRemaining} {sub.trialDaysRemaining === 1 ? 'Tag' : 'Tage'}
+                </p>
+              </div>
+            )}
+          </div>
 
+          {/* Trial Progress Bar */}
+          {sub.isInTrial && (() => {
+            const total = 14;
+            const used = total - sub.trialDaysRemaining;
+            const pct = (used / total) * 100;
+            const barColor = sub.trialDaysRemaining <= 3 ? 'bg-red-500' : sub.trialDaysRemaining <= 7 ? 'bg-amber-500' : 'bg-[#017172]';
+            return (
+              <div className="mt-4">
+                <div className="h-2 bg-white/50 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+                </div>
+                <p className="text-xs text-gray-500 mt-1.5">{used} von 14 Testtagen verbraucht</p>
+              </div>
+            );
+          })()}
         </motion.div>
-      </div>
-    </div>
+      )}
+
+      {/* Usage Meter */}
+      {usage && (
+        <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <BarChart2 size={18} className="text-[#017172]" />
+            Aktuelle Nutzung ({usage.planDisplayName}-Plan)
+          </h2>
+          <div className="space-y-4">
+            <UsageBar
+              label="Mitarbeiter"
+              current={usage.employees.current}
+              limit={usage.employees.limit}
+              isUnlimited={usage.employees.isUnlimited}
+              percentage={usage.employees.percentage}
+            />
+            <UsageBar
+              label="Services"
+              current={usage.services.current}
+              limit={usage.services.limit}
+              isUnlimited={usage.services.isUnlimited}
+              percentage={usage.services.percentage}
+            />
+          </div>
+          {(usage.employees.percentage >= 80 || usage.services.percentage >= 80) && (
+            <div className="mt-4 p-3 bg-amber-50 rounded-xl flex items-center gap-2 text-sm text-amber-700">
+              <AlertTriangle size={16} />
+              Sie nähern sich dem Limit Ihres Plans. Upgraden Sie für mehr Kapazität.
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Pricing Cards */}
+      <motion.div variants={fadeUp}>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Pläne & Preise</h2>
+        <p className="text-gray-500 text-sm mb-6">Monatlich kündbar · Keine versteckten Kosten · Sofort aktivierbar</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {PLANS.map((plan) => {
+            const isCurrent = currentPlanKey === plan.key;
+            return (
+              <div
+                key={plan.key}
+                className={`relative rounded-2xl border-2 p-6 flex flex-col
+                  ${plan.highlight ? 'border-[#017172] shadow-lg' : 'border-gray-200'}
+                  ${isCurrent ? 'ring-2 ring-[#017172]/30' : ''}
+                  bg-white`}
+              >
+                {plan.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-[#017172] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Empfohlen
+                    </span>
+                  </div>
+                )}
+                {isCurrent && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Ihr Plan
+                    </span>
+                  </div>
+                )}
+                <div className="mb-4">
+                  <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
+                  <div className="flex items-end gap-1 mt-2">
+                    <span className="text-3xl font-bold text-gray-900">€{plan.price}</span>
+                    <span className="text-gray-500 mb-1">/Monat</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {plan.employees ? `${plan.employees} Mitarbeiter · ${plan.services} Services` : 'Unbegrenzte Mitarbeiter & Services'}
+                  </p>
+                </div>
+                <ul className="space-y-2.5 flex-1 mb-6">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
+                      <Check size={15} className="text-[#017172] shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div className="space-y-2">
+                  <a
+                    href={`https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20den%20${plan.name}-Plan%20f%C3%BCr%20mein%20Studio%20buchen.`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium transition-colors
+                      ${plan.highlight
+                        ? 'bg-[#017172] hover:bg-[#015f5f] text-white'
+                        : 'bg-gray-900 hover:bg-gray-700 text-white'}`}
+                  >
+                    <MessageCircle size={16} />
+                    {isCurrent ? 'Plan verlängern' : `${plan.name} buchen`}
+                    <ArrowRight size={14} />
+                  </a>
+                  <a
+                    href={`mailto:support@gentlegroup.de?subject=${plan.name}-Plan%20Upgrade&body=Hallo%2C%20ich%20m%C3%B6chte%20auf%20den%20${plan.name}-Plan%20upgraden.`}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Mail size={15} />
+                    Per E-Mail anfragen
+                  </a>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Contact */}
+      <motion.div variants={fadeUp} className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p className="font-semibold text-gray-900">Fragen zu Ihrem Plan?</p>
+          <p className="text-sm text-gray-500 mt-0.5">Wir helfen Ihnen gerne persönlich weiter.</p>
+        </div>
+        <div className="flex gap-3">
+          <a
+            href="https://wa.me/491754701892"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            <MessageCircle size={16} /> WhatsApp
+          </a>
+          <a
+            href="mailto:support@gentlegroup.de"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium transition-colors"
+          >
+            <Mail size={16} /> E-Mail
+          </a>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 }

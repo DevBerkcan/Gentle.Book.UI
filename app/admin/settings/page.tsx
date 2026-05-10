@@ -44,6 +44,8 @@ interface TenantSettings {
   maxAdvanceBookingDays: number;
   timeZone: string;
   defaultCurrency: string;
+  cancellationHoursNotice: number;
+  cancellationFeePercent: number;
   logoUrl?: string;
 }
 
@@ -68,6 +70,8 @@ export default function AdminSettingsPage() {
     maxAdvanceBookingDays: 60,
     timeZone: 'Europe/Berlin',
     defaultCurrency: 'EUR',
+    cancellationHoursNotice: 0,
+    cancellationFeePercent: 0,
     logoUrl: '',
   });
   const [loading, setLoading] = useState(true);
@@ -479,6 +483,34 @@ export default function AdminSettingsPage() {
                     <option value="Asia/Dubai">Asia/Dubai (GST)</option>
                     <option value="Asia/Istanbul">Asia/Istanbul (TRT)</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Cancellation policy */}
+              <div className="mt-2 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <AlertTriangle size={16} className="text-amber-600" />
+                  <p className="text-sm font-semibold text-amber-800">Stornierungsrichtlinie</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Input
+                    label="Kostenlos stornierbar bis (Stunden)"
+                    type="number"
+                    value={String(settings.cancellationHoursNotice)}
+                    onChange={(e) => set('cancellationHoursNotice', parseInt(e.target.value) || 0)}
+                    min={0}
+                    max={720}
+                    description="0 = immer kostenlos stornierbar"
+                  />
+                  <Input
+                    label="Stornogebühr (%)"
+                    type="number"
+                    value={String(settings.cancellationFeePercent)}
+                    onChange={(e) => set('cancellationFeePercent', parseFloat(e.target.value) || 0)}
+                    min={0}
+                    max={100}
+                    description="Prozent des Servicepreises"
+                  />
                 </div>
               </div>
             </CardBody>

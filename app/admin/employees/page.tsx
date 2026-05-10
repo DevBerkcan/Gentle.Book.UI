@@ -9,11 +9,12 @@ import { Chip } from "@nextui-org/chip";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/modal";
 import {
   Plus, Edit, Trash2, Users, AlertCircle, X, Save, UserCheck, UserX,
-  Lock, Eye, EyeOff, Key, MapPin, Clock
+  Lock, Eye, EyeOff, Key, MapPin, Clock, CalendarDays, Plane,
 } from "lucide-react";
 import { getEmployees, createEmployee, updateEmployee, deleteEmployee, type Employee, type CreateEmployeeDto } from "@/lib/api/employees";
 import api from "@/lib/api/client";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { toast } from "sonner";
 
 const MODAL_CLS = {
   base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
@@ -51,8 +52,31 @@ const EMPTY: CreateEmployeeDto = {
   specialty: "",
   username: "",
   password: "",
-  location: ""  // Added location
+  location: ""
 };
+
+// ── Vacation types ────────────────────────────────────────────────────────────
+interface Vacation {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  startDate: string;
+  endDate: string;
+  type: string;
+  note: string | null;
+  createdAt: string;
+}
+
+const VACATION_TYPES = [
+  { value: "Vacation", label: "Urlaub" },
+  { value: "SickLeave", label: "Krankenstand" },
+  { value: "PersonalDay", label: "Persönlicher Tag" },
+];
+
+const vacationTypeLabel = (type: string) =>
+  VACATION_TYPES.find(t => t.value === type)?.label ?? type;
+
+const EMPTY_VACATION = { startDate: "", endDate: "", type: "Vacation", note: "" };
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -88,6 +112,16 @@ export default function EmployeesPage() {
   const [scheduleError, setScheduleError] = useState('');
   const [scheduleSaved, setScheduleSaved] = useState(false);
 
+  // Vacation modal
+  const { isOpen: isVacationOpen, onOpen: onVacationOpen, onClose: onVacationClose } = useDisclosure();
+  const [vacationEmployee, setVacationEmployee] = useState<Employee | null>(null);
+  const [vacations, setVacations] = useState<Vacation[]>([]);
+  const [vacationLoading, setVacationLoading] = useState(false);
+  const [vacationForm, setVacationForm] = useState(EMPTY_VACATION);
+  const [vacationSaving, setVacationSaving] = useState(false);
+  const [vacationError, setVacationError] = useState('');
+  const [deletingVacationId, setDeletingVacationId] = useState<string | null>(null);
+
   const { confirm, dialog } = useConfirm();
 
   useEffect(() => { load(); }, [showInactive]);
@@ -116,7 +150,7 @@ export default function EmployeesPage() {
       role: emp.role,
       specialty: emp.specialty ?? "",
       username: emp.username ?? "",
-      location: emp.location ?? ""  // Added location
+      location: emp.location ?? ""
     });
     setFormActive(emp.isActive);
     setModalErr(null);
@@ -131,13 +165,11 @@ export default function EmployeesPage() {
       return;
     }
 
-    // For new employees, username and password are required
     if (!editing && (!form.username?.trim() || !form.password?.trim())) {
       setModalErr("Benutzername und Passwort sind erforderlich");
       return;
     }
 
-    // For editing with password reset, password is required
     if (editing && resetPassword && !form.password?.trim()) {
       setModalErr("Neues Passwort ist erforderlich");
       return;
@@ -151,26 +183,20 @@ export default function EmployeesPage() {
         name: form.name.trim(),
         role: form.role.trim(),
         specialty: form.specialty?.trim() || null,
-        location: form.location?.trim() || null  // Added location
+        location: form.location?.trim() || null
       };
 
-      // Add username for new employees or if changed
       if (form.username?.trim()) {
         payload.username = form.username.trim();
       }
 
       if (editing) {
-        // For edit, include isActive
         payload.isActive = formActive;
-
-        // Include new password only if reset is requested
         if (resetPassword && form.password?.trim()) {
           payload.newPassword = form.password.trim();
         }
-
         await updateEmployee(editing.id, payload);
       } else {
-        // For new employees, include password
         if (form.password?.trim()) {
           payload.password = form.password.trim();
         }
@@ -206,7 +232,6 @@ export default function EmployeesPage() {
       setSelectedEmployeeForDelete(null);
     }
   }
-
 
   function handleToggle(emp: Employee) {
     setSelectedEmployeeForToggle(emp);
@@ -279,6 +304,69 @@ export default function EmployeesPage() {
   const updateScheduleItem = (dayOfWeek: number, field: keyof ScheduleItem, value: string | boolean) =>
     setSchedule((prev) => prev.map((s) => s.dayOfWeek === dayOfWeek ? { ...s, [field]: value } : s));
 
+  // ── Vacation handlers ─────────────────────────────────────────────────────
+
+  async function openVacation(emp: Employee) {
+    setVacationEmployee(emp);
+    setVacationForm(EMPTY_VACATION);
+    setVacationError('');
+    setVacations([]);
+    setVacationLoading(true);
+    onVacationOpen();
+    try {
+      const res = await api.get(`/admin/vacations?employeeId=${emp.id}`);
+      setVacations(res.data ?? []);
+    } catch {
+      setVacationError('Fehler beim Laden der Abwesenheiten');
+    } finally {
+      setVacationLoading(false);
+    }
+  }
+
+  async function createVacation() {
+    if (!vacationEmployee) return;
+    if (!vacationForm.startDate || !vacationForm.endDate) {
+      setVacationError('Start- und Enddatum sind Pflichtfelder');
+      return;
+    }
+    if (vacationForm.startDate > vacationForm.endDate) {
+      setVacationError('Startdatum muss vor Enddatum liegen');
+      return;
+    }
+    setVacationSaving(true);
+    setVacationError('');
+    try {
+      await api.post('/admin/vacations', {
+        employeeId: vacationEmployee.id,
+        startDate: vacationForm.startDate,
+        endDate: vacationForm.endDate,
+        type: vacationForm.type,
+        note: vacationForm.note || null,
+      });
+      const res = await api.get(`/admin/vacations?employeeId=${vacationEmployee.id}`);
+      setVacations(res.data ?? []);
+      setVacationForm(EMPTY_VACATION);
+      toast.success('Abwesenheit eingetragen');
+    } catch (e: any) {
+      setVacationError(e.response?.data?.message || 'Fehler beim Speichern');
+    } finally {
+      setVacationSaving(false);
+    }
+  }
+
+  async function deleteVacation(id: string) {
+    setDeletingVacationId(id);
+    try {
+      await api.delete(`/admin/vacations/${id}`);
+      setVacations(prev => prev.filter(v => v.id !== id));
+      toast.success('Abwesenheit gelöscht');
+    } catch (e: any) {
+      toast.error(e.response?.data?.message || 'Fehler beim Löschen');
+    } finally {
+      setDeletingVacationId(null);
+    }
+  }
+
   const activeCount = employees.filter(e => e.isActive).length;
   const inactiveCount = employees.length - activeCount;
 
@@ -332,7 +420,6 @@ export default function EmployeesPage() {
                 <ModalBody>
                   {selectedEmployeeForDelete && (
                     <div className="space-y-4">
-                      {/* Warning Message */}
                       <div className="bg-red-50 p-4 rounded-xl border border-red-200">
                         <p className="text-sm text-red-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
@@ -342,7 +429,6 @@ export default function EmployeesPage() {
                         </p>
                       </div>
 
-                      {/* Employee Info */}
                       <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
                         <div className="flex items-center gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(selectedEmployeeForDelete.name)}`}>
@@ -367,24 +453,20 @@ export default function EmployeesPage() {
                         </div>
                       </div>
 
-                      {/* Impact Warning */}
                       <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
                         <p className="text-sm text-amber-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
                           <span>
                             <strong>Auswirkung:</strong> Beim Löschen eines Mitarbeiters werden alle zukünftigen Buchungen ungültig.
-                            Bereits abgeschlossene Buchungen bleiben erhalten, können aber nicht mehr dem Mitarbeiter zugeordnet werden.
                           </span>
                         </p>
                       </div>
 
-                      {/* Alternative Suggestion */}
                       <div className="bg-[#017172]/5 p-4 rounded-xl border border-[#017172]/20">
                         <p className="text-sm text-[#017172] flex items-start gap-2">
                           <UserX size={16} className="shrink-0 mt-0.5" />
                           <span>
                             <strong>Alternative:</strong> Statt zu löschen, können Sie den Mitarbeiter auch <strong>deaktivieren</strong>.
-                            Deaktivierte Mitarbeiter erscheinen nicht in Buchungen, aber alle historischen Daten bleiben erhalten.
                           </span>
                         </p>
                       </div>
@@ -435,10 +517,7 @@ export default function EmployeesPage() {
               <>
                 <ModalHeader>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedEmployeeForToggle?.isActive
-                        ? "bg-amber-500"
-                        : "bg-[#017172]"
-                      }`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedEmployeeForToggle?.isActive ? "bg-amber-500" : "bg-[#017172]"}`}>
                       {selectedEmployeeForToggle?.isActive
                         ? <UserX size={20} className="text-white" />
                         : <UserCheck size={20} className="text-white" />
@@ -448,9 +527,7 @@ export default function EmployeesPage() {
                       <h2 className="text-lg font-bold text-[#1E1E1E]">
                         {selectedEmployeeForToggle?.isActive ? "Mitarbeiter deaktivieren" : "Mitarbeiter aktivieren"}
                       </h2>
-                      <p className="text-xs text-[#8A8A8A]">
-                        {selectedEmployeeForToggle?.name}
-                      </p>
+                      <p className="text-xs text-[#8A8A8A]">{selectedEmployeeForToggle?.name}</p>
                     </div>
                   </div>
                 </ModalHeader>
@@ -458,15 +535,8 @@ export default function EmployeesPage() {
                 <ModalBody>
                   {selectedEmployeeForToggle && (
                     <div className="space-y-4">
-                      {/* Info Message */}
-                      <div className={`p-4 rounded-xl border ${selectedEmployeeForToggle.isActive
-                          ? "bg-amber-50 border-amber-200"
-                          : "bg-[#017172]/5 border-[#017172]/20"
-                        }`}>
-                        <p className={`text-sm flex items-start gap-2 ${selectedEmployeeForToggle.isActive
-                            ? "text-amber-700"
-                            : "text-[#017172]"
-                          }`}>
+                      <div className={`p-4 rounded-xl border ${selectedEmployeeForToggle.isActive ? "bg-amber-50 border-amber-200" : "bg-[#017172]/5 border-[#017172]/20"}`}>
+                        <p className={`text-sm flex items-start gap-2 ${selectedEmployeeForToggle.isActive ? "text-amber-700" : "text-[#017172]"}`}>
                           {selectedEmployeeForToggle.isActive
                             ? <UserX size={16} className="shrink-0 mt-0.5" />
                             : <UserCheck size={16} className="shrink-0 mt-0.5" />
@@ -485,7 +555,6 @@ export default function EmployeesPage() {
                         </p>
                       </div>
 
-                      {/* Employee Info */}
                       <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
                         <div className="flex items-center gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(selectedEmployeeForToggle.name)}`}>
@@ -500,24 +569,19 @@ export default function EmployeesPage() {
                               </p>
                             )}
                           </div>
-                          <Chip
-                            size="sm"
-                            variant="flat"
-                            className={selectedEmployeeForToggle.isActive ? "bg-[#017172]/10 text-[#017172]" : "bg-[#6b7280]/10 text-[#6b7280]"}
-                          >
+                          <Chip size="sm" variant="flat"
+                            className={selectedEmployeeForToggle.isActive ? "bg-[#017172]/10 text-[#017172]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
                             {selectedEmployeeForToggle.isActive ? "Aktiv" : "Inaktiv"}
                           </Chip>
                         </div>
                       </div>
 
-                      {/* Impact Warning for deactivation */}
                       {selectedEmployeeForToggle.isActive && (
                         <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
                           <p className="text-sm text-amber-700 flex items-start gap-2">
                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
                             <span>
                               <strong>Auswirkung:</strong> Der Mitarbeiter wird in zukünftigen Buchungsformularen nicht mehr angezeigt.
-                              Bereits gebuchte Termine bleiben bestehen.
                             </span>
                           </p>
                         </div>
@@ -648,9 +712,7 @@ export default function EmployeesPage() {
                     {/* Actions */}
                     <div className="flex flex-col gap-1.5 shrink-0">
                       <Button
-                        isIconOnly
-                        size="sm"
-                        variant="flat"
+                        isIconOnly size="sm" variant="flat"
                         className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
                         onPress={() => openEdit(emp)}
                         title="Bearbeiten"
@@ -658,9 +720,7 @@ export default function EmployeesPage() {
                         <Edit size={14} />
                       </Button>
                       <Button
-                        isIconOnly
-                        size="sm"
-                        variant="flat"
+                        isIconOnly size="sm" variant="flat"
                         className="bg-[#F5EDEB] text-[#8A8A8A] hover:bg-[#E8C7C3]/30"
                         onPress={() => openSchedule(emp)}
                         title="Arbeitszeiten"
@@ -668,9 +728,15 @@ export default function EmployeesPage() {
                         <Clock size={14} />
                       </Button>
                       <Button
-                        isIconOnly
-                        size="sm"
-                        variant="flat"
+                        isIconOnly size="sm" variant="flat"
+                        className="bg-blue-50 text-blue-500 hover:bg-blue-100"
+                        onPress={() => openVacation(emp)}
+                        title="Abwesenheiten"
+                      >
+                        <CalendarDays size={14} />
+                      </Button>
+                      <Button
+                        isIconOnly size="sm" variant="flat"
                         className={emp.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-[#017172]/10 text-[#017172] hover:bg-[#017172]/20"}
                         onPress={() => handleToggle(emp)}
                         title={emp.isActive ? "Deaktivieren" : "Aktivieren"}
@@ -678,9 +744,7 @@ export default function EmployeesPage() {
                         {emp.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
                       </Button>
                       <Button
-                        isIconOnly
-                        size="sm"
-                        variant="flat"
+                        isIconOnly size="sm" variant="flat"
                         className="bg-red-50 text-red-500 hover:bg-red-100"
                         onPress={() => handleDelete(emp)}
                         title="Löschen"
@@ -754,7 +818,6 @@ export default function EmployeesPage() {
                     classNames={INPUT_CLS}
                   />
 
-                  {/* Location Field - New */}
                   <Input
                     label="Standort (optional)"
                     placeholder="z.B. Basel, Zürich, Bern"
@@ -765,7 +828,6 @@ export default function EmployeesPage() {
                     startContent={<MapPin size={16} className="text-[#8A8A8A]" />}
                   />
 
-                  {/* Username Field */}
                   <Input
                     label="Benutzername (für Login)"
                     placeholder="z.B. anna.meier"
@@ -777,7 +839,6 @@ export default function EmployeesPage() {
                     startContent={<Key size={16} className="text-[#8A8A8A]" />}
                   />
 
-                  {/* Password Field - for new employees */}
                   {!editing && (
                     <Input
                       label="Passwort"
@@ -802,7 +863,6 @@ export default function EmployeesPage() {
                     />
                   )}
 
-                  {/* Password Reset for existing employees */}
                   {editing && (
                     <>
                       {!resetPassword ? (
@@ -983,6 +1043,154 @@ export default function EmployeesPage() {
                   startContent={!scheduleSaving && <Save size={14} />}
                 >
                   Speichern
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
+      {/* Vacation / Absence Modal */}
+      <Modal isOpen={isVacationOpen} onClose={onVacationClose} size="lg" placement="center" classNames={MODAL_CLS}>
+        <ModalContent>
+          {(close) => (
+            <>
+              <ModalHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center">
+                    <Plane size={16} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-[#1E1E1E]">Abwesenheiten</h2>
+                    <p className="text-xs text-[#8A8A8A]">{vacationEmployee?.name}</p>
+                  </div>
+                </div>
+              </ModalHeader>
+              <ModalBody>
+                <div className="space-y-5">
+                  {/* Existing vacations list */}
+                  <div>
+                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">Eingetragene Abwesenheiten</p>
+                    {vacationLoading ? (
+                      <div className="flex justify-center py-6">
+                        <div className="animate-spin rounded-full h-7 w-7 border-b-4 border-blue-400" />
+                      </div>
+                    ) : vacations.length === 0 ? (
+                      <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <CalendarDays size={24} className="mx-auto text-gray-300 mb-1" />
+                        <p className="text-sm text-[#8A8A8A]">Noch keine Abwesenheiten eingetragen</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {vacations.map((v) => (
+                          <div key={v.id} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-sm font-semibold text-[#1E1E1E]">
+                                  {new Date(v.startDate).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                  {' – '}
+                                  {new Date(v.endDate).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </span>
+                                <Chip
+                                  size="sm"
+                                  variant="flat"
+                                  className={
+                                    v.type === 'SickLeave' ? 'bg-red-100 text-red-700' :
+                                    v.type === 'PersonalDay' ? 'bg-purple-100 text-purple-700' :
+                                    'bg-blue-100 text-blue-700'
+                                  }
+                                >
+                                  {vacationTypeLabel(v.type)}
+                                </Chip>
+                              </div>
+                              {v.note && <p className="text-xs text-[#8A8A8A] mt-0.5 truncate">{v.note}</p>}
+                            </div>
+                            <Button
+                              isIconOnly size="sm" variant="flat"
+                              className="bg-red-50 text-red-400 hover:bg-red-100 shrink-0"
+                              isLoading={deletingVacationId === v.id}
+                              onPress={() => deleteVacation(v.id)}
+                            >
+                              <Trash2 size={13} />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add new vacation form */}
+                  <div className="border-t border-gray-100 pt-4">
+                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">Neue Abwesenheit eintragen</p>
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Von</label>
+                          <input
+                            type="date"
+                            value={vacationForm.startDate}
+                            onChange={(e) => setVacationForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Bis</label>
+                          <input
+                            type="date"
+                            value={vacationForm.endDate}
+                            min={vacationForm.startDate || undefined}
+                            onChange={(e) => setVacationForm(prev => ({ ...prev, endDate: e.target.value }))}
+                            className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Typ</label>
+                        <select
+                          value={vacationForm.type}
+                          onChange={(e) => setVacationForm(prev => ({ ...prev, type: e.target.value }))}
+                          className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                        >
+                          {VACATION_TYPES.map(t => (
+                            <option key={t.value} value={t.value}>{t.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Notiz (optional)</label>
+                        <input
+                          type="text"
+                          placeholder="z.B. Genehmigt am 01.05."
+                          value={vacationForm.note}
+                          onChange={(e) => setVacationForm(prev => ({ ...prev, note: e.target.value }))}
+                          className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                        />
+                      </div>
+
+                      {vacationError && (
+                        <p className="text-xs text-red-600 flex items-center gap-1">
+                          <AlertCircle size={12} /> {vacationError}
+                        </p>
+                      )}
+
+                      <Button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                        onPress={createVacation}
+                        isLoading={vacationSaving}
+                        isDisabled={!vacationForm.startDate || !vacationForm.endDate}
+                        startContent={!vacationSaving && <Plus size={15} />}
+                      >
+                        Abwesenheit eintragen
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="flat" className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
+                  Schließen
                 </Button>
               </ModalFooter>
             </>

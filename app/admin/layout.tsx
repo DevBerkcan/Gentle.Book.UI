@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { SupportWidget } from '@/components/admin/SupportWidget';
 import { AuthProvider, useAuth } from '@/lib/contexts/AuthContext';
-import { MessageCircle, Mail, LockKeyhole, Check, Zap, Users, Star, Shield, RefreshCw, ArrowRight } from 'lucide-react';
+import { MessageCircle, Mail, LockKeyhole, Check, Zap, Users, Star, Shield, RefreshCw, ArrowRight, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api/client';
 
@@ -123,6 +123,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [trialExpired,    setTrialExpired]    = useState(false);
   const [trialDaysLeft,   setTrialDaysLeft]   = useState<number | null>(null);
   const [showTrialBanner, setShowTrialBanner] = useState(false);
+  const [showOnboardingBanner, setShowOnboardingBanner] = useState(false);
 
   useEffect(() => {
     if (pathname === '/admin/login') return;
@@ -150,6 +151,21 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       .catch(() => {});
   }, [isAuthenticated, isTenantAdmin, pathname]);
 
+  // Check onboarding completion for new tenants
+  useEffect(() => {
+    if (!isAuthenticated || !isTenantAdmin) return;
+    if (pathname.startsWith('/admin/onboarding') || pathname === '/admin/login') return;
+
+    api.get('/admin/onboarding')
+      .then((res) => {
+        const data = res.data;
+        if (data && !data.isComplete && data.completedSteps < 2) {
+          setShowOnboardingBanner(true);
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated, isTenantAdmin, pathname]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white flex items-center justify-center">
@@ -168,6 +184,20 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <AdminNav />
         {/* Sidebar spacer: 230px on desktop, 56px (top bar) on mobile */}
         <div className="flex-1 min-w-0 md:ml-[230px] flex flex-col pt-14 md:pt-0 overflow-x-hidden">
+          {showOnboardingBanner && (
+            <div className="bg-[#017172] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+              <p className="text-white text-sm font-medium flex items-center gap-2">
+                <Rocket size={16} />
+                Richten Sie Ihr Studio in wenigen Schritten ein
+              </p>
+              <Link
+                href="/admin/onboarding"
+                className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                Setup-Wizard starten <ArrowRight size={12} />
+              </Link>
+            </div>
+          )}
           {showTrialBanner && trialDaysLeft !== null && !trialExpired && (
             <TrialBanner daysLeft={trialDaysLeft} />
           )}

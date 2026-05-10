@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
@@ -303,7 +304,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
       onStatusModalClose();
     } catch (err: any) {
-      alert("Fehler beim Aktualisieren: " + err.message);
+      toast.error("Fehler beim Aktualisieren: " + err.message);
     } finally {
       setUpdating(false);
     }
@@ -318,7 +319,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
       onDeleteModalClose();
     } catch (err: any) {
-      alert("Fehler beim Löschen: " + err.message);
+      toast.error("Fehler beim Löschen: " + err.message);
     } finally {
       setDeleting(false);
     }
@@ -450,7 +451,7 @@ export default function AdminBookingsPage() {
       setResendSuccess(true);
       setTimeout(() => setResendSuccess(false), 3000);
     } catch (err: any) {
-      alert("Fehler: " + (err.response?.data?.message || err.message));
+      toast.error("Fehler: " + (err.response?.data?.message || err.message));
     } finally {
       setResending(false);
     }
@@ -474,7 +475,7 @@ export default function AdminBookingsPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (err: any) {
-      alert('Export fehlgeschlagen: ' + err.message);
+      toast.error('Export fehlgeschlagen: ' + err.message);
     } finally {
       setExportLoading(false);
     }
