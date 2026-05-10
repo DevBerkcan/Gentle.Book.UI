@@ -21,6 +21,40 @@ import {
 } from "@/lib/api/booking";
 import { BookingEvents } from "@/lib/tracking";
 
+const FONT_QUERY: Record<string, string> = {
+  playfair:   "Playfair+Display:wght@400;600;700",
+  montserrat: "Montserrat:wght@400;600;700",
+  "dm-serif": "DM+Serif+Display",
+  josefin:    "Josefin+Sans:wght@400;600;700",
+};
+const FONT_FAMILY: Record<string, string> = {
+  inter:      "Inter, sans-serif",
+  playfair:   "'Playfair Display', serif",
+  montserrat: "'Montserrat', sans-serif",
+  "dm-serif": "'DM Serif Display', serif",
+  josefin:    "'Josefin Sans', sans-serif",
+};
+
+function hexToRgb(hex: string) {
+  const clean = hex.replace("#", "");
+  return {
+    r: parseInt(clean.slice(0, 2), 16),
+    g: parseInt(clean.slice(2, 4), 16),
+    b: parseInt(clean.slice(4, 6), 16),
+  };
+}
+function lighten(hex: string, amount = 0.85) {
+  try {
+    const { r, g, b } = hexToRgb(hex);
+    return `rgb(${Math.round(r+(255-r)*amount)},${Math.round(g+(255-g)*amount)},${Math.round(b+(255-b)*amount)})`;
+  } catch { return "#F5EDEB"; }
+}
+function getBorderRadius(style?: string) {
+  if (style === "pill")   return "9999px";
+  if (style === "square") return "4px";
+  return "16px";
+}
+
 const TOTAL_STEPS = 4;
 
 export default function TenantBookingPage() {
@@ -29,6 +63,11 @@ export default function TenantBookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [tenantName, setTenantName] = useState<string>('');
   const [primaryColor, setPrimaryColor] = useState<string>('#E8C7C3');
+  const [fontFamily, setFontFamily] = useState<string>('inter');
+  const [buttonStyle, setButtonStyle] = useState<string>('rounded');
+  const [bookingTheme, setBookingTheme] = useState<string>('light');
+  const [serviceLayout, setServiceLayout] = useState<string>('list');
+  const [showPrices, setShowPrices] = useState<boolean>(true);
 
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -60,6 +99,16 @@ export default function TenantBookingPage() {
         if (!info) return;
         setTenantName(info.companyName ?? info.name ?? slug);
         if (info.primaryColor) setPrimaryColor(info.primaryColor);
+        try {
+          const cfg = typeof info.linktreeConfig === 'string'
+            ? JSON.parse(info.linktreeConfig)
+            : info.linktreeConfig ?? {};
+          if (cfg.fontFamily) setFontFamily(cfg.fontFamily);
+          if (cfg.buttonStyle) setButtonStyle(cfg.buttonStyle);
+          if (cfg.bookingTheme) setBookingTheme(cfg.bookingTheme);
+          if (cfg.serviceLayout) setServiceLayout(cfg.serviceLayout);
+          if (cfg.showPrices !== undefined) setShowPrices(cfg.showPrices);
+        } catch {}
       })
       .catch(() => setTenantName(slug));
 
@@ -149,10 +198,25 @@ export default function TenantBookingPage() {
     );
   }
 
+  const bgStyle = (() => {
+    if (bookingTheme === 'dark') return { background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' };
+    if (bookingTheme === 'branded') return { background: `linear-gradient(135deg, ${lighten(primaryColor, 0.82)} 0%, ${lighten(primaryColor, 0.92)} 60%, #ffffff 100%)` };
+    return { background: `linear-gradient(135deg, ${lighten(primaryColor, 0.88)} 0%, ${lighten(primaryColor, 0.94)} 60%, #ffffff 100%)` };
+  })();
+  const isDark = bookingTheme === 'dark';
+  const fontStyle = { fontFamily: FONT_FAMILY[fontFamily] ?? FONT_FAMILY.inter };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] via-[#F5EDEB] to-white">
+    <div className="min-h-screen" style={{ ...bgStyle, ...fontStyle }}>
+      {FONT_QUERY[fontFamily] && (
+        // eslint-disable-next-line @next/next/no-head-element
+        <link
+          rel="stylesheet"
+          href={`https://fonts.googleapis.com/css2?family=${FONT_QUERY[fontFamily]}&display=swap`}
+        />
+      )}
       {/* Header */}
-      <div className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <div className={`border-b sticky top-0 z-10 backdrop-blur-sm ${isDark ? 'border-white/10 bg-black/40' : 'border-gray-100 bg-white/80'}`}>
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
           <button
             onClick={() => router.push(`/booking/${slug}`)}
@@ -160,10 +224,10 @@ export default function TenantBookingPage() {
             style={{ backgroundColor: primaryColor }}
           />
           <div>
-            <p className="font-bold text-gray-900 text-sm leading-tight">
+            <p className={`font-bold text-sm leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {tenantName || slug}
             </p>
-            <p className="text-xs text-gray-400">Online-Buchung</p>
+            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>Online-Buchung</p>
           </div>
         </div>
       </div>
@@ -183,14 +247,16 @@ export default function TenantBookingPage() {
                           ? "text-white"
                           : currentStep === step
                           ? "text-white ring-4 ring-opacity-20"
-                          : "bg-[#F0E6E4] text-[#8A8A8A]"
+                          : isDark ? "bg-white/10 text-white/40" : "bg-[#F0E6E4] text-[#8A8A8A]"
                       }`}
                       style={currentStep >= step ? { backgroundColor: primaryColor } : {}}
                     >
                       {currentStep > step ? <Check size={18} /> : step}
                     </div>
                     <p className={`text-[10px] sm:text-xs font-medium text-center leading-tight transition-colors ${
-                      currentStep === step ? 'text-gray-700' : currentStep > step ? 'text-gray-400' : 'text-gray-300'
+                      isDark
+                        ? currentStep === step ? 'text-white' : 'text-white/40'
+                        : currentStep === step ? 'text-gray-700' : currentStep > step ? 'text-gray-400' : 'text-gray-300'
                     }`}>
                       {stepLabels[step - 1]}
                     </p>
@@ -220,7 +286,14 @@ export default function TenantBookingPage() {
           )}
         </AnimatePresence>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 ring-1 ring-[#E8C7C3]/20">
+        <div
+          className={`shadow-2xl p-5 sm:p-8 ${isDark ? 'bg-white/10 backdrop-blur-md ring-1 ring-white/10' : 'bg-white ring-1'}`}
+          style={{
+            borderRadius: getBorderRadius(buttonStyle),
+            boxShadow: isDark ? '0 25px 60px rgba(0,0,0,0.5)' : undefined,
+            ...(isDark ? {} : { '--tw-ring-color': `${primaryColor}33` } as any),
+          }}
+        >
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>

@@ -28,7 +28,6 @@ interface LinktreeConfig {
   ctaText: string;
   bgPattern: BgPattern;
   buttonStyle: ButtonStyle;
-  // Phase 2:
   fontFamily?: FontFamily;
   ctaColor?: string;
   avatarShape?: "circle" | "rounded" | "square";
@@ -37,6 +36,11 @@ interface LinktreeConfig {
   animationSpeed?: AnimSpeed;
   showWelcome?: boolean;
   confetti?: boolean;
+  // Buchungsflow design
+  bookingTheme?: "light" | "dark" | "branded";
+  serviceLayout?: "list" | "cards";
+  showPrices?: boolean;
+  ctaBadge?: string;
 }
 
 const DEFAULT_CONFIG: LinktreeConfig = {
@@ -51,6 +55,10 @@ const DEFAULT_CONFIG: LinktreeConfig = {
   animationSpeed: "normal",
   showWelcome: false,
   confetti: false,
+  bookingTheme: "light",
+  serviceLayout: "list",
+  showPrices: true,
+  ctaBadge: "",
 };
 
 // ── Industry Presets ──────────────────────────────────────────────────────────
@@ -153,6 +161,10 @@ export default function AdminLinksPage() {
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Live preview
+  const [previewKey, setPreviewKey] = useState(0);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
   // Toast
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -201,6 +213,7 @@ export default function AdminLinksPage() {
           linktreeStyle: newTheme,
           linktreeConfig: JSON.stringify(newConfig),
         });
+        setPreviewKey((k) => k + 1);
         if (!silent) showToast("success", "Design gespeichert");
       } catch {
         showToast("error", "Design konnte nicht gespeichert werden");
@@ -316,8 +329,13 @@ export default function AdminLinksPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
+  const previewUrl = tenantSlug ? `/booking/${tenantSlug}` : null;
+
   return (
-    <div className="min-h-screen bg-[#F5EDEB] p-4 sm:p-6">
+    <div className="min-h-screen bg-[#F5EDEB] lg:flex lg:flex-row lg:overflow-hidden lg:h-screen">
+
+    {/* ── Left Editor Panel ── */}
+    <div className="lg:w-[500px] lg:flex-shrink-0 lg:overflow-y-auto lg:h-full p-4 sm:p-6">
 
       {/* ── Toast Stack ── */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
@@ -432,10 +450,20 @@ export default function AdminLinksPage() {
               </button>
             )}
             {tenantSlug && (
-              <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
-                <Eye size={15} /><span className="hidden sm:inline">Vorschau</span>
-              </a>
+              <>
+                {/* Mobile: open preview modal */}
+                <button
+                  onClick={() => setShowPreviewModal(true)}
+                  className="flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors lg:hidden"
+                >
+                  <Eye size={15} /><span className="hidden sm:inline">Vorschau</span>
+                </button>
+                {/* Desktop: open in new tab */}
+                <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
+                  className="hidden lg:flex items-center gap-1.5 text-sm bg-white text-[#1E1E1E] px-3 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">
+                  <ExternalLink size={15} /><span>Seite öffnen</span>
+                </a>
+              </>
             )}
             <button onClick={() => { setShowAddForm(true); setEditingId(null); }}
               className="flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors">
@@ -795,12 +823,98 @@ export default function AdminLinksPage() {
                     </div>
                   </div>
 
+                  {/* ── Buchungsflow gestalten ── */}
+                  <div className="pt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Buchungsflow gestalten</span>
+                    </div>
+
+                    {/* Buchungs-Hintergrund */}
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2">Buchungs-Hintergrund</p>
+                      <div className="flex gap-2">
+                        {([
+                          { v: "light",   label: "Hell",    preview: "bg-gradient-to-br from-pink-50 to-white" },
+                          { v: "dark",    label: "Dunkel",  preview: "bg-gradient-to-br from-[#1a1a2e] to-[#0f3460]" },
+                          { v: "branded", label: "Branded", preview: "" },
+                        ] as const).map(({ v, label, preview }) => (
+                          <button key={v} onClick={() => updateConfig("bookingTheme", v)}
+                            className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 border rounded-xl text-xs font-medium transition-all ${
+                              (config.bookingTheme ?? "light") === v
+                                ? "border-[#E8C7C3] ring-1 ring-[#E8C7C3] bg-[#F5EDEB] text-[#D8B0AC]"
+                                : "border-gray-100 text-gray-500 hover:border-gray-300 bg-white"
+                            }`}
+                          >
+                            <div
+                              className={`w-12 h-6 rounded-lg border border-white/40 ${preview}`}
+                              style={v === "branded" ? { background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}11)` } : {}}
+                            />
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Service-Layout */}
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-2">Service-Ansicht</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => updateConfig("serviceLayout", "list")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+                            (config.serviceLayout ?? "list") === "list"
+                              ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                              : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          <LayoutList size={14} /> Liste
+                        </button>
+                        <button onClick={() => updateConfig("serviceLayout", "cards")}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-medium transition-all ${
+                            (config.serviceLayout ?? "list") === "cards"
+                              ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                              : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                        >
+                          <LayoutGrid size={14} /> Karten
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preise anzeigen */}
+                    <div className="flex items-center justify-between py-2.5 px-3 bg-gray-50 rounded-xl mb-4">
+                      <div>
+                        <p className="text-xs font-semibold text-[#1E1E1E]">Preise anzeigen</p>
+                        <p className="text-[10px] text-gray-400">Im Service-Schritt des Buchungsflows</p>
+                      </div>
+                      <button onClick={() => updateConfig("showPrices", !(config.showPrices ?? true))}
+                        className={`relative w-10 h-5 rounded-full transition-colors ${(config.showPrices ?? true) ? "bg-[#E8C7C3]" : "bg-gray-200"}`}>
+                        <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${(config.showPrices ?? true) ? "translate-x-5" : "translate-x-0.5"}`} />
+                      </button>
+                    </div>
+
+                    {/* CTA Badge */}
+                    <div>
+                      <p className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                        <Sparkles size={12} /> Button-Badge (optional)
+                      </p>
+                      <input
+                        type="text"
+                        value={config.ctaBadge ?? ""}
+                        onChange={(e) => updateConfig("ctaBadge", e.target.value)}
+                        placeholder='z.B. "Kostenlos" oder "Neu"'
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8C7C3]/50"
+                      />
+                      <p className="text-[10px] text-gray-400 mt-1">Erscheint als kleines Badge am Buchungsbutton</p>
+                    </div>
+                  </div>
+
                   {/* Vorschau-Link */}
                   {tenantSlug && (
-                    <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs text-[#E8C7C3] hover:underline font-medium">
+                    <button onClick={() => setShowPreviewModal(true)}
+                      className="flex items-center gap-1.5 text-xs text-[#E8C7C3] hover:underline font-medium lg:hidden">
                       <Eye size={12} /> Vorschau öffnen
-                    </a>
+                    </button>
                   )}
                 </div>
               </motion.div>
@@ -963,6 +1077,71 @@ export default function AdminLinksPage() {
           </p>
         )}
       </div>
+    </div>{/* end editor panel */}
+
+    {/* ── Right Preview Panel (desktop only) ── */}
+    {previewUrl && (
+      <div className="hidden lg:flex flex-col flex-1 bg-gray-100 p-6 h-full overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Eye size={14} className="text-gray-500" />
+            <span className="text-sm font-semibold text-gray-600">Live-Vorschau</span>
+            {designSaving && <Loader2 size={11} className="animate-spin text-[#E8C7C3]" />}
+          </div>
+          <a href={previewUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+            <ExternalLink size={11} /> In neuem Tab öffnen
+          </a>
+        </div>
+        <div className="flex-1 rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+          <iframe
+            key={previewKey}
+            src={previewUrl}
+            className="w-full h-full"
+            style={{ border: 'none', minHeight: '100%' }}
+            title="Buchungsseite Vorschau"
+          />
+        </div>
+      </div>
+    )}
+
+    {/* ── Mobile Preview Modal ── */}
+    <AnimatePresence>
+      {showPreviewModal && previewUrl && (
+        <motion.div
+          key="preview-modal"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex flex-col bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setShowPreviewModal(false)}
+        >
+          <motion.div
+            initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="flex flex-col bg-white rounded-t-3xl overflow-hidden flex-1 mt-12"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+              <p className="font-semibold text-sm text-gray-800 flex items-center gap-2">
+                <Eye size={14} /> Live-Vorschau
+              </p>
+              <button onClick={() => setShowPreviewModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-xl transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <iframe
+                key={previewKey}
+                src={previewUrl}
+                className="w-full h-full"
+                style={{ border: 'none', height: '100%' }}
+                title="Buchungsseite Vorschau"
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
     </div>
   );
 }
