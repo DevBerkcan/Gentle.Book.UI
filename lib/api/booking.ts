@@ -53,6 +53,7 @@ export interface AvailabilityResponse {
   serviceId: string;
   serviceDuration: number;
   availableSlots: TimeSlot[];
+  message?: string | null;
 }
 
 export interface CustomerInfo {

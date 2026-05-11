@@ -363,7 +363,9 @@ export default function AdminLinksPage() {
   async function handleSaveEdit(id: string) {
     setSaving(true);
     try {
-      const res = await api.put(`/admin/links/${id}`, { title: editTitle.trim(), url: editUrl.trim(), iconType: editIcon });
+      const trimmed = editUrl.trim();
+      const normalizedUrl = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+      const res = await api.put(`/admin/links/${id}`, { title: editTitle.trim(), url: normalizedUrl, iconType: editIcon });
       setLinks((prev) => prev.map((l) => (l.id === id ? res.data : l)));
       setEditingId(null);
       showToast("success", "Link wurde gespeichert");

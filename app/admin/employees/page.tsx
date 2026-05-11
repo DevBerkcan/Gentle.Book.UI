@@ -206,7 +206,7 @@ export default function EmployeesPage() {
       await load();
       onClose();
     } catch (e: any) {
-      setModalErr(e.message);
+      setModalErr(e.response?.data?.message || e.message);
     } finally {
       setSubmitting(false);
     }

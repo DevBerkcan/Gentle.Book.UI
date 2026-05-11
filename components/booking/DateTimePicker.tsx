@@ -12,6 +12,7 @@ interface DateTimePickerProps {
   selectedDate: string | null;
   selectedTime: string | null;
   availableSlots: TimeSlot[];
+  noSlotsMessage?: string | null;
   onDateSelect: (date: string) => void;
   onTimeSelect: (time: string) => void;
   onLoadSlots: (date: string, employeeId?: string) => void;
@@ -26,6 +27,7 @@ export function DateTimePicker({
   selectedDate,
   selectedTime,
   availableSlots,
+  noSlotsMessage,
   onDateSelect,
   onTimeSelect,
   onLoadSlots,
@@ -178,7 +180,7 @@ export function DateTimePicker({
               </div>
             ) : availableSlots.length === 0 ? (
               <div className="text-center py-8 bg-[#F5EDEB] rounded-xl text-[#8A8A8A] text-sm">
-                Keine verfügbaren Termine an diesem Tag
+                {noSlotsMessage ?? "Keine verfügbaren Termine an diesem Tag"}
               </div>
             ) : (
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">

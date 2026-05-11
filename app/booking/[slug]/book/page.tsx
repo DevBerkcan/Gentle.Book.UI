@@ -75,6 +75,7 @@ export default function TenantBookingPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [noSlotsMessage, setNoSlotsMessage] = useState<string | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     firstName: "", lastName: "", email: "", phone: "",
@@ -126,6 +127,7 @@ export default function TenantBookingPage() {
     try {
       const data = await getAvailability(selectedService.id, date, empId, slug);
       setAvailableSlots(data.availableSlots);
+      setNoSlotsMessage(data.message ?? null);
       BookingEvents.dateSelected(date);
     } catch {
       setError("Fehler beim Laden der Verfügbarkeit");
@@ -325,6 +327,7 @@ export default function TenantBookingPage() {
                   selectedDate={selectedDate}
                   selectedTime={selectedTime}
                   availableSlots={availableSlots}
+                  noSlotsMessage={noSlotsMessage}
                   onDateSelect={setSelectedDate}
                   onTimeSelect={(t) => { setSelectedTime(t); BookingEvents.timeSlotSelected(t); }}
                   onLoadSlots={handleLoadSlots}
