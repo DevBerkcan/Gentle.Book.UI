@@ -179,6 +179,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
+  if (pathname === '/admin/reset-password') {
+    return <>{children}</>;
+  }
+  if (pathname === '/admin/forgot-password') {
+    return <>{children}</>;
+  }
 
   if (isAuthenticated) {
     return (
