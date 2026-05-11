@@ -127,6 +127,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (pathname === '/admin/login') return;
+    if (pathname === '/admin/reset-password') return;
+    if (pathname === '/admin/forgot-password') return;
     if (!loading && !isAuthenticated) {
       router.push('/admin/login');
     }
