@@ -292,6 +292,18 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
                   <Download size={14} /> iCal / Outlook
                 </button>
               </motion.div>
+
+              {/* Cancel link */}
+              <motion.div variants={slideUp} className="pt-1 text-center">
+                <p className="text-xs text-gray-400 mb-1">Pläne geändert?</p>
+                <Link
+                  href={`/my-bookings?email=${encodeURIComponent(booking.customer.email)}`}
+                  className="text-xs font-medium underline-offset-2 hover:underline transition-opacity hover:opacity-70"
+                  style={{ color: withAlpha(primary, 0.6) }}
+                >
+                  Buchung stornieren →
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
 

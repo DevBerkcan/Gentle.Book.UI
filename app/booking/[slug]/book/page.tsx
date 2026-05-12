@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
 import { ServiceSelector } from "@/components/booking/ServiceSelector";
@@ -162,7 +162,10 @@ export default function TenantBookingPage() {
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
-        !customerInfo.email.trim() || !customerInfo.phone.trim()) return;
+        !customerInfo.email.trim() || !customerInfo.phone.trim()) {
+      setError("Bitte füllen Sie alle Pflichtfelder aus.");
+      return;
+    }
     if (!emailRegex.test(customerInfo.email.trim())) {
       setError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
       return;
@@ -182,6 +185,7 @@ export default function TenantBookingPage() {
       router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
     } catch (err: any) {
       setError(err.message || "Fehler beim Buchen. Bitte versuchen Sie es erneut.");
+    } finally {
       setSubmitting(false);
     }
   };
@@ -222,10 +226,13 @@ export default function TenantBookingPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
           <button
             onClick={() => router.push(`/booking/${slug}`)}
-            className="w-8 h-8 rounded-full flex-shrink-0"
-            style={{ backgroundColor: primaryColor }}
-          />
-          <div>
+            className={`flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70 flex-shrink-0 ${isDark ? 'text-white/70' : 'text-gray-500'}`}
+            title={`Zurück zu ${tenantName || slug}`}
+          >
+            <ArrowLeft size={15} />
+            <span className="hidden sm:inline">Zurück</span>
+          </button>
+          <div className="flex-1">
             <p className={`font-bold text-sm leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {tenantName || slug}
             </p>

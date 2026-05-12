@@ -4,8 +4,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Calendar, Clock, TrendingUp, TrendingDown, Users,
-  Euro, Copy, Check, ExternalLink, Sparkles,
+  Calendar, CalendarDays, Clock, TrendingUp, TrendingDown, Users,
+  Euro, Copy, Check, ExternalLink, Sparkles, Ban,
   ArrowUpRight, ChevronRight, CheckCircle2, Circle, X, BarChart2, AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
@@ -368,6 +368,16 @@ export default function AdminDashboardPage() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
           >
             <Users size={15} className="text-purple-500" /> Kunden
+          </Link>
+          <Link href="/admin/calendar"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
+          >
+            <CalendarDays size={15} className="text-blue-500" /> Kalender
+          </Link>
+          <Link href="/admin/blocked-slots"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
+          >
+            <Ban size={15} className="text-red-400" /> Sperrzeiten
           </Link>
         </motion.div>
 
