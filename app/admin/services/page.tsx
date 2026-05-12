@@ -259,12 +259,13 @@ export default function AdminServicesPage() {
         try {
             if (!selectedItem || !('categoryId' in selectedItem)) return;
             setSubmitting(true);
+            setModalError(null);
             await deleteAdminService(selectedItem.id);
             setServices(services.filter(s => s.id !== selectedItem.id));
             onDeleteModalClose();
             setSelectedItem(null);
         } catch (err: any) {
-            setError(err.message);
+            setModalError(err.message);
         } finally {
             setSubmitting(false);
         }
@@ -1221,10 +1222,12 @@ export default function AdminServicesPage() {
                     isOpen={isDeleteModalOpen}
                     selectedItem={selectedItem}
                     submitting={submitting}
+                    deleteError={modalError}
                     onConfirm={'categoryId' in (selectedItem || {}) ? handleDeleteService : handleDeleteCategory}
                     onClose={() => {
                         onDeleteModalClose();
                         setSelectedItem(null);
+                        setModalError(null);
                     }}
                 />
             </div>
@@ -2016,12 +2019,14 @@ function DeleteModal({
     isOpen,
     selectedItem,
     submitting,
+    deleteError,
     onConfirm,
     onClose
 }: {
     isOpen: boolean;
     selectedItem: AdminService | AdminServiceCategory | null;
     submitting: boolean;
+    deleteError?: string | null;
     onConfirm: () => void;
     onClose: () => void;
 }) {
@@ -2137,6 +2142,16 @@ function DeleteModal({
                                                 <strong>Auswirkung:</strong> Diese Kategorie enthält <strong>{servicesCount} Services</strong>.
                                                 Sie können die Kategorie erst löschen, wenn alle Services entfernt oder einer anderen Kategorie zugewiesen wurden.
                                             </span>
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Backend error (e.g. future bookings exist) */}
+                                {deleteError && (
+                                    <div className="bg-red-50 p-4 rounded-xl border border-red-300">
+                                        <p className="text-sm text-red-700 flex items-start gap-2">
+                                            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                                            <span>{deleteError}</span>
                                         </p>
                                     </div>
                                 )}

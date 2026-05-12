@@ -29,6 +29,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+function showSessionExpiredToast(redirect: () => void) {
+  const toast = document.createElement('div');
+  toast.textContent = 'Ihre Sitzung ist abgelaufen. Sie werden zur Anmeldung weitergeleitet...';
+  toast.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#1E1E1E;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.remove(); redirect(); }, 2500);
+}
+
 // Response: handle 401/402 globally.
 api.interceptors.response.use(
   (response) => response,
@@ -43,14 +51,14 @@ api.interceptors.response.use(
         localStorage.removeItem('superadmin_token');
         localStorage.removeItem('superadmin_user');
         if (!path.includes('/superadmin/login')) {
-          window.location.href = '/superadmin/login';
+          showSessionExpiredToast(() => { window.location.href = '/superadmin/login'; });
         }
       } else {
         localStorage.removeItem('access_token');
         localStorage.removeItem('auth_user');
         localStorage.removeItem('employee');
         if (!path.includes('/admin/login')) {
-          window.location.href = '/admin/login';
+          showSessionExpiredToast(() => { window.location.href = '/admin/login'; });
         }
       }
     }

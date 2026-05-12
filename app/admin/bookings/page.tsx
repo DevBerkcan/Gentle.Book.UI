@@ -401,6 +401,10 @@ export default function AdminBookingsPage() {
       setSuccess(true);
       await loadBookings();
 
+      if (!booking.confirmationSent && booking.customer?.email) {
+        toast.warning("Buchung erstellt, aber Bestätigungs-E-Mail konnte nicht gesendet werden.");
+      }
+
       setTimeout(() => {
         onManualBookingModalClose();
         resetManualBookingForm();
@@ -425,6 +429,10 @@ export default function AdminBookingsPage() {
       setCreatedBooking(booking);
       setSuccess(true);
       await loadBookings();
+
+      if (!booking.confirmationSent && booking.customer?.email) {
+        toast.warning("Buchung erstellt, aber Bestätigungs-E-Mail konnte nicht gesendet werden.");
+      }
 
       // Close the conflict modal
       setShowEmailConflictModal(false);
@@ -540,7 +548,10 @@ export default function AdminBookingsPage() {
       <div className="text-sm text-[#8A8A8A] space-y-1 mb-3">
         <div>{new Date(booking.bookingDate).toLocaleDateString("de-DE")} · {booking.startTime} – {booking.endTime}</div>
         <div>{booking.serviceName}</div>
-        {booking.customerEmail && <div className="break-all">{booking.customerEmail}</div>}
+        {booking.customerEmail
+          ? <div className="break-all">{booking.customerEmail}</div>
+          : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full w-fit"><Mail size={11} />kein E-Mail</div>
+        }
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-[#E8C7C3]/20">
         <div className="font-bold text-[#017172]">{formatPrice(booking.price, booking.currency)}</div>
@@ -1013,7 +1024,10 @@ export default function AdminBookingsPage() {
                           </td>
                           <td className="px-5 py-4">
                             <div className="font-semibold text-[#1E1E1E] text-sm">{booking.customerName}</div>
-                            <div className="text-xs text-[#8A8A8A] break-all">{booking.customerEmail}</div>
+                            {booking.customerEmail
+                              ? <div className="text-xs text-[#8A8A8A] break-all">{booking.customerEmail}</div>
+                              : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full w-fit mt-0.5"><Mail size={10} />kein E-Mail</div>
+                            }
                             <div className="text-xs text-[#8A8A8A]">{booking.customerPhone}</div>
                           </td>
                           <td className="px-5 py-4">
