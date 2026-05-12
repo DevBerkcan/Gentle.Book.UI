@@ -8,9 +8,16 @@ import {
   Globe, Phone, Mail, ExternalLink, Loader2, ChevronRight, Sparkles,
 } from "lucide-react";
 import { getTenantInfo, getTenantLinks, type TenantLink } from "@/lib/api/booking";
-import { SoftTemplate } from "./templates/soft";
-import { HeroTemplate } from "./templates/hero";
-import { NeonTemplate } from "./templates/neon";
+import { SoftTemplate }      from "./templates/soft";
+import { HeroTemplate }      from "./templates/hero";
+import { NeonTemplate }      from "./templates/neon";
+import { MagazineTemplate }  from "./templates/magazine";
+import { SplitTemplate }     from "./templates/split";
+import { CorporateTemplate } from "./templates/corporate";
+import { TattooTemplate }    from "./templates/tattoo";
+import { BarbershopTemplate } from "./templates/barbershop";
+import { BeautyTemplate }    from "./templates/beauty";
+import { OrganicTemplate }   from "./templates/organic";
 
 // ── Icon Map ──────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -349,9 +356,16 @@ export default function TenantLinktreePage() {
     links: links as any,
     handleCtaClick, showFloating,
   };
-  if (cfg.pageTemplate === "soft")    return <SoftTemplate {...templateProps} />;
-  if (cfg.pageTemplate === "hero")    return <HeroTemplate {...templateProps} />;
-  if (cfg.pageTemplate === "neon")    return <NeonTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "soft")       return <SoftTemplate      {...templateProps} />;
+  if (cfg.pageTemplate === "hero")       return <HeroTemplate      {...templateProps} />;
+  if (cfg.pageTemplate === "neon")       return <NeonTemplate      {...templateProps} />;
+  if (cfg.pageTemplate === "magazine")   return <MagazineTemplate  {...templateProps} />;
+  if (cfg.pageTemplate === "split")      return <SplitTemplate     {...templateProps} />;
+  if (cfg.pageTemplate === "corporate")  return <CorporateTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "tattoo")     return <TattooTemplate    {...templateProps} />;
+  if (cfg.pageTemplate === "barbershop") return <BarbershopTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "beauty")     return <BeautyTemplate    {...templateProps} />;
+  if (cfg.pageTemplate === "organic")    return <OrganicTemplate   {...templateProps} />;
 
   return (
     <div className="min-h-screen" style={{ background: t.bg, fontFamily }}>

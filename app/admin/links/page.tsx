@@ -42,7 +42,7 @@ interface LinktreeConfig {
   showPrices?: boolean;
   ctaBadge?: string;
   // Templates
-  pageTemplate?: "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate" | "organic";
+  pageTemplate?: "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate" | "organic" | "tattoo" | "barbershop" | "beauty";
   colorScheme?: string;
 }
 
@@ -102,15 +102,19 @@ const PAGE_TEMPLATES: {
   key: string; name: string; desc: string;
   plan: "starter" | "pro" | "business";
   emoji: string;
+  industry?: string;
 }[] = [
-  { key: "classic",   name: "Classic",   desc: "Zentriert, zeitlos",    plan: "starter",  emoji: "⭐" },
-  { key: "soft",      name: "Soft",      desc: "Pastell, weich",        plan: "starter",  emoji: "🌸" },
-  { key: "hero",      name: "Hero",      desc: "Großes Header-Banner",  plan: "starter",  emoji: "🦸" },
-  { key: "neon",      name: "Neon",      desc: "Dunkel & leuchtend",    plan: "pro",      emoji: "⚡" },
-  { key: "magazine",  name: "Magazine",  desc: "Redaktionell, kühl",    plan: "pro",      emoji: "📰" },
-  { key: "split",     name: "Split",     desc: "Zweispaltig, modern",   plan: "pro",      emoji: "⬛" },
-  { key: "corporate", name: "Corporate", desc: "Sachlich, professionell",plan: "business", emoji: "🏢" },
-  { key: "organic",   name: "Organic",   desc: "Fließend, organisch",   plan: "business", emoji: "🌿" },
+  { key: "classic",    name: "Classic",    desc: "Zentriert, zeitlos",      plan: "starter",  emoji: "⭐" },
+  { key: "soft",       name: "Soft",       desc: "Pastell, weich",          plan: "starter",  emoji: "🌸" },
+  { key: "hero",       name: "Hero",       desc: "Großes Header-Banner",    plan: "starter",  emoji: "🦸" },
+  { key: "neon",       name: "Neon",       desc: "Dunkel & leuchtend",      plan: "pro",      emoji: "⚡" },
+  { key: "magazine",   name: "Magazine",   desc: "Redaktionell, kühl",      plan: "pro",      emoji: "📰" },
+  { key: "split",      name: "Split",      desc: "Zweispaltig, modern",     plan: "pro",      emoji: "⬛" },
+  { key: "corporate",  name: "Corporate",  desc: "Clean, professionell",    plan: "business", emoji: "🏢" },
+  { key: "organic",    name: "Organic",    desc: "Fließend, natürlich",     plan: "starter",  emoji: "🌿", industry: "Wellness" },
+  { key: "tattoo",     name: "Tattoo",     desc: "Dark & edgy",             plan: "starter",  emoji: "🎨", industry: "Tattoo"   },
+  { key: "barbershop", name: "Barbershop", desc: "Vintage & warm",          plan: "starter",  emoji: "🪒", industry: "Barbershop"},
+  { key: "beauty",     name: "Beauty",     desc: "Elegant & luxuriös",      plan: "starter",  emoji: "💄", industry: "Beauty"   },
 ];
 
 const PLAN_ORDER = { starter: 0, pro: 1, business: 2 };
@@ -587,6 +591,11 @@ export default function AdminLinksPage() {
                             <span className="text-xl leading-none">{tpl.emoji}</span>
                             <span className="text-[10px] font-semibold text-gray-700 leading-tight">{tpl.name}</span>
                             <span className="text-[9px] text-gray-400 leading-tight">{tpl.desc}</span>
+                            {tpl.industry && !isLocked && (
+                              <span className="text-[8px] font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full leading-none">
+                                {tpl.industry}
+                              </span>
+                            )}
                             {isLocked && (
                               <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold bg-gray-800 text-white px-1.5 py-0.5 rounded-full leading-none">
                                 {tpl.plan === "pro" ? "PRO" : "BIZ"}
