@@ -1235,7 +1235,7 @@ export default function AdminLinksPage() {
         <div className="flex-1 rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
           <iframe
             key={previewKey}
-            src={previewUrl}
+            src={previewUrl ? `${previewUrl}?v=${previewKey}` : undefined}
             className="w-full h-full"
             style={{ border: 'none', minHeight: '100%' }}
             title="Buchungsseite Vorschau"
@@ -1271,7 +1271,7 @@ export default function AdminLinksPage() {
             <div className="flex-1 overflow-hidden">
               <iframe
                 key={previewKey}
-                src={previewUrl}
+                src={previewUrl ? `${previewUrl}?v=${previewKey}` : undefined}
                 className="w-full h-full"
                 style={{ border: 'none', height: '100%' }}
                 title="Buchungsseite Vorschau"

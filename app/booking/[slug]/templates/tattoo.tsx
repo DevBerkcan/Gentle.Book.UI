@@ -36,9 +36,13 @@ export function TattooTemplate({
         }}
       />
 
-      {/* Accent glow top */}
-      <div className="fixed top-0 left-0 right-0 h-1 pointer-events-none"
-        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`, boxShadow: `0 0 30px ${withAlpha(accent, 0.8)}` }} />
+      {/* Animated accent glow top */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 pointer-events-none"
+        animate={{ opacity: [0.7, 1, 0.7] }}
+        transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`, boxShadow: `0 0 30px ${withAlpha(accent, 0.8)}` }}
+      />
 
       <div className="relative max-w-sm mx-auto px-5 py-14 pb-20 flex flex-col items-center gap-6">
 
@@ -48,9 +52,19 @@ export function TattooTemplate({
           transition={{ duration: 0.4 }}
           className="w-full flex flex-col items-center gap-4 text-center"
         >
-          {/* Avatar — square with accent border */}
-          <div className="relative">
-            <div className="absolute -inset-0.5" style={{ background: accent }} />
+          {/* Avatar — ink-drop entrance + pulsing glow ring */}
+          <motion.div
+            className="relative"
+            initial={{ scale: 0, filter: "drop-shadow(0 0 0px transparent)" }}
+            animate={{ scale: 1, filter: `drop-shadow(0 0 12px ${withAlpha(accent, 0.7)})` }}
+            transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.1 }}
+          >
+            <motion.div
+              className="absolute -inset-0.5"
+              animate={{ boxShadow: [`0 0 0px ${withAlpha(accent, 0)}`, `0 0 18px ${withAlpha(accent, 0.9)}`, `0 0 0px ${withAlpha(accent, 0)}`] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              style={{ background: accent }}
+            />
             {logoSrc ? (
               <img src={logoSrc} alt={tenantName}
                 className="relative w-24 h-24 object-cover"
@@ -64,12 +78,18 @@ export function TattooTemplate({
                 }
               </div>
             )}
-          </div>
+          </motion.div>
 
           <div>
-            <h1 className="text-3xl font-bold uppercase tracking-widest text-white" style={{ fontFamily, letterSpacing: "0.2em" }}>
+            <motion.h1
+              className="text-3xl font-bold uppercase tracking-widest text-white"
+              style={{ fontFamily, letterSpacing: "0.2em" }}
+              initial={{ opacity: 0, letterSpacing: "0.5em" }}
+              animate={{ opacity: 1, letterSpacing: "0.2em" }}
+              transition={{ duration: 0.7, delay: 0.25, ease: "easeOut" }}
+            >
               {tenantName}
-            </h1>
+            </motion.h1>
             {tagline && (
               <p className="text-sm mt-1 tracking-wider uppercase" style={{ color: withAlpha(accent, 0.7), letterSpacing: "0.1em" }}>
                 {tagline}
@@ -118,9 +138,12 @@ export function TattooTemplate({
             </div>
           </motion.div>
 
-          {/* Custom links — outline style */}
+          {/* Custom links — outline style, slide from left */}
           {links.map((link) => (
-            <motion.div key={link.id} variants={item}>
+            <motion.div key={link.id} variants={item}
+              initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
+              whileHover={{ x: 4, borderColor: withAlpha(accent, 0.7) } as any}
+            >
               <a href={link.url} target="_blank" rel="noopener noreferrer"
                 className="group w-full flex items-center gap-4 px-5 py-3.5 transition-all active:scale-[0.97] border"
                 style={{

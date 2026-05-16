@@ -169,7 +169,7 @@ export async function getServices(tenantSlug?: string): Promise<Service[]> {
 export async function getTenantInfo(tenantSlug: string): Promise<{
   name: string; companyName?: string; primaryColor?: string; tagline?: string; welcomeMessage?: string; logoUrl?: string; linktreeStyle?: string; industryType?: string; linktreeConfig?: string;
 }> {
-  const res = await fetch(`${API_BASE_URL}/booking/${tenantSlug}/info`);
+  const res = await fetch(`${API_BASE_URL}/booking/${tenantSlug}/info`, { cache: 'no-store' });
   if (!res.ok) return { name: tenantSlug };
   return res.json();
 }

@@ -25,8 +25,16 @@ export function CorporateTemplate({
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: sansFam }}>
 
-      {/* Top accent line */}
-      <div className="h-1 w-full" style={{ background: accent }} />
+      {/* Top accent line — draws in on load */}
+      <div className="h-1 w-full overflow-hidden" style={{ background: withAlpha(accent, 0.12) }}>
+        <motion.div
+          className="h-full"
+          style={{ background: accent }}
+          initial={{ width: "0%" }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 1.8, ease: "easeOut" }}
+        />
+      </div>
 
       {/* Header */}
       <div className="bg-white border-b border-gray-100">
@@ -47,12 +55,24 @@ export function CorporateTemplate({
           )}
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-semibold uppercase tracking-widest truncate"
-              style={{ color: accent, letterSpacing: "0.12em" }}>
+            <motion.h1
+              className="text-base font-semibold uppercase tracking-widest truncate"
+              style={{ color: accent, letterSpacing: "0.12em" }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               {tenantName}
-            </h1>
+            </motion.h1>
             {tagline && (
-              <p className="text-xs text-gray-400 mt-0.5 truncate">{tagline}</p>
+              <motion.p
+                className="text-xs text-gray-400 mt-0.5 truncate"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+              >
+                {tagline}
+              </motion.p>
             )}
           </div>
         </div>
@@ -118,7 +138,7 @@ export function CorporateTemplate({
 
           {/* Custom links */}
           {links.map((link) => (
-            <motion.div key={link.id} variants={item}>
+            <motion.div key={link.id} variants={item} whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}>
               <a href={link.url} target="_blank" rel="noopener noreferrer"
                 className="group w-full flex items-center gap-3 px-5 py-3.5 bg-white transition-all active:scale-[0.98] hover:shadow-md"
                 style={{

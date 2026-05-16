@@ -27,11 +27,14 @@ export function BeautyTemplate({
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   const sparklePositions = [
-    { top: "8%",  left: "10%", size: 12, delay: 0 },
-    { top: "15%", right: "8%", size: 8,  delay: 0.5 },
-    { top: "45%", left: "5%",  size: 10, delay: 1 },
-    { top: "70%", right: "6%", size: 14, delay: 0.3 },
-    { top: "85%", left: "12%", size: 8,  delay: 0.8 },
+    { top: "6%",  left: "8%",  size: 12, delay: 0 },
+    { top: "13%", right: "7%", size: 8,  delay: 0.5 },
+    { top: "28%", left: "4%",  size: 10, delay: 1.1 },
+    { top: "38%", right: "5%", size: 7,  delay: 0.7 },
+    { top: "55%", left: "6%",  size: 9,  delay: 0.2 },
+    { top: "65%", right: "9%", size: 14, delay: 0.9 },
+    { top: "78%", left: "11%", size: 8,  delay: 0.4 },
+    { top: "90%", right: "7%", size: 11, delay: 1.3 },
   ];
 
   return (
@@ -74,23 +77,36 @@ export function BeautyTemplate({
             boxShadow: `0 4px 40px ${withAlpha(rose, 0.12)}, 0 0 0 1px ${withAlpha(gold, 0.06)}`,
           }}
         >
-          {/* Avatar with gold ring */}
+          {/* Avatar with gold ring + shimmer */}
           <div className="relative mb-1">
-            <div className="absolute -inset-2 rounded-full opacity-80"
-              style={{ background: `conic-gradient(${gold}, ${withAlpha(gold, 0.4)}, ${rose}, ${gold})` }} />
+            <motion.div
+              className="absolute -inset-2 rounded-full opacity-80"
+              style={{ background: `conic-gradient(${gold}, ${withAlpha(gold, 0.4)}, ${rose}, ${gold})` }}
+              animate={{ rotate: [0, 360] }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+            />
             <div className="absolute -inset-1 rounded-full bg-white" />
-            {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
-                className="relative w-24 h-24 object-cover rounded-full border-2 border-white" />
-            ) : (
-              <div className="relative w-24 h-24 rounded-full flex items-center justify-center border-2 border-white"
-                style={{ background: `linear-gradient(135deg, ${rose}, ${withAlpha(rose, 0.6)})` }}>
-                {emoji
-                  ? <span className="text-4xl">{emoji}</span>
-                  : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
-                }
-              </div>
-            )}
+            <div className="relative overflow-hidden rounded-full">
+              {logoSrc ? (
+                <img src={logoSrc} alt={tenantName}
+                  className="w-24 h-24 object-cover rounded-full border-2 border-white" />
+              ) : (
+                <div className="w-24 h-24 rounded-full flex items-center justify-center border-2 border-white"
+                  style={{ background: `linear-gradient(135deg, ${rose}, ${withAlpha(rose, 0.6)})` }}>
+                  {emoji
+                    ? <span className="text-4xl">{emoji}</span>
+                    : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
+                  }
+                </div>
+              )}
+              {/* Shimmer wave */}
+              <motion.div
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%)", backgroundSize: "200% 100%" }}
+                animate={{ backgroundPosition: ["-100% 0%", "200% 0%"] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", repeatDelay: 1 }}
+              />
+            </div>
           </div>
 
           {/* Name */}

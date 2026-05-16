@@ -51,11 +51,32 @@ export function BarbershopTemplate({
       <div className="relative" style={{ background: darkBrown }}>
         <div className="max-w-sm mx-auto px-5 py-3 flex items-center justify-center gap-2">
           <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.4) }} />
-          <Scissors size={12} style={{ color: gold }} />
+          {/* Animated barber pole */}
+          <div className="relative w-5 h-5 rounded-sm overflow-hidden flex-shrink-0" style={{ border: `1px solid ${withAlpha(gold, 0.5)}` }}>
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, ${accent} 0px, ${accent} 4px, white 4px, white 8px, #1a3a6b 8px, #1a3a6b 12px, white 12px, white 16px)`,
+                backgroundSize: "24px 24px",
+              }}
+              animate={{ backgroundPosition: ["0% 0%", "0% 100%"] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            />
+          </div>
           <span className="text-[10px] uppercase tracking-[0.3em] font-semibold" style={{ color: gold }}>
             Est. 2024
           </span>
-          <Scissors size={12} style={{ color: gold, transform: "scaleX(-1)" }} />
+          <div className="relative w-5 h-5 rounded-sm overflow-hidden flex-shrink-0" style={{ border: `1px solid ${withAlpha(gold, 0.5)}` }}>
+            <motion.div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `repeating-linear-gradient(45deg, ${accent} 0px, ${accent} 4px, white 4px, white 8px, #1a3a6b 8px, #1a3a6b 12px, white 12px, white 16px)`,
+                backgroundSize: "24px 24px",
+              }}
+              animate={{ backgroundPosition: ["0% 0%", "0% 100%"] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            />
+          </div>
           <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.4) }} />
         </div>
       </div>
@@ -86,16 +107,22 @@ export function BarbershopTemplate({
             )}
           </div>
 
-          {/* Name with ornament */}
+          {/* Name with ornament — stamp entrance */}
           <div>
             <div className="flex items-center justify-center gap-2 mb-1">
               <div className="h-px w-8" style={{ background: withAlpha(gold, 0.5) }} />
               <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: withAlpha(accent, 0.5) }}>The</span>
               <div className="h-px w-8" style={{ background: withAlpha(gold, 0.5) }} />
             </div>
-            <h1 className="text-3xl font-black text-center" style={{ color: darkBrown, fontFamily, lineHeight: 1.1 }}>
+            <motion.h1
+              className="text-3xl font-black text-center"
+              style={{ color: darkBrown, fontFamily, lineHeight: 1.1 }}
+              initial={{ scale: 1.3, rotate: 2, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+            >
               {tenantName}
-            </h1>
+            </motion.h1>
             <div className="flex items-center justify-center gap-2 mt-1">
               <div className="h-px w-12" style={{ background: withAlpha(gold, 0.5) }} />
               <Sparkles size={10} style={{ color: gold }} />
@@ -149,7 +176,7 @@ export function BarbershopTemplate({
 
           {/* Custom links */}
           {links.map((link) => (
-            <motion.div key={link.id} variants={item}>
+            <motion.div key={link.id} variants={item} whileHover={{ scale: 1.01, x: 4 }}>
               <a href={link.url} target="_blank" rel="noopener noreferrer"
                 className="group w-full flex items-center gap-4 px-5 py-3.5 transition-all active:scale-[0.97]"
                 style={{

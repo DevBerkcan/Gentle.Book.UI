@@ -29,14 +29,26 @@ export function OrganicTemplate({
     <div className="min-h-screen" style={{ background: beige, fontFamily }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
 
-      {/* Organic blob shapes */}
+      {/* Organic blob shapes — breathing animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
-        <div className="absolute -top-20 -right-20 w-72 h-72 opacity-20 blur-2xl"
-          style={{ background: green, borderRadius: "60% 40% 70% 30% / 50% 60% 40% 50%" }} />
-        <div className="absolute top-1/3 -left-16 w-56 h-56 opacity-15 blur-2xl"
-          style={{ background: green, borderRadius: "40% 60% 30% 70% / 60% 40% 60% 40%" }} />
-        <div className="absolute -bottom-12 right-1/4 w-48 h-48 opacity-10 blur-2xl"
-          style={{ background: green, borderRadius: "70% 30% 50% 50% / 30% 70% 50% 50%" }} />
+        <motion.div
+          className="absolute -top-20 -right-20 w-72 h-72 opacity-20 blur-2xl"
+          style={{ background: green }}
+          animate={{ borderRadius: ["60% 40% 70% 30% / 50% 60% 40% 50%", "40% 60% 30% 70% / 60% 40% 60% 40%", "60% 40% 70% 30% / 50% 60% 40% 50%"] }}
+          transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/3 -left-16 w-56 h-56 opacity-15 blur-2xl"
+          style={{ background: green }}
+          animate={{ borderRadius: ["40% 60% 30% 70% / 60% 40% 60% 40%", "70% 30% 60% 40% / 40% 60% 40% 60%", "40% 60% 30% 70% / 60% 40% 60% 40%"] }}
+          transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
+        />
+        <motion.div
+          className="absolute -bottom-12 right-1/4 w-48 h-48 opacity-10 blur-2xl"
+          style={{ background: green }}
+          animate={{ borderRadius: ["70% 30% 50% 50% / 30% 70% 50% 50%", "50% 50% 30% 70% / 70% 30% 70% 30%", "70% 30% 50% 50% / 30% 70% 50% 50%"] }}
+          transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 2 }}
+        />
       </div>
 
       {/* Wave header */}
@@ -112,7 +124,9 @@ export function OrganicTemplate({
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-md transition-all active:scale-[0.97]"
                 style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.3)}` }}
               >
-                <Leaf size={18} className="flex-shrink-0" />
+                <motion.span animate={{ rotate: [0, 8, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
+                  <Leaf size={18} />
+                </motion.span>
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
                 <motion.span animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}>
                   <ChevronRight size={16} className="opacity-70" />
@@ -123,7 +137,9 @@ export function OrganicTemplate({
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-md transition-all active:scale-[0.97]"
                 style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.3)}`, display: "flex" }}
               >
-                <Leaf size={18} className="flex-shrink-0" />
+                <motion.span animate={{ rotate: [0, 8, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
+                  <Leaf size={18} />
+                </motion.span>
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
                 <motion.span animate={{ x: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}>
                   <ChevronRight size={16} className="opacity-70" />

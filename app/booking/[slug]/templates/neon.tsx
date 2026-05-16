@@ -43,6 +43,13 @@ export function NeonTemplate({
           style={{ background: primaryColor }} />
         <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full opacity-10 blur-3xl"
           style={{ background: primaryColor }} />
+        {/* CRT Scan-line */}
+        <motion.div
+          className="absolute left-0 right-0 h-20 pointer-events-none"
+          style={{ background: `linear-gradient(to bottom, transparent, ${withAlpha(primaryColor, 0.04)}, transparent)` }}
+          animate={{ top: ["-8%", "108%"] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "linear", repeatDelay: 1.5 }}
+        />
       </div>
 
       <div className="relative max-w-md mx-auto px-5 py-14 pb-20 flex flex-col items-center gap-6">
@@ -53,11 +60,19 @@ export function NeonTemplate({
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col items-center gap-3 text-center"
         >
-          {/* Avatar with neon ring */}
+          {/* Avatar with pulsing neon ring */}
           <div className="relative">
-            <div className="absolute inset-0 rounded-full blur-lg opacity-60"
-              style={{ background: primaryColor, transform: "scale(1.3)" }} />
-            <div className="absolute -inset-1 rounded-full" style={{ boxShadow: neonGlow }} />
+            <motion.div
+              className="absolute inset-0 rounded-full blur-lg"
+              style={{ background: primaryColor, transform: "scale(1.3)" }}
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute -inset-1 rounded-full"
+              animate={{ boxShadow: [`0 0 16px ${withAlpha(primaryColor, 0.5)}, 0 0 40px ${withAlpha(primaryColor, 0.2)}`, `0 0 28px ${withAlpha(primaryColor, 0.9)}, 0 0 70px ${withAlpha(primaryColor, 0.4)}`, `0 0 16px ${withAlpha(primaryColor, 0.5)}, 0 0 40px ${withAlpha(primaryColor, 0.2)}`] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            />
             {logoSrc ? (
               <img src={logoSrc} alt={tenantName}
                 className="relative w-24 h-24 object-cover border-2"
