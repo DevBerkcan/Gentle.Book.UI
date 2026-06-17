@@ -17,9 +17,10 @@ interface ServiceSelectorProps {
   selectedService: Service | null;
   onSelect: (service: Service) => void;
   onNext: () => void;
+  tenantSlug?: string;
 }
 
-export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext }: ServiceSelectorProps) {
+export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext, tenantSlug }: ServiceSelectorProps) {
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,8 +31,13 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
   useEffect(() => {
     async function loadCategories() {
       try {
-        const data = await getServiceCategories();
-        setCategories(data);
+        const data = await getServiceCategories(tenantSlug);
+        if (data.length > 0) {
+          setCategories(data);
+          return;
+        }
+
+        throw new Error("No categories returned");
       } catch {
         const defaultCategory: ServiceCategory = {
           id: "default",
@@ -47,7 +53,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
       }
     }
     loadCategories();
-  }, [fallbackServices]);
+  }, [fallbackServices, tenantSlug]);
 
   const allServices = useMemo(() => {
     return categories.flatMap((cat) => cat.services);
@@ -77,7 +83,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
     
     setLoadingServices((prev) => ({ ...prev, [categoryId]: true }));
     try {
-      const services = await getServicesByCategory(categoryId);
+      const services = await getServicesByCategory(categoryId, tenantSlug);
       setCategories((prevCategories) =>
         prevCategories.map((cat) =>
           cat.id === categoryId ? { ...cat, services } : cat

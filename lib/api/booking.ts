@@ -142,16 +142,23 @@ export async function getEmployees(tenantSlug?: string): Promise<Employee[]> {
 
 // ── Services ──────────────────────────────────────────────────────────────────
 
-export async function getServiceCategories(): Promise<ServiceCategory[]> {
-  const res = await fetch(`${API_BASE_URL}/services/categories`);
+export async function getServiceCategories(tenantSlug?: string): Promise<ServiceCategory[]> {
+  const url = tenantSlug
+    ? `${API_BASE_URL}/services/categories?tenantSlug=${tenantSlug}`
+    : `${API_BASE_URL}/services/categories`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error("Fehler beim Laden der Kategorien");
   return res.json();
 }
 
 export async function getServicesByCategory(
-  categoryId: string
+  categoryId: string,
+  tenantSlug?: string
 ): Promise<Service[]> {
-  const res = await fetch(`${API_BASE_URL}/services/services/${categoryId}`);
+  const url = tenantSlug
+    ? `${API_BASE_URL}/services/categories/${categoryId}/services?tenantSlug=${tenantSlug}`
+    : `${API_BASE_URL}/services/categories/${categoryId}/services`;
+  const res = await fetch(url);
   if (!res.ok)
     throw new Error("Fehler beim Laden der Services für diese Kategorie");
   return res.json();

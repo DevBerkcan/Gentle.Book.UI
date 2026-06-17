@@ -311,6 +311,7 @@ export default function TenantBookingPage() {
                   selectedService={selectedService}
                   onSelect={handleServiceSelect}
                   onNext={next}
+                  tenantSlug={slug}
                 />
               </motion.div>
             )}
