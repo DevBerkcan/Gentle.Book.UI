@@ -187,7 +187,7 @@ export async function getAdminCategory(id: string): Promise<AdminServiceCategory
   // Add backward compatibility fields to all services in category
   return {
     ...category,
-    services: category.services.map(service => addBackwardCompatibility(service))
+    services: (category.services ?? []).map(service => addBackwardCompatibility(service))
   };
 }
 

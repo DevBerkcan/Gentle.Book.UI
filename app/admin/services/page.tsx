@@ -156,17 +156,31 @@ export default function AdminServicesPage() {
 
     useEffect(() => {
         loadData();
-    }, [page, searchTerm, viewMode]);
+    }, [page, viewMode]);
 
     const loadData = async () => {
         setLoading(true);
         setError(null);
         try {
-            const [servicesData, categoriesData, employeesData] = await Promise.all([
-                getAdminServices(),
-                getAdminCategories(),
-                getEmployeesForAssignment(),
-            ]);
+            let servicesData: AdminService[] = [];
+            let categoriesData: AdminServiceCategory[] = [];
+            let employeesData: EmployeeForAssignment[] = employees;
+
+            if (viewMode === "services") {
+                [servicesData, categoriesData] = await Promise.all([
+                    getAdminServices(),
+                    getAdminCategories(),
+                ]);
+            } else if (viewMode === "categories") {
+                categoriesData = await getAdminCategories();
+                servicesData = categoriesData.flatMap((category) => category.services);
+            } else {
+                [servicesData, categoriesData, employeesData] = await Promise.all([
+                    getAdminServices(),
+                    getAdminCategories(),
+                    getEmployeesForAssignment(),
+                ]);
+            }
 
             if (servicesData.length === 0 && categoriesData.length === 0) {
                 const guideSeen = window.localStorage.getItem(SERVICES_GUIDE_STORAGE_KEY);
@@ -209,7 +223,7 @@ export default function AdminServicesPage() {
                 const start = (page - 1) * pageSize;
                 const end = start + pageSize;
                 setCategories(filteredCategories.slice(start, end));
-                setServices(servicesData); // Keep full services for modals
+                setServices(servicesData); // Derived from categories for category detail modals
             } else {
                 setEmployees(employeesData);
                 setServices(servicesData);
@@ -328,7 +342,11 @@ export default function AdminServicesPage() {
             setSubmitting(true);
             setModalError(null);
             const newCategory = await createAdminCategory(categoryForm as CreateCategoryData);
-            setCategories(prev => [newCategory, ...prev]);
+            setCategories(prev => [newCategory, ...prev].slice(0, pageSize));
+            const nextTotalCount = totalCount + 1;
+            setTotalCount(nextTotalCount);
+            setTotalPages(Math.max(1, Math.ceil(nextTotalCount / pageSize)));
+            setViewMode("categories");
             handleClose();
         } catch (err: any) {
             setModalError(err.message);
