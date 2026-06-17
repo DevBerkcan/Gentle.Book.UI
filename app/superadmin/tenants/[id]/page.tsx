@@ -24,6 +24,12 @@ export default function TenantDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>('link');
   const [copied, setCopied] = useState(false);
   const [extendingTrial, setExtendingTrial] = useState(false);
+  const [changingPlan, setChangingPlan] = useState(false);
+  const [planChanged, setPlanChanged] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
+  const [resendingWelcome, setResendingWelcome] = useState(false);
+  const [welcomeResent, setWelcomeResent] = useState(false);
+  const [resendError, setResendError] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -59,6 +65,7 @@ export default function TenantDetailPage() {
     superAdminApi.getTenant(id)
       .then((data) => {
         setTenant(data);
+        if (data.subscription?.plan) setSelectedPlan(data.subscription.plan);
         if (data.settings?.logoUrl) setLogoUrl(data.settings.logoUrl);
         if (data.settings) {
           setSettings({
@@ -116,6 +123,36 @@ export default function TenantDetailPage() {
       console.error(err);
     } finally {
       setExtendingTrial(false);
+    }
+  };
+
+  const handleChangePlan = async () => {
+    if (!selectedPlan) return;
+    setChangingPlan(true);
+    try {
+      await superAdminApi.changePlan(id, selectedPlan);
+      const data = await superAdminApi.getTenant(id);
+      setTenant(data);
+      setPlanChanged(true);
+      setTimeout(() => setPlanChanged(false), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setChangingPlan(false);
+    }
+  };
+
+  const handleResendWelcome = async () => {
+    setResendingWelcome(true);
+    setResendError('');
+    try {
+      await superAdminApi.resendWelcomeEmail(id);
+      setWelcomeResent(true);
+      setTimeout(() => setWelcomeResent(false), 5000);
+    } catch (err: any) {
+      setResendError(err?.response?.data?.message ?? 'Fehler beim Senden');
+    } finally {
+      setResendingWelcome(false);
     }
   };
 
@@ -544,58 +581,120 @@ export default function TenantDetailPage() {
 
       {/* ── Tab: Abo ──────────────────────────────────────────────────── */}
       {activeTab === 'subscription' && (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
-          <h2 className="font-semibold text-gray-900">Abonnement</h2>
+        <div className="space-y-4">
 
-          {sub ? (
-            <>
-              <div className={`flex items-start gap-4 p-4 rounded-xl border ${
-                sub.isInTrial
-                  ? 'bg-yellow-50 border-yellow-200'
-                  : sub.status === 'Active'
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}>
-                <Clock size={20} className={
-                  sub.isInTrial ? 'text-yellow-600 mt-0.5' : sub.status === 'Active' ? 'text-green-600 mt-0.5' : 'text-red-600 mt-0.5'
-                } />
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-sm">
-                    {sub.isInTrial
-                      ? `Trial — ${sub.trialDaysRemaining} Tage verbleibend`
-                      : sub.status === 'Active'
-                      ? 'Aktives Abonnement'
-                      : 'Abgelaufen / Inaktiv'}
-                  </p>
-                  {sub.isInTrial && (
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Läuft ab: {new Date(sub.trialEndsAt).toLocaleDateString('de-DE')}
+          {/* Current status */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+            <h2 className="font-semibold text-gray-900">Abonnement</h2>
+
+            {sub ? (
+              <>
+                <div className={`flex items-start gap-4 p-4 rounded-xl border ${
+                  sub.isInTrial
+                    ? 'bg-yellow-50 border-yellow-200'
+                    : sub.status === 'Active'
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <Clock size={20} className={
+                    sub.isInTrial ? 'text-yellow-600 mt-0.5' : sub.status === 'Active' ? 'text-green-600 mt-0.5' : 'text-red-600 mt-0.5'
+                  } />
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-sm">
+                      {sub.isInTrial
+                        ? `Trial — ${sub.trialDaysRemaining} Tage verbleibend`
+                        : sub.status === 'Active'
+                        ? 'Aktives Abonnement'
+                        : 'Abgelaufen / Inaktiv'}
                     </p>
-                  )}
-                  <p className="text-xs text-gray-400 mt-0.5">Plan: {sub.plan} · Status: {sub.status}</p>
+                    {sub.isInTrial && (
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Läuft ab: {new Date(sub.trialEndsAt).toLocaleDateString('de-DE')}
+                      </p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-0.5">Plan: <strong>{sub.plan}</strong> · Status: {sub.status}</p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Extend trial */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">Trial verlängern</p>
-                <div className="flex gap-2">
-                  {[7, 14, 30].map((days) => (
-                    <button
-                      key={days}
-                      onClick={() => handleExtendTrial(days)}
-                      disabled={extendingTrial}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium disabled:opacity-50 transition-colors"
-                    >
-                      +{days} Tage
-                    </button>
-                  ))}
+                {/* Plan change */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">Plan ändern</p>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    {[
+                      { value: 'Trial',        label: 'Trial',        price: 'Kostenlos' },
+                      { value: 'Starter',      label: 'Starter',      price: '€29/Monat' },
+                      { value: 'Professional', label: 'Professional', price: '€59/Monat' },
+                      { value: 'Agency',       label: 'Agency',       price: '€99/Monat' },
+                    ].map(({ value, label, price }) => (
+                      <button
+                        key={value}
+                        onClick={() => setSelectedPlan(value)}
+                        className={`p-3 border rounded-xl text-left transition-colors ${
+                          selectedPlan === value
+                            ? 'border-gray-900 bg-gray-50 ring-1 ring-gray-900'
+                            : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <p className="text-xs font-bold text-gray-900">{label}</p>
+                        <p className="text-xs text-gray-500">{price}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleChangePlan}
+                    disabled={changingPlan || !selectedPlan || selectedPlan === sub.plan}
+                    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                  >
+                    <CreditCard size={15} />
+                    {changingPlan ? 'Speichern...' : planChanged ? '✓ Gespeichert' : 'Plan speichern'}
+                  </button>
                 </div>
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-gray-400">Kein Abo gefunden.</p>
-          )}
+
+                {/* Extend trial */}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 mb-2">Trial verlängern</p>
+                  <div className="flex gap-2">
+                    {[7, 14, 30].map((days) => (
+                      <button
+                        key={days}
+                        onClick={() => handleExtendTrial(days)}
+                        disabled={extendingTrial}
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium disabled:opacity-50 transition-colors"
+                      >
+                        +{days} Tage
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-gray-400">Kein Abo gefunden.</p>
+            )}
+          </div>
+
+          {/* Onboarding email resend */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
+            <h2 className="font-semibold text-gray-900">📧 Onboarding-Mail</h2>
+            <p className="text-sm text-gray-500">
+              Sendet die vollständige Willkommens-Mail mit einem frischen Passwort-Link (72h gültig) erneut an den Admin-User.
+            </p>
+            {welcomeResent && (
+              <p className="text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">
+                ✓ Mail wurde erfolgreich versandt.
+              </p>
+            )}
+            {resendError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{resendError}</p>
+            )}
+            <button
+              onClick={handleResendWelcome}
+              disabled={resendingWelcome || welcomeResent}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+            >
+              <Mail size={15} />
+              {resendingWelcome ? 'Senden...' : welcomeResent ? '✓ Gesendet' : 'Willkommens-Mail erneut senden'}
+            </button>
+          </div>
         </div>
       )}
 

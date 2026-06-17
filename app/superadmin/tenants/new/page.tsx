@@ -9,6 +9,13 @@ import { superAdminApi, CreateTenantPayload } from '@/lib/api/superadmin';
 
 type Step = 'company' | 'industry' | 'admin' | 'confirm';
 
+const PLANS = [
+  { value: 'Trial',        label: 'Trial',        price: 'Kostenlos', duration: '14 Tage', color: 'border-gray-200 hover:border-gray-400' },
+  { value: 'Starter',      label: 'Starter',      price: '€29',       duration: '/Monat',  color: 'border-blue-200 hover:border-blue-400' },
+  { value: 'Professional', label: 'Professional', price: '€59',       duration: '/Monat',  color: 'border-purple-200 hover:border-purple-400' },
+  { value: 'Agency',       label: 'Agency',       price: '€99',       duration: '/Monat',  color: 'border-amber-200 hover:border-amber-400' },
+];
+
 const STEPS: { key: Step; label: string; icon: React.ReactNode }[] = [
   { key: 'company', label: 'Firma', icon: <Building2 size={16} /> },
   { key: 'industry', label: 'Branche', icon: <Palette size={16} /> },
@@ -48,6 +55,8 @@ export default function NewTenantWizard() {
     adminPassword: '',
     adminFirstName: '',
     adminLastName: '',
+    plan: 'Trial',
+    personalNote: '',
   });
 
   const update = (field: keyof CreateTenantPayload, value: string) => {
@@ -166,7 +175,7 @@ export default function NewTenantWizard() {
           </>
         )}
 
-        {/* Step 2: Industry */}
+        {/* Step 2: Industry + Plan */}
         {step === 'industry' && (
           <>
             <h2 className="font-semibold text-gray-900">Branche auswählen</h2>
@@ -174,9 +183,9 @@ export default function NewTenantWizard() {
               {INDUSTRIES.map(({ value, label, emoji }) => (
                 <button
                   key={value}
-                  onClick={() => { update('industryType', value); setStep('admin'); }}
+                  onClick={() => update('industryType', value)}
                   className={`flex items-center gap-3 p-3 border rounded-xl text-sm text-left transition-colors hover:border-gray-400 ${
-                    form.industryType === value ? 'border-gray-900 bg-gray-50' : 'border-gray-200'
+                    form.industryType === value ? 'border-gray-900 bg-gray-50 ring-1 ring-gray-900' : 'border-gray-200'
                   }`}
                 >
                   <span className="text-xl">{emoji}</span>
@@ -184,9 +193,38 @@ export default function NewTenantWizard() {
                 </button>
               ))}
             </div>
-            <button onClick={() => setStep('company')} className="text-sm text-gray-400 hover:text-gray-600">
-              ← Zurück
-            </button>
+
+            <div className="border-t border-gray-100 pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Gebuchtes Paket</h3>
+              <p className="text-xs text-gray-400 mb-3">Das Paket wurde bereits über das CRM verkauft.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {PLANS.map(({ value, label, price, duration, color }) => (
+                  <button
+                    key={value}
+                    onClick={() => update('plan', value)}
+                    className={`p-3 border rounded-xl text-left transition-colors ${color} ${
+                      form.plan === value ? 'ring-2 ring-offset-1 ring-gray-900 border-gray-900 bg-gray-50' : ''
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-gray-900">{label}</p>
+                    <p className="text-sm font-semibold text-gray-700">{price}<span className="text-xs font-normal text-gray-400"> {duration}</span></p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setStep('company')} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50">
+                Zurück
+              </button>
+              <button
+                onClick={() => setStep('admin')}
+                disabled={!form.industryType}
+                className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-40"
+              >
+                Weiter
+              </button>
+            </div>
           </>
         )}
 
@@ -217,6 +255,20 @@ export default function NewTenantWizard() {
               <input type="password" value={form.adminPassword} onChange={(e) => update('adminPassword', e.target.value)}
                 placeholder="Mindestens 8 Zeichen"
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Persönliche Notiz für Willkommens-Mail
+                <span className="ml-1.5 font-normal text-gray-400 text-xs">(optional)</span>
+              </label>
+              <textarea
+                value={form.personalNote}
+                onChange={(e) => update('personalNote', e.target.value)}
+                rows={3}
+                placeholder={'z.B. "Schön, dass Sie dabei sind! Bei Fragen rufen Sie mich an: 079 xxx xx xx"'}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 resize-none"
+              />
+              <p className="text-xs text-amber-600 mt-1">Erscheint als gelbe Info-Box in der Willkommens-Mail.</p>
             </div>
             {error && <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-2.5">{error}</p>}
             <div className="flex gap-3">
@@ -252,6 +304,10 @@ export default function NewTenantWizard() {
                 <span className="font-medium text-gray-900">/booking/{created.slug}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-gray-500">Paket</span>
+                <span className="font-medium text-gray-900">{form.plan ?? 'Trial'}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-gray-500">Admin-Login</span>
                 <span className="font-medium text-gray-900">/admin/login</span>
               </div>
@@ -270,7 +326,7 @@ export default function NewTenantWizard() {
                 Branding einrichten
               </button>
               <button
-                onClick={() => { setStep('company'); setForm({ name: '', slug: '', industryType: '', currency: 'EUR', timeZone: 'Europe/Berlin', adminEmail: '', adminPassword: '', adminFirstName: '', adminLastName: '' }); setCreated(null); }}
+                onClick={() => { setStep('company'); setForm({ name: '', slug: '', industryType: '', currency: 'EUR', timeZone: 'Europe/Berlin', adminEmail: '', adminPassword: '', adminFirstName: '', adminLastName: '', plan: 'Trial', personalNote: '' }); setCreated(null); }}
                 className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium"
               >
                 Weiteres anlegen

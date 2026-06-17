@@ -35,6 +35,8 @@ export interface CreateTenantPayload {
   adminFirstName?: string;
   adminLastName?: string;
   sendWelcomeEmail?: boolean;
+  plan?: string;
+  personalNote?: string;
 }
 
 export interface UpdateTenantSettingsPayload {
@@ -110,10 +112,20 @@ export const superAdminApi = {
     return data;
   },
 
-  // ── Trial ────────────────────────────────────────────────────
+  // ── Trial & Plan ─────────────────────────────────────────────
   async extendTrial(tenantId: string, days: number) {
     const { data } = await api.post(`/superadmin/tenants/${tenantId}/trial/extend`, { days });
     return data as { trialEndsAt: string; trialDaysRemaining: number };
+  },
+
+  async changePlan(tenantId: string, plan: string) {
+    const { data } = await api.patch(`/superadmin/tenants/${tenantId}/plan`, { plan });
+    return data as { plan: string; status: string; displayName: string; maxEmployees: number; maxServices: number };
+  },
+
+  async resendWelcomeEmail(tenantId: string) {
+    const { data } = await api.post(`/superadmin/tenants/${tenantId}/resend-welcome`);
+    return data as { sent: boolean; sentTo: string };
   },
 
   // ── Stats ────────────────────────────────────────────────────
