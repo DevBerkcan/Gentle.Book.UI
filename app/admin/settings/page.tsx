@@ -7,7 +7,7 @@ import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { Input, Textarea } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
 import { Settings, Save, Building2, Phone, Globe, Palette, Lock, ImageIcon, Upload, Clock, AlertTriangle } from 'lucide-react';
-import api from '@/lib/api/client';
+import api, { apiOrigin } from '@/lib/api/client';
 
 const DAYS = [
   { value: 1, label: 'Montag' },
@@ -241,7 +241,6 @@ export default function AdminSettingsPage() {
     );
   }
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-6">
@@ -271,7 +270,7 @@ export default function AdminSettingsPage() {
                 <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E8C7C3]/50 bg-[#F5EDEB] flex items-center justify-center overflow-hidden flex-shrink-0">
                   {settings.logoUrl ? (
                     <img
-                      src={`${apiBase}${settings.logoUrl}`}
+                      src={settings.logoUrl?.startsWith('http') ? settings.logoUrl : `${apiOrigin}${settings.logoUrl}`}
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                     />

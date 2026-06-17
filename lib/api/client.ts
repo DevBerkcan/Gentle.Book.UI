@@ -11,6 +11,8 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+export const apiOrigin = new URL(API_BASE_URL).origin;
+
 // Request: attach JWT from localStorage.
 // SuperAdmin calls (/superadmin/*) use superadmin_token; all others use access_token.
 api.interceptors.request.use(

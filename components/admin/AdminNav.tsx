@@ -10,7 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
-import api from "@/lib/api/client";
+import api, { apiOrigin } from "@/lib/api/client";
 
 const NAV_GROUPS = [
   {
@@ -90,7 +90,7 @@ export function AdminNav() {
       <div className="px-5 py-5 border-b border-white/8">
         <Link href="/admin/dashboard" className="flex items-center gap-3">
           {logoUrl
-            ? <img src={logoUrl} alt={companyName ?? "Logo"} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
+            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
             : (
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0">
                 <Sparkles size={18} className="text-white" />
@@ -167,7 +167,7 @@ export function AdminNav() {
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/8 z-40 flex items-center justify-between px-4">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">
           {logoUrl
-            ? <img src={logoUrl} alt="" className="w-8 h-8 rounded-xl object-cover" />
+            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt="" className="w-8 h-8 rounded-xl object-cover" />
             : (
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center">
                 <Sparkles size={15} className="text-white" />
