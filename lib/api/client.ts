@@ -15,6 +15,9 @@ const api = axios.create({
 // SuperAdmin calls (/superadmin/*) use superadmin_token; all others use access_token.
 api.interceptors.request.use(
   (config) => {
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
     if (typeof window !== 'undefined') {
       const isSuperAdminRoute = config.url?.includes('/superadmin');
       const token = isSuperAdminRoute
