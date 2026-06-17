@@ -6,7 +6,7 @@ import {
     Plus, Edit, Trash2, Loader2, Search, X, Check,
     Clock, DollarSign, Eye, EyeOff, Users, Tag,
     ArrowLeft, Save, AlertCircle, ChevronLeft, ChevronRight,
-    Sparkles, Scissors, Heart, Droplets, Zap
+    Sparkles, Scissors, Heart, Droplets, Zap, Info
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,6 +62,23 @@ const inputClassNames = {
 type ViewMode = "services" | "categories" | "assignments";
 type ModalMode = "create" | "edit" | "view" | "create-category" | "edit-category" | "view-category" | null;
 
+const SERVICES_GUIDE_STORAGE_KEY = "admin-services-guide-seen";
+
+const servicesGuideSteps = [
+    {
+        title: "Kategorie erstellen",
+        description: "Erstelle zuerst eine Kategorie. Kategorien strukturieren deine Leistungen, zum Beispiel Gesicht, Beratung oder Laser.",
+    },
+    {
+        title: "Service zur Kategorie anlegen",
+        description: "Danach legst du einen Service an und wählst die passende Kategorie aus. Dort definierst du Dauer, Preis und Beschreibung.",
+    },
+    {
+        title: "Mitarbeiter zuweisen",
+        description: "Zum Schluss ordnest du zu, welche Mitarbeiter den Service ausführen. Erst dann kann der Service sauber gebucht werden.",
+    },
+];
+
 // Category icons mapping for visual appeal
 const categoryIcons: Record<string, React.ReactNode> = {
     'Gesicht': <Heart className="w-5 h-5" />,
@@ -99,6 +116,8 @@ export default function AdminServicesPage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [showServicesGuide, setShowServicesGuide] = useState(false);
+    const [guideStep, setGuideStep] = useState(0);
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -148,6 +167,15 @@ export default function AdminServicesPage() {
                 getAdminCategories(),
                 getEmployeesForAssignment(),
             ]);
+
+            if (servicesData.length === 0 && categoriesData.length === 0) {
+                const guideSeen = window.localStorage.getItem(SERVICES_GUIDE_STORAGE_KEY);
+                if (!guideSeen) {
+                    setGuideStep(0);
+                    setShowServicesGuide(true);
+                    window.localStorage.setItem(SERVICES_GUIDE_STORAGE_KEY, "true");
+                }
+            }
 
             // Filter based on search term
             let filteredServices = servicesData;
@@ -200,6 +228,15 @@ export default function AdminServicesPage() {
             setPage(1);
             loadData();
         }
+    };
+
+    const openServicesGuide = () => {
+        setGuideStep(0);
+        setShowServicesGuide(true);
+    };
+
+    const closeServicesGuide = () => {
+        setShowServicesGuide(false);
     };
 
     const handleCreateService = async () => {
@@ -682,6 +719,33 @@ export default function AdminServicesPage() {
                         Mitarbeiter-Zuordnung
                     </Button>
                 </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 flex flex-col gap-3 rounded-lg border border-[#017172]/20 bg-[#017172]/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#017172] shadow-sm">
+                            <Info size={18} />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-[#1E1E1E]">So legst du Services richtig an</p>
+                            <p className="mt-0.5 text-sm text-[#5F5F5F]">
+                                Zuerst eine Kategorie erstellen, danach Services in dieser Kategorie anlegen und Mitarbeiter zuweisen.
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        size="sm"
+                        variant="flat"
+                        className="self-start bg-white text-[#017172] font-semibold sm:self-center"
+                        startContent={<Info size={15} />}
+                        onPress={openServicesGuide}
+                    >
+                        Anleitung öffnen
+                    </Button>
+                </motion.div>
 
                 {/* Search Bar - Only show for services and categories */}
                 {viewMode !== "assignments" && (
@@ -1230,6 +1294,116 @@ export default function AdminServicesPage() {
                         setModalError(null);
                     }}
                 />
+
+                <AnimatePresence>
+                    {showServicesGuide && (
+                        <motion.div
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 py-6"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                        >
+                            <motion.div
+                                className="w-full max-w-lg rounded-lg border border-[#E8C7C3]/40 bg-white shadow-2xl"
+                                initial={{ opacity: 0, y: 24, scale: 0.97 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                                transition={{ duration: 0.22, ease: "easeOut" }}
+                            >
+                                <div className="flex items-start justify-between gap-4 border-b border-[#E8C7C3]/30 p-5">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#017172]/10 text-[#017172]">
+                                            <Info size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-wide text-[#017172]">
+                                                Schritt {guideStep + 1} von {servicesGuideSteps.length}
+                                            </p>
+                                            <h2 className="mt-1 text-lg font-bold text-[#1E1E1E]">
+                                                {servicesGuideSteps[guideStep].title}
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="light"
+                                        className="text-[#8A8A8A]"
+                                        onPress={closeServicesGuide}
+                                        aria-label="Anleitung schließen"
+                                    >
+                                        <X size={18} />
+                                    </Button>
+                                </div>
+
+                                <div className="p-5">
+                                    <AnimatePresence mode="wait">
+                                        <motion.div
+                                            key={guideStep}
+                                            initial={{ opacity: 0, x: 18 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -18 }}
+                                            transition={{ duration: 0.18 }}
+                                        >
+                                            <p className="text-sm leading-6 text-[#5F5F5F]">
+                                                {servicesGuideSteps[guideStep].description}
+                                            </p>
+                                        </motion.div>
+                                    </AnimatePresence>
+
+                                    <div className="mt-6 flex gap-2">
+                                        {servicesGuideSteps.map((step, index) => (
+                                            <button
+                                                key={step.title}
+                                                type="button"
+                                                className={`h-2 flex-1 rounded-full transition-colors ${
+                                                    index === guideStep ? "bg-[#017172]" : "bg-[#E8C7C3]/45"
+                                                }`}
+                                                onClick={() => setGuideStep(index)}
+                                                aria-label={`Schritt ${index + 1} anzeigen`}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col-reverse gap-2 border-t border-[#E8C7C3]/30 p-5 sm:flex-row sm:justify-between">
+                                    <Button
+                                        variant="flat"
+                                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold"
+                                        isDisabled={guideStep === 0}
+                                        startContent={<ChevronLeft size={16} />}
+                                        onPress={() => setGuideStep((step) => Math.max(0, step - 1))}
+                                    >
+                                        Zurück
+                                    </Button>
+                                    {guideStep < servicesGuideSteps.length - 1 ? (
+                                        <Button
+                                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                                            endContent={<ChevronRight size={16} />}
+                                            onPress={() => setGuideStep((step) => Math.min(servicesGuideSteps.length - 1, step + 1))}
+                                        >
+                                            Weiter
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                                            startContent={<Plus size={16} />}
+                                            onPress={() => {
+                                                closeServicesGuide();
+                                                setViewMode("categories");
+                                                setPage(1);
+                                                setSearchTerm("");
+                                                openCategoryModal("create");
+                                            }}
+                                        >
+                                            Kategorie erstellen
+                                        </Button>
+                                    )}
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
