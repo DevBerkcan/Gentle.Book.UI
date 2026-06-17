@@ -193,9 +193,7 @@ export default function AdminSettingsPage() {
     try {
       const formData = new FormData();
       formData.append('logo', file);
-      const res = await api.post('/tenant/logo', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await api.post('/tenant/logo', formData);
       setSettings((s) => ({ ...s, logoUrl: res.data.logoUrl }));
     } catch (err: any) {
       setLogoError(err.response?.data?.message || 'Fehler beim Hochladen');
