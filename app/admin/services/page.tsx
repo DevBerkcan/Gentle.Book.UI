@@ -37,6 +37,7 @@ import {
     updateAdminCategory,
     deleteAdminCategory,
     bulkAssignServicesToEmployee,
+    getTenantDefaultCurrency,
     type AdminService,
     type AdminServiceCategory,
     type EmployeeForAssignment,
@@ -45,7 +46,6 @@ import {
     type CreateCategoryData,
     type UpdateCategoryData
 } from "@/lib/api/admin-services";
-import { form } from "@nextui-org/react";
 import { formatPrice } from "@/lib/utils/currency";
 
 const modalClassNames = {
@@ -78,6 +78,18 @@ const servicesGuideSteps = [
         description: "Zum Schluss ordnest du zu, welche Mitarbeiter den Service ausführen. Erst dann kann der Service sauber gebucht werden.",
     },
 ];
+
+const currencyLabels: Record<string, string> = {
+    EUR: "EUR - Euro",
+    USD: "USD - US-Dollar",
+    CHF: "CHF - Schweizer Franken",
+};
+
+const currencySymbols: Record<string, string> = {
+    EUR: "€",
+    USD: "$",
+    CHF: "CHF",
+};
 
 // Category icons mapping for visual appeal
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -118,6 +130,7 @@ export default function AdminServicesPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [showServicesGuide, setShowServicesGuide] = useState(false);
     const [guideStep, setGuideStep] = useState(0);
+    const [tenantCurrency, setTenantCurrency] = useState("EUR");
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -157,6 +170,18 @@ export default function AdminServicesPage() {
     useEffect(() => {
         loadData();
     }, [page, viewMode]);
+
+    useEffect(() => {
+        getTenantDefaultCurrency()
+            .then((currency) => {
+                setTenantCurrency(currency);
+                setServiceForm((prev) => ({ ...prev, currency: prev.currency || currency }));
+            })
+            .catch(() => {
+                setTenantCurrency("EUR");
+                setServiceForm((prev) => ({ ...prev, currency: prev.currency || "EUR" }));
+            });
+    }, []);
 
     const loadData = async () => {
         setLoading(true);
@@ -267,7 +292,7 @@ export default function AdminServicesPage() {
                 durationMinutes: serviceForm.durationMinutes!,
                 bufferTimeMinutes: serviceForm.bufferTimeMinutes ?? 0,
                 price: serviceForm.price!,
-                currency: serviceForm.currency!,
+                currency: tenantCurrency,
                 displayOrder: serviceForm.displayOrder!,
                 categoryId: serviceForm.categoryId,
                 employeeIds: serviceForm.employeeIds || [],
@@ -291,7 +316,7 @@ export default function AdminServicesPage() {
                 durationMinutes: serviceForm.durationMinutes!,
                 bufferTimeMinutes: serviceForm.bufferTimeMinutes ?? 0,
                 price: serviceForm.price!,
-                currency: serviceForm.currency!,
+                currency: tenantCurrency,
                 displayOrder: serviceForm.displayOrder!,
                 categoryId: serviceForm.categoryId!,
                 employeeIds: serviceForm.employeeIds || [],
@@ -416,6 +441,7 @@ export default function AdminServicesPage() {
             displayOrder: 0,
             categoryId: "",
             employeeIds: [],
+            currency: tenantCurrency,
         });
         setCategoryForm({
             name: "",
@@ -453,11 +479,13 @@ export default function AdminServicesPage() {
                 durationMinutes: service.durationMinutes,
                 bufferTimeMinutes: service.bufferTimeMinutes ?? 0,
                 price: service.price,
-                currency: service.currency,
+                currency: tenantCurrency,
                 displayOrder: service.displayOrder,
                 categoryId: service.categoryId,
                 employeeIds: employeeIds,
             });
+        } else if (mode === "create") {
+            setServiceForm((prev) => ({ ...prev, currency: tenantCurrency }));
         } else if (mode === "view" && service) {
             setSelectedItem(service);
         }
@@ -1260,6 +1288,7 @@ export default function AdminServicesPage() {
                     setServiceForm={setServiceForm}
                     categories={categories}
                     employees={employees}
+                    tenantCurrency={tenantCurrency}
                     modalError={modalError}
                     submitting={submitting}
                     onSave={modalMode === "create" ? handleCreateService : handleUpdateService}
@@ -1436,6 +1465,7 @@ function ServiceModals({
     setServiceForm,
     categories,
     employees,
+    tenantCurrency,
     modalError,
     submitting,
     onSave,
@@ -1448,12 +1478,21 @@ function ServiceModals({
     setServiceForm: (form: any) => void;
     categories: AdminServiceCategory[];
     employees: EmployeeForAssignment[];
+    tenantCurrency: string;
     modalError: string | null;
     submitting: boolean;
     onSave: () => void;
     onClose: () => void;
 }) {
     const isCreateOrEdit = modalMode === "create" || modalMode === "edit";
+    const [showCurrencyInfo, setShowCurrencyInfo] = useState(false);
+    const selectedCurrency = (tenantCurrency || serviceForm.currency || "EUR").toUpperCase();
+    const selectedCurrencyLabel = currencyLabels[selectedCurrency] || selectedCurrency;
+    const selectedCurrencySymbol = currencySymbols[selectedCurrency] || selectedCurrency;
+    const employeeOptions = [
+        { id: "none", name: "Bitte wählen", role: "" },
+        ...employees,
+    ];
 
     return (
         <Modal
@@ -1538,7 +1577,24 @@ function ServiceModals({
                                         description="Pause nach dem Termin"
                                         classNames={inputClassNames}
                                     />
+                                </div>
 
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        className="text-left"
+                                        onClick={() => setShowCurrencyInfo(true)}
+                                        disabled={submitting}
+                                    >
+                                        <Input
+                                            label="Währung *"
+                                            value={selectedCurrencyLabel}
+                                            isReadOnly
+                                            isDisabled={submitting}
+                                            description="Wird zentral in den Einstellungen verwaltet"
+                                            classNames={inputClassNames}
+                                        />
+                                    </button>
                                     <Input
                                         label="Preis*"
                                         type="number"
@@ -1548,33 +1604,31 @@ function ServiceModals({
                                         onChange={(e) => setServiceForm({ ...serviceForm, price: parseFloat(e.target.value) })}
                                         isRequired
                                         isDisabled={submitting}
-                                        startContent={<DollarSign size={16} className="text-[#8A8A8A]" />}
+                                        startContent={<span className="text-sm font-semibold text-[#8A8A8A]">{selectedCurrencySymbol}</span>}
                                         classNames={inputClassNames}
                                     />
                                 </div>
 
-                                {/* Currency Select - Add this */}
-                                <Select
-                                    label="Währung *"
-                                    placeholder="Währung auswählen"
-                                    selectedKeys={serviceForm.currency ? [serviceForm.currency] : ["CHF"]}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        if (value) {
-                                            setServiceForm({ ...serviceForm, currency: value });
-                                        }
-                                    }}
-                                    isRequired
-                                    isDisabled={submitting}
-                                    classNames={{
-                                        trigger: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
-                                        label: "text-[#8A8A8A]",
-                                        value: "text-[#1E1E1E]",
-                                    }}
-                                >
-                                    <SelectItem key="CHF" value="CHF">CHF - Schweizer Franken</SelectItem>
-                                    <SelectItem key="EUR" value="EUR">EUR - Euro</SelectItem>
-                                </Select>
+                                {showCurrencyInfo && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="flex items-start gap-2 rounded-lg border border-[#017172]/20 bg-[#017172]/5 p-3 text-sm text-[#5F5F5F]"
+                                    >
+                                        <Info size={16} className="mt-0.5 shrink-0 text-[#017172]" />
+                                        <div className="flex-1">
+                                            Die Währung gilt systemweit. Bitte ändern Sie die Währung unter Einstellungen, wenn alle Preise eine andere Währung verwenden sollen.
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="text-[#8A8A8A] hover:text-[#1E1E1E]"
+                                            onClick={() => setShowCurrencyInfo(false)}
+                                            aria-label="Währungshinweis schließen"
+                                        >
+                                            <X size={15} />
+                                        </button>
+                                    </motion.div>
+                                )}
 
                                 <Input
                                     label="Sortierreihenfolge"
@@ -1615,26 +1669,51 @@ function ServiceModals({
                                 {/* Mitarbeiter Multi-Select */}
                                 <Select
                                     label="Mitarbeiter (optional)"
-                                    placeholder="Mitarbeiter auswählen"
+                                    placeholder="Bitte wählen"
                                     selectionMode="multiple"
-                                    selectedKeys={serviceForm.employeeIds || []}
+                                    selectedKeys={new Set(serviceForm.employeeIds || [])}
                                     onSelectionChange={(keys) => {
+                                        if (keys === "all") {
+                                            setServiceForm({ ...serviceForm, employeeIds: employees.map((emp) => emp.id) });
+                                            return;
+                                        }
+
                                         const selectedKeys = Array.from(keys) as string[];
+                                        if (selectedKeys.includes("none")) {
+                                            setServiceForm({ ...serviceForm, employeeIds: [] });
+                                            return;
+                                        }
+
                                         setServiceForm({
                                             ...serviceForm,
-                                            employeeIds: selectedKeys.filter(key => key !== "none")
+                                            employeeIds: selectedKeys
                                         });
                                     }}
                                     isDisabled={submitting}
+                                    renderValue={(items) => {
+                                        if (items.length === 0) {
+                                            return <span className="text-[#8A8A8A]">Bitte wählen</span>;
+                                        }
+
+                                        return (
+                                            <div className="flex flex-wrap gap-1">
+                                                {items.map((item) => (
+                                                    <Chip key={item.key} size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                                        {item.textValue}
+                                                    </Chip>
+                                                ))}
+                                            </div>
+                                        );
+                                    }}
                                     classNames={{
                                         trigger: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
                                         label: "text-[#8A8A8A]",
                                         value: "text-[#1E1E1E]",
                                     }}
                                 >
-                                    {employees.map((emp) => (
-                                        <SelectItem key={emp.id}>
-                                            {emp.name} - {emp.role}
+                                    {employeeOptions.map((emp) => (
+                                        <SelectItem key={emp.id} textValue={emp.role ? `${emp.name} - ${emp.role}` : emp.name}>
+                                            {emp.role ? `${emp.name} - ${emp.role}` : emp.name}
                                         </SelectItem>
                                     ))}
                                 </Select>

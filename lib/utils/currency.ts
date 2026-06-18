@@ -6,6 +6,8 @@ export const formatPrice = (price: number | undefined | null, currency: string =
   switch(currency?.toUpperCase()) {
     case 'EUR':
       return `${price.toFixed(2).replace('.', ',')} €`;
+    case 'USD':
+      return `$${price.toFixed(2)}`;
     case 'CHF':
     default:
       return `${price.toFixed(2)} CHF`;

@@ -86,6 +86,10 @@ export interface EmployeeForAssignment {
   serviceCount: number;
 }
 
+interface TenantSettingsResponse {
+  defaultCurrency?: string | null;
+}
+
 // Helper function to add backward compatibility fields
 function addBackwardCompatibility(service: AdminService): AdminService {
   return {
@@ -224,6 +228,12 @@ export async function deleteAdminCategory(id: string): Promise<void> {
 export async function getEmployeesForAssignment(): Promise<EmployeeForAssignment[]> {
   const response = await api.get('/admin/services/employees');
   return extractData<EmployeeForAssignment[]>(response, true);
+}
+
+export async function getTenantDefaultCurrency(): Promise<string> {
+  const response = await api.get('/tenant/settings');
+  const settings = extractData<TenantSettingsResponse>(response, false);
+  return (settings?.defaultCurrency || 'EUR').toUpperCase();
 }
 
 // Get services by employee
