@@ -18,6 +18,10 @@ import { TattooTemplate }    from "./templates/tattoo";
 import { BarbershopTemplate } from "./templates/barbershop";
 import { BeautyTemplate }    from "./templates/beauty";
 import { OrganicTemplate }   from "./templates/organic";
+import { ClinicTemplate }    from "./templates/clinic";
+import { FitnessTemplate }   from "./templates/fitness";
+import { RestaurantTemplate } from "./templates/restaurant";
+import { PortfolioTemplate } from "./templates/portfolio";
 
 // ── Icon Map ──────────────────────────────────────────────────────────────────
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -74,6 +78,12 @@ interface LinktreeConfig {
   ctaBadge?:       string;
   pageTemplate?:   string;
   colorScheme?:    string;
+  heroStyle?:      string;
+  mediaScale?:     string;
+  buttonSpacing?:  string;
+  cardDensity?:    string;
+  motionIntensity?: string;
+  startFocus?:     string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -346,8 +356,23 @@ export default function TenantLinktreePage() {
   const ctaBg       = cfg.ctaColor ?? t.ctaBg;
   const ctaTextClr  = cfg.ctaColor ? getContrastColor(cfg.ctaColor) : ((t as any).ctaTextColor ?? "#ffffff");
   const cardS       = resolveCardStyle(cfg.cardStyle, t.cardBg, t.cardBorder, primaryColor);
-  const { container, item: itemVariant } = buildAnimVariants(cfg.animationSpeed);
+  const resolvedAnimSpeed = cfg.motionIntensity === "off"
+    ? "none"
+    : cfg.motionIntensity === "strong"
+    ? "fast"
+    : cfg.animationSpeed;
+  const { container, item: itemVariant } = buildAnimVariants(resolvedAnimSpeed);
   const isGrid      = cfg.layoutMode === "grid";
+  const avatarSize  = cfg.mediaScale === "lg" ? "w-32 h-32" : cfg.mediaScale === "sm" ? "w-20 h-20" : "w-24 h-24";
+  const avatarText  = cfg.mediaScale === "lg" ? "text-5xl" : cfg.mediaScale === "sm" ? "text-2xl" : "text-3xl";
+  const heroGap     = cfg.heroStyle === "immersive" ? "gap-7 py-16" : cfg.heroStyle === "editorial" ? "gap-6 py-14" : "gap-5 py-14";
+  const buttonPad   = cfg.buttonSpacing === "airy" ? "px-6 py-5" : cfg.buttonSpacing === "tight" ? "px-4 py-3" : "px-5 py-4";
+  const cardPad     = cfg.cardDensity === "airy" ? "px-5 py-5" : cfg.cardDensity === "tight" ? "px-3 py-3" : "px-5 py-4";
+  const gridCardPad = cfg.cardDensity === "airy" ? "px-4 py-6" : cfg.cardDensity === "tight" ? "px-3 py-4" : "px-3 py-5";
+  const linkGap     = cfg.cardDensity === "tight" ? "gap-2" : cfg.cardDensity === "airy" ? "gap-4" : "gap-3";
+  const showProfileFirst = (cfg.startFocus ?? "logo") === "logo";
+  const showCtaFirst = cfg.startFocus === "cta";
+  const showLinksFirst = cfg.startFocus === "links";
 
   // ── Template dispatch ──────────────────────────────────────────────────────
   const templateProps = {
@@ -366,6 +391,10 @@ export default function TenantLinktreePage() {
   if (cfg.pageTemplate === "barbershop") return <BarbershopTemplate {...templateProps} />;
   if (cfg.pageTemplate === "beauty")     return <BeautyTemplate    {...templateProps} />;
   if (cfg.pageTemplate === "organic")    return <OrganicTemplate   {...templateProps} />;
+  if (cfg.pageTemplate === "clinic")     return <ClinicTemplate    {...templateProps} />;
+  if (cfg.pageTemplate === "fitness")    return <FitnessTemplate   {...templateProps} />;
+  if (cfg.pageTemplate === "restaurant") return <RestaurantTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "portfolio")  return <PortfolioTemplate {...templateProps} />;
 
   return (
     <div className="min-h-screen" style={{ background: t.bg, fontFamily }}>
@@ -398,13 +427,13 @@ export default function TenantLinktreePage() {
         </div>
       )}
 
-      <div className="relative max-w-md mx-auto px-4 py-14 pb-16 flex flex-col items-center gap-5">
+      <div className={`relative max-w-md mx-auto px-4 pb-16 flex flex-col items-center ${heroGap}`}>
 
         {/* ── Profile ── */}
         <motion.div
           initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex flex-col items-center gap-3 text-center"
+          className={`flex flex-col items-center gap-3 text-center ${showProfileFirst ? "order-1" : showCtaFirst ? "order-2" : "order-3"}`}
         >
           {/* Avatar */}
           <div className="relative">
@@ -413,14 +442,14 @@ export default function TenantLinktreePage() {
             )}
             {logoSrc ? (
               <img src={logoSrc} alt={tenantName}
-                className="relative w-24 h-24 object-cover shadow-2xl border-4"
+                className={`relative ${avatarSize} object-cover shadow-2xl border-4`}
                 style={{ borderRadius: avRadius, borderColor: t.avatarBorder }} />
             ) : (
-              <div className="relative w-24 h-24 flex items-center justify-center shadow-2xl border-4"
+              <div className={`relative ${avatarSize} flex items-center justify-center shadow-2xl border-4`}
                 style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`, borderRadius: avRadius, borderColor: t.avatarBorder }}>
                 {emoji
-                  ? <span className="text-3xl leading-none">{emoji}</span>
-                  : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
+                  ? <span className={`${avatarText} leading-none`}>{emoji}</span>
+                  : <span className={`text-white ${avatarText} font-bold`}>{tenantName.charAt(0).toUpperCase()}</span>
                 }
               </div>
             )}
@@ -457,14 +486,14 @@ export default function TenantLinktreePage() {
 
         {/* ── Links ── */}
         <motion.div
-          className={`w-full mt-1 ${isGrid ? "grid grid-cols-1 gap-3" : "flex flex-col gap-3"}`}
+          className={`w-full mt-1 ${isGrid ? `grid grid-cols-1 ${linkGap}` : `flex flex-col ${linkGap}`} ${showCtaFirst ? "order-1" : showLinksFirst ? "order-1" : "order-2"}`}
           variants={container} initial="hidden" animate="visible"
         >
           {/* Booking CTA — always full width */}
-          <motion.div variants={itemVariant} className="col-span-full">
+          <motion.div variants={itemVariant} className={`col-span-full ${showLinksFirst ? "order-2" : "order-1"}`}>
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
-                className="cta-shimmer group w-full flex items-center gap-3 px-5 py-4 font-bold text-base shadow-xl transition-transform active:scale-[0.97] text-left"
+                className={`cta-shimmer group w-full flex items-center gap-3 ${buttonPad} font-bold text-base shadow-xl transition-transform active:scale-[0.97] text-left`}
                 style={{ background: ctaBg, boxShadow: `0 8px 30px ${t.ctaShadow}`, color: ctaTextClr, borderRadius: btnRadius }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 group-hover:bg-white/30 transition-colors" style={{ borderRadius: btnRadius }}>
@@ -477,7 +506,7 @@ export default function TenantLinktreePage() {
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
-                className="cta-shimmer group w-full flex items-center gap-3 px-5 py-4 font-bold text-base shadow-xl transition-transform active:scale-[0.97]"
+                className={`cta-shimmer group w-full flex items-center gap-3 ${buttonPad} font-bold text-base shadow-xl transition-transform active:scale-[0.97]`}
                 style={{ background: ctaBg, boxShadow: `0 8px 30px ${t.ctaShadow}`, color: ctaTextClr, borderRadius: btnRadius, display: "flex" }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 group-hover:bg-white/30 transition-colors" style={{ borderRadius: btnRadius }}>
@@ -502,12 +531,12 @@ export default function TenantLinktreePage() {
 
           {/* Custom links — list or grid */}
           {isGrid ? (
-            <div className="grid grid-cols-2 gap-3">
+            <div className={`grid grid-cols-2 ${linkGap} ${showLinksFirst ? "order-1" : "order-2"}`}>
               {links.map((link) => (
                 <motion.div key={link.id} variants={itemVariant}>
                   <TiltCard>
                     <a href={link.url} target="_blank" rel="noopener noreferrer"
-                      className="flex flex-col items-center gap-2.5 px-3 py-5 font-semibold text-sm text-center active:scale-[0.97] transition-all w-full"
+                      className={`flex flex-col items-center gap-2.5 ${gridCardPad} font-semibold text-sm text-center active:scale-[0.97] transition-all w-full`}
                       style={{ ...cardS, borderRadius: btnRadius, backdropFilter: (t as any).blur ? "blur(16px)" : undefined, WebkitBackdropFilter: (t as any).blur ? "blur(16px)" : undefined }}
                     >
                       <span className="p-2.5 rounded-xl text-white" style={{ background: t.iconBg, borderRadius: btnRadius }}>
@@ -520,11 +549,12 @@ export default function TenantLinktreePage() {
               ))}
             </div>
           ) : (
-            links.map((link) => (
+            <div className={`flex flex-col ${linkGap} ${showLinksFirst ? "order-1" : "order-2"}`}>
+            {links.map((link) => (
               <motion.div key={link.id} variants={itemVariant}>
                 <TiltCard>
                   <a href={link.url} target="_blank" rel="noopener noreferrer"
-                    className="group w-full flex items-center gap-3 px-5 py-4 font-semibold text-base active:scale-[0.97] transition-all"
+                    className={`group w-full flex items-center gap-3 ${cardPad} font-semibold text-base active:scale-[0.97] transition-all`}
                     style={{ ...cardS, borderRadius: btnRadius, backdropFilter: (t as any).blur ? "blur(16px)" : undefined, WebkitBackdropFilter: (t as any).blur ? "blur(16px)" : undefined, color: t.textSecondary, boxShadow: cfg.cardStyle === "ghost" || cfg.cardStyle === "outlined" ? "none" : "0 2px 16px rgba(0,0,0,0.05)" }}
                   >
                     <span className="flex-shrink-0 p-2 text-white transition-transform group-hover:scale-105" style={{ background: t.iconBg, borderRadius: btnRadius }}>
@@ -535,7 +565,8 @@ export default function TenantLinktreePage() {
                   </a>
                 </TiltCard>
               </motion.div>
-            ))
+            ))}
+            </div>
           )}
         </motion.div>
 

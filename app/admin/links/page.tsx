@@ -9,10 +9,18 @@ import {
   ArrowUp, ArrowDown, Palette, Loader2, Sparkles, ChevronDown,
   Circle, Grid3x3, Minus, Type, Pipette, LayoutList, LayoutGrid,
   Zap, Wind, Smile, QrCode, Download, Copy, Check as CheckIcon,
+  SlidersHorizontal, Smartphone, Tablet, Monitor, BarChart3,
+  MousePointerClick, TrendingUp, Clock3, TestTube2,
 } from "lucide-react";
 import QRCodeSVG from "react-qr-code";
 import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import {
+  getStatistics,
+  getTrackingStatistics,
+  type DashboardStatistics,
+  type SimplifiedTrackingStatistics,
+} from "@/lib/api/admin";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +31,16 @@ type FontFamily = "inter" | "playfair" | "montserrat" | "dm-serif" | "josefin";
 type CardStyle = "filled" | "outlined" | "gradient" | "ghost";
 type LayoutMode = "list" | "grid";
 type AnimSpeed = "none" | "slow" | "normal" | "fast";
+type HeroStyle = "compact" | "editorial" | "immersive";
+type SizeLevel = "sm" | "md" | "lg";
+type SpacingLevel = "tight" | "normal" | "airy";
+type MotionIntensity = "off" | "subtle" | "strong";
+type StartFocus = "logo" | "cta" | "links";
+type PreviewDevice = "mobile" | "tablet" | "desktop";
+type PageTemplate =
+  | "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate"
+  | "organic" | "tattoo" | "barbershop" | "beauty" | "clinic" | "fitness"
+  | "restaurant" | "portfolio";
 
 interface LinktreeConfig {
   ctaText: string;
@@ -42,8 +60,14 @@ interface LinktreeConfig {
   showPrices?: boolean;
   ctaBadge?: string;
   // Templates
-  pageTemplate?: "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate" | "organic" | "tattoo" | "barbershop" | "beauty";
+  pageTemplate?: PageTemplate;
   colorScheme?: string;
+  heroStyle?: HeroStyle;
+  mediaScale?: SizeLevel;
+  buttonSpacing?: SpacingLevel;
+  cardDensity?: SpacingLevel;
+  motionIntensity?: MotionIntensity;
+  startFocus?: StartFocus;
 }
 
 const DEFAULT_CONFIG: LinktreeConfig = {
@@ -64,6 +88,12 @@ const DEFAULT_CONFIG: LinktreeConfig = {
   ctaBadge: "",
   pageTemplate: "classic",
   colorScheme: "auto",
+  heroStyle: "compact",
+  mediaScale: "md",
+  buttonSpacing: "normal",
+  cardDensity: "normal",
+  motionIntensity: "subtle",
+  startFocus: "logo",
 };
 
 // ── Industry Presets ──────────────────────────────────────────────────────────
@@ -76,6 +106,10 @@ const INDUSTRY_PRESETS: Record<string, { color: string; style: Theme; emoji: str
   Nail:        { color: "#D4A5C9", style: "glass",     emoji: "💅",  label: "Nails",          ctaText: "Nail-Termin buchen",     bgPattern: "dots",    buttonStyle: "pill"    },
   Physio:      { color: "#4A90D9", style: "minimal",   emoji: "🏋️", label: "Physiotherapie", ctaText: "Termin vereinbaren",     bgPattern: "none",    buttonStyle: "rounded" },
   Tattoo:      { color: "#1A1A2E", style: "dark",      emoji: "🎨",  label: "Tattoo",         ctaText: "Studio-Termin buchen",   bgPattern: "grid",    buttonStyle: "square"  },
+  Yoga:        { color: "#7C9885", style: "glass",     emoji: "🧘",  label: "Yoga",           ctaText: "Session buchen",         bgPattern: "waves",   buttonStyle: "pill"    },
+  Fitness:     { color: "#EF4444", style: "bold",      emoji: "🏋️", label: "Fitness",        ctaText: "Training buchen",        bgPattern: "grid",    buttonStyle: "rounded" },
+  Restaurant:  { color: "#B45309", style: "bold",      emoji: "🍽️", label: "Restaurant",     ctaText: "Tisch reservieren",      bgPattern: "none",    buttonStyle: "rounded" },
+  Coaching:    { color: "#2563EB", style: "minimal",   emoji: "💼",  label: "Coaching",       ctaText: "Erstgespräch buchen",    bgPattern: "grid",    buttonStyle: "rounded" },
   Other:       { color: "#E8C7C3", style: "gradient",  emoji: "📅",  label: "Andere",         ctaText: "Termin buchen",          bgPattern: "none",    buttonStyle: "rounded" },
 };
 
@@ -94,12 +128,16 @@ const COLOR_PALETTES: { key: string; name: string; primary: string; bg: string; 
   { key: "slate",    name: "Slate",     primary: "#64748B", bg: "#F8FAFC", theme: "minimal"  },
   { key: "mint",     name: "Mint",      primary: "#10B981", bg: "#F0FDF4", theme: "minimal"  },
   { key: "noir",     name: "Noir",      primary: "#ffffff", bg: "#0a0a0a", theme: "dark"     },
+  { key: "saffron",  name: "Saffron",   primary: "#D97706", bg: "#FFFBEB", theme: "bold"     },
+  { key: "clinical", name: "Clinical",  primary: "#0EA5E9", bg: "#F0F9FF", theme: "minimal"  },
+  { key: "lime",     name: "Lime",      primary: "#84CC16", bg: "#F7FEE7", theme: "glass"    },
+  { key: "mono",     name: "Mono",      primary: "#18181B", bg: "#FAFAFA", theme: "minimal"  },
 ];
 
 // ── Page Templates ─────────────────────────────────────────────────────────────
 
 const PAGE_TEMPLATES: {
-  key: string; name: string; desc: string;
+  key: PageTemplate; name: string; desc: string;
   plan: "starter" | "pro" | "business";
   emoji: string;
   industry?: string;
@@ -115,9 +153,78 @@ const PAGE_TEMPLATES: {
   { key: "tattoo",     name: "Tattoo",     desc: "Dark & edgy",             plan: "starter",  emoji: "🎨", industry: "Tattoo"   },
   { key: "barbershop", name: "Barbershop", desc: "Vintage & warm",          plan: "starter",  emoji: "🪒", industry: "Barbershop"},
   { key: "beauty",     name: "Beauty",     desc: "Elegant & luxuriös",      plan: "starter",  emoji: "💄", industry: "Beauty"   },
+  { key: "clinic",     name: "Clinic",     desc: "Vertrauen & Klarheit",    plan: "starter",  emoji: "🏥", industry: "Praxis"   },
+  { key: "fitness",    name: "Fitness",    desc: "3D Energy Cards",         plan: "pro",      emoji: "🔥", industry: "Fitness"  },
+  { key: "restaurant", name: "Restaurant", desc: "Reservierung & Genuss",   plan: "pro",      emoji: "🍽️", industry: "Food"     },
+  { key: "portfolio",  name: "Portfolio",  desc: "Creator & Coach",         plan: "business", emoji: "◼", industry: "Creator"  },
 ];
 
 const PLAN_ORDER = { starter: 0, pro: 1, business: 2 };
+
+const CMS_TEMPLATE_PACKS: {
+  key: string;
+  name: string;
+  desc: string;
+  icon: string;
+  primaryColor: string;
+  theme: Theme;
+  config: LinktreeConfig;
+}[] = [
+  {
+    key: "salon-launch",
+    name: "Salon Launch",
+    desc: "Friseur, Beauty, Nails",
+    icon: "✂️",
+    primaryColor: "#C9A96E",
+    theme: "bold",
+    config: { pageTemplate: "beauty", fontFamily: "playfair", buttonStyle: "pill", cardStyle: "filled", bgPattern: "dots", layoutMode: "list", animationSpeed: "normal", ctaText: "Wunschtermin buchen", ctaBadge: "Beliebt", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" },
+  },
+  {
+    key: "medical-trust",
+    name: "Medical Trust",
+    desc: "Praxis, Physio, Beratung",
+    icon: "🏥",
+    primaryColor: "#0EA5E9",
+    theme: "minimal",
+    config: { pageTemplate: "clinic", fontFamily: "inter", buttonStyle: "rounded", cardStyle: "outlined", bgPattern: "grid", layoutMode: "list", animationSpeed: "slow", ctaText: "Termin vereinbaren", ctaBadge: "Online", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "md", buttonSpacing: "normal", cardDensity: "tight", motionIntensity: "subtle", startFocus: "cta" },
+  },
+  {
+    key: "fitness-energy",
+    name: "Fitness Energy",
+    desc: "Gym, Coaching, Yoga",
+    icon: "🔥",
+    primaryColor: "#EF4444",
+    theme: "dark",
+    config: { pageTemplate: "fitness", fontFamily: "montserrat", buttonStyle: "rounded", cardStyle: "gradient", bgPattern: "grid", layoutMode: "grid", animationSpeed: "fast", ctaText: "Training buchen", ctaBadge: "Neu", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, confetti: true, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" },
+  },
+  {
+    key: "food-reservation",
+    name: "Food Reservation",
+    desc: "Restaurant, Cafe, Bar",
+    icon: "🍽️",
+    primaryColor: "#B45309",
+    theme: "bold",
+    config: { pageTemplate: "restaurant", fontFamily: "dm-serif", buttonStyle: "rounded", cardStyle: "filled", bgPattern: "none", layoutMode: "list", animationSpeed: "normal", ctaText: "Tisch reservieren", ctaBadge: "Heute", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "md", buttonSpacing: "normal", cardDensity: "airy", motionIntensity: "subtle", startFocus: "cta" },
+  },
+  {
+    key: "creator-pro",
+    name: "Creator Pro",
+    desc: "Coach, Portfolio, Beratung",
+    icon: "◼",
+    primaryColor: "#18181B",
+    theme: "minimal",
+    config: { pageTemplate: "portfolio", fontFamily: "josefin", buttonStyle: "square", cardStyle: "ghost", bgPattern: "none", layoutMode: "grid", animationSpeed: "normal", ctaText: "Call buchen", ctaBadge: "Limited", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "sm", buttonSpacing: "tight", cardDensity: "tight", motionIntensity: "subtle", startFocus: "links" },
+  },
+  {
+    key: "night-studio",
+    name: "Night Studio",
+    desc: "Tattoo, Barber, Events",
+    icon: "⚡",
+    primaryColor: "#A855F7",
+    theme: "dark",
+    config: { pageTemplate: "neon", fontFamily: "josefin", buttonStyle: "square", cardStyle: "outlined", bgPattern: "grid", layoutMode: "grid", animationSpeed: "fast", ctaText: "Slot sichern", ctaBadge: "Live", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, confetti: true, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" },
+  },
+];
 
 // ── Themes ────────────────────────────────────────────────────────────────────
 
@@ -212,6 +319,12 @@ export default function AdminLinksPage() {
   // Live preview
   const [previewKey, setPreviewKey] = useState(0);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("mobile");
+
+  // Conversion insights
+  const [trackingStats, setTrackingStats] = useState<SimplifiedTrackingStatistics | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStatistics | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(true);
 
   // Toast
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -250,6 +363,14 @@ export default function AdminLinksPage() {
       else if (plan.includes("pro"))  setTenantPlan("pro");
       else                            setTenantPlan("starter");
     }).catch(() => {});
+
+    Promise.all([getTrackingStatistics(), getStatistics()])
+      .then(([tracking, dashboard]) => {
+        setTrackingStats(tracking);
+        setDashboardStats(dashboard);
+      })
+      .catch(() => {})
+      .finally(() => setInsightsLoading(false));
   }, [tenantSlug]);
 
   // ── Save design (debounced) ──────────────────────────────────────────────────
@@ -284,6 +405,8 @@ export default function AdminLinksPage() {
   async function applyPreset(key: string) {
     const preset = INDUSTRY_PRESETS[key] ?? INDUSTRY_PRESETS.Other;
     const newConfig: LinktreeConfig = {
+      ...DEFAULT_CONFIG,
+      ...config,
       ctaText: preset.ctaText,
       bgPattern: preset.bgPattern,
       buttonStyle: preset.buttonStyle,
@@ -293,6 +416,15 @@ export default function AdminLinksPage() {
     setConfig(newConfig);
     await saveDesign(preset.style, preset.color, newConfig, false);
     showToast("success", `Vorlage „${preset.label}" angewendet ✓`);
+  }
+
+  async function applyCmsTemplate(pack: typeof CMS_TEMPLATE_PACKS[number]) {
+    const next: LinktreeConfig = { ...DEFAULT_CONFIG, ...config, ...pack.config, colorScheme: pack.key };
+    setTheme(pack.theme);
+    setPrimaryColor(pack.primaryColor);
+    setConfig(next);
+    await saveDesign(pack.theme, pack.primaryColor, next, false);
+    showToast("success", `CMS-Paket „${pack.name}" angewendet`);
   }
 
   // ── Apply color palette ──────────────────────────────────────────────────────
@@ -398,6 +530,19 @@ export default function AdminLinksPage() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   const previewUrl = tenantSlug ? `/booking/${tenantSlug}` : null;
+  const bookingConversion = trackingStats && trackingStats.totalPageViews > 0
+    ? (trackingStats.totalBookings / trackingStats.totalPageViews) * 100
+    : 0;
+  const clickThroughRate = trackingStats && trackingStats.totalPageViews > 0
+    ? (trackingStats.totalLinkClicks / trackingStats.totalPageViews) * 100
+    : 0;
+  const topLink = trackingStats?.linkClicks?.slice().sort((a, b) => b.clickCount - a.clickCount)[0] ?? null;
+  const topService = dashboardStats?.popularServices?.[0] ?? null;
+  const previewDeviceStyle: Record<PreviewDevice, { width: string; label: string }> = {
+    mobile: { width: "390px", label: "Mobile" },
+    tablet: { width: "768px", label: "Tablet" },
+    desktop: { width: "100%", label: "Desktop" },
+  };
 
   return (
     <div className="min-h-screen bg-[#F5EDEB] lg:flex lg:flex-row lg:overflow-hidden lg:h-screen">
@@ -606,6 +751,189 @@ export default function AdminLinksPage() {
                       })}
                     </div>
                     <p className="text-[10px] text-gray-400 mt-2">Wähle das Layout deiner öffentlichen Buchungsseite</p>
+                  </div>
+
+                  {/* ── Template Feintuning ── */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <SlidersHorizontal size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Template-Feintuning</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-[11px] font-semibold text-gray-500 mb-2">Hero-Stil</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {([
+                            { v: "compact", label: "Kompakt" },
+                            { v: "editorial", label: "Editorial" },
+                            { v: "immersive", label: "Immersiv" },
+                          ] as const).map(({ v, label }) => (
+                            <button key={v} onClick={() => updateConfig("heroStyle", v)}
+                              className={`py-2 rounded-xl border text-xs font-medium transition-all ${
+                                (config.heroStyle ?? "compact") === v
+                                  ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                  : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                              }`}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-[11px] font-semibold text-gray-500 mb-2">Bild / Logo-Größe</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {([
+                            { v: "sm", label: "Klein" },
+                            { v: "md", label: "Mittel" },
+                            { v: "lg", label: "Groß" },
+                          ] as const).map(({ v, label }) => (
+                            <button key={v} onClick={() => updateConfig("mediaScale", v)}
+                              className={`py-2 rounded-xl border text-xs font-medium transition-all ${
+                                (config.mediaScale ?? "md") === v
+                                  ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                  : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                              }`}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold text-gray-500 mb-2">Button-Abstände</p>
+                          <div className="flex flex-col gap-1.5">
+                            {([
+                              { v: "tight", label: "Eng" },
+                              { v: "normal", label: "Normal" },
+                              { v: "airy", label: "Luftig" },
+                            ] as const).map(({ v, label }) => (
+                              <button key={v} onClick={() => updateConfig("buttonSpacing", v)}
+                                className={`py-2 rounded-xl border text-xs font-medium transition-all ${
+                                  (config.buttonSpacing ?? "normal") === v
+                                    ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                    : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                                }`}>
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="text-[11px] font-semibold text-gray-500 mb-2">Karten-Dichte</p>
+                          <div className="flex flex-col gap-1.5">
+                            {([
+                              { v: "tight", label: "Dicht" },
+                              { v: "normal", label: "Normal" },
+                              { v: "airy", label: "Großzügig" },
+                            ] as const).map(({ v, label }) => (
+                              <button key={v} onClick={() => updateConfig("cardDensity", v)}
+                                className={`py-2 rounded-xl border text-xs font-medium transition-all ${
+                                  (config.cardDensity ?? "normal") === v
+                                    ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                    : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                                }`}>
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-[11px] font-semibold text-gray-500 mb-2">Animation</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {([
+                            { v: "off", label: "Aus" },
+                            { v: "subtle", label: "Dezent" },
+                            { v: "strong", label: "Stark" },
+                          ] as const).map(({ v, label }) => (
+                            <button key={v} onClick={() => updateConfig("motionIntensity", v)}
+                              className={`py-2 rounded-xl border text-xs font-medium transition-all ${
+                                (config.motionIntensity ?? "subtle") === v
+                                  ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                  : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                              }`}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-[11px] font-semibold text-gray-500 mb-2">Startbereich</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {([
+                            { v: "logo", label: "Logo zuerst" },
+                            { v: "cta", label: "CTA zuerst" },
+                            { v: "links", label: "Links zuerst" },
+                          ] as const).map(({ v, label }) => (
+                            <button key={v} onClick={() => updateConfig("startFocus", v)}
+                              className={`py-2 px-1 rounded-xl border text-[11px] font-medium transition-all ${
+                                (config.startFocus ?? "logo") === v
+                                  ? "bg-[#F5EDEB] border-[#E8C7C3] text-[#D8B0AC]"
+                                  : "bg-white border-gray-100 text-gray-500 hover:border-gray-300"
+                              }`}>
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ── CMS Template Packs ── */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={14} className="text-[#E8C7C3]" />
+                      <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Fertige CMS-Pakete</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {CMS_TEMPLATE_PACKS.map((pack) => {
+                        const isActive = (config.colorScheme ?? "") === pack.key;
+                        return (
+                          <button
+                            key={pack.key}
+                            onClick={() => applyCmsTemplate(pack)}
+                            className={`group relative overflow-hidden rounded-2xl border p-3 text-left transition-all ${
+                              isActive
+                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3]"
+                                : "border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm"
+                            }`}
+                          >
+                            <motion.div
+                              aria-hidden
+                              className="absolute -right-5 -top-5 h-16 w-16 rounded-2xl opacity-25"
+                              style={{ background: pack.primaryColor, transformStyle: "preserve-3d" }}
+                              animate={{ rotateX: [0, 18, 0], rotateY: [0, -22, 0], y: [0, 4, 0] }}
+                              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                            />
+                            <div className="relative flex items-start gap-2">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-base shadow-sm"
+                                style={{ background: `${pack.primaryColor}22`, color: pack.primaryColor }}>
+                                {pack.icon}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-[#1E1E1E]">{pack.name}</p>
+                                <p className="mt-0.5 text-[10px] leading-snug text-gray-400">{pack.desc}</p>
+                              </div>
+                            </div>
+                            <div className="relative mt-3 flex items-center gap-1.5">
+                              {[pack.primaryColor, "#ffffff", "#111111"].map((c) => (
+                                <span key={c} className="h-3 w-3 rounded-full border border-white shadow-sm" style={{ background: c }} />
+                              ))}
+                              <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                                {(pack.config.pageTemplate ?? "classic").toString()}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2">Setzt Layout, Farben, Animation, CTA und Buchungsflow in einem Schritt</p>
                   </div>
 
                   {/* ── Farbpaletten ── */}
@@ -1062,6 +1390,69 @@ export default function AdminLinksPage() {
         </div>
 
         {/* ══════════════════════════════════════════════════════════════
+            CONVERSION SECTION
+        ══════════════════════════════════════════════════════════════ */}
+        <div className="mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2.5">
+              <BarChart3 size={16} className="text-[#E8C7C3]" />
+              <div>
+                <p className="font-semibold text-sm text-[#1E1E1E]">Conversion-Optimierung</p>
+                <p className="text-[10px] text-gray-400">Echte Tracking-Werte und nächste Testfelder</p>
+              </div>
+            </div>
+            {insightsLoading && <Loader2 size={14} className="animate-spin text-[#E8C7C3]" />}
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            {[
+              { label: "Besucher", value: trackingStats?.totalPageViews ?? 0, icon: Eye },
+              { label: "Link-Klicks", value: trackingStats?.totalLinkClicks ?? 0, icon: MousePointerClick },
+              { label: "Zur Buchung", value: `${bookingConversion.toFixed(1)}%`, icon: TrendingUp },
+              { label: "CTR", value: `${clickThroughRate.toFixed(1)}%`, icon: BarChart3 },
+            ].map(({ label, value, icon: Icon }) => (
+              <div key={label} className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400">
+                  <Icon size={11} /> {label}
+                </div>
+                <p className="mt-1 text-lg font-bold text-[#1E1E1E]">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[#1E1E1E]">Meist geklickter Link</p>
+                <p className="text-[10px] text-gray-400 truncate">{topLink ? `${topLink.linkName} · ${topLink.clickCount} Klicks` : "Noch keine Link-Klicks"}</p>
+              </div>
+              <MousePointerClick size={15} className="text-[#E8C7C3] shrink-0" />
+            </div>
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[#1E1E1E]">Top-Service</p>
+                <p className="text-[10px] text-gray-400 truncate">{topService ? `${topService.serviceName} · ${topService.bookingCount} Buchungen` : "Noch keine Service-Daten"}</p>
+              </div>
+              <Calendar size={15} className="text-[#E8C7C3] shrink-0" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            {[
+              { label: "QR-Scans", icon: QrCode },
+              { label: "Beste Zeiten", icon: Clock3 },
+              { label: "A/B-Test", icon: TestTube2 },
+            ].map(({ label, icon: Icon }) => (
+              <div key={label} className="rounded-xl bg-[#F5EDEB]/60 px-2 py-2 text-center">
+                <Icon size={14} className="mx-auto mb-1 text-[#D8B0AC]" />
+                <p className="text-[10px] font-semibold text-[#1E1E1E]">{label}</p>
+                <p className="text-[9px] text-gray-400">Backend offen</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════
             ADD LINK FORM
         ══════════════════════════════════════════════════════════════ */}
         <AnimatePresence>
@@ -1227,12 +1618,31 @@ export default function AdminLinksPage() {
             <span className="text-sm font-semibold text-gray-600">Live-Vorschau</span>
             {designSaving && <Loader2 size={11} className="animate-spin text-[#E8C7C3]" />}
           </div>
-          <a href={previewUrl} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            <ExternalLink size={11} /> In neuem Tab öffnen
-          </a>
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-xl bg-white border border-gray-200 p-1">
+              {([
+                { v: "mobile", icon: Smartphone },
+                { v: "tablet", icon: Tablet },
+                { v: "desktop", icon: Monitor },
+              ] as const).map(({ v, icon: Icon }) => (
+                <button key={v} onClick={() => setPreviewDevice(v)}
+                  title={previewDeviceStyle[v].label}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    previewDevice === v ? "bg-[#F5EDEB] text-[#D8B0AC]" : "text-gray-400 hover:text-gray-600"
+                  }`}>
+                  <Icon size={13} />
+                </button>
+              ))}
+            </div>
+            <a href={previewUrl} target="_blank" rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
+              <ExternalLink size={11} /> In neuem Tab öffnen
+            </a>
+          </div>
         </div>
-        <div className="flex-1 rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+        <div className="flex-1 rounded-2xl overflow-hidden bg-gray-200 p-4 flex justify-center">
+          <div className="h-full overflow-hidden rounded-2xl shadow-xl border border-gray-200 bg-white transition-all duration-300"
+            style={{ width: previewDeviceStyle[previewDevice].width, maxWidth: "100%" }}>
           <iframe
             key={previewKey}
             src={previewUrl ? `${previewUrl}?v=${previewKey}` : undefined}
@@ -1240,6 +1650,7 @@ export default function AdminLinksPage() {
             style={{ border: 'none', minHeight: '100%' }}
             title="Buchungsseite Vorschau"
           />
+          </div>
         </div>
       </div>
     )}

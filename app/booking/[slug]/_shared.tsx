@@ -27,6 +27,12 @@ export interface LinktreeConfig {
   ctaBadge?: string;
   pageTemplate?: string;
   colorScheme?: string;
+  heroStyle?: string;
+  mediaScale?: string;
+  buttonSpacing?: string;
+  cardDensity?: string;
+  motionIntensity?: string;
+  startFocus?: string;
 }
 
 export interface TenantLinkItem {
