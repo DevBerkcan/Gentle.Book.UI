@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, User, Eye, EyeOff, Mail, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 
 type LoginMode = 'employee' | 'admin';
 
@@ -206,13 +207,10 @@ export default function AdminLoginPage() {
             </AnimatePresence>
 
             {/* Submit */}
-            <motion.button
+            <ShimmerButton
               type="submit"
               disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.01 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-white text-sm shadow-lg shadow-[#E8C7C3]/15 transition-opacity disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #E8C7C3, #D8B0AC)' }}
+              className="w-full py-3.5 text-sm disabled:opacity-60"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
@@ -222,7 +220,7 @@ export default function AdminLoginPage() {
               ) : (
                 <>Anmelden <ArrowRight size={15} /></>
               )}
-            </motion.button>
+            </ShimmerButton>
 
             {mode === 'admin' && (
               <div className="text-center pt-1">

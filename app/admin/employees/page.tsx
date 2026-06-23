@@ -12,6 +12,7 @@ import {
   Lock, Eye, EyeOff, Key, MapPin, Clock, CalendarDays, Plane,
 } from "lucide-react";
 import { getEmployees, createEmployee, updateEmployee, deleteEmployee, type Employee, type CreateEmployeeDto } from "@/lib/api/employees";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 import api from "@/lib/api/client";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
@@ -623,16 +624,18 @@ export default function EmployeesPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: "Gesamt", value: employees.length, cls: "text-[#1E1E1E]" },
-            { label: "Aktiv", value: activeCount, cls: "text-[#017172]" },
-            { label: "Inaktiv", value: inactiveCount, cls: "text-[#8A8A8A]" },
-          ].map(({ label, value, cls }) => (
-            <Card key={label} className="border border-[#E8C7C3]/30 shadow-md">
-              <CardBody className="p-4">
-                <div className={`text-2xl sm:text-3xl font-bold ${cls}`}>{value}</div>
-                <div className="text-xs text-[#8A8A8A] mt-0.5">{label}</div>
-              </CardBody>
-            </Card>
+            { label: "Gesamt", value: employees.length, cls: "text-[#1E1E1E]", glow: "#E8C7C3" },
+            { label: "Aktiv", value: activeCount, cls: "text-[#017172]", glow: "#017172" },
+            { label: "Inaktiv", value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#E8C7C3" },
+          ].map(({ label, value, cls, glow }) => (
+            <GlowingEffect key={label} glowColor={glow} spread={40}>
+              <Card className="border border-[#E8C7C3]/30 shadow-md relative z-[1]">
+                <CardBody className="p-4">
+                  <div className={`text-2xl sm:text-3xl font-bold ${cls}`}>{value}</div>
+                  <div className="text-xs text-[#8A8A8A] mt-0.5">{label}</div>
+                </CardBody>
+              </Card>
+            </GlowingEffect>
           ))}
         </div>
 
@@ -676,9 +679,10 @@ export default function EmployeesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {employees.map((emp) => (
-              <Card key={emp.id}
-                className={`border shadow-md transition-all hover:shadow-lg ${emp.isActive ? "border-[#E8C7C3]/30" : "border-[#E8C7C3]/10 opacity-60"}`}>
-                <CardBody className="p-5">
+              <GlowingEffect key={emp.id} glowColor="#017172" spread={45} disabled={!emp.isActive}>
+                <Card
+                  className={`border shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 relative z-[1] ${emp.isActive ? "border-[#E8C7C3]/30" : "border-[#E8C7C3]/10 opacity-60"}`}>
+                  <CardBody className="p-5">
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(emp.name)}`}>
@@ -754,7 +758,8 @@ export default function EmployeesPage() {
                     </div>
                   </div>
                 </CardBody>
-              </Card>
+                </Card>
+              </GlowingEffect>
             ))}
           </div>
         )}

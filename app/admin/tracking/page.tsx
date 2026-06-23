@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import {
   TrendingUp, Users, BarChart3, MousePointerClick,
   Calendar, Instagram, MapPin, MessageCircle, FileText, Shield,
@@ -100,79 +102,95 @@ export default function TrackingPage() {
 
         {/* ── Overview Cards (All Time) ──────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <Card className="border border-[#E8C7C3]/30 shadow-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Seitenaufrufe (gesamt)</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">{stats.totalPageViews}</div>
-                </div>
-                <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
-                  <Eye className="text-[#017172]" size={20} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-[#E8C7C3]/30 shadow-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Total Klicks (gesamt)</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#017172]">{stats.totalLinkClicks}</div>
-                </div>
-                <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
-                  <MousePointerClick className="text-[#017172]" size={20} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-[#E8C7C3]/30 shadow-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Buchungen (gesamt)</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#017172]">{stats.totalBookings}</div>
-                </div>
-                <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
-                  <BarChart3 className="text-[#017172]" size={20} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="border border-[#E8C7C3]/30 shadow-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø CHF</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
-                    {formatPrice(stats.averageBookingValueCHF, "CHF")}
+          <GlowingEffect glowColor="#E8C7C3" spread={50}>
+            <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+              <CardBody className="p-4 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Seitenaufrufe (gesamt)</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">
+                      <AnimatedNumber value={stats.totalPageViews} duration={1.4} />
+                    </div>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
+                    <Eye className="text-[#017172]" size={20} />
                   </div>
                 </div>
-                <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
-                  <DollarSign className="text-[#017172]" size={20} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
+          </GlowingEffect>
 
-          <Card className="border border-[#E8C7C3]/30 shadow-xl">
-            <CardBody className="p-4 sm:p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø EUR</div>
-                  <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
-                    {formatPrice(stats.averageBookingValueEUR, "EUR")}
+          <GlowingEffect glowColor="#E8C7C3" spread={50}>
+            <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+              <CardBody className="p-4 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Total Klicks (gesamt)</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
+                      <AnimatedNumber value={stats.totalLinkClicks} duration={1.4} />
+                    </div>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
+                    <MousePointerClick className="text-[#017172]" size={20} />
                   </div>
                 </div>
-                <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
-                  <Euro className="text-[#017172]" size={20} />
+              </CardBody>
+            </Card>
+          </GlowingEffect>
+
+          <GlowingEffect glowColor="#E8C7C3" spread={50}>
+            <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+              <CardBody className="p-4 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Buchungen (gesamt)</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
+                      <AnimatedNumber value={stats.totalBookings} duration={1.4} />
+                    </div>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
+                    <BarChart3 className="text-[#017172]" size={20} />
+                  </div>
                 </div>
-              </div>
-            </CardBody>
-          </Card>
+              </CardBody>
+            </Card>
+          </GlowingEffect>
+
+          <GlowingEffect glowColor="#E8C7C3" spread={50}>
+            <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+              <CardBody className="p-4 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø CHF</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
+                      <AnimatedNumber value={stats.averageBookingValueCHF} duration={1.4} formatFn={(n) => formatPrice(n, "CHF")} />
+                    </div>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
+                    <DollarSign className="text-[#017172]" size={20} />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </GlowingEffect>
+
+          <GlowingEffect glowColor="#E8C7C3" spread={50}>
+            <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+              <CardBody className="p-4 sm:p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø EUR</div>
+                    <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
+                      <AnimatedNumber value={stats.averageBookingValueEUR} duration={1.4} formatFn={(n) => formatPrice(n, "EUR")} />
+                    </div>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-[#017172]/10 rounded-xl">
+                    <Euro className="text-[#017172]" size={20} />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </GlowingEffect>
         </div>
 
         {/* ── All Time Revenue Card ──────────────────────────────────────── */}
@@ -231,29 +249,33 @@ export default function TrackingPage() {
               icon: Calendar 
             },
           ].map(({ label, bookings, revCHF, revEUR, icon: Icon }) => (
-            <Card key={label} className="border border-[#E8C7C3]/30 shadow-xl">
-              <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
-                <div className="flex items-center gap-2">
-                  <Icon size={18} className="text-[#017172]" />
-                  <h3 className="text-base font-semibold text-[#1E1E1E]">{label}</h3>
-                </div>
-              </CardHeader>
-              <CardBody className="p-4 sm:p-6 pt-2">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-[#8A8A8A]">CHF</span>
-                  <div className="text-xl sm:text-2xl font-bold text-[#017172]">
-                    {formatPrice(revCHF, "CHF")}
+            <GlowingEffect key={label} glowColor="#017172" spread={40}>
+              <Card className="border border-[#E8C7C3]/30 shadow-xl relative z-[1]">
+                <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-0">
+                  <div className="flex items-center gap-2">
+                    <Icon size={18} className="text-[#017172]" />
+                    <h3 className="text-base font-semibold text-[#1E1E1E]">{label}</h3>
                   </div>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm text-[#8A8A8A]">EUR</span>
-                  <div className="text-xl sm:text-2xl font-bold text-[#017172]">
-                    {formatPrice(revEUR, "EUR")}
+                </CardHeader>
+                <CardBody className="p-4 sm:p-6 pt-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-[#8A8A8A]">CHF</span>
+                    <div className="text-xl sm:text-2xl font-bold text-[#017172]">
+                      <AnimatedNumber value={revCHF} formatFn={(n) => formatPrice(n, "CHF")} />
+                    </div>
                   </div>
-                </div>
-                <div className="text-sm text-[#8A8A8A] text-right">{bookings} Buchungen</div>
-              </CardBody>
-            </Card>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-[#8A8A8A]">EUR</span>
+                    <div className="text-xl sm:text-2xl font-bold text-[#017172]">
+                      <AnimatedNumber value={revEUR} formatFn={(n) => formatPrice(n, "EUR")} />
+                    </div>
+                  </div>
+                  <div className="text-sm text-[#8A8A8A] text-right">
+                    <AnimatedNumber value={bookings} /> Buchungen
+                  </div>
+                </CardBody>
+              </Card>
+            </GlowingEffect>
           ))}
         </div>
 

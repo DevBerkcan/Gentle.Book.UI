@@ -15,6 +15,8 @@ import {
 import QRCodeSVG from "react-qr-code";
 import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { MagicCard } from "@/components/ui/magic-card";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 import {
   getStatistics,
   getTrackingStatistics,
@@ -160,6 +162,25 @@ const PAGE_TEMPLATES: {
 ];
 
 const PLAN_ORDER = { starter: 0, pro: 1, business: 2 };
+
+// ── Template visual styles (mini-preview backgrounds & accents) ────────────────
+const TPL_VISUAL: Record<PageTemplate, { bg: string; accent: string }> = {
+  classic:    { bg: "linear-gradient(145deg,#FDF6F5,#F5EDEB)", accent: "#E8C7C3" },
+  soft:       { bg: "linear-gradient(145deg,#FFF0F8,#FFE0F0)", accent: "#F9A8D4" },
+  hero:       { bg: "linear-gradient(145deg,#1a1a2e,#16213e)",  accent: "#E8C7C3" },
+  neon:       { bg: "linear-gradient(145deg,#0D0D0D,#1a0028)",  accent: "#A855F7" },
+  magazine:   { bg: "linear-gradient(145deg,#F8F8F8,#E8E8E8)", accent: "#1E1E1E" },
+  split:      { bg: "linear-gradient(90deg,#1E1E1E 48%,#F8F8F8 52%)", accent: "#E8C7C3" },
+  corporate:  { bg: "linear-gradient(145deg,#EFF6FF,#DBEAFE)", accent: "#2563EB" },
+  organic:    { bg: "linear-gradient(145deg,#F0FDF4,#DCFCE7)", accent: "#16A34A" },
+  tattoo:     { bg: "linear-gradient(145deg,#0A0A0A,#1A0A0A)", accent: "#EF4444" },
+  barbershop: { bg: "linear-gradient(145deg,#FFF8F0,#FDEBD0)", accent: "#C9A96E" },
+  beauty:     { bg: "linear-gradient(145deg,#FFF1F2,#FFE4E6)", accent: "#F43F5E" },
+  clinic:     { bg: "linear-gradient(145deg,#F0F9FF,#E0F2FE)", accent: "#0EA5E9" },
+  fitness:    { bg: "linear-gradient(145deg,#150505,#2D1515)", accent: "#EF4444" },
+  restaurant: { bg: "linear-gradient(145deg,#FFFBEB,#FEF3C7)", accent: "#B45309" },
+  portfolio:  { bg: "linear-gradient(145deg,#FAFAFA,#F0F0F0)", accent: "#18181B" },
+};
 
 const CMS_TEMPLATE_PACKS: {
   key: string;
@@ -650,10 +671,15 @@ export default function AdminLinksPage() {
       <div className="max-w-2xl mx-auto">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-[#1E1E1E]">Meine Links</h1>
-            <p className="text-sm text-[#8A8A8A] mt-1">Profil & Design deiner öffentlichen Seite</p>
+            <div className="flex items-center gap-2.5 mb-1">
+              <h1 className="text-2xl font-bold text-[#1E1E1E]">Meine Links</h1>
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                <Sparkles size={9} /> Live
+              </span>
+            </div>
+            <p className="text-sm text-[#8A8A8A]">Profil & Design deiner öffentlichen Buchungsseite</p>
           </div>
           <div className="flex gap-2">
             {tenantSlug && (
@@ -678,10 +704,13 @@ export default function AdminLinksPage() {
                 </a>
               </>
             )}
-            <button onClick={() => { setShowAddForm(true); setEditingId(null); }}
-              className="flex items-center gap-1.5 text-sm bg-[#E8C7C3] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D8B0AC] transition-colors">
+            <ShimmerButton
+              onClick={() => { setShowAddForm(true); setEditingId(null); }}
+              className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl"
+              shimmerDuration="2.5s"
+            >
               <Plus size={16} />Link hinzufügen
-            </button>
+            </ShimmerButton>
           </div>
         </div>
 
@@ -690,10 +719,15 @@ export default function AdminLinksPage() {
         ══════════════════════════════════════════════════════════════ */}
         <div className="mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <button onClick={() => setDesignOpen((v) => !v)}
-            className="w-full flex items-center justify-between px-4 py-4 text-sm hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-2.5">
-              <Palette size={16} className="text-[#E8C7C3]" />
-              <span className="font-semibold text-[#1E1E1E]">Seiten-Design</span>
+            className="w-full flex items-center justify-between px-4 py-4 text-sm hover:bg-gradient-to-r hover:from-[#FDF8F7] hover:to-white transition-all">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center shadow-sm flex-shrink-0">
+                <Palette size={14} className="text-white" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold text-[#1E1E1E] text-sm leading-tight">Seiten-Design</p>
+                {!designOpen && <p className="text-[10px] text-[#8A8A8A] leading-tight">Template · Farben · Layout · Animationen</p>}
+              </div>
               {designSaving && <Loader2 size={12} className="animate-spin text-[#E8C7C3]" />}
             </div>
             <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
@@ -715,42 +749,66 @@ export default function AdminLinksPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <LayoutGrid size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Seitenvorlage</span>
+                      <span className="ml-auto text-[10px] font-semibold text-[#8A8A8A] bg-gray-100 px-2 py-0.5 rounded-full">{PAGE_TEMPLATES.length} Designs</span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {PAGE_TEMPLATES.map((tpl) => {
                         const isActive = (config.pageTemplate ?? "classic") === tpl.key;
                         const isLocked = PLAN_ORDER[tpl.plan] > PLAN_ORDER[tenantPlan];
+                        const visual = TPL_VISUAL[tpl.key as PageTemplate] ?? { bg: "#F5EDEB", accent: "#E8C7C3" };
                         return (
-                          <button key={tpl.key}
-                            onClick={() => !isLocked && updateConfig("pageTemplate", tpl.key)}
-                            disabled={isLocked}
-                            title={isLocked ? `Erfordert ${tpl.plan.charAt(0).toUpperCase() + tpl.plan.slice(1)}-Plan` : tpl.desc}
-                            className={`relative flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all text-center ${
+                          <MagicCard
+                            key={tpl.key}
+                            gradientColor={visual.accent}
+                            gradientOpacity={isLocked ? 0 : 0.18}
+                            gradientSize={120}
+                            className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden text-left cursor-pointer ${
                               isActive
-                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3]"
+                                ? "border-[#E8C7C3] ring-2 ring-[#E8C7C3]/30 shadow-md shadow-[#E8C7C3]/20"
                                 : isLocked
-                                ? "border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed"
-                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                                ? "border-gray-100 opacity-50 cursor-not-allowed"
+                                : "border-gray-100 hover:border-[#E8C7C3]/50 hover:shadow-sm"
                             }`}
+                            onClick={() => !isLocked && updateConfig("pageTemplate", tpl.key)}
                           >
-                            <span className="text-xl leading-none">{tpl.emoji}</span>
-                            <span className="text-[10px] font-semibold text-gray-700 leading-tight">{tpl.name}</span>
-                            <span className="text-[9px] text-gray-400 leading-tight">{tpl.desc}</span>
-                            {tpl.industry && !isLocked && (
-                              <span className="text-[8px] font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full leading-none">
-                                {tpl.industry}
-                              </span>
-                            )}
-                            {isLocked && (
-                              <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold bg-gray-800 text-white px-1.5 py-0.5 rounded-full leading-none">
-                                {tpl.plan === "pro" ? "PRO" : "BIZ"}
-                              </span>
-                            )}
-                          </button>
+                            {/* Mini visual preview */}
+                            <div
+                              className="w-full h-[58px] flex flex-col items-center justify-center gap-[3px] relative overflow-hidden"
+                              style={{ background: visual.bg }}
+                            >
+                              {/* Avatar circle */}
+                              <div className="w-[14px] h-[14px] rounded-full shadow-sm" style={{ background: visual.accent }} />
+                              {/* Name bar */}
+                              <div className="h-[3px] w-8 rounded-full" style={{ background: visual.accent, opacity: 0.65 }} />
+                              {/* CTA button */}
+                              <div className="h-[6px] w-10 rounded-md" style={{ background: visual.accent, opacity: 0.45 }} />
+                              {/* Emoji badge */}
+                              <div className="absolute top-1 left-1.5 text-[11px] leading-none opacity-80">{tpl.emoji}</div>
+                              {/* Active checkmark */}
+                              {isActive && (
+                                <div className="absolute top-1 right-1 w-[14px] h-[14px] bg-[#E8C7C3] rounded-full flex items-center justify-center shadow-sm">
+                                  <Check size={8} className="text-white" strokeWidth={3} />
+                                </div>
+                              )}
+                              {/* Lock overlay */}
+                              {isLocked && (
+                                <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
+                                  <span className="text-[8px] font-bold bg-gray-800 text-white px-1.5 py-0.5 rounded-full shadow">
+                                    {tpl.plan === "pro" ? "PRO" : "BIZ"}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {/* Label */}
+                            <div className={`px-2 py-1.5 ${isActive ? "bg-[#FDF8F7]" : "bg-white"} transition-colors`}>
+                              <p className="text-[10px] font-bold text-[#1E1E1E] leading-tight">{tpl.name}</p>
+                              <p className="text-[9px] text-[#8A8A8A] leading-tight truncate">{tpl.desc}</p>
+                            </div>
+                          </MagicCard>
                         );
                       })}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2">Wähle das Layout deiner öffentlichen Buchungsseite</p>
+                    <p className="text-[10px] text-[#8A8A8A] mt-2">Wähle das Layout deiner öffentlichen Buchungsseite</p>
                   </div>
 
                   {/* ── Template Feintuning ── */}
@@ -942,26 +1000,31 @@ export default function AdminLinksPage() {
                       <Pipette size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Farbpalette</span>
                     </div>
-                    <div className="grid grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       {COLOR_PALETTES.map((palette) => {
                         const isActive = (config.colorScheme ?? "auto") === palette.key;
                         return (
                           <button key={palette.key} onClick={() => applyColorScheme(palette)}
                             title={palette.name}
-                            className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl border transition-all ${
+                            className={`flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all ${
                               isActive
-                                ? "border-[#E8C7C3] ring-1 ring-[#E8C7C3] bg-[#F5EDEB]"
-                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                                ? "border-[#E8C7C3] ring-1 ring-[#E8C7C3] bg-[#F5EDEB] shadow-sm"
+                                : "border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm"
                             }`}
                           >
-                            <div className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0"
-                              style={{ background: palette.primary }} />
-                            <span className="text-[9px] font-medium text-gray-500 leading-tight truncate w-full text-center">{palette.name}</span>
+                            <div
+                              className="w-7 h-7 rounded-lg flex-shrink-0 shadow-sm"
+                              style={{ background: `linear-gradient(135deg, ${palette.primary}, ${palette.bg})` }}
+                            />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-bold text-[#1E1E1E] leading-tight truncate">{palette.name}</p>
+                              <p className="text-[9px] text-[#8A8A8A] font-mono leading-tight">{palette.primary}</p>
+                            </div>
                           </button>
                         );
                       })}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2">Oder wähle unten eine eigene Farbe</p>
+                    <p className="text-[10px] text-[#8A8A8A] mt-2">Oder wähle unten eine eigene Farbe</p>
                   </div>
 
                   {/* ── Branchenvorlagen ── */}
@@ -970,28 +1033,35 @@ export default function AdminLinksPage() {
                       <Sparkles size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Branchenvorlage</span>
                     </div>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       {Object.entries(INDUSTRY_PRESETS).map(([key, preset]) => {
                         const isActive = key === industryType;
                         return (
                           <button key={key} onClick={() => applyPreset(key)}
-                            className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all text-center ${
+                            className={`flex items-center gap-2.5 p-2.5 rounded-xl border transition-all text-left ${
                               isActive
-                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3]"
-                                : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                                ? "border-[#E8C7C3] bg-[#F5EDEB] ring-1 ring-[#E8C7C3] shadow-sm"
+                                : "border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm"
                             }`}
                           >
-                            {/* Color dot */}
-                            <div className="w-6 h-6 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-sm"
-                              style={{ background: preset.color }}>
+                            <div
+                              className="w-8 h-8 rounded-xl flex items-center justify-center text-base shadow-sm flex-shrink-0"
+                              style={{ background: `${preset.color}22`, border: `1.5px solid ${preset.color}55` }}
+                            >
+                              {preset.emoji}
                             </div>
-                            <span className="text-lg leading-none">{preset.emoji}</span>
-                            <span className="text-[10px] font-medium text-gray-600 leading-tight">{preset.label}</span>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-bold text-[#1E1E1E] leading-tight truncate">{preset.label}</p>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: preset.color }} />
+                                <span className="text-[9px] text-[#8A8A8A] font-mono truncate">{preset.color}</span>
+                              </div>
+                            </div>
                           </button>
                         );
                       })}
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-2">Klicke auf eine Vorlage um Farbe, Theme und Design automatisch anzupassen</p>
+                    <p className="text-[10px] text-[#8A8A8A] mt-2">Setzt Farbe, Theme und Stil passend zur Branche</p>
                   </div>
 
                   {/* ── Theme ── */}
@@ -1395,10 +1465,12 @@ export default function AdminLinksPage() {
         <div className="mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2.5">
-              <BarChart3 size={16} className="text-[#E8C7C3]" />
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-sm">
+                <BarChart3 size={13} className="text-white" />
+              </div>
               <div>
                 <p className="font-semibold text-sm text-[#1E1E1E]">Conversion-Optimierung</p>
-                <p className="text-[10px] text-gray-400">Echte Tracking-Werte und nächste Testfelder</p>
+                <p className="text-[10px] text-[#8A8A8A]">Echtzeit-Tracking deiner Buchungsseite</p>
               </div>
             </div>
             {insightsLoading && <Loader2 size={14} className="animate-spin text-[#E8C7C3]" />}
@@ -1406,16 +1478,17 @@ export default function AdminLinksPage() {
 
           <div className="grid grid-cols-2 gap-2 mb-3">
             {[
-              { label: "Besucher", value: trackingStats?.totalPageViews ?? 0, icon: Eye },
-              { label: "Link-Klicks", value: trackingStats?.totalLinkClicks ?? 0, icon: MousePointerClick },
-              { label: "Zur Buchung", value: `${bookingConversion.toFixed(1)}%`, icon: TrendingUp },
-              { label: "CTR", value: `${clickThroughRate.toFixed(1)}%`, icon: BarChart3 },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-                <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-400">
-                  <Icon size={11} /> {label}
+              { label: "Besucher", value: trackingStats?.totalPageViews ?? 0, icon: Eye, color: "#6366F1" },
+              { label: "Link-Klicks", value: trackingStats?.totalLinkClicks ?? 0, icon: MousePointerClick, color: "#0EA5E9" },
+              { label: "Zur Buchung", value: `${bookingConversion.toFixed(1)}%`, icon: TrendingUp, color: "#10B981" },
+              { label: "CTR", value: `${clickThroughRate.toFixed(1)}%`, icon: BarChart3, color: "#F59E0B" },
+            ].map(({ label, value, icon: Icon, color }) => (
+              <div key={label} className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-3 py-2.5 shadow-sm">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl" style={{ background: `linear-gradient(90deg, ${color}, ${color}66)` }} />
+                <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: `${color}` }}>
+                  <Icon size={10} /> {label}
                 </div>
-                <p className="mt-1 text-lg font-bold text-[#1E1E1E]">{value}</p>
+                <p className="mt-1 text-xl font-bold text-[#1E1E1E]">{value}</p>
               </div>
             ))}
           </div>
@@ -1483,11 +1556,15 @@ export default function AdminLinksPage() {
                 <div className="flex gap-2 justify-end pt-1">
                   <button onClick={() => { setShowAddForm(false); setNewTitle(""); setNewUrl(""); }}
                     className="px-4 py-2 text-sm rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 font-medium">Abbrechen</button>
-                  <button onClick={handleCreate} disabled={saving || !newTitle.trim() || !newUrl.trim()}
-                    className="px-5 py-2 text-sm rounded-xl bg-[#E8C7C3] text-white font-semibold hover:bg-[#D8B0AC] disabled:opacity-40 transition-colors flex items-center gap-1.5">
+                  <ShimmerButton
+                    onClick={handleCreate}
+                    disabled={saving || !newTitle.trim() || !newUrl.trim()}
+                    className="px-5 py-2 text-sm rounded-xl disabled:opacity-40 flex items-center gap-1.5"
+                    shimmerDuration="2.5s"
+                  >
                     {saving ? <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Plus size={14} />}
                     Hinzufügen
-                  </button>
+                  </ShimmerButton>
                 </div>
               </div>
             </motion.div>
@@ -1497,15 +1574,18 @@ export default function AdminLinksPage() {
         {/* ══════════════════════════════════════════════════════════════
             FIXED BOOKING BUTTON
         ══════════════════════════════════════════════════════════════ */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-3 overflow-hidden">
-          <div className="flex items-center gap-3 px-4 py-3.5">
+        <div className="relative bg-white rounded-2xl shadow-sm border border-[#E8C7C3]/30 mb-3 overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#E8C7C3] to-[#D8B0AC] rounded-l-2xl" />
+          <div className="flex items-center gap-3 px-4 py-3.5 pl-5">
             <div className="flex-shrink-0 text-gray-200"><GripVertical size={16} /></div>
-            <div className="flex-shrink-0 p-2 rounded-xl bg-[#E8C7C3] text-white"><Calendar size={16} /></div>
+            <div className="flex-shrink-0 p-2 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] text-white shadow-sm">
+              <Calendar size={16} />
+            </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-[#1E1E1E] text-sm">{config.ctaText || "Termin buchen"}</p>
-              <p className="text-xs text-[#8A8A8A]">Immer erster Link · automatisch</p>
+              <p className="text-xs text-[#8A8A8A]">Immer erster Link · wird automatisch angeheftet</p>
             </div>
-            <span className="text-xs bg-[#F5EDEB] text-[#D8B0AC] px-2.5 py-1 rounded-lg font-semibold">Fest</span>
+            <span className="text-[11px] bg-[#F5EDEB] text-[#D8B0AC] px-2.5 py-1 rounded-lg font-bold">Fest</span>
           </div>
         </div>
 
@@ -1537,7 +1617,7 @@ export default function AdminLinksPage() {
                   animate={{ opacity: link.isActive ? 1 : 0.55, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -4 }}
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition-all duration-200"
                 >
                   {editingId === link.id ? (
                     <div className="p-4 flex flex-col gap-3">
@@ -1611,15 +1691,21 @@ export default function AdminLinksPage() {
 
     {/* ── Right Preview Panel (desktop only) ── */}
     {previewUrl && (
-      <div className="hidden lg:flex flex-col flex-1 bg-gray-100 p-6 h-full overflow-hidden">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Eye size={14} className="text-gray-500" />
-            <span className="text-sm font-semibold text-gray-600">Live-Vorschau</span>
+      <div className="hidden lg:flex flex-col flex-1 bg-[#EEEAE7] p-6 h-full overflow-hidden">
+        {/* Preview header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            </div>
+            <div className="h-4 w-px bg-gray-300 mx-1" />
+            <span className="text-xs font-semibold text-gray-500">Live-Vorschau</span>
             {designSaving && <Loader2 size={11} className="animate-spin text-[#E8C7C3]" />}
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex rounded-xl bg-white border border-gray-200 p-1">
+            <div className="flex rounded-xl bg-white border border-gray-200 shadow-sm p-1">
               {([
                 { v: "mobile", icon: Smartphone },
                 { v: "tablet", icon: Tablet },
@@ -1627,29 +1713,43 @@ export default function AdminLinksPage() {
               ] as const).map(({ v, icon: Icon }) => (
                 <button key={v} onClick={() => setPreviewDevice(v)}
                   title={previewDeviceStyle[v].label}
-                  className={`p-1.5 rounded-lg transition-colors ${
-                    previewDevice === v ? "bg-[#F5EDEB] text-[#D8B0AC]" : "text-gray-400 hover:text-gray-600"
+                  className={`p-1.5 rounded-lg transition-all ${
+                    previewDevice === v
+                      ? "bg-[#F5EDEB] text-[#D8B0AC] shadow-sm"
+                      : "text-gray-400 hover:text-gray-600"
                   }`}>
                   <Icon size={13} />
                 </button>
               ))}
             </div>
             <a href={previewUrl} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              <ExternalLink size={11} /> In neuem Tab öffnen
+              className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-[#1E1E1E] transition-colors bg-white border border-gray-200 shadow-sm px-2.5 py-1.5 rounded-xl">
+              <ExternalLink size={11} /> Öffnen
             </a>
           </div>
         </div>
-        <div className="flex-1 rounded-2xl overflow-hidden bg-gray-200 p-4 flex justify-center">
-          <div className="h-full overflow-hidden rounded-2xl shadow-xl border border-gray-200 bg-white transition-all duration-300"
-            style={{ width: previewDeviceStyle[previewDevice].width, maxWidth: "100%" }}>
-          <iframe
-            key={previewKey}
-            src={previewUrl ? `${previewUrl}?v=${previewKey}` : undefined}
-            className="w-full h-full"
-            style={{ border: 'none', minHeight: '100%' }}
-            title="Buchungsseite Vorschau"
-          />
+        {/* Browser chrome mockup */}
+        <div className="flex-1 rounded-2xl overflow-hidden bg-white shadow-xl border border-gray-200 flex flex-col">
+          {/* URL bar */}
+          <div className="flex-shrink-0 h-9 bg-[#F3F3F3] border-b border-gray-200 flex items-center px-3 gap-2">
+            <div className="flex-1 bg-white rounded-md h-5 flex items-center px-2 border border-gray-200">
+              <p className="text-[10px] text-gray-400 truncate font-mono">
+                {typeof window !== "undefined" ? window.location.origin : ""}{previewUrl}
+              </p>
+            </div>
+          </div>
+          {/* iframe */}
+          <div className="flex-1 overflow-hidden flex justify-center bg-gray-50 transition-all duration-300">
+            <div className="h-full overflow-hidden transition-all duration-300"
+              style={{ width: previewDeviceStyle[previewDevice].width, maxWidth: "100%" }}>
+              <iframe
+                key={previewKey}
+                src={previewUrl ? `${previewUrl}?v=${previewKey}` : undefined}
+                className="w-full h-full"
+                style={{ border: "none", minHeight: "100%" }}
+                title="Buchungsseite Vorschau"
+              />
+            </div>
           </div>
         </div>
       </div>

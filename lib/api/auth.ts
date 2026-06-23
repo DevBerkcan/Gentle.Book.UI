@@ -112,7 +112,7 @@ export const authApi = {
     try {
       await api.post('/employee-auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      // silent fail — logout errors don't affect user session
     }
   },
 

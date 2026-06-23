@@ -237,7 +237,7 @@ export default function CustomersPage() {
   };
 
   const MobileCustomerCard = ({ customer }: { customer: CustomerListItem }) => (
-    <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex justify-between items-start mb-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm shrink-0">

@@ -67,7 +67,7 @@ export default function ActivityPage() {
       const data = await superAdminApi.getActivity(100);
       setActivity(data);
     } catch (e) {
-      console.error(e);
+      // silent fail
     }
     setLoading(false);
   }

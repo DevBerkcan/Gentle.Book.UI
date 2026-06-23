@@ -13,11 +13,17 @@
     --corporate-beige: #F5EDEB;
     --corporate-white: #FFFFFF;
     --corporate-grey: #8A8A8A;
-    
+
     /* Legacy colors (keeping for backward compatibility) */
     --barber-red: #dc2626;
     --barber-dark-red: #991b1b;
     --barber-gold: #d4af37;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
@@ -27,10 +33,76 @@
   * {
     @apply focus-visible:outline-[#E8C7C3] focus-visible:outline-2 focus-visible:outline-offset-2;
   }
+
+  ::selection {
+    background-color: #E8C7C3;
+    color: #1E1E1E;
+  }
+
+  /* Slim, branded scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #E8C7C3;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #D8B0AC;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Glass morphism helper */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Subtle card shadow lift on hover */
+  .card-hover {
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .card-hover:hover {
+    box-shadow: 0 8px 30px rgba(232, 199, 195, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+  }
+
+  /* Gradient text */
+  .text-gradient-rose {
+    background: linear-gradient(135deg, #E8C7C3, #D8B0AC);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Floating animation */
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-6px); }
+  }
+  .animate-float {
+    animation: float-gentle 4s ease-in-out infinite;
+  }
+
+  /* Shimmer skeleton loading */
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #f0ebe9 25%, #f8f5f4 50%, #f0ebe9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 8px;
   }
 }

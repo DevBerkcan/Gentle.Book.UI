@@ -131,7 +131,7 @@ const [loadingEmployeeServices, setLoadingEmployeeServices] = useState(false);
         setEmployees(data);
         if (data.length > 0) setSelectedEmployeeId(data[0].id);
       })
-      .catch(console.error)
+      .catch(() => {})
       .finally(() => setLoadingEmployees(false));
   }, []);
 
@@ -159,7 +159,7 @@ async function loadServicesForEmployee(employeeId: string) {
     const data = await adminApi.getServicesByEmployee(employeeId);
     setEmployeeServices(data);
   } catch (error) {
-    console.error("Error loading employee services:", error);
+    void error;
     setEmployeeServices([]);
   } finally {
     setLoadingEmployeeServices(false);
@@ -207,7 +207,7 @@ async function loadServicesForEmployee(employeeId: string) {
 
       setEvents([...bookingEvents, ...blockedEvents]);
     } catch (error) {
-      console.error("Error loading events:", error);
+      void error;
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ async function loadServicesForEmployee(employeeId: string) {
       const data = await adminApi.getServices();
       setServices(data);
     } catch (error) {
-      console.error("Error loading services:", error);
+      void error;
     }
   }
 
@@ -260,7 +260,7 @@ async function loadServicesForEmployee(employeeId: string) {
       ));
       setIsBookingModalOpen(false);
     } catch (error) {
-      console.error("Error updating status:", error);
+      void error;
     } finally {
       setUpdating(false);
     }
@@ -330,7 +330,7 @@ const handleCreateManualBooking = async () => {
       resetManualBookingForm();
     }, 3000);
   } catch (error: any) {
-    console.error("Error creating manual booking:", error);
+    void error;
     setError(error.message || "Fehler beim Erstellen der Buchung");
   } finally {
     setSubmitting(false);

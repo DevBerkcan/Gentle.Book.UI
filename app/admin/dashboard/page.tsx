@@ -12,6 +12,8 @@ import Link from "next/link";
 import { getDashboard, getOnboardingStatus, type DashboardOverview, type OnboardingStatus } from "@/lib/api/admin";
 import { formatPrice } from "@/lib/utils/currency";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -56,26 +58,46 @@ function StatCard({
   growth?: number | null;
   accent: string;
 }) {
+  const isNumeric = typeof value === "number";
+
   return (
-    <motion.div variants={fadeUp}
-      className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
-          {icon}
+    <motion.div variants={fadeUp}>
+      <GlowingEffect glowColor={accent} spread={50}>
+        <div
+          className="relative overflow-hidden bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
+        >
+          {/* Top accent gradient bar */}
+          <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl"
+            style={{ background: `linear-gradient(90deg, ${accent}, ${accent}66)` }} />
+          {/* Subtle background glow */}
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-[0.06] group-hover:opacity-[0.10] transition-opacity duration-300"
+            style={{ background: accent }} />
+
+          <div className="relative flex items-start justify-between mb-4">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+              style={{ background: `${accent}18` }}>
+              {icon}
+            </div>
+            {growth != null && growth !== 0 && (
+              <span className={`flex items-center gap-0.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
+                growth > 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+              }`}>
+                {growth > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {Math.abs(growth).toFixed(0)}%
+              </span>
+            )}
+          </div>
+
+          <div className="relative text-3xl font-bold text-[#1E1E1E] mb-1 tabular-nums">
+            {isNumeric ? (
+              <AnimatedNumber value={value as number} duration={1.4} />
+            ) : (
+              value
+            )}
+          </div>
+          <div className="relative text-xs text-[#8A8A8A] font-medium">{label}</div>
         </div>
-        {growth != null && growth !== 0 && (
-          <span className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-1 rounded-full ${
-            growth > 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
-          }`}>
-            {growth > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-            {Math.abs(growth).toFixed(0)}%
-          </span>
-        )}
-      </div>
-      <div className="text-3xl font-bold text-[#1E1E1E] mb-1 tabular-nums">{value}</div>
-      <div className="text-xs text-[#8A8A8A] font-medium">{label}</div>
+      </GlowingEffect>
     </motion.div>
   );
 }
@@ -155,12 +177,21 @@ export default function AdminDashboardPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
 
         {/* ── Header ───────────────────────────────────────────────── */}
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <p className="text-xs text-[#8A8A8A] font-medium mb-0.5">{todayDate}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">
-            {greeting()}{user?.firstName ? `, ${user.firstName}` : ""}! 👋
-          </h1>
-          <p className="text-sm text-[#8A8A8A] mt-1">Hier ist deine heutige Übersicht.</p>
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+          className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs text-[#8A8A8A] font-medium">{todayDate}</p>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">
+              {greeting()}{user?.firstName ? `, ${user.firstName}` : ""}! 👋
+            </h1>
+            <p className="text-sm text-[#8A8A8A] mt-1">Hier ist deine heutige Übersicht.</p>
+          </div>
         </motion.div>
 
         {/* ── Booking Link Banner ───────────────────────────────────── */}

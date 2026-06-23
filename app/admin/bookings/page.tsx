@@ -535,7 +535,7 @@ export default function AdminBookingsPage() {
   );
 
   const MobileBookingCard = ({ booking }: { booking: BookingListItem }) => (
-    <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex justify-between items-start mb-3">
         <div>
           <div className="font-mono text-xs font-semibold text-[#8A8A8A]">{booking.bookingNumber}</div>

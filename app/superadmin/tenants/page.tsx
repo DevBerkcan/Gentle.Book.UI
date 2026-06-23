@@ -119,6 +119,48 @@ function TrialProgressBar({ days }: { days: number }) {
   );
 }
 
+const PLAN_STYLES: Record<string, { cls: string; label: string }> = {
+  Trial:        { cls: 'bg-gray-100 text-gray-600 border border-gray-200',           label: 'Trial' },
+  Starter:      { cls: 'bg-blue-50 text-blue-700 border border-blue-200',            label: 'Starter' },
+  Professional: { cls: 'bg-purple-50 text-purple-700 border border-purple-200',      label: 'Pro' },
+  Agency:       { cls: 'bg-amber-50 text-amber-700 border border-amber-200',         label: 'Business' },
+};
+
+function PlanQuickChange({
+  tenantId, currentPlan, isInTrial, isChanging, onChange,
+}: {
+  tenantId: string;
+  currentPlan?: string;
+  isInTrial?: boolean;
+  isChanging: boolean;
+  onChange: (plan: string) => void;
+}) {
+  const plan = isInTrial ? 'Trial' : (currentPlan ?? 'Trial');
+  const style = PLAN_STYLES[plan] ?? PLAN_STYLES['Trial'];
+  return (
+    <div className="flex items-center gap-1">
+      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${style.cls}`}>
+        {style.label}
+      </span>
+      {isChanging ? (
+        <Loader2 size={12} className="animate-spin text-gray-400" />
+      ) : (
+        <select
+          value={isInTrial ? 'Trial' : (currentPlan ?? 'Trial')}
+          onChange={(e) => onChange(e.target.value)}
+          className="text-xs text-gray-400 bg-transparent border-0 cursor-pointer hover:text-gray-700 outline-none py-0 pl-0 pr-4 appearance-none"
+          title="Plan ändern"
+        >
+          <option value="Trial">Trial</option>
+          <option value="Starter">Starter (€29)</option>
+          <option value="Professional">Pro (€59)</option>
+          <option value="Agency">Business (€99)</option>
+        </select>
+      )}
+    </div>
+  );
+}
+
 function SubscriptionCell({ sub }: { sub: TenantListItem['subscription'] }) {
   if (!sub) return <span className="text-xs text-gray-300">–</span>;
 
@@ -167,6 +209,7 @@ export default function TenantsPage() {
   const [toggling, setToggling] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [extendingTrial, setExtendingTrial] = useState<string | null>(null);
+  const [changingPlan, setChangingPlan] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => { load(); }, []);
@@ -230,6 +273,19 @@ export default function TenantsPage() {
       alert(e.response?.data?.message ?? 'Löschen fehlgeschlagen');
     }
     setDeleting(null);
+  }
+
+  async function handleChangePlan(t: TenantListItem, plan: string) {
+    setChangingPlan(t.id);
+    try {
+      const result = await superAdminApi.changePlan(t.id, plan);
+      setTenants(prev => prev.map(x => x.id === t.id
+        ? { ...x, subscription: { ...x.subscription!, plan: result.plan, status: result.status } }
+        : x));
+    } catch (e: any) {
+      alert(e.response?.data?.message ?? 'Plan-Änderung fehlgeschlagen');
+    }
+    setChangingPlan(null);
   }
 
   async function handleExtendTrial(t: TenantListItem) {
@@ -564,6 +620,7 @@ export default function TenantsPage() {
                 <th className="px-4 py-3 text-center hidden md:table-cell">Mitarb.</th>
                 <th className="px-4 py-3 text-center hidden md:table-cell">Buchungen</th>
                 <th className="px-4 py-3 text-left">Subscription</th>
+                <th className="px-4 py-3 text-left hidden lg:table-cell">Plan</th>
                 <th className="px-4 py-3 text-center hidden lg:table-cell">Online</th>
                 <th className="px-4 py-3 text-right">Aktionen</th>
               </tr>
@@ -613,6 +670,17 @@ export default function TenantsPage() {
                   {/* Subscription / Trial */}
                   <td className="px-4 py-3">
                     <SubscriptionCell sub={t.subscription} />
+                  </td>
+
+                  {/* Plan Schnell-Wechsel */}
+                  <td className="px-4 py-3 hidden lg:table-cell">
+                    <PlanQuickChange
+                      tenantId={t.id}
+                      currentPlan={t.subscription?.plan}
+                      isInTrial={t.subscription?.isInTrial}
+                      isChanging={changingPlan === t.id}
+                      onChange={(plan) => handleChangePlan(t, plan)}
+                    />
                   </td>
 
                   {/* Online-Status */}

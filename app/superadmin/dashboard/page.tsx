@@ -8,6 +8,8 @@ import {
   RefreshCw, XCircle, UserPlus,
 } from 'lucide-react';
 import { superAdminApi, TenantListItem, ActivityItem, OverviewData } from '@/lib/api/superadmin';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { AnimatedNumber } from '@/components/ui/animated-number';
 
 interface Stats {
   totalTenants: number;
@@ -65,8 +67,8 @@ export default function SuperAdminDashboard() {
       setTenants(t.items);
       setActivity(a);
       setOverview(ov);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // silent fail — UI shows empty state
     }
     setLoading(false);
   }
@@ -76,6 +78,13 @@ export default function SuperAdminDashboard() {
   const expiringSoon = tenants.filter(
     t => t.subscription?.isInTrial && (t.subscription.trialDaysRemaining ?? 99) <= 7
   );
+  const planCounts = {
+    Trial:        tenants.filter(t => t.subscription?.isInTrial).length,
+    Starter:      tenants.filter(t => t.subscription?.plan === 'Starter' && !t.subscription?.isInTrial).length,
+    Professional: tenants.filter(t => t.subscription?.plan === 'Professional' && !t.subscription?.isInTrial).length,
+    Agency:       tenants.filter(t => t.subscription?.plan === 'Agency' && !t.subscription?.isInTrial).length,
+  };
+
   const recentTenants = [...tenants]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
@@ -127,13 +136,17 @@ export default function SuperAdminDashboard() {
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
           {statCards.map(({ label, value, icon, accent, bg }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
-                <span style={{ color: accent }}>{icon}</span>
+            <GlowingEffect key={label} glowColor={accent} spread={45}>
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-[1] hover:-translate-y-0.5 transition-all duration-200">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
+                  <span style={{ color: accent }}>{icon}</span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900 leading-none">
+                  <AnimatedNumber value={value} duration={1.4} />
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{label}</p>
               </div>
-              <p className="text-2xl font-bold text-gray-900 leading-none">{value}</p>
-              <p className="text-xs text-gray-400 mt-1">{label}</p>
-            </div>
+            </GlowingEffect>
           ))}
         </div>
       )}
@@ -172,6 +185,34 @@ export default function SuperAdminDashboard() {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── Plan-Verteilung ────────────────────────────────────────────── */}
+      {!loading && tenants.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { plan: 'Trial',        count: planCounts.Trial,        color: '#6b7280', bg: '#f3f4f6', label: 'Im Trial' },
+            { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: 'Starter (€29)' },
+            { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: 'Pro (€59)' },
+            { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Business (€99)' },
+          ].map(({ plan, count, color, bg, label }) => (
+            <div
+              key={plan}
+              className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:-translate-y-0.5 transition-all duration-200"
+            >
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
+                style={{ background: bg, color }}
+              >
+                {count}
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">{label}</p>
+                <p className="text-sm font-semibold text-gray-700">{plan}</p>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

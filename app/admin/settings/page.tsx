@@ -6,7 +6,8 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { Input, Textarea } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
-import { Settings, Save, Building2, Phone, Globe, Palette, Lock, ImageIcon, Upload, Clock, AlertTriangle } from 'lucide-react';
+import { Settings, Save, Building2, Phone, Globe, Palette, Lock, ImageIcon, Upload, Clock, AlertTriangle, Sliders } from 'lucide-react';
+import { ShimmerButton } from '@/components/ui/shimmer-button';
 import api, { apiOrigin } from '@/lib/api/client';
 
 const DAYS = [
@@ -258,11 +259,16 @@ export default function AdminSettingsPage() {
 
         <form onSubmit={saveSettings} className="space-y-4">
           {/* Logo */}
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <ImageIcon size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Logo</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-lg flex items-center justify-center shrink-0">
+                  <ImageIcon size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Logo</h2>
+                  <p className="text-xs text-[#8A8A8A]">Firmenlogo hochladen</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-4">
@@ -305,11 +311,16 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* Company Info */}
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <Building2 size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Firmeninformationen</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
+                  <Building2 size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Firmeninformationen</h2>
+                  <p className="text-xs text-[#8A8A8A]">Name, Slogan und Texte</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-4">
@@ -345,11 +356,16 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* Contact */}
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <Phone size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Kontakt</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
+                  <Phone size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Kontakt</h2>
+                  <p className="text-xs text-[#8A8A8A]">Telefon, E-Mail und Adresse</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-4">
@@ -387,11 +403,16 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* Branding */}
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <Palette size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Farben</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-lg flex items-center justify-center shrink-0">
+                  <Palette size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Farben</h2>
+                  <p className="text-xs text-[#8A8A8A]">Primär-, Sekundär- und Akzentfarbe</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-4">
@@ -428,9 +449,17 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* Booking Config */}
-          <Card>
-            <CardHeader className="pb-0">
-              <h2 className="font-semibold text-[#1E1E1E]">Buchungseinstellungen</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
+                  <Sliders size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Buchungseinstellungen</h2>
+                  <p className="text-xs text-[#8A8A8A]">Intervalle, Vorlauf und Stornierung</p>
+                </div>
+              </div>
             </CardHeader>
             <CardBody className="gap-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -514,11 +543,16 @@ export default function AdminSettingsPage() {
           </Card>
 
           {/* Business Hours */}
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <Clock size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Öffnungszeiten</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
+                  <Clock size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Öffnungszeiten</h2>
+                  <p className="text-xs text-[#8A8A8A]">Wochentage und Geschäftszeiten</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-3">
@@ -587,15 +621,23 @@ export default function AdminSettingsPage() {
             </div>
           )}
 
-          <Button
+          <ShimmerButton
             type="submit"
-            className="w-full bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white font-semibold"
-            size="lg"
-            isLoading={saving}
-            startContent={!saving && <Save size={18} />}
+            disabled={saving}
+            className="w-full py-4 text-sm disabled:opacity-60"
           >
-            Speichern
-          </Button>
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                Wird gespeichert…
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Save size={16} />
+                Einstellungen speichern
+              </span>
+            )}
+          </ShimmerButton>
         </form>
 
         {/* Password Change */}
@@ -609,11 +651,16 @@ export default function AdminSettingsPage() {
           </div>
         )}
         <form onSubmit={handleChangePassword} className="mt-4">
-          <Card>
-            <CardHeader className="pb-0">
-              <div className="flex items-center gap-2">
-                <Lock size={18} className="text-[#8A8A8A]" />
-                <h2 className="font-semibold text-[#1E1E1E]">Passwort ändern</h2>
+          <Card className="border border-[#E8C7C3]/20 shadow-md">
+            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#1E1E1E] to-[#4A4A4A] rounded-lg flex items-center justify-center shrink-0">
+                  <Lock size={15} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-[#1E1E1E]">Passwort ändern</h2>
+                  <p className="text-xs text-[#8A8A8A]">Sicherheit und Zugangsdaten</p>
+                </div>
               </div>
             </CardHeader>
             <CardBody className="gap-4">

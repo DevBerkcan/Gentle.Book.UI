@@ -88,13 +88,18 @@ export function AdminNav() {
 
       {/* Logo */}
       <div className="px-5 py-5 border-b border-white/8">
-        <Link href="/admin/dashboard" className="flex items-center">
+        <Link href="/admin/dashboard" className="flex items-center gap-3">
           {logoUrl
-            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-12 object-contain object-left flex-shrink-0" />
+            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0">
-                <Sparkles size={18} className="text-white" />
-              </div>
+              <>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#E8C7C3]/20">
+                  <Sparkles size={17} className="text-white" />
+                </div>
+                {companyName && (
+                  <span className="text-white/80 text-sm font-semibold truncate">{companyName}</span>
+                )}
+              </>
             )
           }
         </Link>
@@ -104,7 +109,7 @@ export function AdminNav() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {groups.map((group) => (
           <div key={group.label}>
-            <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-2 mb-1.5">
+            <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest px-2 mb-2">
               {group.label}
             </p>
             <div className="space-y-0.5">
@@ -116,13 +121,13 @@ export function AdminNav() {
                     href={href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                       active
-                        ? "bg-[#017172] text-white shadow-lg shadow-[#017172]/20"
+                        ? "bg-gradient-to-r from-[#017172] to-[#01878A] text-white shadow-lg shadow-[#017172]/25"
                         : "text-white/55 hover:text-white hover:bg-white/8"
                     }`}
                   >
                     <Icon size={17} className={active ? "text-white" : "text-white/40 group-hover:text-white/80"} />
-                    {label}
-                    {active && <ChevronRight size={14} className="ml-auto opacity-60" />}
+                    <span className="flex-1">{label}</span>
+                    {active && <ChevronRight size={14} className="opacity-50" />}
                   </Link>
                 );
               })}
@@ -133,20 +138,20 @@ export function AdminNav() {
 
       {/* User */}
       <div className="px-3 py-4 border-t border-white/8">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/5 transition-colors group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+        <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{displayName}</p>
+            <p className="text-white text-sm font-semibold truncate">{displayName}</p>
             <p className="text-white/40 text-xs truncate">{displayRole}</p>
           </div>
           <button
             onClick={logout}
-            className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0"
+            className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
             title="Abmelden"
           >
-            <LogOut size={16} />
+            <LogOut size={15} />
           </button>
         </div>
       </div>

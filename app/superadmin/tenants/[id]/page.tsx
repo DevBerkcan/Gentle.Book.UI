@@ -86,7 +86,7 @@ export default function TenantDetailPage() {
           });
         }
       })
-      .catch(console.error)
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -214,7 +214,7 @@ export default function TenantDetailPage() {
     try {
       const data = await superAdminApi.getTenantStats(id);
       setTenantStats(data);
-    } catch (e) { console.error(e); }
+    } catch { /* silent fail */ }
     setStatsLoading(false);
   }
 
@@ -261,7 +261,7 @@ export default function TenantDetailPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats') loadStats(); }}
+            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); }}
             className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
                 ? 'bg-white text-gray-900 shadow-sm'
@@ -616,38 +616,126 @@ export default function TenantDetailPage() {
                   </div>
                 </div>
 
+                {/* Revenue Overview */}
+                {tenantStats && (
+                  <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-gray-900">{tenantStats.totalBookings}</p>
+                      <p className="text-xs text-gray-400">Buchungen</p>
+                    </div>
+                    <div className="text-center border-x border-gray-200">
+                      <p className="text-lg font-bold text-[#017172]">
+                        {tenantStats.totalRevenue > 0
+                          ? `${(tenantStats.totalRevenue / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 })} ${sub.plan}`
+                          : '–'}
+                      </p>
+                      <p className="text-xs text-gray-400">Gesamtumsatz</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-bold text-gray-900">{tenantStats.totalCustomers}</p>
+                      <p className="text-xs text-gray-400">Kunden</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Plan change */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-900 mb-2">Plan ändern</p>
-                  <div className="grid grid-cols-2 gap-2 mb-3">
+                  <p className="text-sm font-semibold text-gray-900 mb-3">Plan wechseln</p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
                     {[
-                      { value: 'Trial',        label: 'Trial',        price: 'Kostenlos' },
-                      { value: 'Starter',      label: 'Starter',      price: '€29/Monat' },
-                      { value: 'Professional', label: 'Professional', price: '€59/Monat' },
-                      { value: 'Agency',       label: 'Agency',       price: '€99/Monat' },
-                    ].map(({ value, label, price }) => (
-                      <button
-                        key={value}
-                        onClick={() => setSelectedPlan(value)}
-                        className={`p-3 border rounded-xl text-left transition-colors ${
-                          selectedPlan === value
-                            ? 'border-gray-900 bg-gray-50 ring-1 ring-gray-900'
-                            : 'border-gray-200 hover:border-gray-400'
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-gray-900">{label}</p>
-                        <p className="text-xs text-gray-500">{price}</p>
-                      </button>
-                    ))}
+                      {
+                        value: 'Trial',
+                        label: 'Trial',
+                        price: 'Kostenlos',
+                        employees: '–',
+                        color: '#6b7280',
+                        bg: '#f3f4f6',
+                        features: ['14 Tage kostenlos', 'Alle Features', 'Kein Kredit nötig'],
+                      },
+                      {
+                        value: 'Starter',
+                        label: 'Starter',
+                        price: '€29/Monat',
+                        employees: '2 Mitarb.',
+                        color: '#3b82f6',
+                        bg: '#eff6ff',
+                        features: ['2 Mitarbeiter', '15 Services', 'Standard Support'],
+                      },
+                      {
+                        value: 'Professional',
+                        label: 'Professional',
+                        price: '€59/Monat',
+                        employees: '10 Mitarb.',
+                        color: '#8b5cf6',
+                        bg: '#f5f3ff',
+                        features: ['10 Mitarbeiter', '50 Services', 'Analytics & Reports', 'Priority Support'],
+                      },
+                      {
+                        value: 'Agency',
+                        label: 'Business',
+                        price: '€99/Monat',
+                        employees: 'Unbegrenzt',
+                        color: '#f59e0b',
+                        bg: '#fffbeb',
+                        features: ['∞ Mitarbeiter', '∞ Services', 'API-Zugang', 'Dedizierter Manager'],
+                      },
+                    ].map(({ value, label, price, employees, color, bg, features }) => {
+                      const isSelected = selectedPlan === value;
+                      const isCurrent = sub.plan === value && !sub.isInTrial && value !== 'Trial';
+                      const isCurrentTrial = value === 'Trial' && sub.isInTrial;
+                      const active = isCurrent || isCurrentTrial;
+                      return (
+                        <button
+                          key={value}
+                          onClick={() => setSelectedPlan(value)}
+                          className={`p-4 border-2 rounded-xl text-left transition-all hover:-translate-y-0.5 ${
+                            isSelected
+                              ? 'border-gray-900 shadow-md'
+                              : active
+                              ? 'border-gray-300 bg-gray-50'
+                              : 'border-gray-100 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div
+                              className="px-2 py-0.5 rounded-full text-xs font-bold"
+                              style={{ background: bg, color }}
+                            >
+                              {label}
+                            </div>
+                            {active && (
+                              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                                Aktiv
+                              </span>
+                            )}
+                            {isSelected && !active && (
+                              <Check size={14} className="text-gray-900" />
+                            )}
+                          </div>
+                          <p className="font-bold text-gray-900 text-base">{price}</p>
+                          <p className="text-xs text-gray-400 mt-0.5 mb-2">{employees}</p>
+                          <ul className="space-y-0.5">
+                            {features.map((f) => (
+                              <li key={f} className="text-xs text-gray-500 flex items-center gap-1">
+                                <span style={{ color }}>✓</span> {f}
+                              </li>
+                            ))}
+                          </ul>
+                        </button>
+                      );
+                    })}
                   </div>
                   <button
                     onClick={handleChangePlan}
-                    disabled={changingPlan || !selectedPlan || selectedPlan === sub.plan}
-                    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                    disabled={changingPlan || !selectedPlan || selectedPlan === (sub.isInTrial ? 'Trial' : sub.plan)}
+                    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-40 transition-colors shadow-sm"
                   >
                     <CreditCard size={15} />
-                    {changingPlan ? 'Speichern...' : planChanged ? '✓ Gespeichert' : 'Plan speichern'}
+                    {changingPlan ? 'Wird gespeichert...' : planChanged ? '✓ Gespeichert' : 'Plan speichern'}
                   </button>
+                  {planChanged && (
+                    <p className="text-xs text-green-600 mt-2">Plan erfolgreich geändert.</p>
+                  )}
                 </div>
 
                 {/* Extend trial */}
