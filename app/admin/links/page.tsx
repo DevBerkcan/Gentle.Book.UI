@@ -17,6 +17,7 @@ import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { MagicCard } from "@/components/ui/magic-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   getStatistics,
   getTrackingStatistics,
@@ -749,6 +750,7 @@ export default function AdminLinksPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <LayoutGrid size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Seitenvorlage</span>
+                      <HelpTip text="Wähle das grundlegende Layout deiner Buchungsseite. Jede Vorlage kann mit eigenen Farben und Schriften angepasst werden. Grau markierte Vorlagen erfordern ein Upgrade." />
                       <span className="ml-auto text-[10px] font-semibold text-[#8A8A8A] bg-gray-100 px-2 py-0.5 rounded-full">{PAGE_TEMPLATES.length} Designs</span>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
@@ -999,6 +1001,7 @@ export default function AdminLinksPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <Pipette size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Farbpalette</span>
+                      <HelpTip text="Passt alle Farben der Buchungsseite gleichzeitig an — Hintergrund, Buttons und Karten werden automatisch aufeinander abgestimmt" />
                     </div>
                     <div className="grid grid-cols-4 gap-2">
                       {COLOR_PALETTES.map((palette) => {
@@ -1032,6 +1035,7 @@ export default function AdminLinksPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles size={14} className="text-[#E8C7C3]" />
                       <span className="text-xs font-semibold text-[#1E1E1E] uppercase tracking-wide">Branchenvorlage</span>
+                      <HelpTip text="Setzt Farben, Schriften und Layout passend zu deiner Branche in einem Klick — danach kannst du alles weiter anpassen" />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       {Object.entries(INDUSTRY_PRESETS).map(([key, preset]) => {

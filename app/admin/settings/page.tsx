@@ -470,6 +470,7 @@ export default function AdminSettingsPage() {
                   onChange={(e) => set('bookingIntervalMinutes', parseInt(e.target.value) || 30)}
                   min={15}
                   max={120}
+                  description="Zeitabstand zwischen Terminen, z.B. 30 = 9:00, 9:30, 10:00 Uhr"
                 />
                 <Input
                   label="Max. Vorlauf (Tage)"
@@ -478,6 +479,7 @@ export default function AdminSettingsPage() {
                   onChange={(e) => set('maxAdvanceBookingDays', parseInt(e.target.value) || 60)}
                   min={7}
                   max={365}
+                  description="Wie weit in die Zukunft können Kunden Termine buchen?"
                 />
                 <Input
                   label="Währung"
@@ -535,7 +537,7 @@ export default function AdminSettingsPage() {
                     onChange={(e) => set('cancellationFeePercent', parseFloat(e.target.value) || 0)}
                     min={0}
                     max={100}
-                    description="Prozent des Servicepreises"
+                    description="Prozent des Servicepreises der bei verspäteter Stornierung einbehalten wird"
                   />
                 </div>
               </div>

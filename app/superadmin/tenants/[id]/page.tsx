@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Save, Clock, ExternalLink, Copy, Check,
-  Palette, Users, Link2, CreditCard, Mail, Phone, Globe, MapPin, Upload, ImageIcon,
+  Palette, Users, Link2, CreditCard, Mail, Phone, Globe, MapPin, Upload, ImageIcon, LogIn,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
@@ -37,6 +37,7 @@ export default function TenantDetailPage() {
 
   const [tenantStats, setTenantStats] = useState<TenantStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [impersonating, setImpersonating] = useState(false);
 
   // New user form
   const [newUser, setNewUser] = useState({ email: '', password: '', firstName: '', lastName: '' });
@@ -96,9 +97,7 @@ export default function TenantDetailPage() {
       await superAdminApi.updateSettings(id, settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch { /* silent fail */ } finally {
       setSaving(false);
     }
   };
@@ -119,9 +118,7 @@ export default function TenantDetailPage() {
       await superAdminApi.extendTrial(id, days);
       const data = await superAdminApi.getTenant(id);
       setTenant(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch { /* silent fail */ } finally {
       setExtendingTrial(false);
     }
   };
@@ -135,9 +132,7 @@ export default function TenantDetailPage() {
       setTenant(data);
       setPlanChanged(true);
       setTimeout(() => setPlanChanged(false), 3000);
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch { /* silent fail */ } finally {
       setChangingPlan(false);
     }
   };
@@ -169,6 +164,22 @@ export default function TenantDetailPage() {
     } finally {
       setLogoUploading(false);
       if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
+
+  const handleImpersonate = async () => {
+    setImpersonating(true);
+    try {
+      const result = await superAdminApi.impersonate(id);
+      localStorage.setItem('access_token', result.access_token);
+      localStorage.setItem('tenant_slug', result.tenant_slug);
+      localStorage.setItem('impersonating', 'true');
+      localStorage.setItem('impersonating_from', window.location.href);
+      window.open('/admin/dashboard', '_blank');
+    } catch (e: any) {
+      alert(e.response?.data?.message ?? 'Impersonate fehlgeschlagen');
+    } finally {
+      setImpersonating(false);
     }
   };
 
@@ -345,6 +356,22 @@ export default function TenantDetailPage() {
             <strong>Industrie:</strong> {tenant.industryType}
             {' · '}
             <strong>Erstellt:</strong> {new Date(tenant.createdAt).toLocaleDateString('de-DE')}
+          </div>
+
+          {/* Impersonate */}
+          <div className="pt-4 border-t border-gray-100">
+            <p className="text-sm font-semibold text-gray-900 mb-1">Als Admin einloggen</p>
+            <p className="text-xs text-gray-400 mb-3">
+              Öffnet den Admin-Bereich dieses Systems in einem neuen Tab. Du siehst alles so wie der Shop-Owner.
+            </p>
+            <button
+              onClick={handleImpersonate}
+              disabled={impersonating}
+              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
+            >
+              <LogIn size={15} />
+              {impersonating ? 'Wird eingeloggt…' : 'Als Admin einloggen'}
+            </button>
           </div>
         </div>
       )}

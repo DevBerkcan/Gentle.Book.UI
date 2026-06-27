@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { AdminNav } from '@/components/admin/AdminNav';
 import { SupportWidget } from '@/components/admin/SupportWidget';
+import { ImpersonateBanner } from '@/components/admin/ImpersonateBanner';
 import { AuthProvider, useAuth } from '@/lib/contexts/AuthContext';
 import { MessageCircle, Mail, LockKeyhole, Check, Zap, Users, Star, Shield, RefreshCw, ArrowRight, Rocket } from 'lucide-react';
 import Link from 'next/link';
@@ -192,6 +193,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <AdminNav />
         {/* Sidebar spacer: 230px on desktop, 56px (top bar) on mobile */}
         <div className="flex-1 min-w-0 md:ml-[230px] flex flex-col pt-14 md:pt-0 overflow-x-hidden">
+          <ImpersonateBanner />
           {showOnboardingBanner && (
             <div className="bg-[#017172] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
               <p className="text-white text-sm font-medium flex items-center gap-2">

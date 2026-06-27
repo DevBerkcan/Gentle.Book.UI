@@ -160,6 +160,18 @@ export const superAdminApi = {
     return data as TenantStats;
   },
 
+  // ── Impersonate ──────────────────────────────────────────────
+  async impersonate(tenantId: string): Promise<{
+    access_token: string;
+    tenant_slug: string;
+    tenant_name: string;
+    user_email: string;
+    user_id: string;
+  }> {
+    const { data } = await api.post(`/superadmin/tenants/${tenantId}/impersonate`);
+    return data;
+  },
+
   // ── Activity Feed ────────────────────────────────────────────
   async getActivity(limit = 30) {
     const { data } = await api.get('/superadmin/activity', { params: { limit } });

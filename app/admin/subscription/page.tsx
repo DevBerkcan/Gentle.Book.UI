@@ -8,6 +8,7 @@ import {
   BarChart2, Globe, ArrowRight,
 } from 'lucide-react';
 import api from '@/lib/api/client';
+import { HelpTip } from '@/components/ui/help-tip';
 
 interface Subscription {
   plan: string;
@@ -250,7 +251,10 @@ export default function AdminSubscriptionPage() {
 
       {/* Pricing Cards */}
       <motion.div variants={fadeUp}>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Pläne & Preise</h2>
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-xl font-bold text-gray-900">Pläne & Preise</h2>
+          <HelpTip text="Alle Pläne beinhalten das Online-Buchungssystem. Der Plan bestimmt wie viele Mitarbeiter & Services du anlegen kannst. Upgrade jederzeit per WhatsApp oder E-Mail möglich." />
+        </div>
         <p className="text-gray-500 text-sm mb-6">Monatlich kündbar · Keine versteckten Kosten · Sofort aktivierbar</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {

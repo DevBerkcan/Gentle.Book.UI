@@ -9,6 +9,7 @@ import {
   Calendar, Instagram, MapPin, MessageCircle, FileText, Shield,
   Clock, Eye, DollarSign, Euro
 } from "lucide-react";
+import { HelpTip } from "@/components/ui/help-tip";
 import {
   getTrackingStatistics, getRevenueStatistics,
   type SimplifiedTrackingStatistics, type RevenueStatistics,
@@ -107,7 +108,10 @@ export default function TrackingPage() {
               <CardBody className="p-4 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Seitenaufrufe (gesamt)</div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1 flex items-center gap-1">
+                      Seitenaufrufe (gesamt)
+                      <HelpTip text="Wie oft deine Buchungsseite von Besuchern aufgerufen wurde — inkl. wiederholter Besuche" />
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">
                       <AnimatedNumber value={stats.totalPageViews} duration={1.4} />
                     </div>
@@ -125,7 +129,10 @@ export default function TrackingPage() {
               <CardBody className="p-4 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Total Klicks (gesamt)</div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1 flex items-center gap-1">
+                      Total Klicks (gesamt)
+                      <HelpTip text="Wie oft Besucher auf Links geklickt haben — z.B. Buchung starten, Social Media, Route" />
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
                       <AnimatedNumber value={stats.totalLinkClicks} duration={1.4} />
                     </div>
@@ -143,7 +150,10 @@ export default function TrackingPage() {
               <CardBody className="p-4 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Buchungen (gesamt)</div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1 flex items-center gap-1">
+                      Buchungen (gesamt)
+                      <HelpTip text="Gesamtzahl aller Buchungen die über deine Buchungsseite eingegangen sind" />
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
                       <AnimatedNumber value={stats.totalBookings} duration={1.4} />
                     </div>
@@ -161,7 +171,10 @@ export default function TrackingPage() {
               <CardBody className="p-4 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø CHF</div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1 flex items-center gap-1">
+                      Ø CHF
+                      <HelpTip text="Durchschnittlicher Buchungswert in Schweizer Franken über alle abgeschlossenen Buchungen" />
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
                       <AnimatedNumber value={stats.averageBookingValueCHF} duration={1.4} formatFn={(n) => formatPrice(n, "CHF")} />
                     </div>
@@ -179,7 +192,10 @@ export default function TrackingPage() {
               <CardBody className="p-4 sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1">Ø EUR</div>
+                    <div className="text-xs sm:text-sm text-[#8A8A8A] mb-1 flex items-center gap-1">
+                      Ø EUR
+                      <HelpTip text="Durchschnittlicher Buchungswert in Euro über alle abgeschlossenen Buchungen" />
+                    </div>
                     <div className="text-2xl sm:text-3xl font-bold text-[#017172]">
                       <AnimatedNumber value={stats.averageBookingValueEUR} duration={1.4} formatFn={(n) => formatPrice(n, "EUR")} />
                     </div>

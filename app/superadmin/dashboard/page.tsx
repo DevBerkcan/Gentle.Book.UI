@@ -10,6 +10,7 @@ import {
 import { superAdminApi, TenantListItem, ActivityItem, OverviewData } from '@/lib/api/superadmin';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { AnimatedNumber } from '@/components/ui/animated-number';
+import { HelpTip } from '@/components/ui/help-tip';
 
 interface Stats {
   totalTenants: number;
@@ -90,12 +91,12 @@ export default function SuperAdminDashboard() {
     .slice(0, 5);
 
   const statCards = stats ? [
-    { label: 'Systeme gesamt',    value: stats.totalTenants,       icon: <Building2 size={18} />, accent: '#3b82f6', bg: '#eff6ff' },
-    { label: 'Aktiv',             value: stats.activeTenants,      icon: <CheckCircle size={18} />, accent: '#22c55e', bg: '#f0fdf4' },
-    { label: 'Im Trial',          value: stats.trialTenants,       icon: <Clock size={18} />, accent: '#eab308', bg: '#fefce8' },
-    { label: 'Aktive Abos',       value: stats.activeSubscriptions,icon: <TrendingUp size={18} />, accent: '#8b5cf6', bg: '#f5f3ff' },
-    { label: 'Abgelaufen',        value: stats.expiredTenants,     icon: <AlertCircle size={18} />, accent: '#ef4444', bg: '#fef2f2' },
-    { label: 'Buchungen gesamt',  value: stats.totalBookings,      icon: <Calendar size={18} />, accent: '#06b6d4', bg: '#ecfeff' },
+    { label: 'Systeme gesamt',    value: stats.totalTenants,       icon: <Building2 size={18} />, accent: '#3b82f6', bg: '#eff6ff', help: 'Alle registrierten Buchungssysteme auf der Plattform (aktiv + inaktiv)' },
+    { label: 'Aktiv',             value: stats.activeTenants,      icon: <CheckCircle size={18} />, accent: '#22c55e', bg: '#f0fdf4', help: 'Systeme die aktuell aktiv sind und von Kunden genutzt werden können' },
+    { label: 'Im Trial',          value: stats.trialTenants,       icon: <Clock size={18} />, accent: '#eab308', bg: '#fefce8', help: 'Systeme die sich noch in der kostenlosen 14-Tage-Testphase befinden' },
+    { label: 'Aktive Abos',       value: stats.activeSubscriptions,icon: <TrendingUp size={18} />, accent: '#8b5cf6', bg: '#f5f3ff', help: 'Systeme mit einem bezahlten und aktiven Abonnement (Starter, Pro oder Business)' },
+    { label: 'Abgelaufen',        value: stats.expiredTenants,     icon: <AlertCircle size={18} />, accent: '#ef4444', bg: '#fef2f2', help: 'Systeme deren Trial oder Abo abgelaufen ist — kein Kundenzugang mehr möglich' },
+    { label: 'Buchungen gesamt',  value: stats.totalBookings,      icon: <Calendar size={18} />, accent: '#06b6d4', bg: '#ecfeff', help: 'Gesamtzahl aller Buchungen über alle Systeme und alle Zeiten hinweg' },
   ] : [];
 
   return (
@@ -135,7 +136,7 @@ export default function SuperAdminDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-          {statCards.map(({ label, value, icon, accent, bg }) => (
+          {statCards.map(({ label, value, icon, accent, bg, help }) => (
             <GlowingEffect key={label} glowColor={accent} spread={45}>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-[1] hover:-translate-y-0.5 transition-all duration-200">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
@@ -144,7 +145,10 @@ export default function SuperAdminDashboard() {
                 <p className="text-2xl font-bold text-gray-900 leading-none">
                   <AnimatedNumber value={value} duration={1.4} />
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{label}</p>
+                <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                  {label}
+                  <HelpTip text={help} />
+                </p>
               </div>
             </GlowingEffect>
           ))}

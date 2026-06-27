@@ -14,6 +14,7 @@ import { formatPrice } from "@/lib/utils/currency";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
+import { HelpTip } from "@/components/ui/help-tip";
 
 // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -50,13 +51,14 @@ const fadeUp = {
 
 // ── StatCard ──────────────────────────────────────────────────────────────
 function StatCard({
-  icon, value, label, growth, accent,
+  icon, value, label, growth, accent, helpText,
 }: {
   icon: React.ReactNode;
   value: string | number;
   label: string;
   growth?: number | null;
   accent: string;
+  helpText?: string;
 }) {
   const isNumeric = typeof value === "number";
 
@@ -95,7 +97,10 @@ function StatCard({
               value
             )}
           </div>
-          <div className="relative text-xs text-[#8A8A8A] font-medium">{label}</div>
+          <div className="relative text-xs text-[#8A8A8A] font-medium flex items-center gap-1">
+            {label}
+            {helpText && <HelpTip text={helpText} />}
+          </div>
         </div>
       </GlowingEffect>
     </motion.div>
@@ -314,6 +319,7 @@ export default function AdminDashboardPage() {
             label="Buchungen diesen Monat"
             growth={monthGrowth}
             accent="#017172"
+            helpText="Alle neuen Buchungen die in diesem Kalendermonat erstellt wurden"
           />
           <StatCard
             icon={<Euro size={20} style={{ color: "#E8C7C3" }} />}
@@ -321,6 +327,7 @@ export default function AdminDashboardPage() {
             label={`Umsatz ${defaultCurrency} diesen Monat`}
             growth={revenueGrowth}
             accent="#D8B0AC"
+            helpText="Summe aller nicht-stornierten Buchungen dieses Monats basierend auf dem Servicepreis"
           />
           <StatCard
             icon={<Users size={20} style={{ color: "#8B5CF6" }} />}
@@ -328,6 +335,7 @@ export default function AdminDashboardPage() {
             label={`Kunden gesamt (${statistics.newCustomersThisMonth} neu)`}
             growth={null}
             accent="#8B5CF6"
+            helpText="Alle registrierten Kunden in deinem System, in Klammern die neu dazugekommenen diesen Monat"
           />
         </motion.div>
 
