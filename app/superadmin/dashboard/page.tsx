@@ -5,9 +5,9 @@ import Link from 'next/link';
 import {
   Building2, Clock, CheckCircle, AlertCircle, Calendar, Plus,
   TrendingUp, Users, Mail, Activity, AlertTriangle, Zap, ArrowRight,
-  RefreshCw, XCircle, UserPlus,
+  RefreshCw, XCircle, UserPlus, Bell,
 } from 'lucide-react';
-import { superAdminApi, TenantListItem, ActivityItem, OverviewData } from '@/lib/api/superadmin';
+import { superAdminApi, TenantListItem, ActivityItem, OverviewData, SubscriptionRequestItem } from '@/lib/api/superadmin';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { AnimatedNumber } from '@/components/ui/animated-number';
 import { HelpTip } from '@/components/ui/help-tip';
@@ -49,25 +49,28 @@ function timeAgo(dateStr: string) {
 }
 
 export default function SuperAdminDashboard() {
-  const [stats,    setStats]    = useState<Stats | null>(null);
-  const [tenants,  setTenants]  = useState<TenantListItem[]>([]);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
-  const [overview, setOverview] = useState<OverviewData | null>(null);
-  const [loading,  setLoading]  = useState(true);
+  const [stats,          setStats]          = useState<Stats | null>(null);
+  const [tenants,        setTenants]        = useState<TenantListItem[]>([]);
+  const [activity,       setActivity]       = useState<ActivityItem[]>([]);
+  const [overview,       setOverview]       = useState<OverviewData | null>(null);
+  const [pendingRequests,setPendingRequests] = useState<SubscriptionRequestItem[]>([]);
+  const [loading,        setLoading]        = useState(true);
 
   async function load() {
     setLoading(true);
     try {
-      const [s, t, a, ov] = await Promise.all([
+      const [s, t, a, ov, req] = await Promise.all([
         superAdminApi.getStats(),
         superAdminApi.getTenants(1, 100),
         superAdminApi.getActivity(20),
         superAdminApi.getOverview(),
+        superAdminApi.getSubscriptionRequests('Pending').catch(() => ({ data: [], pendingCount: 0 })),
       ]);
       setStats(s);
       setTenants(t.items);
       setActivity(a);
       setOverview(ov);
+      setPendingRequests(req.data);
     } catch {
       // silent fail — UI shows empty state
     }
@@ -217,6 +220,45 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── Abo-Anfragen ───────────────────────────────────────────────── */}
+      {!loading && pendingRequests.length > 0 && (
+        <div className="bg-white border border-amber-200 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+              </span>
+              <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
+                <Bell size={15} className="text-amber-500" />
+                {pendingRequests.length} offene {pendingRequests.length === 1 ? 'Abo-Anfrage' : 'Abo-Anfragen'}
+              </h2>
+            </div>
+            <Link href="/superadmin/requests" className="text-xs text-[#017172] hover:underline flex items-center gap-1 font-medium">
+              Alle verwalten <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {pendingRequests.slice(0, 5).map(r => (
+              <Link
+                key={r.id}
+                href={`/superadmin/requests`}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium transition-colors hover:shadow-sm"
+              >
+                <Bell size={13} />
+                {r.tenantName}
+                <span className="text-xs bg-[#017172] text-white px-1.5 py-0.5 rounded-md font-semibold">{r.requestedPlan}</span>
+              </Link>
+            ))}
+            {pendingRequests.length > 5 && (
+              <Link href="/superadmin/requests" className="flex items-center gap-1 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
+                +{pendingRequests.length - 5} weitere
+              </Link>
+            )}
+          </div>
         </div>
       )}
 

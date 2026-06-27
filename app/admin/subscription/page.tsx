@@ -8,6 +8,7 @@ import {
   BarChart2, Globe, ArrowRight,
 } from 'lucide-react';
 import api from '@/lib/api/client';
+import { adminApi } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
 
 interface Subscription {
@@ -121,16 +122,37 @@ export default function AdminSubscriptionPage() {
   const [sub, setSub] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
+  const [requestedPlan, setRequestedPlan] = useState<string | null>(null);
+  const [requestSuccess, setRequestSuccess] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null),
       api.get('/tenant/usage').then(r => r.data).catch(() => null),
-    ]).then(([subData, usageData]) => {
+      adminApi.getSubscriptionRequestStatus().catch(() => null),
+    ]).then(([subData, usageData, requestStatus]) => {
       setSub(subData);
       setUsage(usageData);
+      if (requestStatus?.request?.status === 'Pending') {
+        setRequestedPlan(requestStatus.request.requestedPlan);
+      }
     }).finally(() => setLoading(false));
   }, []);
+
+  const handlePlanRequest = async (planKey: string) => {
+    if (requesting || requestedPlan) return;
+    setRequesting(true);
+    try {
+      await adminApi.requestPlan(planKey);
+      setRequestedPlan(planKey);
+      setRequestSuccess(true);
+    } catch {
+      alert('Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
+    } finally {
+      setRequesting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -249,6 +271,32 @@ export default function AdminSubscriptionPage() {
         </motion.div>
       )}
 
+      {/* Request Success Banner */}
+      {requestSuccess && (
+        <motion.div variants={fadeUp} className="bg-green-50 border border-green-200 rounded-2xl p-5 flex gap-4">
+          <CheckCircle className="text-green-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-green-800">Anfrage erfolgreich gesendet!</p>
+            <p className="text-green-700 text-sm mt-1">
+              Wir haben Ihre Anfrage für den <strong>{requestedPlan}-Plan</strong> erhalten und aktivieren ihn innerhalb von 24 Stunden. Sie erhalten eine Bestätigungs-E-Mail.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Pending Request Banner */}
+      {requestedPlan && !requestSuccess && (
+        <motion.div variants={fadeUp} className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
+          <Clock className="text-amber-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-amber-800">Anfrage in Bearbeitung</p>
+            <p className="text-amber-700 text-sm mt-1">
+              Ihre Anfrage für den <strong>{requestedPlan}-Plan</strong> wird gerade bearbeitet. Aktivierung innerhalb von 24 Stunden.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Pricing Cards */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center gap-2 mb-2">
@@ -300,26 +348,51 @@ export default function AdminSubscriptionPage() {
                   ))}
                 </ul>
                 <div className="space-y-2">
-                  <a
-                    href={`https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20den%20${plan.name}-Plan%20f%C3%BCr%20mein%20Studio%20buchen.`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium transition-colors
-                      ${plan.highlight
-                        ? 'bg-[#017172] hover:bg-[#015f5f] text-white'
-                        : 'bg-gray-900 hover:bg-gray-700 text-white'}`}
-                  >
-                    <MessageCircle size={16} />
-                    {isCurrent ? 'Plan verlängern' : `${plan.name} buchen`}
-                    <ArrowRight size={14} />
-                  </a>
-                  <a
-                    href={`mailto:support@gentlegroup.de?subject=${plan.name}-Plan%20Upgrade&body=Hallo%2C%20ich%20m%C3%B6chte%20auf%20den%20${plan.name}-Plan%20upgraden.`}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    <Mail size={15} />
-                    Per E-Mail anfragen
-                  </a>
+                  {/* Primary: In-App Plan Request */}
+                  {!isCurrent && (
+                    <button
+                      onClick={() => handlePlanRequest(plan.key)}
+                      disabled={requesting || !!requestedPlan}
+                      className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
+                        ${requestedPlan === plan.key
+                          ? 'bg-green-100 text-green-700 cursor-default'
+                          : requestedPlan
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : plan.highlight
+                              ? 'bg-[#017172] hover:bg-[#015f5f] text-white'
+                              : 'bg-gray-900 hover:bg-gray-700 text-white'}`}
+                    >
+                      {requestedPlan === plan.key ? (
+                        <><Check size={15} /> Anfrage gesendet</>
+                      ) : requesting ? (
+                        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>{plan.name} anfragen <ArrowRight size={14} /></>
+                      )}
+                    </button>
+                  )}
+                  {isCurrent && (
+                    <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-green-50 text-green-700">
+                      <Check size={15} /> Aktueller Plan
+                    </div>
+                  )}
+                  {/* Secondary: WhatsApp / Email */}
+                  <div className="flex gap-2">
+                    <a
+                      href={`https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20den%20${plan.name}-Plan%20buchen.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                      <MessageCircle size={13} /> WhatsApp
+                    </a>
+                    <a
+                      href={`mailto:support@gentlegroup.de?subject=${plan.name}-Plan%20Anfrage`}
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                      <Mail size={13} /> E-Mail
+                    </a>
+                  </div>
                 </div>
               </div>
             );

@@ -1,10 +1,11 @@
 // app/superadmin/layout.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell } from 'lucide-react';
+import { superAdminApi } from '@/lib/api/superadmin';
 
 function useSuperAdminAuth() {
   const router = useRouter();
@@ -42,10 +43,25 @@ function useSuperAdminAuth() {
 
 function SuperAdminNav({ logout }: { logout: () => void }) {
   const pathname = usePathname();
+  const [pendingRequests, setPendingRequests] = useState(0);
+
+  useEffect(() => {
+    superAdminApi.getSubscriptionRequests('Pending')
+      .then(r => setPendingRequests(r.pendingCount))
+      .catch(() => {});
+    // Refresh every 5 minutes
+    const id = setInterval(() => {
+      superAdminApi.getSubscriptionRequests('Pending')
+        .then(r => setPendingRequests(r.pendingCount))
+        .catch(() => {});
+    }, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, []);
 
   const navItems = [
     { href: '/superadmin/dashboard',  label: 'Dashboard',       icon: LayoutDashboard },
     { href: '/superadmin/tenants',    label: 'Buchungssysteme', icon: Building2 },
+    { href: '/superadmin/requests',   label: 'Abo-Anfragen',    icon: Bell, badge: pendingRequests },
     { href: '/superadmin/email-logs', label: 'E-Mail Logs',     icon: Mail },
     { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
   ];
@@ -58,7 +74,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon, badge }) => {
           const active = pathname.startsWith(href);
           return (
             <Link
@@ -71,7 +87,12 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
               }`}
             >
               <Icon size={18} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {badge != null && badge > 0 && (
+                <span className="bg-amber-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                  {badge}
+                </span>
+              )}
             </Link>
           );
         })}

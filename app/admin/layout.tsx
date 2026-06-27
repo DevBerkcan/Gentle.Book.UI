@@ -7,20 +7,36 @@ import { AdminNav } from '@/components/admin/AdminNav';
 import { SupportWidget } from '@/components/admin/SupportWidget';
 import { ImpersonateBanner } from '@/components/admin/ImpersonateBanner';
 import { AuthProvider, useAuth } from '@/lib/contexts/AuthContext';
-import { MessageCircle, Mail, LockKeyhole, Check, Zap, Users, Star, Shield, RefreshCw, ArrowRight, Rocket } from 'lucide-react';
+import { MessageCircle, Mail, LockKeyhole, Check, ArrowRight, CheckCircle, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api/client';
+import { adminApi } from '@/lib/api/admin';
 
-const UPGRADE_FEATURES = [
-  { icon: Zap,       text: 'Unbegrenzte Buchungen' },
-  { icon: Users,     text: 'Mehrere Mitarbeiter-Konten' },
-  { icon: Mail,      text: 'Automatische E-Mail-Bestätigungen' },
-  { icon: Star,      text: 'Professionelle Buchungsseite' },
-  { icon: Shield,    text: 'Priority Support & Wartung' },
-  { icon: RefreshCw, text: 'Alle zukünftigen Updates' },
+const MODAL_PLANS = [
+  { key: 'Starter',      name: 'Starter',      price: 29,  employees: '2 Mitarbeiter' },
+  { key: 'Professional', name: 'Professional',  price: 59,  employees: '10 Mitarbeiter', highlight: true },
+  { key: 'Agency',       name: 'Business',      price: 99,  employees: 'Unlimited' },
 ];
 
 function TrialExpiredModal() {
+  const [requesting,    setRequesting]    = useState(false);
+  const [requestedPlan, setRequestedPlan] = useState<string | null>(null);
+  const [confirmed,     setConfirmed]     = useState(false);
+
+  const handleRequest = async (planKey: string) => {
+    if (requesting || requestedPlan) return;
+    setRequesting(true);
+    try {
+      await adminApi.requestPlan(planKey);
+      setRequestedPlan(planKey);
+      setConfirmed(true);
+    } catch {
+      alert('Anfrage konnte nicht gesendet werden.');
+    } finally {
+      setRequesting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
       style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
@@ -31,65 +47,92 @@ function TrialExpiredModal() {
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: '#017172' }} />
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-lg">
         <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10"
           style={{ background: 'linear-gradient(135deg, #0f0f1a 0%, #1e1e2e 100%)' }}>
 
           {/* Header */}
-          <div className="px-8 pt-8 pb-6 text-center">
+          <div className="px-8 pt-8 pb-5 text-center">
             <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/30">
               <LockKeyhole size={30} className="text-red-400" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Testzeitraum abgelaufen</h2>
             <p className="text-white/50 text-sm leading-relaxed">
-              Ihre kostenlose Testphase ist abgelaufen. Upgraden Sie jetzt und behalten Sie vollen Zugriff.
+              Wählen Sie einen Plan und wir aktivieren ihn innerhalb von 24 Stunden.
             </p>
           </div>
 
-          {/* Price */}
-          <div className="mx-6 mb-6 rounded-2xl p-5 border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-black text-white">€49</span>
-                <span className="text-2xl font-bold text-white">,99</span>
-                <span className="text-white/40 text-sm ml-1">/Monat</span>
-              </div>
-              <div className="bg-[#C09995] text-white text-xs font-bold px-3 py-1.5 rounded-xl text-center leading-tight">
-                inkl. Support<br />& Wartung
-              </div>
+          {confirmed ? (
+            /* Confirmation state */
+            <div className="mx-6 mb-6 rounded-2xl p-6 border border-green-500/30 text-center" style={{ background: 'rgba(34,197,94,0.08)' }}>
+              <CheckCircle size={36} className="text-green-400 mx-auto mb-3" />
+              <p className="text-white font-semibold text-lg mb-1">Anfrage gesendet!</p>
+              <p className="text-white/50 text-sm">
+                Ihr <strong className="text-white/80">{requestedPlan}</strong>-Plan wird innerhalb von 24h aktiviert. Sie erhalten eine Bestätigungs-E-Mail.
+              </p>
+              <Link href="/admin/subscription" className="mt-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white/60 transition-colors">
+                Abonnement-Details <ArrowRight size={11} />
+              </Link>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {UPGRADE_FEATURES.map(({ text }) => (
-                <div key={text} className="flex items-center gap-1.5 text-xs text-white/65">
-                  <Check size={11} className="text-[#C09995] flex-shrink-0" />
-                  {text}
-                </div>
-              ))}
-            </div>
-          </div>
+          ) : (
+            <>
+              {/* Plan Cards */}
+              <div className="px-6 mb-5 grid grid-cols-3 gap-2">
+                {MODAL_PLANS.map(plan => (
+                  <button
+                    key={plan.key}
+                    onClick={() => handleRequest(plan.key)}
+                    disabled={requesting || !!requestedPlan}
+                    className={`relative rounded-2xl p-4 text-left border transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
+                      plan.highlight
+                        ? 'border-[#017172] bg-[#017172]/20'
+                        : 'border-white/10 bg-white/5 hover:bg-white/10'
+                    }`}
+                  >
+                    {plan.highlight && (
+                      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                        <span className="bg-[#017172] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Empfohlen</span>
+                      </div>
+                    )}
+                    <p className="text-[11px] text-white/50 font-medium mb-1">{plan.name}</p>
+                    <p className="text-2xl font-black text-white leading-none">€{plan.price}</p>
+                    <p className="text-[10px] text-white/40 mt-0.5">/Monat</p>
+                    <p className="text-[10px] text-white/50 mt-2">{plan.employees}</p>
+                    <div className="mt-3 text-center">
+                      {requesting ? (
+                        <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <span className="text-[11px] font-semibold text-white/70">Anfragen →</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-          {/* CTAs */}
-          <div className="px-6 pb-4 flex flex-col sm:flex-row gap-2.5">
-            <a
-              href="https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20GentleBook%20upgraden"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
-              style={{ background: '#25D366' }}
-            >
-              <MessageCircle size={16} /> WhatsApp
-            </a>
-            <a
-              href="mailto:support@gentlegroup.de?subject=Upgrade GentleBook Pro"
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm text-white border border-white/15 transition-all hover:bg-white/10"
-            >
-              <Mail size={16} /> E-Mail
-            </a>
-          </div>
+              {/* Backup CTAs */}
+              <div className="px-6 pb-4 flex gap-2.5">
+                <a
+                  href="https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20GentleBook%20upgraden"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90"
+                  style={{ background: '#25D366' }}
+                >
+                  <MessageCircle size={14} /> WhatsApp
+                </a>
+                <a
+                  href="mailto:support@gentlegroup.de?subject=Upgrade GentleBook"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white border border-white/15 transition-all hover:bg-white/10"
+                >
+                  <Mail size={14} /> E-Mail
+                </a>
+              </div>
+            </>
+          )}
 
           <div className="px-6 pb-6 text-center">
             <Link href="/admin/subscription" className="text-xs text-white/30 hover:text-white/60 transition-colors inline-flex items-center gap-1">
-              Abonnement-Details ansehen <ArrowRight size={11} />
+              Alle Plan-Details ansehen <ArrowRight size={11} />
             </Link>
           </div>
         </div>

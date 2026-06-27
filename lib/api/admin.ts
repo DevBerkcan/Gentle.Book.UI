@@ -19,6 +19,25 @@ export const adminApi = {
   getRevenueStatistics,
   trackLinkClick,
   getServicesByEmployee,
+
+  async requestPlan(plan: string, contactEmail?: string, note?: string) {
+    const { data } = await api.post('/tenant/subscription-request', { plan, contactEmail: contactEmail ?? '', note });
+    return data as { message: string; requestId: string };
+  },
+
+  async getSubscriptionRequestStatus() {
+    const { data } = await api.get('/tenant/subscription-request/status');
+    return data as {
+      hasPendingRequest: boolean;
+      request: {
+        id: string;
+        requestedPlan: string;
+        status: string;
+        createdAt: string;
+        processedAt?: string;
+      } | null;
+    };
+  },
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────

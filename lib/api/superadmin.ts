@@ -183,9 +183,38 @@ export const superAdminApi = {
     const { data } = await api.get('/superadmin/overview');
     return data as OverviewData;
   },
+
+  // ── Subscription Requests ────────────────────────────────────
+  async getSubscriptionRequests(status?: string) {
+    const { data } = await api.get('/superadmin/subscription-requests', { params: status ? { status } : {} });
+    return data as { data: SubscriptionRequestItem[]; pendingCount: number };
+  },
+
+  async activateSubscriptionRequest(id: string) {
+    const { data } = await api.post(`/superadmin/subscription-requests/${id}/activate`);
+    return data as { message: string };
+  },
+
+  async declineSubscriptionRequest(id: string) {
+    const { data } = await api.post(`/superadmin/subscription-requests/${id}/decline`);
+    return data as { message: string };
+  },
 };
 
 // ── Extra Types ───────────────────────────────────────────────────────────────
+
+export interface SubscriptionRequestItem {
+  id: string;
+  requestedPlan: string;
+  contactEmail: string;
+  status: string;
+  note?: string;
+  createdAt: string;
+  processedAt?: string;
+  tenantId: string;
+  tenantName: string;
+  tenantSlug: string;
+}
 
 export interface EmailLogItem {
   id: string;
