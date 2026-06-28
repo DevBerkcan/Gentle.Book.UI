@@ -46,8 +46,7 @@ export const blockedTimeSlotsApi = {
       
       const response = await api.get(`/blockedtimeslots${query}`);
       return response.data;
-    } catch (error) {
-      console.error('Error fetching blocked time slots:', error);
+    } catch {
       return [];
     }
   },
@@ -61,8 +60,7 @@ export const blockedTimeSlotsApi = {
       
       const response = await api.get(`/blockedtimeslots/by-date?${params.toString()}`);
       return response.data;
-    } catch (error) {
-      console.error('Error fetching blocked time slots by date:', error);
+    } catch {
       return [];
     }
   },
@@ -72,8 +70,7 @@ export const blockedTimeSlotsApi = {
     try {
       const response = await api.get(`/blockedtimeslots/${id}`);
       return response.data;
-    } catch (error) {
-      console.error(`Error fetching blocked time slot ${id}:`, error);
+    } catch {
       return null;
     }
   },

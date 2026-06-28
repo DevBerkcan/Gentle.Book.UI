@@ -12,12 +12,8 @@ export function useTrackingCapture() {
     // Speichere nur wenn UTM-Parameter vorhanden sind
     if (trackingData.utmSource || trackingData.utmMedium || trackingData.utmCampaign) {
       saveTrackingData(trackingData);
-      console.log("[Tracking] UTM Parameters captured:", trackingData);
-    }
-    // Speichere auch wenn Referrer vorhanden ist (kam von anderer Seite)
-    else if (trackingData.referrerUrl) {
+    } else if (trackingData.referrerUrl) {
       saveTrackingData(trackingData);
-      console.log("[Tracking] Referrer captured:", trackingData.referrerUrl);
     }
   }, []);
 }

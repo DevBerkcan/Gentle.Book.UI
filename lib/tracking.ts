@@ -33,8 +33,8 @@ export function saveTrackingData(data: TrackingData) {
 
   try {
     localStorage.setItem(TRACKING_STORAGE_KEY, JSON.stringify(data));
-  } catch (error) {
-    console.error("Failed to save tracking data:", error);
+  } catch {
+    // localStorage unavailable
   }
 }
 
@@ -44,8 +44,7 @@ export function getTrackingData(): TrackingData {
   try {
     const stored = localStorage.getItem(TRACKING_STORAGE_KEY);
     return stored ? JSON.parse(stored) : {};
-  } catch (error) {
-    console.error("Failed to get tracking data:", error);
+  } catch {
     return {};
   }
 }
@@ -55,8 +54,8 @@ export function clearTrackingData() {
 
   try {
     localStorage.removeItem(TRACKING_STORAGE_KEY);
-  } catch (error) {
-    console.error("Failed to clear tracking data:", error);
+  } catch {
+    // localStorage unavailable
   }
 }
 
@@ -79,8 +78,6 @@ export function trackEvent(eventName: string, eventParams?: Record<string, any>)
   if ((window as any).va) {
     (window as any).va("track", eventName, eventParams);
   }
-
-  console.log("[Tracking Event]", eventName, eventParams);
 }
 
 // Buchungsprozess Events

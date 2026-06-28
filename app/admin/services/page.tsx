@@ -464,7 +464,7 @@ export default function AdminServicesPage() {
                 const employeesData = await getEmployeesForAssignment();
                 setEmployees(employeesData);
             } catch (err) {
-                console.error("Failed to load employees:", err);
+                /* silent */
             }
         }
 

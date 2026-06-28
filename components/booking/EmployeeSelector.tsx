@@ -62,10 +62,9 @@ export function EmployeeSelector({
             handleSelect(data[0]);
           }
         }
-      } catch (err) {
+      } catch {
         if (isMounted) {
           setError("Fehler beim Laden der Mitarbeiter");
-          console.error(err);
         }
       } finally {
         if (isMounted) {

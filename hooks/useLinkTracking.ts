@@ -15,14 +15,9 @@ export function useLinkTracking() {
     }
 
     try {
-      await trackLinkClick({
-        linkName, 
-        linkUrl,
-        sessionId
-      });
-      console.log(`Tracked click: ${linkName}`);
-    } catch (error) {
-      console.error("Error tracking link click:", error);
+      await trackLinkClick({ linkName, linkUrl, sessionId });
+    } catch {
+      // silent
     }
   }, []);
 

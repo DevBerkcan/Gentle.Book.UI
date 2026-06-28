@@ -89,8 +89,8 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
           cat.id === categoryId ? { ...cat, services } : cat
         )
       );
-    } catch (error) {
-      console.error(`Failed to load services for category ${categoryId}:`, error);
+    } catch {
+      // silent
     } finally {
       setLoadingServices((prev) => ({ ...prev, [categoryId]: false }));
     }

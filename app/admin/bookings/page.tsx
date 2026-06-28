@@ -104,7 +104,7 @@ export default function AdminBookingsPage() {
       const data = await getServicesByEmployee(employeeId);
       setEmployeeServices(data);
     } catch (error) {
-      console.error("Error loading employee services:", error);
+      /* silent */
       setEmployeeServices([]);
     } finally {
       setLoadingEmployeeServices(false);
@@ -170,7 +170,7 @@ export default function AdminBookingsPage() {
       setEmployees(data);
       if (data.length > 0) setSelectedEmployeeId(data[0].id);
     } catch (err) {
-      console.error("Failed to load employees:", err);
+      /* silent */
     } finally {
       setLoadingEmployees(false);
     }
@@ -181,7 +181,7 @@ export default function AdminBookingsPage() {
       const data = await getServices();
       setServices(data);
     } catch (error) {
-      console.error("Error loading services:", error);
+      /* silent */
     }
   }
 
@@ -195,7 +195,7 @@ export default function AdminBookingsPage() {
       setCurrentPage(response.page);
       setTotalCount(response.totalCount);
     } catch (err) {
-      console.error("Failed to load bookings:", err);
+      /* silent */
     } finally {
       setLoading(false);
     }
@@ -388,7 +388,7 @@ export default function AdminBookingsPage() {
       await submitBooking(bookingData);
 
     } catch (error: any) {
-      console.error("Error preparing booking:", error);
+      /* silent */
       setError(error.message || "Fehler beim Erstellen der Buchung");
     }
   }
@@ -410,7 +410,7 @@ export default function AdminBookingsPage() {
         resetManualBookingForm();
       }, 3000);
     } catch (error: any) {
-      console.error("Error creating manual booking:", error);
+      /* silent */
       setError(error.message || "Fehler beim Erstellen der Buchung");
     } finally {
       setSubmitting(false);
@@ -444,7 +444,7 @@ export default function AdminBookingsPage() {
         resetManualBookingForm();
       }, 3000);
     } catch (error: any) {
-      console.error("Error creating manual booking:", error);
+      /* silent */
       setError(error.message || "Fehler beim Erstellen der Buchung");
     } finally {
       setSubmitting(false);

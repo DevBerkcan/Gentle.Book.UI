@@ -103,7 +103,7 @@ export default function CustomersPage() {
       const customer = await customersApi.getById(id);
       setSelectedCustomer(customer);
     } catch (err: any) {
-      console.error("Error loading customer details:", err);
+      /* silent */
     }
   }
 

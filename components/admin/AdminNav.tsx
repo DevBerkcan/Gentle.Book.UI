@@ -7,6 +7,7 @@ import {
   Users, Scissors, Settings, CreditCard, Link2,
   BarChart3, Menu, X, ChevronRight, Sparkles,
 } from "lucide-react";
+import { NotificationBell } from "@/components/admin/NotificationBell";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -146,6 +147,7 @@ export function AdminNav() {
             <p className="text-white text-sm font-semibold truncate">{displayName}</p>
             <p className="text-white/40 text-xs truncate">{displayRole}</p>
           </div>
+          <NotificationBell dark />
           <button
             onClick={logout}
             className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
@@ -177,12 +179,15 @@ export function AdminNav() {
             )
           }
         </Link>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/8"
-        >
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell dark />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/8"
+          >
+            {open ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* ── Mobile Drawer ────────────────────────────────────────────── */}

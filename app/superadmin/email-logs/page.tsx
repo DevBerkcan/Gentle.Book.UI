@@ -64,8 +64,8 @@ export default function EmailLogsPage() {
       setSentCount(res.sentCount);
       setFailedCount(res.failedCount);
       setTenants(tRes.items);
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // silent
     }
     setLoading(false);
   }
