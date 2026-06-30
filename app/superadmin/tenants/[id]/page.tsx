@@ -5,11 +5,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Save, Clock, ExternalLink, Copy, Check,
-  Palette, Users, Link2, CreditCard, Mail, Phone, Globe, MapPin, Upload, ImageIcon, LogIn,
+  Palette, Users, Link2, CreditCard, Mail, Phone, Globe, MapPin, Upload, ImageIcon, LogIn, Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 import { superAdminApi, UpdateTenantSettingsPayload, TenantStats } from '@/lib/api/superadmin';
+import { useConfirm } from '@/components/ConfirmDialog';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
 
 type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats';
@@ -38,6 +39,8 @@ export default function TenantDetailPage() {
   const [tenantStats, setTenantStats] = useState<TenantStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const { confirm, dialog } = useConfirm();
 
   // New user form
   const [newUser, setNewUser] = useState({ email: '', password: '', firstName: '', lastName: '' });
@@ -164,6 +167,24 @@ export default function TenantDetailPage() {
     } finally {
       setLogoUploading(false);
       if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
+
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: `"${tenant?.companyName || tenant?.name}" löschen?`,
+      message: 'Alle Buchungen, Mitarbeiter, Kunden und Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.',
+      variant: 'danger',
+      confirmLabel: 'Endgültig löschen',
+    });
+    if (!ok) return;
+    setDeleting(true);
+    try {
+      await superAdminApi.deleteTenant(id);
+      router.push('/superadmin/tenants');
+    } catch (e: any) {
+      alert(e.response?.data?.message ?? 'Löschen fehlgeschlagen');
+      setDeleting(false);
     }
   };
 
@@ -889,6 +910,24 @@ export default function TenantDetailPage() {
           )}
         </div>
       )}
+
+      {/* ── Danger Zone ─────────────────────────────────────────────── */}
+      <div className="mt-8 border border-red-200 rounded-2xl p-6 bg-red-50/30">
+        <h3 className="text-sm font-bold text-red-700 mb-1">Gefahrenzone</h3>
+        <p className="text-xs text-red-500/80 mb-4">
+          Löscht dieses System permanent — alle Buchungen, Mitarbeiter, Kunden und Daten werden unwiderruflich entfernt.
+        </p>
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold shadow-sm shadow-red-200 disabled:opacity-50 hover:bg-red-600 transition-colors"
+        >
+          <Trash2 size={14} />
+          {deleting ? 'Wird gelöscht…' : 'System endgültig löschen'}
+        </button>
+      </div>
+
+      {dialog}
     </div>
   );
 }

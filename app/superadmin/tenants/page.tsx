@@ -1,7 +1,7 @@
 // app/superadmin/tenants/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Plus, Building2, Clock, CheckCircle, XCircle, AlertCircle,
@@ -9,6 +9,7 @@ import {
   Users, Calendar, X, Loader2, TrendingUp, AlertTriangle, Zap,
 } from 'lucide-react';
 import { superAdminApi, TenantListItem } from '@/lib/api/superadmin';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -211,6 +212,7 @@ export default function TenantsPage() {
   const [extendingTrial, setExtendingTrial] = useState<string | null>(null);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const { confirm, dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -264,7 +266,13 @@ export default function TenantsPage() {
   }
 
   async function deleteTenant(t: TenantListItem) {
-    if (!confirm(`"${t.companyName || t.name}" wirklich löschen?\n\nAlle Buchungen, Mitarbeiter und Daten werden unwiderruflich gelöscht!`)) return;
+    const ok = await confirm({
+      title: `"${t.companyName || t.name}" löschen?`,
+      message: 'Alle Buchungen, Mitarbeiter, Kunden und Daten werden unwiderruflich gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.',
+      variant: 'danger',
+      confirmLabel: 'Endgültig löschen',
+    });
+    if (!ok) return;
     setDeleting(t.id);
     try {
       await superAdminApi.deleteTenant(t.id);
@@ -766,6 +774,7 @@ export default function TenantsPage() {
           </div>
         </div>
       )}
+      {dialog}
     </div>
   );
 }
