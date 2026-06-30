@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, Sparkles,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, Sparkles,
 } from "lucide-react";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { useState, useEffect } from "react";
@@ -48,9 +48,12 @@ const ADMIN_GROUP = {
   ],
 };
 
+const COLLAPSE_KEY = "admin-sidebar-collapsed";
+
 export function AdminNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const { user, employee, logout, isAuthenticated, isTenantAdmin } = useAuth();
   const [logoUrl, setLogoUrl]         = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
@@ -64,6 +67,22 @@ export function AdminNav() {
       }).catch(() => {});
     }
   }, [isTenantAdmin]);
+
+  useEffect(() => {
+    setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "true");
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--admin-sidebar-width", collapsed ? "72px" : "230px");
+  }, [collapsed]);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(COLLAPSE_KEY, String(next));
+      return next;
+    });
+  };
 
   // Close drawer on route change
   useEffect(() => { setOpen(false); }, [pathname]);
@@ -84,13 +103,19 @@ export function AdminNav() {
     pathname === href || (href !== "/admin/dashboard" && pathname?.startsWith(href));
 
   // ── Sidebar content (shared desktop + mobile) ──────────────────────────
-  const SidebarContent = () => (
+  const SidebarContent = ({ forceExpanded = false }: { forceExpanded?: boolean }) => {
+    const isCollapsed = forceExpanded ? false : collapsed;
+    return (
     <div className="flex flex-col h-full">
 
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/8">
+      <div className={`px-5 py-5 border-b border-white/8 ${isCollapsed ? "px-3" : ""}`}>
         <Link href="/admin/dashboard" className="flex items-center gap-3">
-          {logoUrl
+          {isCollapsed ? (
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#E8C7C3]/20 mx-auto">
+              <Sparkles size={17} className="text-white" />
+            </div>
+          ) : logoUrl
             ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
               <>
@@ -110,9 +135,11 @@ export function AdminNav() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {groups.map((group) => (
           <div key={group.label}>
-            <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest px-2 mb-2">
-              {group.label}
-            </p>
+            {!isCollapsed && (
+              <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest px-2 mb-2">
+                {group.label}
+              </p>
+            )}
             <div className="space-y-0.5">
               {group.items.map(({ href, label, icon: Icon }) => {
                 const active = isActive(href);
@@ -120,15 +147,18 @@ export function AdminNav() {
                   <Link
                     key={href}
                     href={href}
+                    title={isCollapsed ? label : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
+                      isCollapsed ? "justify-center" : ""
+                    } ${
                       active
                         ? "bg-gradient-to-r from-[#017172] to-[#01878A] text-white shadow-lg shadow-[#017172]/25"
                         : "text-white/55 hover:text-white hover:bg-white/8"
                     }`}
                   >
                     <Icon size={17} className={active ? "text-white" : "text-white/40 group-hover:text-white/80"} />
-                    <span className="flex-1">{label}</span>
-                    {active && <ChevronRight size={14} className="opacity-50" />}
+                    {!isCollapsed && <span className="flex-1">{label}</span>}
+                    {!isCollapsed && active && <ChevronRight size={14} className="opacity-50" />}
                   </Link>
                 );
               })}
@@ -139,32 +169,61 @@ export function AdminNav() {
 
       {/* User */}
       <div className="px-3 py-4 border-t border-white/8">
-        <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30">
-            {initials}
+        {isCollapsed ? (
+          <div className="flex flex-col items-center gap-2">
+            <div
+              className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30"
+              title={displayName}
+            >
+              {initials}
+            </div>
+            <NotificationBell dark />
+            <button
+              onClick={logout}
+              className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
+              title="Abmelden"
+            >
+              <LogOut size={15} />
+            </button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-            <p className="text-white/40 text-xs truncate">{displayRole}</p>
+        ) : (
+          <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+              <p className="text-white/40 text-xs truncate">{displayRole}</p>
+            </div>
+            <NotificationBell dark />
+            <button
+              onClick={logout}
+              className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
+              title="Abmelden"
+            >
+              <LogOut size={15} />
+            </button>
           </div>
-          <NotificationBell dark />
-          <button
-            onClick={logout}
-            className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
-            title="Abmelden"
-          >
-            <LogOut size={15} />
-          </button>
-        </div>
+        )}
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <>
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 w-[230px] flex-col bg-[#1a1a2e] border-r border-white/5 z-40">
+      <aside className={`hidden md:flex fixed inset-y-0 left-0 flex-col bg-[#1a1a2e] border-r border-white/5 z-40 transition-[width] duration-200 ${
+        collapsed ? "w-[72px]" : "w-[230px]"
+      }`}>
         <SidebarContent />
+        <button
+          onClick={toggleCollapsed}
+          className="hidden md:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
+          title={collapsed ? "Sidebar einblenden" : "Sidebar ausblenden"}
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
       </aside>
 
       {/* ── Mobile Top Bar ───────────────────────────────────────────── */}
@@ -206,7 +265,7 @@ export function AdminNav() {
               transition={{ type: "spring", stiffness: 340, damping: 30 }}
               className="md:hidden fixed inset-y-0 left-0 w-[260px] bg-[#1a1a2e] border-r border-white/8 z-50"
             >
-              <SidebarContent />
+              <SidebarContent forceExpanded />
             </motion.aside>
           </>
         )}
