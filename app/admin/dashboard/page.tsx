@@ -16,14 +16,23 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { HelpTip } from "@/components/ui/help-tip";
 
-// ── helpers ──────────────────────────────────────────────────────────────
+// ── Design Tokens (matching AdminLinksPage & AdminSettingsPage) ───────────────
+// bg:         #F7F7F8
+// surface:    #FFFFFF
+// border:     #E5E7EB   subtle: #F3F4F6
+// text-1:     #111318   text-2: #374151   text-3: #6B7280   text-4: #9CA3AF
+// accent:     #4F46E5   accent-bg: #EEF2FF   accent-bdr: #A5B4FC / #C7D2FE
+// success:    #065F46 on #D1FAE5   error: #991B1B on #FEE2E2
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_MAP: Record<string, { label: string; dot: string; bg: string; text: string }> = {
-  Confirmed:  { label: "Bestätigt",       dot: "bg-emerald-400", bg: "bg-emerald-50",  text: "text-emerald-700" },
-  Pending:    { label: "Ausstehend",      dot: "bg-amber-400",   bg: "bg-amber-50",    text: "text-amber-700"   },
-  Completed:  { label: "Abgeschlossen",   dot: "bg-[#017172]",   bg: "bg-teal-50",     text: "text-teal-700"    },
-  Cancelled:  { label: "Storniert",       dot: "bg-red-400",     bg: "bg-red-50",      text: "text-red-600"     },
-  NoShow:     { label: "Nicht erschienen",dot: "bg-gray-400",    bg: "bg-gray-100",    text: "text-gray-600"    },
+  Confirmed: { label: "Bestätigt",        dot: "bg-emerald-400", bg: "bg-[#D1FAE5]", text: "text-[#065F46]" },
+  Pending:   { label: "Ausstehend",       dot: "bg-amber-400",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
+  Completed: { label: "Abgeschlossen",    dot: "bg-[#4F46E5]",   bg: "bg-[#EEF2FF]", text: "text-[#4F46E5]" },
+  Cancelled: { label: "Storniert",        dot: "bg-red-400",     bg: "bg-[#FEE2E2]", text: "text-[#991B1B]" },
+  NoShow:    { label: "Nicht erschienen", dot: "bg-[#9CA3AF]",   bg: "bg-[#F3F4F6]", text: "text-[#374151]" },
 };
 
 function formatTime(mins: number) {
@@ -45,11 +54,12 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
 const fadeUp = {
-  hidden:  { opacity: 0, y: 20 },
+  hidden:  { opacity: 0, y: 16 },
   visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 22 } },
 };
 
-// ── StatCard ──────────────────────────────────────────────────────────────
+// ── StatCard ──────────────────────────────────────────────────────────────────
+
 function StatCard({
   icon, value, label, growth, accent, helpText,
 }: {
@@ -64,40 +74,36 @@ function StatCard({
 
   return (
     <motion.div variants={fadeUp}>
-      <GlowingEffect glowColor={accent} spread={50}>
-        <div
-          className="relative overflow-hidden bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 group"
-        >
-          {/* Top accent gradient bar */}
+      <GlowingEffect glowColor={accent} spread={40}>
+        <div className="relative overflow-hidden bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 group">
+          {/* Top accent line */}
           <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl"
-            style={{ background: `linear-gradient(90deg, ${accent}, ${accent}66)` }} />
-          {/* Subtle background glow */}
-          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-[0.06] group-hover:opacity-[0.10] transition-opacity duration-300"
+            style={{ background: `linear-gradient(90deg, ${accent}, ${accent}55)` }} />
+          {/* Background glow */}
+          <div className="absolute -top-8 -right-8 w-20 h-20 rounded-full opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-300"
             style={{ background: accent }} />
 
           <div className="relative flex items-start justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
-              style={{ background: `${accent}18` }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: `${accent}15` }}>
               {icon}
             </div>
             {growth != null && growth !== 0 && (
-              <span className={`flex items-center gap-0.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
-                growth > 0 ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+              <span className={`flex items-center gap-0.5 text-[11px] font-semibold px-2 py-1 rounded-full ${
+                growth > 0
+                  ? "bg-[#D1FAE5] text-[#065F46]"
+                  : "bg-[#FEE2E2] text-[#991B1B]"
               }`}>
-                {growth > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {growth > 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
                 {Math.abs(growth).toFixed(0)}%
               </span>
             )}
           </div>
 
-          <div className="relative text-3xl font-bold text-[#1E1E1E] mb-1 tabular-nums">
-            {isNumeric ? (
-              <AnimatedNumber value={value as number} duration={1.4} />
-            ) : (
-              value
-            )}
+          <div className="relative text-[28px] font-bold text-[#111318] mb-1 tabular-nums leading-none">
+            {isNumeric ? <AnimatedNumber value={value as number} duration={1.4} /> : value}
           </div>
-          <div className="relative text-xs text-[#8A8A8A] font-medium flex items-center gap-1">
+          <div className="relative text-xs text-[#6B7280] font-medium flex items-center gap-1">
             {label}
             {helpText && <HelpTip text={helpText} />}
           </div>
@@ -107,17 +113,18 @@ function StatCard({
   );
 }
 
-// ── Page ─────────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function AdminDashboardPage() {
   const { user, isTenantAdmin } = useAuth();
-  const [dashboard,        setDashboard]       = useState<DashboardOverview | null>(null);
-  const [onboarding,       setOnboarding]      = useState<OnboardingStatus | null>(null);
-  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
-  const [loading,          setLoading]          = useState(true);
-  const [error,            setError]            = useState<string | null>(null);
-  const [copied,           setCopied]           = useState(false);
-  const [defaultCurrency,  setDefaultCurrency]  = useState("EUR");
-  const [usage,            setUsage]            = useState<any>(null);
+  const [dashboard,            setDashboard]           = useState<DashboardOverview | null>(null);
+  const [onboarding,           setOnboarding]          = useState<OnboardingStatus | null>(null);
+  const [onboardingDismissed,  setOnboardingDismissed] = useState(false);
+  const [loading,              setLoading]             = useState(true);
+  const [error,                setError]               = useState<string | null>(null);
+  const [copied,               setCopied]              = useState(false);
+  const [defaultCurrency,      setDefaultCurrency]     = useState("EUR");
+  const [usage,                setUsage]               = useState<any>(null);
 
   useEffect(() => {
     getDashboard()
@@ -139,27 +146,32 @@ export default function AdminDashboardPage() {
       }
     });
 
-    // Persist dismiss in sessionStorage
     if (typeof window !== "undefined" && sessionStorage.getItem("onboarding_dismissed")) {
       setOnboardingDismissed(true);
     }
   }, [isTenantAdmin]);
 
+  // ── Loading ──────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F2EFED]">
-        <div className="w-10 h-10 rounded-full border-4 border-[#017172] border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F7F8]">
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />
       </div>
     );
   }
 
+  // ── Error ────────────────────────────────────────────────────────────────
+
   if (error || !dashboard) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F2EFED] p-4">
-        <div className="bg-white rounded-3xl shadow-xl p-10 text-center max-w-sm">
-          <p className="text-2xl mb-3">⚠️</p>
-          <h2 className="text-lg font-bold text-[#1E1E1E] mb-2">Fehler beim Laden</h2>
-          <p className="text-sm text-[#8A8A8A]">{error || "Dashboard nicht verfügbar"}</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F7F8] p-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-10 text-center max-w-sm">
+          <div className="w-12 h-12 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle size={20} className="text-[#991B1B]" />
+          </div>
+          <h2 className="text-base font-bold text-[#111318] mb-2">Fehler beim Laden</h2>
+          <p className="text-sm text-[#6B7280]">{error || "Dashboard nicht verfügbar"}</p>
         </div>
       </div>
     );
@@ -177,49 +189,54 @@ export default function AdminDashboardPage() {
 
   const todayDate = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long" });
 
-  return (
-    <div className="min-h-screen bg-[#F2EFED]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+  // ── Render ───────────────────────────────────────────────────────────────
 
-        {/* ── Header ───────────────────────────────────────────────── */}
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-          className="flex items-start justify-between">
+  return (
+    <div className="min-h-screen bg-[#F7F7F8]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-5">
+
+        {/* ── Page header ───────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+          className="flex items-start justify-between"
+        >
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs text-[#8A8A8A] font-medium">{todayDate}</p>
-              <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <div className="flex items-center gap-2 mb-1.5">
+              <p className="text-xs text-[#9CA3AF] font-medium">{todayDate}</p>
+              <span className="flex items-center gap-1 text-[10px] font-bold text-[#065F46] bg-[#D1FAE5] px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">
+            <h1 className="text-2xl sm:text-[28px] font-bold text-[#111318] tracking-tight">
               {greeting()}{user?.firstName ? `, ${user.firstName}` : ""}! 👋
             </h1>
-            <p className="text-sm text-[#8A8A8A] mt-1">Hier ist deine heutige Übersicht.</p>
+            <p className="text-sm text-[#6B7280] mt-1">Hier ist deine heutige Übersicht.</p>
           </div>
         </motion.div>
 
-        {/* ── Booking Link Banner ───────────────────────────────────── */}
+        {/* ── Booking Link Banner ───────────────────────────────────────── */}
         {isTenantAdmin && user?.tenantSlug && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="relative overflow-hidden rounded-2xl p-5 text-white"
-            style={{ background: "linear-gradient(135deg, #017172 0%, #01a0a2 50%, #01b8ba 100%)" }}
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="relative overflow-hidden rounded-2xl p-5 border border-[#C7D2FE] bg-[#4F46E5]"
           >
-            {/* Decorative blobs */}
-            <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full" />
-            <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-white/8 rounded-full" />
+            {/* Decorative shapes */}
+            <div className="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full" />
+            <div className="absolute -bottom-3 right-16 w-16 h-16 bg-white/6 rounded-full" />
 
             <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <ExternalLink size={14} className="opacity-70" />
-                  <p className="text-white/70 text-xs font-medium">Dein Buchungslink</p>
+                  <ExternalLink size={13} className="text-white/60" />
+                  <p className="text-white/60 text-xs font-medium">Dein Buchungslink</p>
                 </div>
                 <p className="text-white font-mono text-sm sm:text-base font-semibold truncate">
                   {typeof window !== "undefined" ? window.location.origin : ""}/booking/{user.tenantSlug}
                 </p>
-                {user.tenantName && <p className="text-white/50 text-xs mt-0.5">{user.tenantName}</p>}
+                {user.tenantName && (
+                  <p className="text-white/40 text-xs mt-0.5">{user.tenantName}</p>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
@@ -228,44 +245,52 @@ export default function AdminDashboardPage() {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
-                  className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors backdrop-blur-sm"
+                  className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-xl text-sm font-medium transition-colors"
                 >
-                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? <Check size={13} /> : <Copy size={13} />}
                   {copied ? "Kopiert!" : "Kopieren"}
                 </button>
                 <a
                   href={`/booking/${user.tenantSlug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-white text-[#017172] px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 bg-white text-[#4F46E5] px-3.5 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm"
                 >
-                  <ArrowUpRight size={14} /> Öffnen
+                  <ArrowUpRight size={13} />Öffnen
                 </a>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* ── Onboarding Checklist ─────────────────────────────────── */}
+        {/* ── Onboarding Checklist ──────────────────────────────────────── */}
         {isTenantAdmin && onboarding && !onboarding.isComplete && !onboardingDismissed && (
           <motion.div
-            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#017172]/10 flex items-center justify-center">
-                  <Sparkles size={16} className="text-[#017172]" />
+                <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
+                  <Sparkles size={15} className="text-[#4F46E5]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-[#1E1E1E]">Setup-Checkliste</p>
-                  <p className="text-xs text-[#8A8A8A]">{onboarding.completedSteps} von {onboarding.totalSteps} Schritten abgeschlossen</p>
+                  <p className="font-semibold text-sm text-[#111318]">Setup-Checkliste</p>
+                  <p className="text-[11px] text-[#9CA3AF]">
+                    {onboarding.completedSteps} von {onboarding.totalSteps} Schritten abgeschlossen
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                {/* Progress dots */}
                 <div className="flex gap-1">
                   {Array.from({ length: onboarding.totalSteps }).map((_, i) => (
-                    <div key={i} className={`h-1.5 w-6 rounded-full transition-colors ${i < onboarding.completedSteps ? 'bg-[#017172]' : 'bg-gray-100'}`} />
+                    <div key={i}
+                      className={`h-1.5 w-5 rounded-full transition-colors ${
+                        i < onboarding.completedSteps ? "bg-[#4F46E5]" : "bg-[#F3F4F6]"
+                      }`}
+                    />
                   ))}
                 </div>
                 <button
@@ -273,109 +298,121 @@ export default function AdminDashboardPage() {
                     setOnboardingDismissed(true);
                     if (typeof window !== "undefined") sessionStorage.setItem("onboarding_dismissed", "1");
                   }}
-                  className="text-gray-300 hover:text-gray-500 transition-colors p-1"
+                  className="text-[#D1D5DB] hover:text-[#6B7280] transition-colors p-1 rounded-lg hover:bg-[#F3F4F6]"
                   title="Ausblenden"
                 >
                   <X size={14} />
                 </button>
               </div>
             </div>
-            <div className="divide-y divide-gray-50">
+
+            {/* Steps */}
+            <div className="divide-y divide-[#F3F4F6]">
               {[
-                { done: onboarding.hasCompany,   label: "Firmenname eintragen",      href: "/admin/settings",   desc: "Name deines Studios festlegen" },
-                { done: onboarding.hasLogo,      label: "Logo hochladen",            href: "/admin/settings",   desc: "Dein Logo für Buchungsseite & E-Mails" },
-                { done: onboarding.hasHours,     label: "Öffnungszeiten festlegen",  href: "/admin/settings",   desc: "Wann ist dein Studio geöffnet?" },
-                { done: onboarding.hasServices,  label: "Ersten Service anlegen",    href: "/admin/services",   desc: "Welche Leistungen bietest du an?" },
-                { done: onboarding.hasEmployees, label: "Mitarbeiter hinzufügen",    href: "/admin/employees",  desc: "Wer führt die Termine durch?" },
+                { done: onboarding.hasCompany,   label: "Firmenname eintragen",     href: "/admin/settings",  desc: "Name deines Studios festlegen" },
+                { done: onboarding.hasLogo,      label: "Logo hochladen",            href: "/admin/settings",  desc: "Dein Logo für Buchungsseite & E-Mails" },
+                { done: onboarding.hasHours,     label: "Öffnungszeiten festlegen",  href: "/admin/settings",  desc: "Wann ist dein Studio geöffnet?" },
+                { done: onboarding.hasServices,  label: "Ersten Service anlegen",    href: "/admin/services",  desc: "Welche Leistungen bietest du an?" },
+                { done: onboarding.hasEmployees, label: "Mitarbeiter hinzufügen",    href: "/admin/employees", desc: "Wer führt die Termine durch?" },
               ].map(({ done, label, href, desc }) => (
                 <a
                   key={label}
                   href={done ? undefined : href}
-                  className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${done ? 'opacity-60' : 'hover:bg-gray-50/70 cursor-pointer'}`}
+                  className={`flex items-center gap-4 px-5 py-3.5 transition-colors ${
+                    done ? "opacity-55" : "hover:bg-[#F7F7F8] cursor-pointer"
+                  }`}
                 >
                   {done
-                    ? <CheckCircle2 size={18} className="text-[#017172] flex-shrink-0" />
-                    : <Circle size={18} className="text-gray-200 flex-shrink-0" />
-                  }
+                    ? <CheckCircle2 size={17} className="text-[#4F46E5] flex-shrink-0" />
+                    : <Circle size={17} className="text-[#D1D5DB] flex-shrink-0" />}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${done ? 'line-through text-gray-400' : 'text-[#1E1E1E]'}`}>{label}</p>
-                    <p className="text-xs text-[#8A8A8A]">{desc}</p>
+                    <p className={`text-sm font-medium ${done ? "line-through text-[#9CA3AF]" : "text-[#111318]"}`}>{label}</p>
+                    <p className="text-[11px] text-[#9CA3AF]">{desc}</p>
                   </div>
-                  {!done && <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />}
+                  {!done && <ChevronRight size={13} className="text-[#D1D5DB] flex-shrink-0" />}
                 </a>
               ))}
             </div>
           </motion.div>
         )}
 
-        {/* ── Stat Cards ────────────────────────────────────────────── */}
+        {/* ── Stat Cards ────────────────────────────────────────────────── */}
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           variants={stagger} initial="hidden" animate="visible"
         >
           <StatCard
-            icon={<Calendar size={20} style={{ color: "#017172" }} />}
+            icon={<Calendar size={18} style={{ color: "#4F46E5" }} />}
             value={statistics.totalBookingsThisMonth}
             label="Buchungen diesen Monat"
             growth={monthGrowth}
-            accent="#017172"
+            accent="#4F46E5"
             helpText="Alle neuen Buchungen die in diesem Kalendermonat erstellt wurden"
           />
           <StatCard
-            icon={<Euro size={20} style={{ color: "#E8C7C3" }} />}
+            icon={<Euro size={18} style={{ color: "#059669" }} />}
             value={formatPrice(revenueThis, defaultCurrency)}
             label={`Umsatz ${defaultCurrency} diesen Monat`}
             growth={revenueGrowth}
-            accent="#D8B0AC"
+            accent="#059669"
             helpText="Summe aller nicht-stornierten Buchungen dieses Monats basierend auf dem Servicepreis"
           />
           <StatCard
-            icon={<Users size={20} style={{ color: "#8B5CF6" }} />}
+            icon={<Users size={18} style={{ color: "#8B5CF6" }} />}
             value={statistics.totalCustomers}
             label={`Kunden gesamt (${statistics.newCustomersThisMonth} neu)`}
             growth={null}
             accent="#8B5CF6"
-            helpText="Alle registrierten Kunden in deinem System, in Klammern die neu dazugekommenen diesen Monat"
+            helpText="Alle registrierten Kunden in deinem System"
           />
         </motion.div>
 
-        {/* ── Usage Meter ─────────────────────────────────────────── */}
+        {/* ── Usage Meter ───────────────────────────────────────────────── */}
         {usage && (
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+            className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <BarChart2 size={16} className="text-[#017172]" />
-                <span className="text-sm font-semibold text-[#1E1E1E]">Plan-Nutzung ({usage.planDisplayName})</span>
+                <BarChart2 size={15} className="text-[#4F46E5]" />
+                <span className="text-sm font-semibold text-[#111318]">
+                  Plan-Nutzung <span className="text-[#9CA3AF] font-normal">({usage.planDisplayName})</span>
+                </span>
               </div>
-              <Link href="/admin/subscription" className="text-xs text-[#017172] hover:underline">Upgraden →</Link>
+              <Link href="/admin/subscription"
+                className="text-xs font-medium text-[#4F46E5] hover:text-[#4338CA] transition-colors">
+                Upgraden →
+              </Link>
             </div>
             <div className="space-y-3">
               {[
-                { label: 'Mitarbeiter', data: usage.employees },
-                { label: 'Services',   data: usage.services   },
+                { label: "Mitarbeiter", data: usage.employees },
+                { label: "Services",   data: usage.services   },
               ].map(({ label, data }) => {
                 if (!data) return null;
                 const pct = data.isUnlimited ? 10 : Math.min(data.percentage, 100);
-                const color = data.percentage >= 100 ? 'bg-red-500' : data.percentage >= 80 ? 'bg-amber-500' : 'bg-[#017172]';
+                const barColor = data.percentage >= 100 ? "bg-[#EF4444]"
+                  : data.percentage >= 80 ? "bg-[#F59E0B]"
+                  : "bg-[#4F46E5]";
                 return (
-                  <div key={label} className="space-y-1">
-                    <div className="flex justify-between text-xs text-gray-500">
+                  <div key={label} className="space-y-1.5">
+                    <div className="flex justify-between text-xs text-[#6B7280]">
                       <span>{label}</span>
-                      <span className="font-medium text-gray-800">{data.current} / {data.isUnlimited ? '∞' : data.limit}</span>
+                      <span className="font-semibold text-[#374151]">
+                        {data.current} / {data.isUnlimited ? "∞" : data.limit}
+                      </span>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
+                    <div className="h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );
               })}
               {(usage.employees?.percentage >= 80 || usage.services?.percentage >= 80) && (
-                <div className="flex items-center gap-2 pt-1 text-xs text-amber-700">
-                  <AlertTriangle size={13} />
-                  Sie nähern sich dem Limit Ihres Plans.
+                <div className="flex items-center gap-2 pt-1 text-xs text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] rounded-xl px-3 py-2.5">
+                  <AlertTriangle size={12} className="shrink-0" />
+                  Sie nähern sich dem Limit Ihres Plans.{" "}
                   <Link href="/admin/subscription" className="font-semibold underline">Upgrade</Link>
                 </div>
               )}
@@ -383,113 +420,103 @@ export default function AdminDashboardPage() {
           </motion.div>
         )}
 
-        {/* ── Quick Actions ────────────────────────────────────────── */}
+        {/* ── Quick Actions ─────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
           className="flex flex-wrap gap-2"
         >
+          {/* Primary CTA */}
           <Link href="/admin/bookings?new=1"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white shadow-sm hover:opacity-90 active:scale-[0.97] transition-all"
-            style={{ background: "linear-gradient(135deg, #017172, #01a0a2)" }}
-          >
-            <Calendar size={15} /> Neue Buchung
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#4F46E5] hover:bg-[#4338CA] shadow-sm active:scale-[0.97] transition-all">
+            <Calendar size={14} />Neue Buchung
           </Link>
-          <Link href="/admin/bookings"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
-          >
-            <Clock size={15} className="text-[#017172]" />
-            Buchungen heute
-            {today.totalBookings > 0 && (
-              <span className="bg-[#017172] text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">{today.totalBookings}</span>
-            )}
-          </Link>
-          <Link href="/admin/customers"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
-          >
-            <Users size={15} className="text-purple-500" /> Kunden
-          </Link>
-          <Link href="/admin/calendar"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
-          >
-            <CalendarDays size={15} className="text-blue-500" /> Kalender
-          </Link>
-          <Link href="/admin/blocked-slots"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-[#1E1E1E] border border-gray-100 shadow-sm hover:bg-gray-50 active:scale-[0.97] transition-all"
-          >
-            <Ban size={15} className="text-red-400" /> Sperrzeiten
-          </Link>
+          {/* Secondary actions */}
+          {[
+            { href: "/admin/bookings",      icon: <Clock size={14} className="text-[#4F46E5]" />,   label: "Buchungen heute", badge: today.totalBookings > 0 ? today.totalBookings : null },
+            { href: "/admin/customers",     icon: <Users size={14} className="text-[#8B5CF6]" />,   label: "Kunden",          badge: null },
+            { href: "/admin/calendar",      icon: <CalendarDays size={14} className="text-[#059669]" />, label: "Kalender",    badge: null },
+            { href: "/admin/blocked-slots", icon: <Ban size={14} className="text-[#EF4444]" />,     label: "Sperrzeiten",     badge: null },
+          ].map(({ href, icon, label, badge }) => (
+            <Link key={href} href={href}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-white text-[#374151] border border-[#E5E7EB] shadow-sm hover:border-[#C7D2FE] hover:text-[#4F46E5] active:scale-[0.97] transition-all">
+              {icon}{label}
+              {badge && (
+                <span className="bg-[#4F46E5] text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
+                  {badge}
+                </span>
+              )}
+            </Link>
+          ))}
         </motion.div>
 
-        {/* ── Main Grid ────────────────────────────────────────────── */}
+        {/* ── Main Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-          {/* ── Today Column ─────────────────────────────────────── */}
-          <motion.div
-            className="lg:col-span-2"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          >
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              {/* Card Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
+          {/* ── Today ─────────────────────────────────────────────────── */}
+          <motion.div className="lg:col-span-2"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
                 <div>
-                  <h2 className="text-base font-bold text-[#1E1E1E]">Heute</h2>
-                  <p className="text-xs text-[#8A8A8A]">{todayDate}</p>
+                  <h2 className="text-sm font-bold text-[#111318]">Heute</h2>
+                  <p className="text-[11px] text-[#9CA3AF]">{todayDate}</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-[#8A8A8A]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Live
+                <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Live
                 </div>
               </div>
 
-              {/* Mini stats */}
-              <div className="grid grid-cols-4 divide-x divide-gray-50 border-b border-gray-50">
+              {/* Mini stats row */}
+              <div className="grid grid-cols-4 divide-x divide-[#F3F4F6] border-b border-[#F3F4F6]">
                 {[
-                  { value: today.totalBookings,     label: "Gesamt",     color: "text-[#1E1E1E]",  bg: "" },
-                  { value: today.completedBookings, label: "Erledigt",   color: "text-emerald-600", bg: "bg-emerald-50/50" },
-                  { value: today.pendingBookings,   label: "Ausstehend", color: "text-amber-600",   bg: "bg-amber-50/50" },
-                  { value: today.cancelledBookings, label: "Storniert",  color: "text-red-400",     bg: "bg-red-50/30" },
+                  { value: today.totalBookings,     label: "Gesamt",     color: "text-[#111318]",  bg: "" },
+                  { value: today.completedBookings, label: "Erledigt",   color: "text-[#059669]",   bg: "bg-[#F0FDF4]" },
+                  { value: today.pendingBookings,   label: "Ausstehend", color: "text-[#D97706]",   bg: "bg-[#FFFBEB]" },
+                  { value: today.cancelledBookings, label: "Storniert",  color: "text-[#EF4444]",   bg: "bg-[#FFF5F5]" },
                 ].map(({ value, label, color, bg }) => (
                   <div key={label} className={`text-center py-4 px-2 ${bg}`}>
                     <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
-                    <div className="text-[11px] text-[#8A8A8A] mt-0.5 font-medium">{label}</div>
+                    <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-medium uppercase tracking-wide">{label}</div>
                   </div>
                 ))}
               </div>
 
               {/* Bookings list */}
-              <div className="p-5">
+              <div className="p-4">
                 {today.bookings.length > 0 ? (
-                  <div className="space-y-2.5 max-h-[380px] overflow-y-auto">
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
                     {today.bookings.map((b, i) => {
                       const s = STATUS_MAP[b.status] ?? STATUS_MAP["Pending"];
                       return (
                         <motion.div
                           key={b.id}
-                          initial={{ opacity: 0, x: -10 }}
+                          initial={{ opacity: 0, x: -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.04 }}
-                          className="flex items-center gap-4 p-3.5 rounded-xl bg-[#F8F6F5] hover:bg-[#F2EFED] transition-colors border border-transparent hover:border-gray-100"
+                          className="flex items-center gap-3.5 px-3.5 py-3 rounded-xl bg-[#F7F7F8] hover:bg-[#F3F4F6] border border-transparent hover:border-[#E5E7EB] transition-all"
                         >
                           {/* Time */}
-                          <div className="text-center min-w-[52px]">
-                            <div className="text-sm font-bold text-[#1E1E1E] tabular-nums">{b.startTime}</div>
-                            <div className="text-[11px] text-[#8A8A8A]">{b.endTime}</div>
+                          <div className="text-center min-w-[48px]">
+                            <div className="text-sm font-bold text-[#111318] tabular-nums">{b.startTime}</div>
+                            <div className="text-[10px] text-[#9CA3AF]">{b.endTime}</div>
                           </div>
                           {/* Status dot */}
-                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${s.dot}`} />
+                          <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-[#1E1E1E] truncate">{b.customerName}</p>
-                            <p className="text-xs text-[#8A8A8A] truncate">{b.serviceName}</p>
+                            <p className="text-sm font-semibold text-[#111318] truncate">{b.customerName}</p>
+                            <p className="text-xs text-[#9CA3AF] truncate">{b.serviceName}</p>
                           </div>
                           {/* Status badge */}
-                          <span className={`hidden sm:inline-flex text-[11px] font-semibold px-2.5 py-1 rounded-full ${s.bg} ${s.text} whitespace-nowrap`}>
+                          <span className={`hidden sm:inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${s.bg} ${s.text}`}>
                             {s.label}
                           </span>
                           {/* Price */}
-                          <div className="text-right min-w-[64px]">
-                            <div className="text-sm font-bold text-[#017172] tabular-nums">{formatPrice(b.price, b.currency)}</div>
-                            <div className="text-[10px] text-[#8A8A8A] font-mono">{b.bookingNumber.slice(-6)}</div>
+                          <div className="text-right min-w-[60px]">
+                            <div className="text-sm font-bold text-[#374151] tabular-nums">{formatPrice(b.price, b.currency)}</div>
+                            <div className="text-[10px] text-[#9CA3AF] font-mono">{b.bookingNumber.slice(-6)}</div>
                           </div>
                         </motion.div>
                       );
@@ -497,39 +524,39 @@ export default function AdminDashboardPage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="w-14 h-14 bg-[#F2EFED] rounded-2xl flex items-center justify-center mx-auto mb-3">
-                      <Calendar size={22} className="text-[#E8C7C3]" />
+                    <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                      <Calendar size={20} className="text-[#D1D5DB]" />
                     </div>
-                    <p className="text-sm font-medium text-[#8A8A8A]">Keine Termine heute</p>
-                    <p className="text-xs text-[#8A8A8A]/60 mt-1">Genieße den freien Tag!</p>
+                    <p className="text-sm font-medium text-[#374151]">Keine Termine heute</p>
+                    <p className="text-xs text-[#9CA3AF] mt-1">Genieße den freien Tag!</p>
                   </div>
                 )}
               </div>
             </div>
           </motion.div>
 
-          {/* ── Right Column ────────────────────────────────────── */}
-          <div className="space-y-5">
+          {/* ── Right Column ──────────────────────────────────────────── */}
+          <div className="space-y-4">
 
             {/* Next Booking */}
             {nextBooking ? (
               <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+                className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden"
               >
-                <div className="px-5 py-4 border-b border-gray-50 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#017172]/10 flex items-center justify-center">
-                    <Clock size={16} className="text-[#017172]" />
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#F3F4F6]">
+                  <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
+                    <Clock size={15} className="text-[#4F46E5]" />
                   </div>
-                  <h3 className="font-bold text-[#1E1E1E] text-sm">Nächster Termin</h3>
+                  <h3 className="font-bold text-[#111318] text-sm">Nächster Termin</h3>
                 </div>
                 <div className="p-5">
                   {/* Countdown */}
-                  <div className="text-center mb-4 py-4 bg-gradient-to-br from-[#017172]/8 to-[#01a0a2]/5 rounded-xl border border-[#017172]/10">
-                    <div className="text-4xl font-black text-[#017172] tabular-nums">
+                  <div className="text-center mb-4 py-4 bg-[#EEF2FF] rounded-xl border border-[#C7D2FE]">
+                    <div className="text-4xl font-black text-[#4F46E5] tabular-nums leading-none">
                       {formatTime(nextBooking.minutesUntil)}
                     </div>
-                    <div className="text-xs text-[#8A8A8A] mt-1">bis zum nächsten Termin</div>
+                    <div className="text-[11px] text-[#6B7280] mt-1.5">bis zum nächsten Termin</div>
                   </div>
                   {/* Details */}
                   <div className="space-y-2.5">
@@ -540,8 +567,8 @@ export default function AdminDashboardPage() {
                       { label: "Datum",    value: new Date(nextBooking.date).toLocaleDateString("de-DE") },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex items-center justify-between gap-3">
-                        <span className="text-xs text-[#8A8A8A] flex-shrink-0">{label}</span>
-                        <span className="text-xs font-semibold text-[#1E1E1E] text-right truncate">{value}</span>
+                        <span className="text-xs text-[#9CA3AF] flex-shrink-0">{label}</span>
+                        <span className="text-xs font-semibold text-[#111318] text-right truncate">{value}</span>
                       </div>
                     ))}
                   </div>
@@ -549,40 +576,39 @@ export default function AdminDashboardPage() {
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+                className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 text-center"
               >
-                <div className="w-12 h-12 bg-[#F2EFED] rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <Sparkles size={20} className="text-[#E8C7C3]" />
+                <div className="w-11 h-11 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <Sparkles size={18} className="text-[#D1D5DB]" />
                 </div>
-                <p className="text-sm font-medium text-[#8A8A8A]">Kein bevorstehender Termin</p>
+                <p className="text-sm font-medium text-[#374151]">Kein bevorstehender Termin</p>
               </motion.div>
             )}
 
             {/* Popular Services */}
             {statistics.popularServices.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36 }}
+                className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden"
               >
-                <div className="px-5 py-4 border-b border-gray-50">
-                  <h3 className="font-bold text-[#1E1E1E] text-sm">Beliebte Services</h3>
+                <div className="px-5 py-4 border-b border-[#F3F4F6]">
+                  <h3 className="font-bold text-[#111318] text-sm">Beliebte Services</h3>
                 </div>
                 <div className="p-3">
                   {statistics.popularServices.map((s, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F8F6F5] transition-colors">
+                    <div key={idx}
+                      className="flex items-center gap-3 px-2.5 py-2.5 rounded-xl hover:bg-[#F7F7F8] transition-colors">
                       {/* Rank */}
-                      <span className="text-xs font-bold text-[#8A8A8A] w-4 text-center">{idx + 1}</span>
-                      {/* Service */}
+                      <span className="text-[11px] font-bold text-[#9CA3AF] w-4 text-center">{idx + 1}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#1E1E1E] truncate">{s.serviceName}</p>
-                        <p className="text-xs text-[#8A8A8A]">{s.bookingCount}× gebucht</p>
+                        <p className="text-sm font-semibold text-[#111318] truncate">{s.serviceName}</p>
+                        <p className="text-[11px] text-[#9CA3AF]">{s.bookingCount}× gebucht</p>
                       </div>
-                      {/* Revenue */}
-                      <span className="text-sm font-bold text-[#017172] whitespace-nowrap">
+                      <span className="text-sm font-bold text-[#374151] whitespace-nowrap tabular-nums">
                         {formatPrice(defaultCurrency === "CHF" ? s.revenueCHF : s.revenueEUR, defaultCurrency)}
                       </span>
-                      <ChevronRight size={13} className="text-gray-200 flex-shrink-0" />
+                      <ChevronRight size={12} className="text-[#D1D5DB] flex-shrink-0" />
                     </div>
                   ))}
                 </div>

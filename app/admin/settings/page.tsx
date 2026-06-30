@@ -6,9 +6,23 @@ import { useSearchParams } from 'next/navigation';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { Input, Textarea } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
-import { Settings, Save, Building2, Phone, Globe, Palette, Lock, ImageIcon, Upload, Clock, AlertTriangle, Sliders } from 'lucide-react';
+import {
+  Settings, Save, Building2, Phone, Globe, Palette, Lock,
+  ImageIcon, Upload, Clock, AlertTriangle, Sliders,
+} from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import api, { apiOrigin } from '@/lib/api/client';
+
+// ── Design Tokens (matching AdminLinksPage) ───────────────────────────────────
+// bg:         #F7F7F8
+// surface:    #FFFFFF
+// border:     #E5E7EB   subtle: #F3F4F6
+// text-1:     #111318   text-2: #374151   text-3: #6B7280   text-4: #9CA3AF
+// accent:     #4F46E5   accent-bg: #EEF2FF   accent-bdr: #A5B4FC / #C7D2FE
+// success:    #065F46 on #D1FAE5 / border #A7F3D0
+// error:      #991B1B on #FEE2E2 / border #FECACA
+// warning:    #92400E on #FFFBEB / border #FDE68A
+// ─────────────────────────────────────────────────────────────────────────────
 
 const DAYS = [
   { value: 1, label: 'Montag' },
@@ -50,6 +64,59 @@ interface TenantSettings {
   logoUrl?: string;
 }
 
+// ── Shared UI primitives ──────────────────────────────────────────────────────
+
+/** Section card with a left-accent icon header */
+function SectionCard({
+  icon,
+  title,
+  subtitle,
+  accentClass = 'bg-[#4F46E5]',
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  accentClass?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#F3F4F6]">
+        <div className={`w-8 h-8 ${accentClass} rounded-xl flex items-center justify-center shrink-0`}>
+          {icon}
+        </div>
+        <div>
+          <p className="font-semibold text-[#111318] text-sm leading-tight">{title}</p>
+          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{subtitle}</p>
+        </div>
+      </div>
+      <div className="px-5 py-5 space-y-4">{children}</div>
+    </div>
+  );
+}
+
+/** Consistent text input (replaces NextUI Input where full custom styling is needed) */
+function Field({
+  label, description, children,
+}: { label: string; description?: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold text-[#6B7280]">{label}</label>
+      {children}
+      {description && <p className="text-[10px] text-[#9CA3AF] leading-snug">{description}</p>}
+    </div>
+  );
+}
+
+const inputCls =
+  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all';
+
+const selectCls =
+  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all appearance-none';
+
+// ── Main Component ────────────────────────────────────────────────────────────
+
 export default function AdminSettingsPage() {
   const searchParams = useSearchParams();
   const mustChangePassword = searchParams.get('mustChangePassword') === '1';
@@ -80,7 +147,6 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
 
-  // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -88,15 +154,20 @@ export default function AdminSettingsPage() {
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState('');
 
-  // Business hours state
   const [businessHours, setBusinessHours] = useState<BusinessHoursItem[]>(
-    DAYS.map((d) => ({ dayOfWeek: d.value, isOpen: d.value >= 1 && d.value <= 5, openTime: '09:00', closeTime: '18:00', breakStartTime: '', breakEndTime: '' }))
+    DAYS.map((d) => ({
+      dayOfWeek: d.value,
+      isOpen: d.value >= 1 && d.value <= 5,
+      openTime: '09:00',
+      closeTime: '18:00',
+      breakStartTime: '',
+      breakEndTime: '',
+    }))
   );
   const [bhSaving, setBhSaving] = useState(false);
   const [bhSaved, setBhSaved] = useState(false);
   const [bhError, setBhError] = useState('');
 
-  // Logo upload state
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -119,11 +190,8 @@ export default function AdminSettingsPage() {
       const res = await api.get('/tenant/settings');
       const data = res.data?.data ?? res.data;
       if (data) setSettings(data);
-    } catch {
-      // No settings yet, use defaults
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
+    finally { setLoading(false); }
   }
 
   async function loadBusinessHours() {
@@ -140,15 +208,11 @@ export default function AdminSettingsPage() {
           })
         );
       }
-    } catch {
-      // use defaults
-    }
+    } catch {}
   }
 
   async function saveBusinessHours() {
-    setBhSaving(true);
-    setBhError('');
-    setBhSaved(false);
+    setBhSaving(true); setBhError(''); setBhSaved(false);
     try {
       await api.put('/tenant/business-hours', businessHours.map((bh) => ({
         dayOfWeek: bh.dayOfWeek,
@@ -162,9 +226,7 @@ export default function AdminSettingsPage() {
       setTimeout(() => setBhSaved(false), 3000);
     } catch (err: any) {
       setBhError(err.response?.data?.message || 'Fehler beim Speichern');
-    } finally {
-      setBhSaving(false);
-    }
+    } finally { setBhSaving(false); }
   }
 
   const updateBh = (dayOfWeek: number, field: keyof BusinessHoursItem, value: string | boolean) =>
@@ -172,25 +234,20 @@ export default function AdminSettingsPage() {
 
   async function saveSettings(e: React.FormEvent) {
     e.preventDefault();
-    setSaving(true);
-    setError('');
-    setSaved(false);
+    setSaving(true); setError(''); setSaved(false);
     try {
       await api.put('/tenant/settings', settings);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Fehler beim Speichern');
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   }
 
   async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setLogoUploading(true);
-    setLogoError('');
+    setLogoUploading(true); setLogoError('');
     try {
       const formData = new FormData();
       formData.append('logo', file);
@@ -206,512 +263,465 @@ export default function AdminSettingsPage() {
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
-    setPwError('');
-    setPwSuccess('');
-    if (newPassword !== confirmPassword) {
-      setPwError('Die neuen Passwörter stimmen nicht überein.');
-      return;
-    }
-    if (newPassword.length < 6) {
-      setPwError('Das neue Passwort muss mindestens 6 Zeichen lang sein.');
-      return;
-    }
+    setPwError(''); setPwSuccess('');
+    if (newPassword !== confirmPassword) { setPwError('Die neuen Passwörter stimmen nicht überein.'); return; }
+    if (newPassword.length < 6) { setPwError('Das neue Passwort muss mindestens 6 Zeichen lang sein.'); return; }
     setPwSaving(true);
     try {
       await api.put('/auth/change-password', { currentPassword, newPassword });
       setPwSuccess('Passwort erfolgreich geändert.');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
       setTimeout(() => setPwSuccess(''), 4000);
     } catch (err: any) {
       setPwError(err.response?.data?.message || 'Fehler beim Ändern des Passworts.');
-    } finally {
-      setPwSaving(false);
-    }
+    } finally { setPwSaving(false); }
   }
 
   const set = (key: keyof TenantSettings, value: string | number) =>
     setSettings((s) => ({ ...s, [key]: value }));
 
+  // ── Loading ───────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#E8C7C3]" />
+      <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center">
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />
       </div>
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-6">
+    <div className="min-h-screen bg-[#F7F7F8] p-5 sm:p-6">
       <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-xl flex items-center justify-center">
-            <Settings size={20} className="text-white" />
+
+        {/* ── Page header ── */}
+        <div className="flex items-center gap-3 mb-7">
+          <div className="w-9 h-9 bg-[#4F46E5] rounded-xl flex items-center justify-center shadow-sm">
+            <Settings size={17} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#1E1E1E]">Einstellungen</h1>
-            <p className="text-[#8A8A8A] text-sm">Branding & Firmendaten verwalten</p>
+            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight leading-tight">Einstellungen</h1>
+            <p className="text-sm text-[#6B7280]">Branding & Firmendaten verwalten</p>
           </div>
         </div>
 
         <form onSubmit={saveSettings} className="space-y-4">
-          {/* Logo */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-lg flex items-center justify-center shrink-0">
-                  <ImageIcon size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Logo</h2>
-                  <p className="text-xs text-[#8A8A8A]">Firmenlogo hochladen</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E8C7C3]/50 bg-[#F5EDEB] flex items-center justify-center overflow-hidden flex-shrink-0">
-                  {settings.logoUrl ? (
-                    <img
-                      src={settings.logoUrl?.startsWith('http') ? settings.logoUrl : `${apiOrigin}${settings.logoUrl}`}
-                      alt="Logo"
-                      className="w-full h-full object-contain p-1"
-                    />
-                  ) : (
-                    <ImageIcon size={28} className="text-[#E8C7C3]" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    className="hidden"
-                    onChange={handleLogoUpload}
-                  />
-                  <Button
-                    type="button"
-                    variant="bordered"
-                    size="sm"
-                    isLoading={logoUploading}
-                    startContent={!logoUploading && <Upload size={14} />}
-                    onPress={() => fileInputRef.current?.click()}
-                    className="border-[#E8C7C3] text-[#E8C7C3]"
-                  >
-                    {logoUploading ? 'Wird hochgeladen…' : 'Logo hochladen'}
-                  </Button>
-                  <p className="text-xs text-[#8A8A8A]">JPG, PNG, WebP · max. 5 MB</p>
-                  {logoError && <p className="text-xs text-red-600">{logoError}</p>}
-                </div>
-              </div>
-            </CardBody>
-          </Card>
 
-          {/* Company Info */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
-                  <Building2 size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Firmeninformationen</h2>
-                  <p className="text-xs text-[#8A8A8A]">Name, Slogan und Texte</p>
-                </div>
+          {/* ── Logo ── */}
+          <SectionCard
+            icon={<ImageIcon size={15} className="text-white" />}
+            title="Logo"
+            subtitle="Firmenlogo hochladen"
+          >
+            <div className="flex items-center gap-5">
+              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] flex items-center justify-center overflow-hidden flex-shrink-0">
+                {settings.logoUrl ? (
+                  <img
+                    src={settings.logoUrl?.startsWith('http') ? settings.logoUrl : `${apiOrigin}${settings.logoUrl}`}
+                    alt="Logo"
+                    className="w-full h-full object-contain p-1"
+                  />
+                ) : (
+                  <ImageIcon size={26} className="text-[#D1D5DB]" />
+                )}
               </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Firmenname"
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleLogoUpload}
+                />
+                <button
+                  type="button"
+                  disabled={logoUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#4F46E5] disabled:opacity-50 transition-all"
+                >
+                  {logoUploading
+                    ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />Wird hochgeladen…</>
+                    : <><Upload size={13} />Logo hochladen</>}
+                </button>
+                <p className="text-[10px] text-[#9CA3AF]">JPG, PNG, WebP · max. 5 MB</p>
+                {logoError && <p className="text-[11px] text-[#991B1B]">{logoError}</p>}
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* ── Firmeninformationen ── */}
+          <SectionCard
+            icon={<Building2 size={15} className="text-white" />}
+            title="Firmeninformationen"
+            subtitle="Name, Slogan und Texte"
+            accentClass="bg-[#1F2937]"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Firmenname">
+                <input
+                  type="text"
                   value={settings.companyName}
                   onChange={(e) => set('companyName', e.target.value)}
-                  isRequired
+                  placeholder="Mein Salon"
+                  required
+                  className={inputCls}
                 />
-                <Input
-                  label="Slogan"
+              </Field>
+              <Field label="Slogan">
+                <input
+                  type="text"
                   value={settings.tagline}
                   onChange={(e) => set('tagline', e.target.value)}
                   placeholder="Ihr Wohlfühlsalon"
+                  className={inputCls}
                 />
-              </div>
-              <Textarea
-                label="Willkommensnachricht"
+              </Field>
+            </div>
+            <Field label="Willkommensnachricht">
+              <textarea
                 value={settings.welcomeMessage}
                 onChange={(e) => set('welcomeMessage', e.target.value)}
                 placeholder="Herzlich willkommen! Wir freuen uns auf Ihren Besuch."
-                minRows={2}
+                rows={2}
+                className={`${inputCls} resize-none`}
               />
-              <Textarea
-                label="Stornierungsrichtlinie"
+            </Field>
+            <Field label="Stornierungsrichtlinie">
+              <textarea
                 value={settings.cancellationPolicy}
                 onChange={(e) => set('cancellationPolicy', e.target.value)}
                 placeholder="Kostenlose Stornierung bis 24h vor dem Termin."
-                minRows={2}
+                rows={2}
+                className={`${inputCls} resize-none`}
               />
-            </CardBody>
-          </Card>
+            </Field>
+          </SectionCard>
 
-          {/* Contact */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
-                  <Phone size={15} className="text-white" />
+          {/* ── Kontakt ── */}
+          <SectionCard
+            icon={<Phone size={15} className="text-white" />}
+            title="Kontakt"
+            subtitle="Telefon, E-Mail und Adresse"
+            accentClass="bg-[#1F2937]"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Telefon">
+                <input type="tel" value={settings.phone} onChange={(e) => set('phone', e.target.value)}
+                  placeholder="+49 171 123 45 67" className={inputCls} />
+              </Field>
+              <Field label="E-Mail">
+                <input type="email" value={settings.email} onChange={(e) => set('email', e.target.value)}
+                  placeholder="info@ihrsalon.de" className={inputCls} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Website">
+                <div className="relative">
+                  <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                  <input type="url" value={settings.website} onChange={(e) => set('website', e.target.value)}
+                    placeholder="https://ihrsalon.de" className={`${inputCls} pl-8`} />
                 </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Kontakt</h2>
-                  <p className="text-xs text-[#8A8A8A]">Telefon, E-Mail und Adresse</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Telefon"
-                  value={settings.phone}
-                  onChange={(e) => set('phone', e.target.value)}
-                  placeholder="+49 171 123 45 67"
-                />
-                <Input
-                  label="E-Mail"
-                  type="email"
-                  value={settings.email}
-                  onChange={(e) => set('email', e.target.value)}
-                  placeholder="info@ihrsalon.de"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Website"
-                  value={settings.website}
-                  onChange={(e) => set('website', e.target.value)}
-                  placeholder="https://ihrsalon.de"
-                  startContent={<Globe size={16} className="text-[#8A8A8A]" />}
-                />
-                <Input
-                  label="Adresse"
-                  value={settings.address}
-                  onChange={(e) => set('address', e.target.value)}
-                  placeholder="Musterstraße 1, 10115 Berlin"
-                />
-              </div>
-            </CardBody>
-          </Card>
+              </Field>
+              <Field label="Adresse">
+                <input type="text" value={settings.address} onChange={(e) => set('address', e.target.value)}
+                  placeholder="Musterstraße 1, 10115 Berlin" className={inputCls} />
+              </Field>
+            </div>
+          </SectionCard>
 
-          {/* Branding */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-lg flex items-center justify-center shrink-0">
-                  <Palette size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Farben</h2>
-                  <p className="text-xs text-[#8A8A8A]">Primär-, Sekundär- und Akzentfarbe</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <div className="grid grid-cols-3 gap-4">
-                {(['primaryColor', 'secondaryColor', 'accentColor'] as const).map((key) => {
-                  const labels: Record<string, string> = {
-                    primaryColor: 'Primärfarbe',
-                    secondaryColor: 'Sekundärfarbe',
-                    accentColor: 'Akzentfarbe',
-                  };
-                  return (
-                    <div key={key} className="flex flex-col gap-2">
-                      <label className="text-sm text-[#8A8A8A]">{labels[key]}</label>
-                      <div className="flex items-center gap-2 border-2 border-[#E8C7C3]/30 rounded-xl p-2 bg-white">
-                        <input
-                          type="color"
-                          value={settings[key]}
-                          onChange={(e) => set(key, e.target.value)}
-                          className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent"
-                        />
-                        <input
-                          type="text"
-                          value={settings[key]}
-                          onChange={(e) => set(key, e.target.value)}
-                          className="flex-1 text-sm text-[#1E1E1E] bg-transparent outline-none font-mono"
-                          maxLength={7}
-                        />
-                      </div>
+          {/* ── Farben ── */}
+          <SectionCard
+            icon={<Palette size={15} className="text-white" />}
+            title="Farben"
+            subtitle="Primär-, Sekundär- und Akzentfarbe der Buchungsseite"
+          >
+            <div className="grid grid-cols-3 gap-4">
+              {(['primaryColor', 'secondaryColor', 'accentColor'] as const).map((key) => {
+                const labels: Record<string, string> = {
+                  primaryColor: 'Primärfarbe',
+                  secondaryColor: 'Sekundärfarbe',
+                  accentColor: 'Akzentfarbe',
+                };
+                return (
+                  <Field key={key} label={labels[key]}>
+                    <div className="flex items-center gap-2 border border-[#E5E7EB] rounded-xl px-2.5 py-2 bg-white hover:border-[#C7D2FE] transition-all">
+                      <input
+                        type="color"
+                        value={settings[key]}
+                        onChange={(e) => set(key, e.target.value)}
+                        className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0 flex-shrink-0"
+                        style={{ padding: 0 }}
+                      />
+                      <input
+                        type="text"
+                        value={settings[key]}
+                        onChange={(e) => set(key, e.target.value)}
+                        className="flex-1 text-xs text-[#374151] bg-transparent outline-none font-mono min-w-0"
+                        maxLength={7}
+                      />
                     </div>
-                  );
-                })}
-              </div>
-            </CardBody>
-          </Card>
+                  </Field>
+                );
+              })}
+            </div>
+          </SectionCard>
 
-          {/* Booking Config */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
-                  <Sliders size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Buchungseinstellungen</h2>
-                  <p className="text-xs text-[#8A8A8A]">Intervalle, Vorlauf und Stornierung</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Input
-                  label="Intervall (Min)"
-                  type="number"
-                  value={String(settings.bookingIntervalMinutes)}
+          {/* ── Buchungseinstellungen ── */}
+          <SectionCard
+            icon={<Sliders size={15} className="text-white" />}
+            title="Buchungseinstellungen"
+            subtitle="Intervalle, Vorlauf und Stornierung"
+            accentClass="bg-[#1F2937]"
+          >
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <Field label="Intervall (Min)" description="Zeitabstand zwischen Terminen, z.B. 30 = 9:00, 9:30…">
+                <input type="number" value={settings.bookingIntervalMinutes}
                   onChange={(e) => set('bookingIntervalMinutes', parseInt(e.target.value) || 30)}
-                  min={15}
-                  max={120}
-                  description="Zeitabstand zwischen Terminen, z.B. 30 = 9:00, 9:30, 10:00 Uhr"
-                />
-                <Input
-                  label="Max. Vorlauf (Tage)"
-                  type="number"
-                  value={String(settings.maxAdvanceBookingDays)}
+                  min={15} max={120} className={inputCls} />
+              </Field>
+              <Field label="Max. Vorlauf (Tage)" description="Wie weit in die Zukunft können Kunden buchen?">
+                <input type="number" value={settings.maxAdvanceBookingDays}
                   onChange={(e) => set('maxAdvanceBookingDays', parseInt(e.target.value) || 60)}
-                  min={7}
-                  max={365}
-                  description="Wie weit in die Zukunft können Kunden Termine buchen?"
-                />
-                <Input
-                  label="Währung"
-                  value={settings.defaultCurrency}
+                  min={7} max={365} className={inputCls} />
+              </Field>
+              <Field label="Währung">
+                <input type="text" value={settings.defaultCurrency}
                   onChange={(e) => set('defaultCurrency', e.target.value)}
-                  placeholder="EUR"
-                  maxLength={3}
-                />
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-[#1E1E1E]">Zeitzone</label>
-                  <select
-                    value={settings.timeZone}
-                    onChange={(e) => set('timeZone', e.target.value)}
-                    className="w-full rounded-xl border border-[#E8E8E8] bg-white px-3 py-2 text-sm text-[#1E1E1E] outline-none focus:border-[#017172] transition-colors"
-                  >
-                    <option value="Europe/Berlin">Europe/Berlin (MEZ/MESZ)</option>
-                    <option value="Europe/Zurich">Europe/Zurich (MEZ/MESZ)</option>
-                    <option value="Europe/Vienna">Europe/Vienna (MEZ/MESZ)</option>
-                    <option value="Europe/London">Europe/London (GMT/BST)</option>
-                    <option value="Europe/Paris">Europe/Paris (MEZ/MESZ)</option>
-                    <option value="Europe/Amsterdam">Europe/Amsterdam (MEZ/MESZ)</option>
-                    <option value="Europe/Brussels">Europe/Brussels (MEZ/MESZ)</option>
-                    <option value="Europe/Rome">Europe/Rome (MEZ/MESZ)</option>
-                    <option value="Europe/Madrid">Europe/Madrid (MEZ/MESZ)</option>
-                    <option value="Europe/Warsaw">Europe/Warsaw (MEZ/MESZ)</option>
-                    <option value="UTC">UTC</option>
-                    <option value="America/New_York">America/New_York (ET)</option>
-                    <option value="America/Los_Angeles">America/Los_Angeles (PT)</option>
-                    <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-                    <option value="Asia/Istanbul">Asia/Istanbul (TRT)</option>
-                  </select>
-                </div>
-              </div>
+                  placeholder="EUR" maxLength={3} className={inputCls} />
+              </Field>
+              <Field label="Zeitzone">
+                <select value={settings.timeZone} onChange={(e) => set('timeZone', e.target.value)} className={selectCls}>
+                  <option value="Europe/Berlin">Europe/Berlin (MEZ/MESZ)</option>
+                  <option value="Europe/Zurich">Europe/Zurich (MEZ/MESZ)</option>
+                  <option value="Europe/Vienna">Europe/Vienna (MEZ/MESZ)</option>
+                  <option value="Europe/London">Europe/London (GMT/BST)</option>
+                  <option value="Europe/Paris">Europe/Paris (MEZ/MESZ)</option>
+                  <option value="Europe/Amsterdam">Europe/Amsterdam (MEZ/MESZ)</option>
+                  <option value="Europe/Brussels">Europe/Brussels (MEZ/MESZ)</option>
+                  <option value="Europe/Rome">Europe/Rome (MEZ/MESZ)</option>
+                  <option value="Europe/Madrid">Europe/Madrid (MEZ/MESZ)</option>
+                  <option value="Europe/Warsaw">Europe/Warsaw (MEZ/MESZ)</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">America/New_York (ET)</option>
+                  <option value="America/Los_Angeles">America/Los_Angeles (PT)</option>
+                  <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                  <option value="Asia/Istanbul">Asia/Istanbul (TRT)</option>
+                </select>
+              </Field>
+            </div>
 
-              {/* Cancellation policy */}
-              <div className="mt-2 p-4 bg-amber-50 rounded-xl border border-amber-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={16} className="text-amber-600" />
-                  <p className="text-sm font-semibold text-amber-800">Stornierungsrichtlinie</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="Kostenlos stornierbar bis (Stunden)"
-                    type="number"
-                    value={String(settings.cancellationHoursNotice)}
+            {/* Cancellation policy sub-section */}
+            <div className="mt-1 p-4 bg-[#FFFBEB] rounded-xl border border-[#FDE68A]">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle size={14} className="text-[#D97706]" />
+                <p className="text-xs font-semibold text-[#92400E]">Stornierungsrichtlinie</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Kostenlos stornierbar bis (Stunden)" description="0 = immer kostenlos stornierbar">
+                  <input type="number" value={settings.cancellationHoursNotice}
                     onChange={(e) => set('cancellationHoursNotice', parseInt(e.target.value) || 0)}
-                    min={0}
-                    max={720}
-                    description="0 = immer kostenlos stornierbar"
-                  />
-                  <Input
-                    label="Stornogebühr (%)"
-                    type="number"
-                    value={String(settings.cancellationFeePercent)}
+                    min={0} max={720} className={inputCls} />
+                </Field>
+                <Field label="Stornogebühr (%)" description="Prozent des Servicepreises bei verspäteter Stornierung">
+                  <input type="number" value={settings.cancellationFeePercent}
                     onChange={(e) => set('cancellationFeePercent', parseFloat(e.target.value) || 0)}
-                    min={0}
-                    max={100}
-                    description="Prozent des Servicepreises der bei verspäteter Stornierung einbehalten wird"
-                  />
-                </div>
+                    min={0} max={100} className={inputCls} />
+                </Field>
               </div>
-            </CardBody>
-          </Card>
+            </div>
+          </SectionCard>
 
-          {/* Business Hours */}
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#017172] to-[#015f60] rounded-lg flex items-center justify-center shrink-0">
-                  <Clock size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Öffnungszeiten</h2>
-                  <p className="text-xs text-[#8A8A8A]">Wochentage und Geschäftszeiten</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-3">
+          {/* ── Öffnungszeiten ── */}
+          <SectionCard
+            icon={<Clock size={15} className="text-white" />}
+            title="Öffnungszeiten"
+            subtitle="Wochentage und Geschäftszeiten"
+            accentClass="bg-[#1F2937]"
+          >
+            <div className="space-y-2">
               {DAYS.map((day) => {
                 const bh = businessHours.find((b) => b.dayOfWeek === day.value)!;
                 return (
-                  <div key={day.value} className={`rounded-xl p-3 border-2 transition-colors ${bh.isOpen ? 'border-[#E8C7C3]/40 bg-white' : 'border-gray-100 bg-gray-50'}`}>
-                    <div className="flex items-center gap-3 mb-2">
+                  <div
+                    key={day.value}
+                    className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all ${
+                      bh.isOpen
+                        ? 'border-[#E5E7EB] bg-white'
+                        : 'border-[#F3F4F6] bg-[#F7F7F8]'
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <label className="relative flex items-center cursor-pointer flex-shrink-0">
                       <input
                         type="checkbox"
                         id={`day-${day.value}`}
                         checked={bh.isOpen}
                         onChange={(e) => updateBh(day.value, 'isOpen', e.target.checked)}
-                        className="w-4 h-4 accent-[#E8C7C3] cursor-pointer"
+                        className="sr-only peer"
                       />
-                      <label htmlFor={`day-${day.value}`} className={`font-medium text-sm cursor-pointer w-24 ${bh.isOpen ? 'text-[#1E1E1E]' : 'text-[#8A8A8A]'}`}>
-                        {day.label}
-                      </label>
-                      {bh.isOpen && (
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="time"
-                              value={bh.openTime}
-                              onChange={(e) => updateBh(day.value, 'openTime', e.target.value)}
-                              className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-[#1E1E1E] bg-white"
-                            />
-                            <span className="text-[#8A8A8A] text-xs">–</span>
-                            <input
-                              type="time"
-                              value={bh.closeTime}
-                              onChange={(e) => updateBh(day.value, 'closeTime', e.target.value)}
-                              className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-[#1E1E1E] bg-white"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {!bh.isOpen && <span className="text-xs text-[#8A8A8A]">Geschlossen</span>}
-                    </div>
+                      <div className="w-4 h-4 rounded border-2 border-[#D1D5DB] peer-checked:bg-[#4F46E5] peer-checked:border-[#4F46E5] transition-all flex items-center justify-center">
+                        {bh.isOpen && (
+                          <svg viewBox="0 0 10 8" className="w-2.5 h-2 text-white fill-current">
+                            <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </div>
+                    </label>
+
+                    {/* Day name */}
+                    <span className={`text-sm font-medium w-24 flex-shrink-0 ${bh.isOpen ? 'text-[#111318]' : 'text-[#9CA3AF]'}`}>
+                      {day.label}
+                    </span>
+
+                    {bh.isOpen ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <input
+                          type="time"
+                          value={bh.openTime}
+                          onChange={(e) => updateBh(day.value, 'openTime', e.target.value)}
+                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all"
+                        />
+                        <span className="text-[#9CA3AF] text-xs">–</span>
+                        <input
+                          type="time"
+                          value={bh.closeTime}
+                          onChange={(e) => updateBh(day.value, 'closeTime', e.target.value)}
+                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[#9CA3AF]">Geschlossen</span>
+                    )}
                   </div>
                 );
               })}
-              {bhError && <p className="text-xs text-red-600">{bhError}</p>}
-              {bhSaved && <p className="text-xs text-green-600">Öffnungszeiten gespeichert!</p>}
-              <Button
-                type="button"
-                onPress={saveBusinessHours}
-                isLoading={bhSaving}
-                size="sm"
-                className="bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white font-semibold"
-                startContent={!bhSaving && <Save size={14} />}
-              >
-                Öffnungszeiten speichern
-              </Button>
-            </CardBody>
-          </Card>
+            </div>
 
+            {/* Business hours feedback */}
+            {bhError && (
+              <div className="flex items-center gap-2 px-3.5 py-3 bg-[#FEE2E2] border border-[#FECACA] rounded-xl text-sm text-[#991B1B]">
+                <AlertTriangle size={13} className="shrink-0" />{bhError}
+              </div>
+            )}
+            {bhSaved && (
+              <div className="px-3.5 py-3 bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl text-sm text-[#065F46] font-medium">
+                Öffnungszeiten gespeichert ✓
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={saveBusinessHours}
+              disabled={bhSaving}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#111318] text-white hover:bg-[#374151] disabled:opacity-50 transition-all"
+            >
+              {bhSaving
+                ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Wird gespeichert…</>
+                : <><Save size={13} />Öffnungszeiten speichern</>}
+            </button>
+          </SectionCard>
+
+          {/* ── Feedback messages (main form) ── */}
           {error && (
-            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-sm text-red-700">
-              {error}
+            <div className="flex items-center gap-2 px-4 py-3.5 bg-[#FEE2E2] border border-[#FECACA] rounded-xl text-sm text-[#991B1B]">
+              <AlertTriangle size={14} className="shrink-0" />{error}
             </div>
           )}
           {saved && (
-            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 text-sm text-green-700">
-              Einstellungen gespeichert!
+            <div className="px-4 py-3.5 bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl text-sm text-[#065F46] font-medium">
+              Einstellungen gespeichert ✓
             </div>
           )}
 
-          <ShimmerButton
+          {/* ── Save button ── */}
+          <button
             type="submit"
             disabled={saving}
-            className="w-full py-4 text-sm disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#4F46E5] text-white text-sm font-semibold hover:bg-[#4338CA] disabled:opacity-50 transition-all shadow-sm"
           >
-            {saving ? (
-              <span className="flex items-center gap-2">
-                <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                Wird gespeichert…
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Save size={16} />
-                Einstellungen speichern
-              </span>
-            )}
-          </ShimmerButton>
+            {saving
+              ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Wird gespeichert…</>
+              : <><Save size={15} />Einstellungen speichern</>}
+          </button>
         </form>
 
-        {/* Password Change */}
-        <div ref={passwordSectionRef}>
-        {mustChangePassword && (
-          <div className="mt-4 flex items-start gap-3 bg-amber-50 border-2 border-amber-300 rounded-xl p-4 text-sm text-amber-800">
-            <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-amber-500" />
-            <span>
-              <strong>Passwort ändern erforderlich.</strong> Du hast ein vom Admin generiertes Passwort. Bitte lege jetzt ein eigenes Passwort fest.
-            </span>
-          </div>
-        )}
-        <form onSubmit={handleChangePassword} className="mt-4">
-          <Card className="border border-[#E8C7C3]/20 shadow-md">
-            <CardHeader className="pb-3 border-b border-[#E8C7C3]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-[#1E1E1E] to-[#4A4A4A] rounded-lg flex items-center justify-center shrink-0">
-                  <Lock size={15} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-[#1E1E1E]">Passwort ändern</h2>
-                  <p className="text-xs text-[#8A8A8A]">Sicherheit und Zugangsdaten</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="gap-4">
-              <Input
-                label="Aktuelles Passwort"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                autoComplete="current-password"
-              />
+        {/* ══════════════════════════════════════════════════════════════════
+            PASSWORD CHANGE
+        ══════════════════════════════════════════════════════════════════ */}
+        <div ref={passwordSectionRef} className="mt-4 space-y-4">
+
+          {/* Forced-change banner */}
+          {mustChangePassword && (
+            <div className="flex items-start gap-3 px-4 py-3.5 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-sm text-[#92400E]">
+              <AlertTriangle size={15} className="mt-0.5 flex-shrink-0 text-[#D97706]" />
+              <span>
+                <strong>Passwort ändern erforderlich.</strong>{' '}
+                Du hast ein vom Admin generiertes Passwort. Bitte lege jetzt ein eigenes Passwort fest.
+              </span>
+            </div>
+          )}
+
+          <form onSubmit={handleChangePassword}>
+            <SectionCard
+              icon={<Lock size={15} className="text-white" />}
+              title="Passwort ändern"
+              subtitle="Sicherheit und Zugangsdaten"
+              accentClass="bg-[#111318]"
+            >
+              <Field label="Aktuelles Passwort">
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                  className={inputCls}
+                />
+              </Field>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="Neues Passwort"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
-                <Input
-                  label="Neues Passwort wiederholen"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  autoComplete="new-password"
-                />
+                <Field label="Neues Passwort">
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Neues Passwort wiederholen">
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    autoComplete="new-password"
+                    className={inputCls}
+                  />
+                </Field>
               </div>
+
               {pwError && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
-                  {pwError}
+                <div className="flex items-center gap-2 px-3.5 py-3 bg-[#FEE2E2] border border-[#FECACA] rounded-xl text-sm text-[#991B1B]">
+                  <AlertTriangle size={13} className="shrink-0" />{pwError}
                 </div>
               )}
               {pwSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-700">
+                <div className="px-3.5 py-3 bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl text-sm text-[#065F46] font-medium">
                   {pwSuccess}
                 </div>
               )}
-              <Button
+
+              <button
                 type="submit"
-                variant="bordered"
-                className="border-[#E8C7C3] text-[#E8C7C3] font-semibold"
-                isLoading={pwSaving}
-                startContent={!pwSaving && <Lock size={16} />}
-                isDisabled={!currentPassword || !newPassword || !confirmPassword}
+                disabled={pwSaving || !currentPassword || !newPassword || !confirmPassword}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#4F46E5] disabled:opacity-40 transition-all"
               >
-                Passwort ändern
-              </Button>
-            </CardBody>
-          </Card>
-        </form>
+                {pwSaving
+                  ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />Wird gespeichert…</>
+                  : <><Lock size={13} />Passwort ändern</>}
+              </button>
+            </SectionCard>
+          </form>
         </div>
       </div>
     </div>
