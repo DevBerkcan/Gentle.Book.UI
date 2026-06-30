@@ -9,8 +9,7 @@ import {
   ArrowUp, ArrowDown, Palette, Loader2, Sparkles, ChevronDown,
   Circle, Grid3x3, Minus, Type, Pipette, LayoutList, LayoutGrid,
   Zap, Wind, Smile, QrCode, Download, Copy, Check as CheckIcon,
-  SlidersHorizontal, Smartphone, Tablet, Monitor, BarChart3,
-  MousePointerClick, TrendingUp, Clock3, TestTube2,
+  SlidersHorizontal, Smartphone, Tablet, Monitor,
 } from "lucide-react";
 import QRCodeSVG from "react-qr-code";
 import api from "@/lib/api/client";
@@ -18,12 +17,6 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { MagicCard } from "@/components/ui/magic-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 import { HelpTip } from "@/components/ui/help-tip";
-import {
-  getStatistics,
-  getTrackingStatistics,
-  type DashboardStatistics,
-  type SimplifiedTrackingStatistics,
-} from "@/lib/api/admin";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -343,11 +336,6 @@ export default function AdminLinksPage() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("mobile");
 
-  // Conversion insights
-  const [trackingStats, setTrackingStats] = useState<SimplifiedTrackingStatistics | null>(null);
-  const [dashboardStats, setDashboardStats] = useState<DashboardStatistics | null>(null);
-  const [insightsLoading, setInsightsLoading] = useState(true);
-
   // Toast
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -385,14 +373,6 @@ export default function AdminLinksPage() {
       else if (plan.includes("pro"))  setTenantPlan("pro");
       else                            setTenantPlan("starter");
     }).catch(() => {});
-
-    Promise.all([getTrackingStatistics(), getStatistics()])
-      .then(([tracking, dashboard]) => {
-        setTrackingStats(tracking);
-        setDashboardStats(dashboard);
-      })
-      .catch(() => {})
-      .finally(() => setInsightsLoading(false));
   }, [tenantSlug]);
 
   // ── Save design (debounced) ──────────────────────────────────────────────────
@@ -552,14 +532,6 @@ export default function AdminLinksPage() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   const previewUrl = tenantSlug ? `/booking/${tenantSlug}` : null;
-  const bookingConversion = trackingStats && trackingStats.totalPageViews > 0
-    ? (trackingStats.totalBookings / trackingStats.totalPageViews) * 100
-    : 0;
-  const clickThroughRate = trackingStats && trackingStats.totalPageViews > 0
-    ? (trackingStats.totalLinkClicks / trackingStats.totalPageViews) * 100
-    : 0;
-  const topLink = trackingStats?.linkClicks?.slice().sort((a, b) => b.clickCount - a.clickCount)[0] ?? null;
-  const topService = dashboardStats?.popularServices?.[0] ?? null;
   const previewDeviceStyle: Record<PreviewDevice, { width: string; label: string }> = {
     mobile: { width: "390px", label: "Mobile" },
     tablet: { width: "768px", label: "Tablet" },
@@ -1461,72 +1433,6 @@ export default function AdminLinksPage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════
-            CONVERSION SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <div className="mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-sm">
-                <BarChart3 size={13} className="text-white" />
-              </div>
-              <div>
-                <p className="font-semibold text-sm text-[#1E1E1E]">Conversion-Optimierung</p>
-                <p className="text-[10px] text-[#8A8A8A]">Echtzeit-Tracking deiner Buchungsseite</p>
-              </div>
-            </div>
-            {insightsLoading && <Loader2 size={14} className="animate-spin text-[#E8C7C3]" />}
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {[
-              { label: "Besucher", value: trackingStats?.totalPageViews ?? 0, icon: Eye, color: "#6366F1" },
-              { label: "Link-Klicks", value: trackingStats?.totalLinkClicks ?? 0, icon: MousePointerClick, color: "#0EA5E9" },
-              { label: "Zur Buchung", value: `${bookingConversion.toFixed(1)}%`, icon: TrendingUp, color: "#10B981" },
-              { label: "CTR", value: `${clickThroughRate.toFixed(1)}%`, icon: BarChart3, color: "#F59E0B" },
-            ].map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-3 py-2.5 shadow-sm">
-                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl" style={{ background: `linear-gradient(90deg, ${color}, ${color}66)` }} />
-                <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: `${color}` }}>
-                  <Icon size={10} /> {label}
-                </div>
-                <p className="mt-1 text-xl font-bold text-[#1E1E1E]">{value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#1E1E1E]">Meist geklickter Link</p>
-                <p className="text-[10px] text-gray-400 truncate">{topLink ? `${topLink.linkName} · ${topLink.clickCount} Klicks` : "Noch keine Link-Klicks"}</p>
-              </div>
-              <MousePointerClick size={15} className="text-[#E8C7C3] shrink-0" />
-            </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[#1E1E1E]">Top-Service</p>
-                <p className="text-[10px] text-gray-400 truncate">{topService ? `${topService.serviceName} · ${topService.bookingCount} Buchungen` : "Noch keine Service-Daten"}</p>
-              </div>
-              <Calendar size={15} className="text-[#E8C7C3] shrink-0" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            {[
-              { label: "QR-Scans", icon: QrCode },
-              { label: "Beste Zeiten", icon: Clock3 },
-              { label: "A/B-Test", icon: TestTube2 },
-            ].map(({ label, icon: Icon }) => (
-              <div key={label} className="rounded-xl bg-[#F5EDEB]/60 px-2 py-2 text-center">
-                <Icon size={14} className="mx-auto mb-1 text-[#D8B0AC]" />
-                <p className="text-[10px] font-semibold text-[#1E1E1E]">{label}</p>
-                <p className="text-[9px] text-gray-400">Backend offen</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* ══════════════════════════════════════════════════════════════

@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
 import {
-  getTrackingStatistics, getRevenueStatistics,
-  type SimplifiedTrackingStatistics, type RevenueStatistics,
+  getTrackingStatistics, getRevenueStatistics, getStatistics,
+  type SimplifiedTrackingStatistics, type RevenueStatistics, type DashboardStatistics,
 } from "@/lib/api/admin";
 import { socialLinks, footerLinks } from "@/lib/config";
 import { formatPrice } from "@/lib/utils/currency";
@@ -30,6 +30,7 @@ const getIconForLink = (linkName: string) => {
 export default function TrackingPage() {
   const [stats, setStats] = useState<SimplifiedTrackingStatistics | null>(null);
   const [revenue, setRevenue] = useState<RevenueStatistics | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStatistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,12 +42,14 @@ export default function TrackingPage() {
     try {
       setLoading(true);
       setError(null);
-      const [statsData, revenueData] = await Promise.all([
+      const [statsData, revenueData, dashboardData] = await Promise.all([
         getTrackingStatistics(),
         getRevenueStatistics(),
+        getStatistics(),
       ]);
       setStats(statsData);
       setRevenue(revenueData);
+      setDashboardStats(dashboardData);
     } catch (err: any) {
       setError(err.message || "Fehler beim Laden der Statistiken");
     } finally {
@@ -91,6 +94,15 @@ export default function TrackingPage() {
     })
     .sort((a, b) => b.clickCount - a.clickCount);
 
+  const bookingConversion = stats.totalPageViews > 0
+    ? (stats.totalBookings / stats.totalPageViews) * 100
+    : 0;
+  const clickThroughRate = stats.totalPageViews > 0
+    ? (stats.totalLinkClicks / stats.totalPageViews) * 100
+    : 0;
+  const topLink = stats.linkClicks.slice().sort((a, b) => b.clickCount - a.clickCount)[0] ?? null;
+  const topService = dashboardStats?.popularServices?.[0] ?? null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -100,6 +112,44 @@ export default function TrackingPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">Statistiken</h1>
           <p className="text-sm text-[#8A8A8A]">Gesamtübersicht aller Zeiten</p>
         </div>
+
+        {/* ── Conversion Insights ───────────────────────────────────────── */}
+        <Card className="mb-6 border border-[#E8C7C3]/30 shadow-xl">
+          <CardBody className="p-4 sm:p-6">
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-3 py-2.5 shadow-sm">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl" style={{ background: "linear-gradient(90deg, #10B981, #10B98166)" }} />
+                <div className="flex items-center gap-1.5 text-xs font-medium text-[#10B981]">
+                  <TrendingUp size={12} /> Zur Buchung
+                </div>
+                <p className="mt-1 text-xl sm:text-2xl font-bold text-[#1E1E1E]">{bookingConversion.toFixed(1)}%</p>
+              </div>
+              <div className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-3 py-2.5 shadow-sm">
+                <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl" style={{ background: "linear-gradient(90deg, #F59E0B, #F59E0B66)" }} />
+                <div className="flex items-center gap-1.5 text-xs font-medium text-[#F59E0B]">
+                  <BarChart3 size={12} /> CTR
+                </div>
+                <p className="mt-1 text-xl sm:text-2xl font-bold text-[#1E1E1E]">{clickThroughRate.toFixed(1)}%</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[#1E1E1E]">Meist geklickter Link</p>
+                  <p className="text-[11px] text-gray-400 truncate">{topLink ? `${topLink.linkName} · ${topLink.clickCount} Klicks` : "Noch keine Link-Klicks"}</p>
+                </div>
+                <MousePointerClick size={16} className="text-[#E8C7C3] shrink-0" />
+              </div>
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[#1E1E1E]">Top-Service</p>
+                  <p className="text-[11px] text-gray-400 truncate">{topService ? `${topService.serviceName} · ${topService.bookingCount} Buchungen` : "Noch keine Service-Daten"}</p>
+                </div>
+                <Calendar size={16} className="text-[#E8C7C3] shrink-0" />
+              </div>
+            </div>
+          </CardBody>
+        </Card>
 
         {/* ── Overview Cards (All Time) ──────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">

@@ -10,6 +10,7 @@ import {
   ChevronRight, ChevronLeft, Check, ExternalLink,
 } from 'lucide-react';
 import api from '@/lib/api/client';
+import { getAdminCategories, createAdminCategory, createAdminService } from '@/lib/api/admin-services';
 import { toast } from 'sonner';
 
 const DAYS = [
@@ -79,14 +80,20 @@ export default function OnboardingPage() {
         })));
         navigate(2);
       } else if (step === 2) {
-        await api.post('/admin/services', {
+        const categoryName = (service.categoryName || 'Allgemein').trim();
+        const categories = await getAdminCategories();
+        let category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+        if (!category) {
+          category = await createAdminCategory({ name: categoryName, displayOrder: 0 });
+        }
+        await createAdminService({
           name: service.name,
           durationMinutes: service.durationMinutes,
+          bufferTimeMinutes: 0,
           price: service.price,
           currency: service.currency || 'EUR',
-          categoryName: service.categoryName || 'Allgemein',
-          isActive: true,
-          bufferTimeMinutes: 0,
+          displayOrder: 0,
+          categoryId: category.id,
         });
         navigate(3);
       } else if (step === 3) {
