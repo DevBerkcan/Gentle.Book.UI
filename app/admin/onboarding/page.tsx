@@ -10,7 +10,7 @@ import {
   ChevronRight, ChevronLeft, Check, ExternalLink,
 } from 'lucide-react';
 import api from '@/lib/api/client';
-import { getAdminCategories, createAdminCategory, createAdminService } from '@/lib/api/admin-services';
+import { getAdminCategories, createAdminCategory, createAdminService, bulkAssignServicesToEmployee } from '@/lib/api/admin-services';
 import { toast } from 'sonner';
 
 const DAYS = [
@@ -53,6 +53,7 @@ export default function OnboardingPage() {
 
   // Step 4: Employee
   const [employee, setEmployee] = useState({ name: '', role: '', username: '', password: '' });
+  const [createdServiceId, setCreatedServiceId] = useState<string | null>(null);
 
   function navigate(next: number) {
     setDir(next > step ? 1 : -1);
@@ -86,7 +87,7 @@ export default function OnboardingPage() {
         if (!category) {
           category = await createAdminCategory({ name: categoryName, displayOrder: 0 });
         }
-        await createAdminService({
+        const newService = await createAdminService({
           name: service.name,
           durationMinutes: service.durationMinutes,
           bufferTimeMinutes: 0,
@@ -95,14 +96,20 @@ export default function OnboardingPage() {
           displayOrder: 0,
           categoryId: category.id,
         });
+        setCreatedServiceId(newService.id);
         navigate(3);
       } else if (step === 3) {
-        await api.post('/employees', {
+        const empResponse = await api.post('/employees', {
           name: employee.name,
           role: employee.role,
           username: employee.username,
           password: employee.password,
         });
+        const newEmployeeId: string | undefined =
+          empResponse.data?.id ?? empResponse.data?.data?.id;
+        if (newEmployeeId && createdServiceId) {
+          await bulkAssignServicesToEmployee(newEmployeeId, [createdServiceId]);
+        }
         // Fetch slug for booking link
         try {
           const res = await api.get('/tenant/settings');

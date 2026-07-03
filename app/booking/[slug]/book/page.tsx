@@ -154,20 +154,24 @@ export default function TenantBookingPage() {
     setSubmitAttempted(true);
     if (!selectedService || !selectedDate || !selectedTime) {
       setError("Bitte alle Felder ausfüllen");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!privacyAccepted) {
       setError("Bitte stimmen Sie den Datenschutzbestimmungen zu");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
         !customerInfo.email.trim() || !customerInfo.phone.trim()) {
       setError("Bitte füllen Sie alle Pflichtfelder aus.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!emailRegex.test(customerInfo.email.trim())) {
       setError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -357,6 +361,7 @@ export default function TenantBookingPage() {
                   onPrivacyChange={setPrivacyAccepted}
                   selectedEmployee={selectedEmployee}
                   onSubmitAttempt={submitAttempted}
+                  submitError={error}
                   onBack={back}
                   onSubmit={handleSubmit}
                   submitting={submitting}

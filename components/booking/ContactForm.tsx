@@ -18,6 +18,7 @@ interface ContactFormProps {
   privacyAccepted: boolean;
   onPrivacyChange: (accepted: boolean) => void;
   onSubmitAttempt?: boolean;
+  submitError?: string | null;
   onBack: () => void;
   onSubmit: () => void;
   submitting: boolean;
@@ -33,6 +34,7 @@ export function ContactForm({
   privacyAccepted,
   onPrivacyChange,
   onSubmitAttempt = false,
+  submitError,
   onBack,
   onSubmit,
   submitting,
@@ -286,9 +288,17 @@ export function ContactForm({
         initial={{ opacity: 0, y: 60 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-t-2 border-[#E8C7C3]/30 shadow-2xl"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t-2 border-[#E8C7C3]/30 shadow-2xl"
       >
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
+        {(onSubmitAttempt && !isFormValid) && (
+          <p className="text-center text-xs text-red-500 pt-2 px-4">
+            Bitte alle Pflichtfelder ausfüllen und Datenschutz akzeptieren
+          </p>
+        )}
+        {submitError && !(onSubmitAttempt && !isFormValid) && (
+          <p className="text-center text-xs text-red-500 pt-2 px-4">{submitError}</p>
+        )}
+        <div className="max-w-3xl mx-auto flex items-center gap-3 p-4">
           <button
             onClick={onBack}
             className="flex-shrink-0 flex items-center gap-1 bg-[#F5EDEB] hover:bg-[#ede0dd] active:scale-95 text-[#1E1E1E] font-semibold py-3 px-4 rounded-xl transition-all"
