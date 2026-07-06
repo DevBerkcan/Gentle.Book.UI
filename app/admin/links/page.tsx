@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Link2, Plus, Trash2, GripVertical, ExternalLink, Calendar,
@@ -296,7 +297,9 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminLinksPage() {
-  const { user } = useAuth();
+  const { user, isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const tenantSlug = (user as any)?.tenantSlug;
 
   const [links, setLinks] = useState<LinkItem[]>([]);

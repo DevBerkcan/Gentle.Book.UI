@@ -35,6 +35,7 @@ interface AuthContextType {
   hasRole: (roles: string | string[]) => boolean;
   isSuperAdmin: boolean;
   isTenantAdmin: boolean;
+  isEmployee: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -167,6 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       hasRole,
       isSuperAdmin: user?.role === 'SuperAdmin',
       isTenantAdmin: user?.role === 'TenantAdmin',
+      isEmployee: !!user && user.role !== 'SuperAdmin' && user.role !== 'TenantAdmin',
     }}>
       {children}
     </AuthContext.Provider>

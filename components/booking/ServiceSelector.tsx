@@ -4,13 +4,14 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
-import { 
-  Sparkles, Clock, ChevronDown, ChevronUp, Loader2, 
+import {
+  Sparkles, Clock, ChevronDown, ChevronUp, Loader2,
   Search, X, CheckCircle, ArrowRight
 } from "lucide-react";
 import type { Service, ServiceCategory } from "@/lib/api/booking";
 import { getServiceCategories, getServicesByCategory } from "@/lib/api/booking";
 import { formatPrice } from "@/lib/utils/currency";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface ServiceSelectorProps {
   services: Service[];
@@ -18,15 +19,30 @@ interface ServiceSelectorProps {
   onSelect: (service: Service) => void;
   onNext: () => void;
   tenantSlug?: string;
+  primaryColor?: string;
 }
 
-export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext, tenantSlug }: ServiceSelectorProps) {
+function lighten(hex: string, amount = 0.85) {
+  try {
+    const clean = hex.replace("#", "");
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
+  } catch { return "#F5EDEB"; }
+}
+
+export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext, tenantSlug, primaryColor = "#E8C7C3" }: ServiceSelectorProps) {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingServices, setLoadingServices] = useState<Record<string, boolean>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const lightBg   = lighten(primaryColor, 0.90);
+  const veryLight = lighten(primaryColor, 0.94);
 
   useEffect(() => {
     async function loadCategories() {
@@ -36,7 +52,6 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
           setCategories(data);
           return;
         }
-
         throw new Error("No categories returned");
       } catch {
         const defaultCategory: ServiceCategory = {
@@ -55,9 +70,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
     loadCategories();
   }, [fallbackServices, tenantSlug]);
 
-  const allServices = useMemo(() => {
-    return categories.flatMap((cat) => cat.services);
-  }, [categories]);
+  const allServices = useMemo(() => categories.flatMap((cat) => cat.services), [categories]);
 
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return [];
@@ -70,24 +83,17 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
   }, [allServices, searchTerm]);
 
   const handleToggleCategory = async (categoryId: string) => {
-    if (expandedId === categoryId) {
-      setExpandedId(null);
-      return;
-    }
+    if (expandedId === categoryId) { setExpandedId(null); return; }
     setExpandedId(categoryId);
     setShowSearchResults(false);
     setSearchTerm("");
-    
     const category = categories.find((c) => c.id === categoryId);
     if (category && category.services.length > 0) return;
-    
     setLoadingServices((prev) => ({ ...prev, [categoryId]: true }));
     try {
       const services = await getServicesByCategory(categoryId, tenantSlug);
       setCategories((prevCategories) =>
-        prevCategories.map((cat) =>
-          cat.id === categoryId ? { ...cat, services } : cat
-        )
+        prevCategories.map((cat) => cat.id === categoryId ? { ...cat, services } : cat)
       );
     } catch {
       // silent
@@ -96,21 +102,13 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
     }
   };
 
-  const clearSearch = () => {
-    setSearchTerm("");
-    setShowSearchResults(false);
-  };
-
-  const handleSelectService = (service: Service) => {
-    onSelect(service);
-    setSearchTerm("");
-    setShowSearchResults(false);
-  };
+  const clearSearch = () => { setSearchTerm(""); setShowSearchResults(false); };
+  const handleSelectService = (service: Service) => { onSelect(service); setSearchTerm(""); setShowSearchResults(false); };
 
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 text-[#E8C7C3] animate-spin" />
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: primaryColor }} />
       </div>
     );
   }
@@ -118,33 +116,122 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
   if (allServices.length === 0) {
     return (
       <div className="text-center py-12 px-4">
-        <Sparkles size={40} className="text-[#E8C7C3] mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-[#1E1E1E] mb-2">Noch keine Leistungen vorhanden</h2>
-        <p className="text-[#8A8A8A] mb-6">Dieser Salon hat noch keine Leistungen eingetragen.</p>
-        <a
-          href="javascript:history.back()"
-          className="inline-block text-sm text-[#017172] underline"
-        >
-          Zurück zum Profil
+        <Sparkles size={40} className="mx-auto mb-4" style={{ color: primaryColor }} />
+        <h2 className="text-xl font-bold text-[#1E1E1E] mb-2">{t.booking.noServicesTitle}</h2>
+        <p className="text-[#8A8A8A] mb-6">{t.booking.noServicesDesc}</p>
+        <a href="javascript:history.back()" className="inline-block text-sm text-[#017172] underline">
+          {t.booking.backToProfile}
         </a>
       </div>
     );
   }
 
+  const ServiceCard = ({ service }: { service: Service }) => {
+    const isSelected = selectedService?.id === service.id;
+    return (
+      <Card
+        key={service.id}
+        isPressable
+        onPress={() => handleSelectService(service)}
+        className="w-full transition-all"
+        style={isSelected ? { boxShadow: `0 0 0 2px white, 0 0 0 4px ${primaryColor}` } : undefined}
+        fullWidth
+      >
+        <CardBody className="p-3 sm:p-4">
+          <div className="flex items-start gap-3">
+            <div
+              className="flex-shrink-0 p-2 rounded-xl transition-colors"
+              style={{ backgroundColor: isSelected ? primaryColor : `${primaryColor}1A` }}
+            >
+              <Sparkles className={isSelected ? "text-white" : ""} size={18} style={!isSelected ? { color: primaryColor } : {}} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-[#1E1E1E] text-sm">{service.name}</h4>
+                  {service.description && (
+                    <p className="text-xs text-[#8A8A8A] mt-0.5 line-clamp-1">{service.description}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                      <Clock size={12} />
+                      {service.durationMinutes} {t.booking.minutes}
+                    </span>
+                    <span className="text-xs font-bold" style={{ color: primaryColor }}>
+                      {formatPrice(service.price, service.currency)}
+                    </span>
+                  </div>
+                </div>
+                {isSelected && <CheckCircle size={16} className="flex-shrink-0" style={{ color: primaryColor }} />}
+              </div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    );
+  };
+
+  const ServiceCardLarge = ({ service }: { service: Service }) => {
+    const isSelected = selectedService?.id === service.id;
+    return (
+      <Card
+        key={service.id}
+        isPressable
+        onPress={() => handleSelectService(service)}
+        className="w-full transition-all"
+        style={isSelected ? { boxShadow: `0 0 0 2px white, 0 0 0 4px ${primaryColor}` } : undefined}
+        fullWidth
+      >
+        <CardBody className="p-3 sm:p-4 w-full">
+          <div className="flex items-start gap-3 sm:gap-4 w-full">
+            <div
+              className="flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors"
+              style={{ backgroundColor: isSelected ? primaryColor : `${primaryColor}1A` }}
+            >
+              <Sparkles className={isSelected ? "text-white" : ""} size={20} style={!isSelected ? { color: primaryColor } : {}} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-[#1E1E1E] text-sm sm:text-base break-words pr-1">{service.name}</h4>
+                  {service.description && (
+                    <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 line-clamp-2 break-words">{service.description}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
+                    <span className="flex items-center gap-1 text-xs sm:text-sm text-[#8A8A8A] whitespace-nowrap">
+                      <Clock size={14} />
+                      {service.durationMinutes} {t.booking.minutes}
+                    </span>
+                    <span className="font-bold text-sm sm:text-base whitespace-nowrap" style={{ color: primaryColor }}>
+                      {formatPrice(service.price, service.currency)}
+                    </span>
+                  </div>
+                </div>
+                {isSelected && (
+                  <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ml-1" style={{ backgroundColor: primaryColor }}>
+                    <CheckCircle size={14} className="text-white" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+    );
+  };
+
   return (
     <>
       <div className={`space-y-6 px-4 sm:px-0 ${selectedService ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">
-            Wähle deine Behandlung
-          </h2>
-          <p className="text-sm sm:text-base text-[#8A8A8A]">Schritt 1 von 4</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">{t.booking.chooseService}</h2>
+          <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step1of4}</p>
         </div>
 
         {/* Search Bar */}
         <div className="relative">
           <Input
-            placeholder="Behandlungen suchen..."
+            placeholder={t.booking.searchPlaceholder}
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -160,9 +247,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
               ) : null
             }
             classNames={{
-              inputWrapper: "bg-white border-2 border-[#E8C7C3] hover:border-[#017172] focus-within:border-[#017172]",
+              inputWrapper: "bg-white border-2",
               input: "text-[#1E1E1E]",
             }}
+            style={{ borderColor: primaryColor } as any}
           />
         </div>
 
@@ -178,61 +266,15 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
               {searchResults.length > 0 ? (
                 <>
                   <p className="text-sm text-[#8A8A8A]">
-                    {searchResults.length} {searchResults.length === 1 ? 'Behandlung' : 'Behandlungen'} gefunden
+                    {searchResults.length} {searchResults.length === 1 ? t.booking.servicesFound_one : t.booking.servicesFound_other}
                   </p>
                   <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-                    {searchResults.map((service) => (
-                      <Card
-                        key={service.id}
-                        isPressable
-                        onPress={() => handleSelectService(service)}
-                        className={`w-full transition-all ${
-                          selectedService?.id === service.id
-                            ? "ring-2 ring-[#E8C7C3] ring-offset-2"
-                            : "hover:ring-2 hover:ring-[#E8C7C3]/30 hover:ring-offset-1"
-                        }`}
-                        fullWidth
-                      >
-                        <CardBody className="p-3 sm:p-4">
-                          <div className="flex items-start gap-3">
-                            <div className={`flex-shrink-0 p-2 rounded-xl transition-colors ${
-                              selectedService?.id === service.id ? "bg-[#E8C7C3]" : "bg-[#E8C7C3]/10"
-                            }`}>
-                              <Sparkles className={selectedService?.id === service.id ? "text-white" : "text-[#E8C7C3]"} size={18} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-semibold text-[#1E1E1E] text-sm">{service.name}</h4>
-                                  {service.description && (
-                                    <p className="text-xs text-[#8A8A8A] mt-0.5 line-clamp-1">{service.description}</p>
-                                  )}
-                                  <div className="flex items-center gap-3 mt-1.5">
-                                    <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
-                                      <Clock size={12} />
-                                      {service.durationMinutes} Min
-                                    </span>
-                                    <span className="text-xs font-bold text-[#E8C7C3]">
-                                      {formatPrice(service.price, service.currency)}
-                                    </span>
-                                  </div>
-                                </div>
-                                {selectedService?.id === service.id && (
-                                  <CheckCircle size={16} className="text-[#E8C7C3] flex-shrink-0" />
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ))}
+                    {searchResults.map((service) => <ServiceCard key={service.id} service={service} />)}
                   </div>
                 </>
               ) : (
-                <div className="text-center py-8 bg-[#F5EDEB] rounded-xl">
-                  <p className="text-sm text-[#8A8A8A]">
-                    Keine Behandlungen gefunden für &quot;{searchTerm}&quot;
-                  </p>
+                <div className="text-center py-8 rounded-xl" style={{ backgroundColor: lightBg }}>
+                  <p className="text-sm text-[#8A8A8A]">{t.booking.noSearchResults} &quot;{searchTerm}&quot;</p>
                 </div>
               )}
             </motion.div>
@@ -245,12 +287,12 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             {categories.map((category) => {
               const isLoading = loadingServices[category.id];
               const isExpanded = expandedId === category.id;
-
               return (
-                <div key={category.id} className="border-2 border-[#E8C7C3] rounded-xl overflow-hidden">
+                <div key={category.id} className="rounded-xl overflow-hidden border-2" style={{ borderColor: primaryColor }}>
                   <button
                     onClick={() => handleToggleCategory(category.id)}
-                    className="w-full flex items-center justify-between p-3 sm:p-4 bg-[#F5EDEB] hover:bg-[#E8C7C3]/20 transition-colors"
+                    className="w-full flex items-center justify-between p-3 sm:p-4 transition-colors"
+                    style={{ backgroundColor: isExpanded ? `${primaryColor}22` : lightBg }}
                   >
                     <div className="text-left flex-1 min-w-0 pr-2">
                       <h3 className="font-bold text-[#1E1E1E] text-sm sm:text-base truncate">{category.name}</h3>
@@ -258,77 +300,21 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                         <p className="text-xs sm:text-sm text-[#8A8A8A] truncate">{category.description}</p>
                       )}
                     </div>
-                    {isExpanded ? (
-                      <ChevronUp size={18} className="flex-shrink-0 text-[#8A8A8A]" />
-                    ) : (
-                      <ChevronDown size={18} className="flex-shrink-0 text-[#8A8A8A]" />
-                    )}
+                    {isExpanded ? <ChevronUp size={18} className="flex-shrink-0 text-[#8A8A8A]" /> : <ChevronDown size={18} className="flex-shrink-0 text-[#8A8A8A]" />}
                   </button>
 
                   {isExpanded && (
                     <div className="p-3 sm:p-4 space-y-3">
                       {isLoading ? (
                         <div className="flex items-center justify-center py-8">
-                          <Loader2 className="w-6 h-6 text-[#E8C7C3] animate-spin" />
-                          <span className="ml-2 text-sm text-[#8A8A8A]">Behandlungen werden geladen...</span>
+                          <Loader2 className="w-6 h-6 animate-spin" style={{ color: primaryColor }} />
+                          <span className="ml-2 text-sm text-[#8A8A8A]">{t.booking.loadingServices}</span>
                         </div>
                       ) : category.services.length === 0 ? (
-                        <p className="text-center py-4 text-sm text-[#8A8A8A]">
-                          Keine Behandlungen in dieser Kategorie
-                        </p>
+                        <p className="text-center py-4 text-sm text-[#8A8A8A]">{t.booking.noServicesInCategory}</p>
                       ) : (
                         <div className="flex flex-col gap-2 sm:gap-3">
-                          {category.services.map((service) => (
-                            <Card
-                              key={service.id}
-                              isPressable
-                              onPress={() => handleSelectService(service)}
-                              className={`w-full transition-all ${
-                                selectedService?.id === service.id
-                                  ? "ring-2 ring-[#E8C7C3] ring-offset-2"
-                                  : "hover:ring-2 hover:ring-[#E8C7C3]/30 hover:ring-offset-1"
-                              }`}
-                              fullWidth
-                            >
-                              <CardBody className="p-3 sm:p-4 w-full">
-                                <div className="flex items-start gap-3 sm:gap-4 w-full">
-                                  <div className={`flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors ${
-                                    selectedService?.id === service.id ? "bg-[#E8C7C3]" : "bg-[#E8C7C3]/10"
-                                  }`}>
-                                    <Sparkles className={selectedService?.id === service.id ? "text-white" : "text-[#E8C7C3]"} size={20} />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-[#1E1E1E] text-sm sm:text-base break-words pr-1">
-                                          {service.name}
-                                        </h4>
-                                        {service.description && (
-                                          <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 line-clamp-2 break-words">
-                                            {service.description}
-                                          </p>
-                                        )}
-                                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                                          <span className="flex items-center gap-1 text-xs sm:text-sm text-[#8A8A8A] whitespace-nowrap">
-                                            <Clock size={14} />
-                                            {service.durationMinutes} Min
-                                          </span>
-                                          <span className="font-bold text-[#E8C7C3] text-sm sm:text-base whitespace-nowrap">
-                                            {formatPrice(service.price, service.currency)}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      {selectedService?.id === service.id && (
-                                        <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-[#E8C7C3] rounded-full flex items-center justify-center ml-1">
-                                          <CheckCircle size={14} className="text-white" />
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </CardBody>
-                            </Card>
-                          ))}
+                          {category.services.map((service) => <ServiceCardLarge key={service.id} service={service} />)}
                         </div>
                       )}
                     </div>
@@ -340,7 +326,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
         )}
       </div>
 
-      {/* Sticky bottom bar - Matches EmployeeSelector and DateTimePicker */}
+      {/* Sticky bottom bar */}
       <AnimatePresence>
         {selectedService && (
           <motion.div
@@ -348,35 +334,34 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 60 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm border-t-2 border-[#E8C7C3]/30 shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white/95 backdrop-blur-sm shadow-2xl"
+            style={{ borderTop: `2px solid ${primaryColor}4D` }}
           >
             <div className="max-w-3xl mx-auto flex items-center gap-3">
-              {/* Selected service summary - matches EmployeeSelector style */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="bg-[#E8C7C3] p-2 rounded-lg flex-shrink-0">
+                <div className="p-2 rounded-lg flex-shrink-0" style={{ backgroundColor: primaryColor }}>
                   <CheckCircle className="text-white" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-[#8A8A8A]">Ausgewählte Behandlung</p>
+                  <p className="text-xs text-[#8A8A8A]">{t.booking.selectedTreatment}</p>
                   <p className="font-bold text-[#1E1E1E] text-sm truncate">{selectedService.name}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#8A8A8A]">
                       <Clock size={10} className="inline mr-0.5" />
-                      {selectedService.durationMinutes} Min
+                      {selectedService.durationMinutes} {t.booking.minutes}
                     </span>
-                    <span className="text-xs font-bold text-[#E8C7C3]">
+                    <span className="text-xs font-bold" style={{ color: primaryColor }}>
                       {formatPrice(selectedService.price, selectedService.currency)}
                     </span>
                   </div>
                 </div>
               </div>
-
-              {/* Weiter button - matches EmployeeSelector style */}
               <button
                 onClick={onNext}
-                className="flex-shrink-0 flex items-center gap-2 bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] hover:from-[#D8B0AC] hover:to-[#c49590] active:scale-95 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg"
+                className="flex-shrink-0 flex items-center gap-2 active:scale-95 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg"
+                style={{ background: `linear-gradient(to right, ${primaryColor}, ${lighten(primaryColor, 0.2)})` }}
               >
-                Weiter
+                {t.next}
                 <ArrowRight size={18} />
               </button>
             </div>

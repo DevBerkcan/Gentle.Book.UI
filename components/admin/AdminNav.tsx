@@ -5,48 +5,14 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, Sparkles,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, Sparkles, MessageSquare, Inbox,
 } from "lucide-react";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import api, { apiOrigin } from "@/lib/api/client";
-
-const NAV_GROUPS = [
-  {
-    label: "Übersicht",
-    items: [
-      { href: "/admin/dashboard",    label: "Dashboard",     icon: LayoutDashboard },
-      { href: "/admin/calendar",     label: "Kalender",      icon: Calendar },
-      { href: "/admin/bookings",     label: "Buchungen",     icon: BookOpen },
-      { href: "/admin/customers",    label: "Kunden",        icon: Users },
-    ],
-  },
-  {
-    label: "Team & Services",
-    items: [
-      { href: "/admin/services",     label: "Services",      icon: Scissors },
-      { href: "/admin/employees",    label: "Mitarbeiter",   icon: Users },
-      { href: "/admin/blocked-slots",label: "Abwesenheiten", icon: Ban },
-    ],
-  },
-  {
-    label: "Analytics",
-    items: [
-      { href: "/admin/tracking",     label: "Tracking",      icon: BarChart3 },
-    ],
-  },
-];
-
-const ADMIN_GROUP = {
-  label: "Administration",
-  items: [
-    { href: "/admin/links",         label: "Meine Links",   icon: Link2 },
-    { href: "/admin/settings",      label: "Einstellungen", icon: Settings },
-    { href: "/admin/subscription",  label: "Abonnement",    icon: CreditCard },
-  ],
-};
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const COLLAPSE_KEY = "admin-sidebar-collapsed";
 
@@ -54,7 +20,8 @@ export function AdminNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const { user, employee, logout, isAuthenticated, isTenantAdmin } = useAuth();
+  const { user, employee, logout, isAuthenticated, isTenantAdmin, isEmployee } = useAuth();
+  const { t, lang, setLang } = useTranslation();
   const [logoUrl, setLogoUrl]         = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
 
@@ -89,7 +56,54 @@ export function AdminNav() {
 
   if (!isAuthenticated) return null;
 
-  const groups = isTenantAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS;
+  const EMPLOYEE_NAV = [
+    {
+      label: t.admin.myArea,
+      items: [
+        { href: "/admin/calendar",        label: t.admin.myCalendar,  icon: Calendar },
+        { href: "/admin/blocked-slots",   label: t.admin.absences,    icon: Ban },
+        { href: "/admin/employee-notes",  label: t.admin.noteToAdmin, icon: MessageSquare },
+      ],
+    },
+  ];
+
+  const NAV_GROUPS = [
+    {
+      label: t.admin.overview,
+      items: [
+        { href: "/admin/dashboard",    label: t.admin.dashboard, icon: LayoutDashboard },
+        { href: "/admin/calendar",     label: t.admin.calendar,  icon: Calendar },
+        { href: "/admin/bookings",     label: t.admin.bookings,  icon: BookOpen },
+        { href: "/admin/customers",    label: t.admin.customers, icon: Users },
+      ],
+    },
+    {
+      label: t.admin.teamAndServices,
+      items: [
+        { href: "/admin/services",      label: t.admin.services,   icon: Scissors },
+        { href: "/admin/employees",     label: t.admin.employees,  icon: Users },
+        { href: "/admin/blocked-slots", label: t.admin.absences,   icon: Ban },
+      ],
+    },
+    {
+      label: t.admin.analytics,
+      items: [
+        { href: "/admin/tracking", label: t.admin.tracking, icon: BarChart3 },
+      ],
+    },
+  ];
+
+  const ADMIN_GROUP = {
+    label: t.admin.administration,
+    items: [
+      { href: "/admin/inbox",        label: t.admin.inbox,        icon: Inbox },
+      { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
+      { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
+      { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
+    ],
+  };
+
+  const groups = isEmployee ? EMPLOYEE_NAV : isTenantAdmin ? [...NAV_GROUPS, ADMIN_GROUP] : NAV_GROUPS;
 
   const displayName = user?.name
     || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "")
@@ -112,14 +126,14 @@ export function AdminNav() {
       <div className={`px-5 py-5 border-b border-white/8 ${isCollapsed ? "px-3" : ""}`}>
         <Link href="/admin/dashboard" className="flex items-center gap-3">
           {isCollapsed ? (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#E8C7C3]/20 mx-auto">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6355E4]/20 mx-auto">
               <Sparkles size={17} className="text-white" />
             </div>
           ) : logoUrl
             ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
               <>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#E8C7C3]/20">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6355E4]/20">
                   <Sparkles size={17} className="text-white" />
                 </div>
                 {companyName && (
@@ -152,7 +166,7 @@ export function AdminNav() {
                       isCollapsed ? "justify-center" : ""
                     } ${
                       active
-                        ? "bg-gradient-to-r from-[#017172] to-[#01878A] text-white shadow-lg shadow-[#017172]/25"
+                        ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/25"
                         : "text-white/55 hover:text-white hover:bg-white/8"
                     }`}
                   >
@@ -172,37 +186,54 @@ export function AdminNav() {
         {isCollapsed ? (
           <div className="flex flex-col items-center gap-2">
             <div
-              className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30"
+              className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30"
               title={displayName}
             >
               {initials}
             </div>
+            <button
+              onClick={() => setLang(lang === "de" ? "en" : "de")}
+              className="text-[10px] font-bold text-white/40 hover:text-white transition-colors"
+              title={lang === "de" ? "Switch to English" : "Zu Deutsch wechseln"}
+            >
+              {lang === "de" ? "EN" : "DE"}
+            </button>
             <NotificationBell dark />
             <button
               onClick={logout}
               className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
-              title="Abmelden"
+              title={t.admin.logout}
             >
               <LogOut size={15} />
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#017172] to-[#01a0a2] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#017172]/30">
-              {initials}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-2 py-1">
+              <button
+                onClick={() => setLang(lang === "de" ? "en" : "de")}
+                className="text-[10px] font-bold px-2 py-1 rounded-full border border-white/15 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+              >
+                {lang === "de" ? "EN" : "DE"}
+              </button>
+              <NotificationBell dark />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{displayName}</p>
-              <p className="text-white/40 text-xs truncate">{displayRole}</p>
+            <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30">
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-semibold truncate">{displayName}</p>
+                <p className="text-white/40 text-xs truncate">{displayRole}</p>
+              </div>
+              <button
+                onClick={logout}
+                className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
+                title={t.admin.logout}
+              >
+                <LogOut size={15} />
+              </button>
             </div>
-            <NotificationBell dark />
-            <button
-              onClick={logout}
-              className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
-              title="Abmelden"
-            >
-              <LogOut size={15} />
-            </button>
           </div>
         )}
       </div>
@@ -232,13 +263,19 @@ export function AdminNav() {
           {logoUrl
             ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="h-9 w-[150px] object-contain object-left" />
             : (
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center">
                 <Sparkles size={15} className="text-white" />
               </div>
             )
           }
         </Link>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setLang(lang === "de" ? "en" : "de")}
+            className="text-[10px] font-bold px-2 py-1 rounded-full border border-white/20 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+          >
+            {lang === "de" ? "EN" : "DE"}
+          </button>
           <NotificationBell dark />
           <button
             onClick={() => setOpen((v) => !v)}

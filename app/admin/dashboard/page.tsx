@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Calendar, CalendarDays, Clock, TrendingUp, TrendingDown, Users,
@@ -116,7 +117,9 @@ function StatCard({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AdminDashboardPage() {
-  const { user, isTenantAdmin } = useAuth();
+  const { user, isTenantAdmin, isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const [dashboard,            setDashboard]           = useState<DashboardOverview | null>(null);
   const [onboarding,           setOnboarding]          = useState<OnboardingStatus | null>(null);
   const [onboardingDismissed,  setOnboardingDismissed] = useState(false);

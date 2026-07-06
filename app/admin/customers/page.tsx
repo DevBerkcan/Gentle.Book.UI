@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { Card, CardBody } from "@nextui-org/card";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
@@ -51,6 +53,10 @@ const inputClassNames = {
 type ModalMode = "create" | "edit" | "view";
 
 export default function CustomersPage() {
+  const { isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
+
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDetail | null>(null);
   const [loading, setLoading] = useState(true);

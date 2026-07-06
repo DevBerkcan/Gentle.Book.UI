@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
@@ -47,7 +48,10 @@ const manualBookingModalClassNames = {
 };
 
 export default function AdminBookingsPage() {
-  const { employee, hasRole } = useAuth();
+  const { employee, hasRole, isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
+
   const isAdmin = hasRole(['Admin', 'Owner']);
 
   const [bookings, setBookings] = useState<BookingListItem[]>([]);

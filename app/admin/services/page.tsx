@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input, Textarea } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
@@ -119,7 +120,9 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function AdminServicesPage() {
+    const { isEmployee } = useAuth();
     const router = useRouter();
+    useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
     const [viewMode, setViewMode] = useState<ViewMode>("services");
     const [services, setServices] = useState<AdminService[]>([]);
     const [categories, setCategories] = useState<AdminServiceCategory[]>([]);

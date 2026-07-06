@@ -2,7 +2,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
 import { Input, Textarea } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
@@ -118,6 +119,9 @@ const selectCls =
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminSettingsPage() {
+  const { isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const searchParams = useSearchParams();
   const mustChangePassword = searchParams.get('mustChangePassword') === '1';
   const passwordSectionRef = useRef<HTMLDivElement>(null);

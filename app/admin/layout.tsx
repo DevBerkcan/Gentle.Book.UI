@@ -11,6 +11,7 @@ import { MessageCircle, Mail, LockKeyhole, Check, ArrowRight, CheckCircle, Rocke
 import Link from 'next/link';
 import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
+import { LanguageProvider, useTranslation } from '@/lib/i18n/LanguageContext';
 
 const MODAL_PLANS = [
   { key: 'Starter',      name: 'Starter',      price: 29,  employees: '2 Mitarbeiter' },
@@ -19,6 +20,7 @@ const MODAL_PLANS = [
 ];
 
 function TrialExpiredModal() {
+  const { t } = useTranslation();
   const [requesting,    setRequesting]    = useState(false);
   const [requestedPlan, setRequestedPlan] = useState<string | null>(null);
   const [confirmed,     setConfirmed]     = useState(false);
@@ -31,7 +33,7 @@ function TrialExpiredModal() {
       setRequestedPlan(planKey);
       setConfirmed(true);
     } catch {
-      alert('Anfrage konnte nicht gesendet werden.');
+      alert(t.error);
     } finally {
       setRequesting(false);
     }
@@ -56,9 +58,9 @@ function TrialExpiredModal() {
             <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/30">
               <LockKeyhole size={30} className="text-red-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Testzeitraum abgelaufen</h2>
+            <h2 className="text-2xl font-bold text-white mb-2">{t.admin.trialExpired}</h2>
             <p className="text-white/50 text-sm leading-relaxed">
-              Wählen Sie einen Plan und wir aktivieren ihn innerhalb von 24 Stunden.
+              {t.admin.trialExpiredDesc}
             </p>
           </div>
 
@@ -66,12 +68,12 @@ function TrialExpiredModal() {
             /* Confirmation state */
             <div className="mx-6 mb-6 rounded-2xl p-6 border border-green-500/30 text-center" style={{ background: 'rgba(34,197,94,0.08)' }}>
               <CheckCircle size={36} className="text-green-400 mx-auto mb-3" />
-              <p className="text-white font-semibold text-lg mb-1">Anfrage gesendet!</p>
+              <p className="text-white font-semibold text-lg mb-1">{t.admin.requestSent}</p>
               <p className="text-white/50 text-sm">
-                Ihr <strong className="text-white/80">{requestedPlan}</strong>-Plan wird innerhalb von 24h aktiviert. Sie erhalten eine Bestätigungs-E-Mail.
+                <strong className="text-white/80">{requestedPlan}</strong> — {t.admin.planActivatedIn24h}
               </p>
               <Link href="/admin/subscription" className="mt-4 inline-flex items-center gap-1 text-xs text-white/40 hover:text-white/60 transition-colors">
-                Abonnement-Details <ArrowRight size={11} />
+                {t.admin.subscriptionDetails} <ArrowRight size={11} />
               </Link>
             </div>
           ) : (
@@ -91,18 +93,18 @@ function TrialExpiredModal() {
                   >
                     {plan.highlight && (
                       <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                        <span className="bg-[#017172] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Empfohlen</span>
+                        <span className="bg-[#017172] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{t.admin.recommended}</span>
                       </div>
                     )}
                     <p className="text-[11px] text-white/50 font-medium mb-1">{plan.name}</p>
                     <p className="text-2xl font-black text-white leading-none">€{plan.price}</p>
-                    <p className="text-[10px] text-white/40 mt-0.5">/Monat</p>
+                    <p className="text-[10px] text-white/40 mt-0.5">{t.admin.perMonth}</p>
                     <p className="text-[10px] text-white/50 mt-2">{plan.employees}</p>
                     <div className="mt-3 text-center">
                       {requesting ? (
                         <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
-                        <span className="text-[11px] font-semibold text-white/70">Anfragen →</span>
+                        <span className="text-[11px] font-semibold text-white/70">{t.admin.request}</span>
                       )}
                     </div>
                   </button>
@@ -161,9 +163,10 @@ function TrialBanner({ daysLeft }: { daysLeft: number }) {
 }
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
+  const { t, lang, setLang } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, loading, isTenantAdmin } = useAuth();
+  const { isAuthenticated, loading, isTenantAdmin, isEmployee } = useAuth();
   const [trialExpired,    setTrialExpired]    = useState(false);
   const [trialDaysLeft,   setTrialDaysLeft]   = useState<number | null>(null);
   const [showTrialBanner, setShowTrialBanner] = useState(false);
@@ -177,6 +180,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       router.push('/admin/login');
     }
   }, [isAuthenticated, loading, pathname, router]);
+
+  useEffect(() => {
+    if (!loading && isEmployee && pathname === '/admin/dashboard') {
+      router.replace('/admin/calendar');
+    }
+  }, [isEmployee, loading, pathname, router]);
 
   // Check subscription status for TenantAdmin
   useEffect(() => {
@@ -241,13 +250,13 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="bg-[#017172] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
               <p className="text-white text-sm font-medium flex items-center gap-2">
                 <Rocket size={16} />
-                Richten Sie Ihr Studio in wenigen Schritten ein
+                {t.admin.setupWizard}
               </p>
               <Link
                 href="/admin/onboarding"
                 className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
               >
-                Setup-Wizard starten <ArrowRight size={12} />
+                {t.admin.startSetup} <ArrowRight size={12} />
               </Link>
             </div>
           )}
@@ -270,7 +279,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
+      <LanguageProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

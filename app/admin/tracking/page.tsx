@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import {
@@ -116,6 +118,10 @@ function RevenuePeriodCard({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TrackingPage() {
+  const { isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
+
   const [stats,          setStats]          = useState<SimplifiedTrackingStatistics | null>(null);
   const [revenue,        setRevenue]        = useState<RevenueStatistics | null>(null);
   const [dashboardStats, setDashboardStats] = useState<DashboardStatistics | null>(null);

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
   Clock, CheckCircle, XCircle, AlertTriangle,
@@ -119,6 +121,9 @@ function UsageBar({ label, current, limit, isUnlimited, percentage }: { label: s
 }
 
 export default function AdminSubscriptionPage() {
+  const { isEmployee } = useAuth();
+  const router = useRouter();
+  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const [sub, setSub] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [loading, setLoading] = useState(true);

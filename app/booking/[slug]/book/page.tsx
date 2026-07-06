@@ -20,6 +20,7 @@ import {
   type Employee,
 } from "@/lib/api/booking";
 import { BookingEvents } from "@/lib/tracking";
+import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageContext";
 
 const FONT_QUERY: Record<string, string> = {
   playfair:   "Playfair+Display:wght@400;600;700",
@@ -58,11 +59,21 @@ function getBorderRadius(style?: string) {
 const TOTAL_STEPS = 4;
 
 export default function TenantBookingPage() {
+  return (
+    <LanguageProvider>
+      <BookingPageInner />
+    </LanguageProvider>
+  );
+}
+
+function BookingPageInner() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
+  const { lang, setLang, t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [tenantName, setTenantName] = useState<string>('');
   const [primaryColor, setPrimaryColor] = useState<string>('#E8C7C3');
+  const [tenantAddress, setTenantAddress] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string>('inter');
   const [buttonStyle, setButtonStyle] = useState<string>('rounded');
   const [bookingTheme, setBookingTheme] = useState<string>('light');
@@ -100,6 +111,7 @@ export default function TenantBookingPage() {
         if (!info) return;
         setTenantName(info.companyName ?? info.name ?? slug);
         if (info.primaryColor) setPrimaryColor(info.primaryColor);
+        if (info.address) setTenantAddress(info.address);
         try {
           const cfg = typeof info.linktreeConfig === 'string'
             ? JSON.parse(info.linktreeConfig)
@@ -115,7 +127,7 @@ export default function TenantBookingPage() {
 
     getServices(slug)
       .then(setServices)
-      .catch(() => setError("Fehler beim Laden der Services"));
+      .catch(() => setError(t.booking.errorLoadServices));
   }, [slug]);
 
   const handleLoadSlots = async (date: string, employeeId?: string) => {
@@ -130,7 +142,7 @@ export default function TenantBookingPage() {
       setNoSlotsMessage(data.message ?? null);
       BookingEvents.dateSelected(date);
     } catch {
-      setError("Fehler beim Laden der Verfügbarkeit");
+      setError(t.booking.errorLoadAvailability);
     } finally {
       setLoadingSlots(false);
     }
@@ -153,24 +165,24 @@ export default function TenantBookingPage() {
   const handleSubmit = async () => {
     setSubmitAttempted(true);
     if (!selectedService || !selectedDate || !selectedTime) {
-      setError("Bitte alle Felder ausfüllen");
+      setError(t.booking.errorFillRequired);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!privacyAccepted) {
-      setError("Bitte stimmen Sie den Datenschutzbestimmungen zu");
+      setError(t.booking.errorPrivacy);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!customerInfo.firstName.trim() || !customerInfo.lastName.trim() ||
         !customerInfo.email.trim() || !customerInfo.phone.trim()) {
-      setError("Bitte füllen Sie alle Pflichtfelder aus.");
+      setError(t.booking.errorFillAllRequired);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     if (!emailRegex.test(customerInfo.email.trim())) {
-      setError("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      setError(t.booking.errorInvalidEmail);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -188,7 +200,7 @@ export default function TenantBookingPage() {
       BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {});
       router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
     } catch (err: any) {
-      setError(err.message || "Fehler beim Buchen. Bitte versuchen Sie es erneut.");
+      setError(err.message || t.booking.errorBooking);
     } finally {
       setSubmitting(false);
     }
@@ -201,8 +213,8 @@ export default function TenantBookingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
-          <p className="text-2xl font-bold text-gray-800 mb-2">Buchungssystem nicht gefunden</p>
-          <p className="text-gray-500">Der Link <span className="font-mono">/booking/{slug}</span> ist nicht gültig.</p>
+          <p className="text-2xl font-bold text-gray-800 mb-2">{t.booking.bookingSystemNotFound}</p>
+          <p className="text-gray-500">{t.booking.bookingSystemNotFoundDesc} <span className="font-mono">/booking/{slug}</span> {t.booking.bookingSystemNotFoundDesc2}</p>
         </div>
       </div>
     );
@@ -231,24 +243,35 @@ export default function TenantBookingPage() {
           <button
             onClick={() => router.push(`/booking/${slug}`)}
             className={`flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70 flex-shrink-0 ${isDark ? 'text-white/70' : 'text-gray-500'}`}
-            title={`Zurück zu ${tenantName || slug}`}
+            title={`${t.back} ${tenantName || slug}`}
           >
             <ArrowLeft size={15} />
-            <span className="hidden sm:inline">Zurück</span>
+            <span className="hidden sm:inline">{t.back}</span>
           </button>
           <div className="flex-1">
             <p className={`font-bold text-sm leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
               {tenantName || slug}
             </p>
-            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>Online-Buchung</p>
+            <p className={`text-xs ${isDark ? 'text-white/50' : 'text-gray-400'}`}>{t.booking.onlineBooking}</p>
           </div>
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(lang === "de" ? "en" : "de")}
+            className={`flex-shrink-0 text-xs font-bold px-2.5 py-1.5 rounded-full border transition-all ${
+              isDark
+                ? 'border-white/20 text-white/70 hover:bg-white/10'
+                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            {lang === "de" ? "EN" : "DE"}
+          </button>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-10">
         {/* Step indicators */}
         {(() => {
-          const stepLabels = ['Service', 'Mitarbeiter', 'Datum & Zeit', 'Kontakt'];
+          const stepLabels = t.booking.stepLabels;
           return (
             <div className="mb-8 flex justify-center items-start gap-2 sm:gap-3">
               {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((step) => (
@@ -260,9 +283,11 @@ export default function TenantBookingPage() {
                           ? "text-white"
                           : currentStep === step
                           ? "text-white ring-4 ring-opacity-20"
-                          : isDark ? "bg-white/10 text-white/40" : "bg-[#F0E6E4] text-[#8A8A8A]"
+                          : isDark ? "bg-white/10 text-white/40" : "text-[#8A8A8A]"
                       }`}
-                      style={currentStep >= step ? { backgroundColor: primaryColor } : {}}
+                      style={currentStep >= step
+                        ? { backgroundColor: primaryColor }
+                        : isDark ? {} : { backgroundColor: lighten(primaryColor, 0.82) }}
                     >
                       {currentStep > step ? <Check size={18} /> : step}
                     </div>
@@ -277,7 +302,7 @@ export default function TenantBookingPage() {
                   {step < TOTAL_STEPS && (
                     <div
                       className="w-6 sm:w-10 h-1 mx-1 sm:mx-2 rounded transition-all mt-4 sm:mt-[18px] flex-shrink-0"
-                      style={{ backgroundColor: currentStep > step ? primaryColor : '#F0E6E4' }}
+                      style={{ backgroundColor: currentStep > step ? primaryColor : isDark ? 'rgba(255,255,255,0.1)' : lighten(primaryColor, 0.75) }}
                     />
                   )}
                 </div>
@@ -316,6 +341,7 @@ export default function TenantBookingPage() {
                   onSelect={handleServiceSelect}
                   onNext={next}
                   tenantSlug={slug}
+                  primaryColor={primaryColor}
                 />
               </motion.div>
             )}
@@ -328,6 +354,7 @@ export default function TenantBookingPage() {
                   onBack={back}
                   selectedService={selectedService}
                   tenantSlug={slug}
+                  primaryColor={primaryColor}
                 />
               </motion.div>
             )}
@@ -346,6 +373,7 @@ export default function TenantBookingPage() {
                   onNext={next}
                   onBack={back}
                   loading={loadingSlots}
+                  primaryColor={primaryColor}
                 />
               </motion.div>
             )}
@@ -365,6 +393,8 @@ export default function TenantBookingPage() {
                   onBack={back}
                   onSubmit={handleSubmit}
                   submitting={submitting}
+                  primaryColor={primaryColor}
+                  tenantAddress={tenantAddress}
                 />
               </motion.div>
             )}
