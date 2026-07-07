@@ -8,6 +8,7 @@ import {
   Globe, Phone, Mail, ExternalLink, Loader2, ChevronRight, Sparkles,
 } from "lucide-react";
 import { getTenantInfo, getTenantLinks, type TenantLink } from "@/lib/api/booking";
+import { apiOrigin } from "@/lib/api/client";
 import { SoftTemplate }      from "./templates/soft";
 import { HeroTemplate }      from "./templates/hero";
 import { NeonTemplate }      from "./templates/neon";
@@ -346,7 +347,7 @@ export default function TenantLinktreePage() {
   }
 
   const t           = getThemeConfig(linktreeStyle, primaryColor);
-  const logoSrc     = logoUrl ? (logoUrl.startsWith("http") ? logoUrl : `${process.env.NEXT_PUBLIC_API_URL}${logoUrl}`) : null;
+  const logoSrc     = logoUrl ? (logoUrl.startsWith("http") ? logoUrl : `${apiOrigin}${logoUrl}`) : null;
   const btnRadius   = getBorderRadius(cfg.buttonStyle);
   const avRadius    = getAvatarRadius(cfg.avatarShape);
   const ctaText     = cfg.ctaText?.trim() || "Termin buchen";
