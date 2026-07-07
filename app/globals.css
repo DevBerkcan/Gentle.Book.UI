@@ -7,17 +7,23 @@
 
 @layer base {
   :root {
-    /* New Corporate Colors */
-    --corporate-rose: #E8C7C3;
-    --corporate-charcoal: #1E1E1E;
-    --corporate-beige: #F5EDEB;
-    --corporate-white: #FFFFFF;
-    --corporate-grey: #8A8A8A;
+    --font-ui: var(--font-geist-sans);
 
-    /* Legacy colors (keeping for backward compatibility) */
-    --barber-red: #dc2626;
-    --barber-dark-red: #991b1b;
-    --barber-gold: #d4af37;
+    --brand-primary:        #6355E4;
+    --brand-hover:          #5646D6;
+    --brand-active:         #4A3BC2;
+    --brand-soft:           #EEEBFC;
+    --brand-secondary:      #17A398;
+    --brand-secondary-soft: #E4F5F2;
+
+    --gb-navy:           #14162B;
+    --gb-offwhite:       #F6F5FA;
+    --gb-surface:        #FFFFFF;
+    --gb-surface-alt:    #FAFAFC;
+    --gb-border:         #ECEBF2;
+    --gb-border-strong:  #D8D7E2;
+    --gb-text-secondary: #565A72;
+    --gb-text-muted:     #8B8FA6;
   }
 
   html {
@@ -27,39 +33,31 @@
   }
 
   body {
-    @apply bg-[#F5EDEB] text-[#1E1E1E] antialiased;
+    @apply bg-[#F6F5FA] text-[#14162B] antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   }
 
   * {
-    @apply focus-visible:outline-[#E8C7C3] focus-visible:outline-2 focus-visible:outline-offset-2;
+    @apply focus-visible:outline-[#6355E4] focus-visible:outline-2 focus-visible:outline-offset-2;
   }
 
   ::selection {
-    background-color: #E8C7C3;
-    color: #1E1E1E;
+    background-color: #EEEBFC;
+    color: #14162B;
   }
 
   /* Slim, branded scrollbar */
-  ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #E8C7C3;
-    border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #D8B0AC;
-  }
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: #6355E4; border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: #5646D6; }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 
   /* Glass morphism helper */
   .glass {
@@ -69,17 +67,15 @@
   }
 
   /* Subtle card shadow lift on hover */
-  .card-hover {
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
+  .card-hover { transition: box-shadow 0.2s ease, transform 0.2s ease; }
   .card-hover:hover {
-    box-shadow: 0 8px 30px rgba(232, 199, 195, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 30px rgba(99, 85, 228, 0.12), 0 2px 8px rgba(0,0,0,0.06);
     transform: translateY(-1px);
   }
 
   /* Gradient text */
-  .text-gradient-rose {
-    background: linear-gradient(135deg, #E8C7C3, #D8B0AC);
+  .text-gradient-violet {
+    background: linear-gradient(135deg, #6355E4, #17A398);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -90,9 +86,7 @@
     0%, 100% { transform: translateY(0px); }
     50%       { transform: translateY(-6px); }
   }
-  .animate-float {
-    animation: float-gentle 4s ease-in-out infinite;
-  }
+  .animate-float { animation: float-gentle 4s ease-in-out infinite; }
 
   /* Shimmer skeleton loading */
   @keyframes shimmer {
@@ -100,7 +94,7 @@
     to   { background-position:  200% 0; }
   }
   .skeleton {
-    background: linear-gradient(90deg, #f0ebe9 25%, #f8f5f4 50%, #f0ebe9 75%);
+    background: linear-gradient(90deg, #f0eff8 25%, #f8f7fc 50%, #f0eff8 75%);
     background-size: 200% 100%;
     animation: shimmer 1.4s ease infinite;
     border-radius: 8px;

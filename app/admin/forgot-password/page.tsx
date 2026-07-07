@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Building2, ArrowLeft, Send, CheckCircle, Sparkles } from 'lucide-react';
+import { Mail, Building2, ArrowLeft, Send, CheckCircle } from 'lucide-react';
+import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 import Link from 'next/link';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -44,8 +45,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden bg-[#0f0f1a]">
       {/* Blobs */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E8C7C3]/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#017172]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#6355E4]/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#17A398]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       <motion.div
@@ -58,8 +59,8 @@ export default function ForgotPasswordPage() {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#017172] to-[#01a0a2] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#017172]/20">
-              <Sparkles size={28} className="text-white" />
+            <div className="flex justify-center mb-0">
+              <GentleBookMark size={48} />
             </div>
             <h1 className="text-2xl font-bold text-white">Passwort vergessen?</h1>
             <p className="text-white/40 text-sm mt-1">Wir senden dir einen Reset-Link per E-Mail</p>
@@ -88,7 +89,7 @@ export default function ForgotPasswordPage() {
             ) : (
               <motion.form key="form" onSubmit={handleSubmit} className="space-y-4">
                 {/* Tenant Slug */}
-                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#017172]/50 transition-all">
+                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 transition-all">
                   <Building2 size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type="text"
@@ -100,7 +101,7 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
                 {/* Email */}
-                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#017172]/50 transition-all">
+                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 transition-all">
                   <Mail size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type="email"
@@ -130,7 +131,7 @@ export default function ForgotPasswordPage() {
                   disabled={status === 'loading'}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm text-white disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #017172, #01a0a2)' }}
+                  style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
                   {status === 'loading' ? (
                     <span className="flex items-center gap-2">

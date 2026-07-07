@@ -19,7 +19,7 @@ import api, { apiOrigin } from '@/lib/api/client';
 // surface:    #FFFFFF
 // border:     #E5E7EB   subtle: #F3F4F6
 // text-1:     #111318   text-2: #374151   text-3: #6B7280   text-4: #9CA3AF
-// accent:     #4F46E5   accent-bg: #EEF2FF   accent-bdr: #A5B4FC / #C7D2FE
+// accent:     #6355E4   accent-bg: #EEEBFC   accent-bdr: #A5B4FC / #C7D2FE
 // success:    #065F46 on #D1FAE5 / border #A7F3D0
 // error:      #991B1B on #FEE2E2 / border #FECACA
 // warning:    #92400E on #FFFBEB / border #FDE68A
@@ -72,7 +72,7 @@ function SectionCard({
   icon,
   title,
   subtitle,
-  accentClass = 'bg-[#4F46E5]',
+  accentClass = 'bg-[#6355E4]',
   children,
 }: {
   icon: React.ReactNode;
@@ -111,10 +111,10 @@ function Field({
 }
 
 const inputCls =
-  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all';
+  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all';
 
 const selectCls =
-  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all appearance-none';
+  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all appearance-none';
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
@@ -133,9 +133,9 @@ export default function AdminSettingsPage() {
     email: '',
     website: '',
     address: '',
-    primaryColor: '#E8C7C3',
-    secondaryColor: '#D8B0AC',
-    accentColor: '#017172',
+    primaryColor: '#ECEBF2',
+    secondaryColor: '#D8D7E2',
+    accentColor: '#6355E4',
     welcomeMessage: '',
     cancellationPolicy: '',
     bookingIntervalMinutes: 30,
@@ -289,7 +289,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
       </div>
     );
   }
@@ -302,7 +302,7 @@ export default function AdminSettingsPage() {
 
         {/* ── Page header ── */}
         <div className="flex items-center gap-3 mb-7">
-          <div className="w-9 h-9 bg-[#4F46E5] rounded-xl flex items-center justify-center shadow-sm">
+          <div className="w-9 h-9 bg-[#6355E4] rounded-xl flex items-center justify-center shadow-sm">
             <Settings size={17} className="text-white" />
           </div>
           <div>
@@ -343,10 +343,10 @@ export default function AdminSettingsPage() {
                   type="button"
                   disabled={logoUploading}
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#4F46E5] disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#6355E4] disabled:opacity-50 transition-all"
                 >
                   {logoUploading
-                    ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />Wird hochgeladen…</>
+                    ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />Wird hochgeladen…</>
                     : <><Upload size={13} />Logo hochladen</>}
                 </button>
                 <p className="text-[10px] text-[#9CA3AF]">JPG, PNG, WebP · max. 5 MB</p>
@@ -565,7 +565,7 @@ export default function AdminSettingsPage() {
                         onChange={(e) => updateBh(day.value, 'isOpen', e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-4 h-4 rounded border-2 border-[#D1D5DB] peer-checked:bg-[#4F46E5] peer-checked:border-[#4F46E5] transition-all flex items-center justify-center">
+                      <div className="w-4 h-4 rounded border-2 border-[#D1D5DB] peer-checked:bg-[#6355E4] peer-checked:border-[#6355E4] transition-all flex items-center justify-center">
                         {bh.isOpen && (
                           <svg viewBox="0 0 10 8" className="w-2.5 h-2 text-white fill-current">
                             <path d="M1 4l2.5 2.5L9 1" stroke="white" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -585,14 +585,14 @@ export default function AdminSettingsPage() {
                           type="time"
                           value={bh.openTime}
                           onChange={(e) => updateBh(day.value, 'openTime', e.target.value)}
-                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all"
+                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all"
                         />
                         <span className="text-[#9CA3AF] text-xs">–</span>
                         <input
                           type="time"
                           value={bh.closeTime}
                           onChange={(e) => updateBh(day.value, 'closeTime', e.target.value)}
-                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all"
+                          className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all"
                         />
                       </div>
                     ) : (
@@ -643,7 +643,7 @@ export default function AdminSettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#4F46E5] text-white text-sm font-semibold hover:bg-[#4338CA] disabled:opacity-50 transition-all shadow-sm"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] disabled:opacity-50 transition-all shadow-sm"
           >
             {saving
               ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Wird gespeichert…</>
@@ -718,10 +718,10 @@ export default function AdminSettingsPage() {
               <button
                 type="submit"
                 disabled={pwSaving || !currentPassword || !newPassword || !confirmPassword}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#4F46E5] disabled:opacity-40 transition-all"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#6355E4] disabled:opacity-40 transition-all"
               >
                 {pwSaving
-                  ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />Wird gespeichert…</>
+                  ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />Wird gespeichert…</>
                   : <><Lock size={13} />Passwort ändern</>}
               </button>
             </SectionCard>

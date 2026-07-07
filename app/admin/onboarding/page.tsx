@@ -41,7 +41,7 @@ export default function OnboardingPage() {
   const [slug, setSlug] = useState<string | null>(null);
 
   // Step 1: Company
-  const [company, setCompany] = useState({ companyName: '', tagline: '', accentColor: '#017172' });
+  const [company, setCompany] = useState({ companyName: '', tagline: '', accentColor: '#6355E4' });
 
   // Step 2: Business Hours
   const [hours, setHours] = useState(
@@ -136,7 +136,7 @@ export default function OnboardingPage() {
     setHours(prev => prev.map(h => h.dayOfWeek === dayOfWeek ? { ...h, [field]: value } : h));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] via-white to-[#F0F9F9] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-white to-[#F0F9F9] flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-xl">
 
         {/* Header */}
@@ -156,12 +156,12 @@ export default function OnboardingPage() {
             return (
               <div key={i} className="flex items-center flex-1">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0 transition-all ${
-                  done ? 'bg-[#017172] text-white' : active ? 'bg-[#017172]/20 text-[#017172] ring-2 ring-[#017172]' : 'bg-gray-100 text-gray-400'
+                  done ? 'bg-[#6355E4] text-white' : active ? 'bg-[#6355E4]/20 text-[#6355E4] ring-2 ring-[#6355E4]' : 'bg-gray-100 text-gray-400'
                 }`}>
                   {done ? <Check size={14} /> : <Icon size={14} />}
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`h-0.5 flex-1 mx-1 rounded-full transition-all ${done ? 'bg-[#017172]' : 'bg-gray-200'}`} />
+                  <div className={`h-0.5 flex-1 mx-1 rounded-full transition-all ${done ? 'bg-[#6355E4]' : 'bg-gray-200'}`} />
                 )}
               </div>
             );
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
         {/* Step content */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-50 flex items-center gap-3">
-            {(() => { const Icon = STEPS[step].icon; return <Icon size={20} className="text-[#017172]" />; })()}
+            {(() => { const Icon = STEPS[step].icon; return <Icon size={20} className="text-[#6355E4]" />; })()}
             <div>
               <h2 className="font-bold text-[#1E1E1E]">{STEPS[step].title}</h2>
             </div>
@@ -227,13 +227,13 @@ export default function OnboardingPage() {
                   {DAYS.map(day => {
                     const h = hours.find(x => x.dayOfWeek === day.value)!;
                     return (
-                      <div key={day.value} className={`rounded-xl p-3 border transition-colors ${h.isOpen ? 'border-[#017172]/20 bg-[#017172]/5' : 'border-gray-100 bg-gray-50'}`}>
+                      <div key={day.value} className={`rounded-xl p-3 border transition-colors ${h.isOpen ? 'border-[#6355E4]/20 bg-[#6355E4]/5' : 'border-gray-100 bg-gray-50'}`}>
                         <div className="flex items-center gap-3">
                           <input
                             type="checkbox"
                             checked={h.isOpen}
                             onChange={e => updateHour(day.value, 'isOpen', e.target.checked)}
-                            className="w-4 h-4 accent-[#017172]"
+                            className="w-4 h-4 accent-[#6355E4]"
                           />
                           <span className={`font-semibold text-sm w-8 ${h.isOpen ? 'text-[#1E1E1E]' : 'text-gray-400'}`}>{day.label}</span>
                           {h.isOpen ? (
@@ -329,8 +329,8 @@ export default function OnboardingPage() {
               {/* Step 4: Done */}
               {step === 4 && (
                 <div className="text-center space-y-5 py-4">
-                  <div className="w-20 h-20 bg-[#017172]/10 rounded-full flex items-center justify-center mx-auto">
-                    <PartyPopper size={36} className="text-[#017172]" />
+                  <div className="w-20 h-20 bg-[#6355E4]/10 rounded-full flex items-center justify-center mx-auto">
+                    <PartyPopper size={36} className="text-[#6355E4]" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#1E1E1E] mb-2">Herzlichen Glückwunsch! 🎉</h3>
@@ -344,14 +344,14 @@ export default function OnboardingPage() {
                       href={`/booking/${slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#017172]/10 text-[#017172] rounded-xl text-sm font-semibold hover:bg-[#017172]/20 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6355E4]/10 text-[#6355E4] rounded-xl text-sm font-semibold hover:bg-[#6355E4]/20 transition-colors"
                     >
                       <ExternalLink size={15} />
                       Buchungsseite öffnen
                     </a>
                   )}
                   <Button
-                    className="w-full bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                    className="w-full bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
                     size="lg"
                     onPress={() => router.push('/admin/dashboard')}
                   >
@@ -379,7 +379,7 @@ export default function OnboardingPage() {
                 <div />
               )}
               <Button
-                className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold px-6"
+                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold px-6"
                 endContent={<ChevronRight size={16} />}
                 onPress={saveStep}
                 isLoading={saving}

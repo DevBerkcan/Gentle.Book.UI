@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, Sparkles, MessageSquare, Inbox,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox,
 } from "lucide-react";
+import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -126,16 +127,12 @@ export function AdminNav() {
       <div className={`px-5 py-5 border-b border-white/8 ${isCollapsed ? "px-3" : ""}`}>
         <Link href="/admin/dashboard" className="flex items-center gap-3">
           {isCollapsed ? (
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6355E4]/20 mx-auto">
-              <Sparkles size={17} className="text-white" />
-            </div>
+            <GentleBookMark size={28} className="mx-auto" />
           ) : logoUrl
             ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
               <>
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6355E4]/20">
-                  <Sparkles size={17} className="text-white" />
-                </div>
+                <GentleBookMark size={28} />
                 {companyName && (
                   <span className="text-white/80 text-sm font-semibold truncate">{companyName}</span>
                 )}
@@ -262,11 +259,7 @@ export function AdminNav() {
         <Link href="/admin/dashboard" className="flex items-center">
           {logoUrl
             ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="h-9 w-[150px] object-contain object-left" />
-            : (
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center">
-                <Sparkles size={15} className="text-white" />
-              </div>
-            )
+            : <GentleBookMark size={24} />
           }
         </Link>
         <div className="flex items-center gap-1">

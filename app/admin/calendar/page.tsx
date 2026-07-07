@@ -53,9 +53,9 @@ const statusIcons = {
 };
 
 const modalClassNames = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20 bg-[#F5EDEB]/30",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20 bg-[#F6F5FA]/30",
   body: "py-4"
 };
 
@@ -434,7 +434,7 @@ const handleCreateManualBooking = async () => {
 
   if (loading && events.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white flex items-center justify-center">
         <div className="text-center">
           <Spinner size="lg" />
           <p className="mt-4 text-[#8A8A8A]">Kalender wird geladen...</p>
@@ -444,7 +444,7 @@ const handleCreateManualBooking = async () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -463,7 +463,7 @@ const handleCreateManualBooking = async () => {
               Zeitslot blockieren
             </Button>
             <Button
-              className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+              className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
               startContent={<Plus size={18} />}
               onPress={handleOpenManualBooking}
             >
@@ -473,7 +473,7 @@ const handleCreateManualBooking = async () => {
         </div>
 
         {/* Filter Bar */}
-        <Card className="mb-4 border border-[#E8C7C3]/20 shadow-xl">
+        <Card className="mb-4 border border-[#ECEBF2]/20 shadow-xl">
           <CardBody className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 items-end">
               <Select
@@ -481,7 +481,7 @@ const handleCreateManualBooking = async () => {
                 selectedKeys={filterStatus ? [filterStatus] : []}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="max-w-xs"
-                classNames={{ trigger: "bg-white border border-[#E8C7C3]/30" }}
+                classNames={{ trigger: "bg-white border border-[#ECEBF2]/30" }}
               >
                 <SelectItem key="all" value="all">Alle Termine</SelectItem>
                 <SelectItem key="blocked" value="blocked">Blockierte Zeiten</SelectItem>
@@ -496,7 +496,7 @@ const handleCreateManualBooking = async () => {
         </Card>
 
         {/* Calendar */}
-        <Card className="border border-[#E8C7C3]/20 shadow-xl overflow-hidden">
+        <Card className="border border-[#ECEBF2]/20 shadow-xl overflow-hidden">
           <CardBody className="p-0">
             <div className="h-[600px] lg:h-[700px]">
               <Calendar
@@ -543,7 +543,7 @@ const handleCreateManualBooking = async () => {
         </Card>
 
         {/* Legend */}
-        <Card className="mt-4 border border-[#E8C7C3]/20 shadow-xl">
+        <Card className="mt-4 border border-[#ECEBF2]/20 shadow-xl">
           <CardBody className="p-4">
             <div className="flex flex-wrap items-center gap-6 text-sm">
               {Object.entries(statusLabels).map(([status, label]) => {
@@ -575,7 +575,7 @@ const handleCreateManualBooking = async () => {
                 <ModalHeader>
                   {selectedEvent?.type === 'booking' ? (
                     <div className="flex items-center gap-3 w-full">
-                      <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                         <User size={20} className="text-white" />
                       </div>
                       <div className="flex-1">
@@ -601,9 +601,9 @@ const handleCreateManualBooking = async () => {
                 <ModalBody>
                   {selectedEvent?.type === 'booking' ? (
                     <div className="space-y-4">
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
-                          <Scissors size={16} className="text-[#017172]" />
+                          <Scissors size={16} className="text-[#6355E4]" />
                           <span className="font-semibold text-[#1E1E1E]">Service</span>
                         </div>
                         <div className="flex items-start justify-between">
@@ -614,46 +614,46 @@ const handleCreateManualBooking = async () => {
                               {moment(selectedEvent.start).format('DD.MM.YYYY')} · {moment(selectedEvent.start).format('HH:mm')} – {moment(selectedEvent.end).format('HH:mm')}
                             </p>
                           </div>
-                          <p className="text-xl font-bold text-[#017172]">{formatPrice(selectedEvent.resource.price, selectedEvent.resource.currency)}</p>
+                          <p className="text-xl font-bold text-[#6355E4]">{formatPrice(selectedEvent.resource.price, selectedEvent.resource.currency)}</p>
                         </div>
                       </div>
 
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
-                          <User size={16} className="text-[#017172]" />
+                          <User size={16} className="text-[#6355E4]" />
                           <span className="font-semibold text-[#1E1E1E]">Kunde</span>
                         </div>
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm">
+                          <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
                             {selectedEvent.resource.customerName.charAt(0)}
                           </div>
                           <p className="font-medium text-[#1E1E1E]">{selectedEvent.resource.customerName}</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           <a href={`mailto:${selectedEvent.resource.customerEmail}`}
-                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#E8C7C3]/10 transition-colors text-sm">
-                            <Mail size={14} className="text-[#017172]" />
+                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
+                            <Mail size={14} className="text-[#6355E4]" />
                             <span className="truncate text-[#1E1E1E]">{selectedEvent.resource.customerEmail}</span>
                           </a>
                           <a href={`tel:${selectedEvent.resource.customerPhone}`}
-                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#E8C7C3]/10 transition-colors text-sm">
-                            <Phone size={14} className="text-[#017172]" />
+                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
+                            <Phone size={14} className="text-[#6355E4]" />
                             <span className="text-[#1E1E1E]">{selectedEvent.resource.customerPhone}</span>
                           </a>
                         </div>
                       </div>
 
                       {selectedEvent.resource.customerNotes && (
-                        <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                        <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                           <div className="flex items-center gap-2 mb-2">
-                            <MessageCircle size={16} className="text-[#017172]" />
+                            <MessageCircle size={16} className="text-[#6355E4]" />
                             <span className="font-semibold text-[#1E1E1E]">Notizen</span>
                           </div>
                           <p className="text-sm text-[#1E1E1E] italic">"{selectedEvent.resource.customerNotes}"</p>
                         </div>
                       )}
 
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <p className="font-semibold text-[#1E1E1E] mb-3">Status aktualisieren</p>
                         <div className="flex flex-wrap gap-2">
                           {[
@@ -675,7 +675,7 @@ const handleCreateManualBooking = async () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <div className="flex items-center gap-2 p-3 bg-white rounded-lg mb-3">
                         <Clock size={15} className="text-[#6b7280]" />
                         <span className="text-sm text-[#1E1E1E]">
@@ -691,7 +691,7 @@ const handleCreateManualBooking = async () => {
                 <ModalFooter>
                   <Button 
                   variant="flat" 
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" 
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" 
                   startContent={<X size={14} />}
                   onPress={onClose}>
                     Schließen
@@ -721,7 +721,7 @@ const handleCreateManualBooking = async () => {
               <>
                 <ModalHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center">
                       <Ban size={16} className="text-white" />
                     </div>
                     <div>
@@ -739,7 +739,7 @@ const handleCreateManualBooking = async () => {
                     )}
 
                     {/* Range toggle */}
-                    <div className="flex items-center gap-3 p-3 bg-[#F5EDEB] rounded-xl border border-[#E8C7C3]/30">
+                    <div className="flex items-center gap-3 p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
                       <Switch
                         isSelected={isRange}
                         onValueChange={setIsRange}
@@ -762,7 +762,7 @@ const handleCreateManualBooking = async () => {
                         value={singleForm.blockDate}
                         onChange={(e) => setSingleForm(f => ({ ...f, blockDate: e.target.value }))}
                         min={moment().format('YYYY-MM-DD')}
-                        classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                        classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                       />
                     ) : (
                       <div className="grid grid-cols-2 gap-3">
@@ -773,7 +773,7 @@ const handleCreateManualBooking = async () => {
                           value={rangeForm.fromDate}
                           onChange={(e) => setRangeForm(f => ({ ...f, fromDate: e.target.value }))}
                           min={moment().format('YYYY-MM-DD')}
-                          classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                          classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                         />
                         <Input
                           type="date"
@@ -782,7 +782,7 @@ const handleCreateManualBooking = async () => {
                           value={rangeForm.toDate}
                           onChange={(e) => setRangeForm(f => ({ ...f, toDate: e.target.value }))}
                           min={rangeForm.fromDate || moment().format('YYYY-MM-DD')}
-                          classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                          classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                         />
                       </div>
                     )}
@@ -798,7 +798,7 @@ const handleCreateManualBooking = async () => {
                           ? setRangeForm(f => ({ ...f, startTime: e.target.value }))
                           : setSingleForm(f => ({ ...f, startTime: e.target.value }))
                         }
-                        classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                        classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                       />
                       <Input
                         type="time"
@@ -809,7 +809,7 @@ const handleCreateManualBooking = async () => {
                           ? setRangeForm(f => ({ ...f, endTime: e.target.value }))
                           : setSingleForm(f => ({ ...f, endTime: e.target.value }))
                         }
-                        classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                        classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                       />
                     </div>
 
@@ -822,14 +822,14 @@ const handleCreateManualBooking = async () => {
                         ? setRangeForm(f => ({ ...f, reason: e.target.value }))
                         : setSingleForm(f => ({ ...f, reason: e.target.value }))
                       }
-                      classNames={{ inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]" }}
+                      classNames={{ inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]" }}
                     />
                   </div>
                 </ModalBody>
                 <ModalFooter className="gap-2">
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={onClose}
                     isDisabled={submittingBlocked}
                     startContent={<X size={14} />}
@@ -837,7 +837,7 @@ const handleCreateManualBooking = async () => {
                     Abbrechen
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                    className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                     onPress={handleCreateBlockedSlot}
                     isLoading={submittingBlocked}
                     startContent={!submittingBlocked && <Ban size={15} />}
@@ -863,7 +863,7 @@ const handleCreateManualBooking = async () => {
               <>
                 <ModalHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                       <Plus size={18} className="text-white" />
                     </div>
                     <div>
@@ -874,10 +874,10 @@ const handleCreateManualBooking = async () => {
                 </ModalHeader>
                 <ModalBody>
                   {success && createdBooking ? (
-<div className="bg-[#F5EDEB] rounded-xl border-2 border-[#E8C7C3]/30 shadow-lg overflow-hidden">
-  <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+<div className="bg-[#F6F5FA] rounded-xl border-2 border-[#ECEBF2]/30 shadow-lg overflow-hidden">
+  <div className="p-5 border-b-2 border-[#ECEBF2]/20">
     <div className="flex items-center gap-3">
-      <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
         <CheckCircle size={20} className="text-white" />
       </div>
       <div>
@@ -887,23 +887,23 @@ const handleCreateManualBooking = async () => {
     </div>
   </div>
 
-  <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+  <div className="p-5 border-b-2 border-[#ECEBF2]/20">
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-        <Scissors size={16} className="text-[#017172]" />
+      <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+        <Scissors size={16} className="text-[#6355E4]" />
       </div>
       <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Service</span>
     </div>
     <div className="flex items-center justify-between">
       <p className="font-medium text-[#1E1E1E] text-base">{createdBooking.booking.serviceName}</p>
-      <p className="text-xl font-bold text-[#017172]">{formatPrice(createdBooking.booking.price, createdBooking.booking.currency)} </p>
+      <p className="text-xl font-bold text-[#6355E4]">{formatPrice(createdBooking.booking.price, createdBooking.booking.currency)} </p>
     </div>
   </div>
 
-  <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+  <div className="p-5 border-b-2 border-[#ECEBF2]/20">
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-        <CalendarIconLucide size={16} className="text-[#017172]" />
+      <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+        <CalendarIconLucide size={16} className="text-[#6355E4]" />
       </div>
       <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Datum & Zeit</span>
     </div>
@@ -925,10 +925,10 @@ const handleCreateManualBooking = async () => {
     </div>
   </div>
 
-  <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+  <div className="p-5 border-b-2 border-[#ECEBF2]/20">
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-        <User size={16} className="text-[#017172]" />
+      <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+        <User size={16} className="text-[#6355E4]" />
       </div>
       <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Kunde</span>
     </div>
@@ -940,13 +940,13 @@ const handleCreateManualBooking = async () => {
   {createdBooking.employee && (
     <div className="p-5">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-          <User size={16} className="text-[#017172]" />
+        <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+          <User size={16} className="text-[#6355E4]" />
         </div>
         <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Fachkraft</span>
       </div>
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm">
+        <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
           {createdBooking.employee.name.charAt(0)}
         </div>
         <p className="text-[#1E1E1E] font-medium">{createdBooking.employee.name}</p>
@@ -959,7 +959,7 @@ const handleCreateManualBooking = async () => {
                       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
 
 {/* Step 1: Employee */}
-<div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+<div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
   <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">1. Fachkraft wählen</p>
   {loadingEmployees ? (
     <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
@@ -978,15 +978,15 @@ const handleCreateManualBooking = async () => {
           }}
           className={`text-left p-3 rounded-xl border-2 transition-all ${
             selectedEmployeeId === emp.id
-              ? 'border-[#017172] bg-[#017172]/5'
-              : 'border-[#E8C7C3]/30 bg-white hover:border-[#017172]/30'
+              ? 'border-[#6355E4] bg-[#6355E4]/5'
+              : 'border-[#ECEBF2]/30 bg-white hover:border-[#6355E4]/30'
           }`}
         >
           <div className="flex items-center gap-2">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
               selectedEmployeeId === emp.id
-                ? 'bg-[#017172] text-white'
-                : 'bg-[#E8C7C3]/20 text-[#017172]'
+                ? 'bg-[#6355E4] text-white'
+                : 'bg-[#ECEBF2]/20 text-[#6355E4]'
             }`}>
               {emp.name.charAt(0)}
             </div>
@@ -1002,7 +1002,7 @@ const handleCreateManualBooking = async () => {
 </div>
 
                     {/* Step 2: Service with integrated search */}
-<div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+<div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
   <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">2. Service auswählen</p>
   
   {!selectedEmployeeId ? (
@@ -1019,7 +1019,7 @@ const handleCreateManualBooking = async () => {
       <PopoverTrigger>
 <Button
   variant="flat"
-  className="w-full justify-start bg-white border border-[#E8C7C3]/30 text-[#1E1E1E] h-12"
+  className="w-full justify-start bg-white border border-[#ECEBF2]/30 text-[#1E1E1E] h-12"
   endContent={<Search size={18} className="text-[#8A8A8A]" />}
   isDisabled={!selectedEmployeeId}
 >
@@ -1036,7 +1036,7 @@ const handleCreateManualBooking = async () => {
             placeholder="Service suchen..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border-b border-[#E8C7C3]/20"
+            className="border-b border-[#ECEBF2]/20"
             startContent={<Search size={18} className="text-[#8A8A8A]" />}
             classNames={{
               inputWrapper: "bg-transparent shadow-none",
@@ -1054,7 +1054,7 @@ const handleCreateManualBooking = async () => {
                 .map(service => (
                   <button
                     key={service.id}
-                    className="w-full text-left p-3 hover:bg-[#F5EDEB] transition-colors border-b border-[#E8C7C3]/10 last:border-0"
+                    className="w-full text-left p-3 hover:bg-[#F6F5FA] transition-colors border-b border-[#ECEBF2]/10 last:border-0"
                     onClick={() => {
                       setBookingForm({ ...bookingForm, serviceId: service.id });
                       setSearchTerm('');
@@ -1063,7 +1063,7 @@ const handleCreateManualBooking = async () => {
                   >
                     <div className="font-medium text-[#1E1E1E]">{service.name}</div>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-[#017172] font-semibold">
+                      <span className="text-xs text-[#6355E4] font-semibold">
                         {formatPrice(service.price, service.currency)}
                       </span>
                       <span className="text-xs text-[#8A8A8A]">
@@ -1090,7 +1090,7 @@ const handleCreateManualBooking = async () => {
 </div>
 
                       {/* Step 3: Date */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">3. Datum wählen</p>
                         <Input
                           type="date"
@@ -1099,12 +1099,12 @@ const handleCreateManualBooking = async () => {
                           max={moment().add(60, 'days').format('YYYY-MM-DD')}
                           onChange={(e) => setBookingForm({ ...bookingForm, bookingDate: e.target.value })}
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                       </div>
 
                       {/* Step 4: Time */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">4. Uhrzeit wählen</p>
                         {loadingSlots ? (
                           <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
@@ -1118,8 +1118,8 @@ const handleCreateManualBooking = async () => {
                                 key={slot.startTime}
                                 size="sm"
                                 className={`${bookingForm.startTime === slot.startTime
-                                  ? 'bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold'
-                                  : 'bg-white border border-[#E8C7C3] text-[#1E1E1E] hover:border-[#017172]/40'
+                                  ? 'bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold'
+                                  : 'bg-white border border-[#ECEBF2] text-[#1E1E1E] hover:border-[#6355E4]/40'
                                   }`}
                                 onPress={() => setBookingForm({ ...bookingForm, startTime: slot.startTime })}
                                 isDisabled={submitting}
@@ -1136,7 +1136,7 @@ const handleCreateManualBooking = async () => {
                       </div>
 
                       {/* Step 5: Customer */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">5. Kundendaten</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
@@ -1146,7 +1146,7 @@ const handleCreateManualBooking = async () => {
                             onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
                             isRequired
                             isDisabled={submitting}
-                            classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                            classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
                             label="Nachname"
@@ -1155,7 +1155,7 @@ const handleCreateManualBooking = async () => {
                             onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
                             isRequired
                             isDisabled={submitting}
-                            classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                            classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
                             label="E-Mail (optional)"
@@ -1163,7 +1163,7 @@ const handleCreateManualBooking = async () => {
                             value={bookingForm.email}
                             onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
                             isDisabled={submitting}
-                            classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                            classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
                             label="Telefon (optional)"
@@ -1171,7 +1171,7 @@ const handleCreateManualBooking = async () => {
                             value={bookingForm.phone}
                             onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
                             isDisabled={submitting}
-                            classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                            classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                         </div>
                         <div className="mt-3">
@@ -1180,14 +1180,14 @@ const handleCreateManualBooking = async () => {
                             value={bookingForm.customerNotes}
                             onChange={(e) => setBookingForm({ ...bookingForm, customerNotes: e.target.value })}
                             isDisabled={submitting}
-                            classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                            classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                         </div>
                       </div>
 
                       {/* Summary */}
                       {selectedService && (
-                        <div className="bg-[#017172]/5 border border-[#017172]/20 p-3 rounded-xl flex items-center justify-between">
+                        <div className="bg-[#6355E4]/5 border border-[#6355E4]/20 p-3 rounded-xl flex items-center justify-between">
                           <div>
                             <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
                             <p className="text-xs text-[#8A8A8A]">
@@ -1197,7 +1197,7 @@ const handleCreateManualBooking = async () => {
                                 : ''}
                             </p>
                           </div>
-                          <p className="text-lg font-bold text-[#017172]">{formatPrice(selectedService.price, selectedService.currency)}</p>
+                          <p className="text-lg font-bold text-[#6355E4]">{formatPrice(selectedService.price, selectedService.currency)}</p>
                         </div>
                       )}
                     </div>
@@ -1206,7 +1206,7 @@ const handleCreateManualBooking = async () => {
                 <ModalFooter>
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={onClose}
                     startContent={<X size={14} />}
                     isDisabled={submitting}
@@ -1215,7 +1215,7 @@ const handleCreateManualBooking = async () => {
                   </Button>
                   {!success && !createdBooking && (
                     <Button
-                      className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                      className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                       onPress={handleCreateManualBooking}
                       isLoading={submitting}
                       isDisabled={!bookingForm.serviceId || !bookingForm.bookingDate || !bookingForm.startTime || !bookingForm.firstName || !bookingForm.lastName}

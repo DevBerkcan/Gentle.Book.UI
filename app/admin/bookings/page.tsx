@@ -34,16 +34,16 @@ import { useConfirm } from "@/components/ConfirmDialog";
 import { formatPrice } from "@/lib/utils/currency";
 
 const modalClassNames = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20",
   body: "py-5",
 };
 
 const manualBookingModalClassNames = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20 bg-[#F5EDEB]/30",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20 bg-[#F6F5FA]/30",
   body: "py-4"
 };
 
@@ -528,7 +528,7 @@ export default function AdminBookingsPage() {
 
   const inputClassNames = {
     input: "text-[#1E1E1E]",
-    inputWrapper: "bg-white border border-[#E8C7C3]/40 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+    inputWrapper: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
     label: "text-[#8A8A8A]",
   };
 
@@ -539,7 +539,7 @@ export default function AdminBookingsPage() {
   );
 
   const MobileBookingCard = ({ booking }: { booking: BookingListItem }) => (
-    <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+    <div className="bg-white border border-[#ECEBF2]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex justify-between items-start mb-3">
         <div>
           <div className="font-mono text-xs font-semibold text-[#8A8A8A]">{booking.bookingNumber}</div>
@@ -557,12 +557,12 @@ export default function AdminBookingsPage() {
           : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full w-fit"><Mail size={11} />kein E-Mail</div>
         }
       </div>
-      <div className="flex items-center justify-between pt-2 border-t border-[#E8C7C3]/20">
-        <div className="font-bold text-[#017172]">{formatPrice(booking.price, booking.currency)}</div>
+      <div className="flex items-center justify-between pt-2 border-t border-[#ECEBF2]/20">
+        <div className="font-bold text-[#6355E4]">{formatPrice(booking.price, booking.currency)}</div>
         <div className="flex gap-2">
           <Button
             size="sm"
-            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
             startContent={<Edit size={13} />}
             onPress={() => openStatusModal(booking)}
           >
@@ -581,7 +581,7 @@ export default function AdminBookingsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white py-6 sm:py-8 px-3 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white py-6 sm:py-8 px-3 sm:px-4">
       <div className="max-w-7xl mx-auto">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
@@ -590,7 +590,7 @@ export default function AdminBookingsPage() {
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">Buchungsverwaltung</h1>
               {totalCount > 0 && (
-                <span className="bg-[#017172]/10 text-[#017172] text-sm font-semibold px-3 py-1 rounded-full">
+                <span className="bg-[#6355E4]/10 text-[#6355E4] text-sm font-semibold px-3 py-1 rounded-full">
                   {totalCount}
                 </span>
               )}
@@ -602,9 +602,9 @@ export default function AdminBookingsPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="flat"
-              className="bg-white border border-[#E8C7C3]/40 text-[#017172] font-semibold"
+              className="bg-white border border-[#ECEBF2]/40 text-[#6355E4] font-semibold"
               startContent={exportLoading
-                ? <span className="w-4 h-4 rounded-full border-2 border-[#017172]/30 border-t-[#017172] animate-spin" />
+                ? <span className="w-4 h-4 rounded-full border-2 border-[#6355E4]/30 border-t-[#6355E4] animate-spin" />
                 : <Download size={16} />}
               onPress={handleExportCsv}
               isDisabled={exportLoading}
@@ -612,7 +612,7 @@ export default function AdminBookingsPage() {
               CSV Export
             </Button>
             <Button
-              className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+              className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
               startContent={<Plus size={18} />}
               onPress={() => {
                 resetManualBookingForm();
@@ -625,7 +625,7 @@ export default function AdminBookingsPage() {
         </div>
 
         {/* ── Desktop filter bar ─────────────────────────────────────────── */}
-        <Card className="hidden md:block mb-6 border border-[#E8C7C3]/30 shadow-lg">
+        <Card className="hidden md:block mb-6 border border-[#ECEBF2]/30 shadow-lg">
           <CardBody className="p-5">
             <div className="grid grid-cols-5 gap-3 items-end">
               <div className="col-span-2 flex gap-2">
@@ -639,7 +639,7 @@ export default function AdminBookingsPage() {
                   classNames={inputClassNames}
                 />
                 <Button
-                  className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold self-end h-14 px-4"
+                  className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold self-end h-14 px-4"
                   onPress={commitSearch}
                 >
                   <Search size={16} />
@@ -651,7 +651,7 @@ export default function AdminBookingsPage() {
                 selectedKeys={filter.status ? [filter.status] : [""]}
                 onChange={(e) => handleFilterChange("status", e.target.value)}
                 classNames={{
-                  trigger: "bg-white border border-[#E8C7C3]/40 hover:border-[#017172]",
+                  trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
                   label: "text-[#8A8A8A]",
                 }}
               >
@@ -667,15 +667,15 @@ export default function AdminBookingsPage() {
             </div>
 
             {hasActiveFilters && (
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#E8C7C3]/20">
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#ECEBF2]/20">
                 <span className="text-xs text-[#8A8A8A]">Aktive Filter:</span>
                 {filter.searchTerm && (
-                  <span className="text-xs bg-[#017172]/10 text-[#017172] px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs bg-[#6355E4]/10 text-[#6355E4] px-2 py-0.5 rounded-full font-medium">
                     "{filter.searchTerm}"
                   </span>
                 )}
                 {filter.status && (
-                  <span className="text-xs bg-[#017172]/10 text-[#017172] px-2 py-0.5 rounded-full font-medium">
+                  <span className="text-xs bg-[#6355E4]/10 text-[#6355E4] px-2 py-0.5 rounded-full font-medium">
                     {getStatusLabel(filter.status)}
                   </span>
                 )}
@@ -701,7 +701,7 @@ export default function AdminBookingsPage() {
               <>
                 <ModalHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                       <Calendar size={18} className="text-white" />
                     </div>
                     <div>
@@ -721,29 +721,29 @@ export default function AdminBookingsPage() {
                   {selectedBookingDetails && (
                     <div className="space-y-4">
                       {/* Service Info */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Service</h3>
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="font-medium text-[#1E1E1E]">{selectedBookingDetails.serviceName}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <Clock size={13} className="text-[#017172]" />
+                              <Clock size={13} className="text-[#6355E4]" />
                               <p className="text-xs text-[#8A8A8A]">
                                 {selectedBookingDetails.startTime} – {selectedBookingDetails.endTime}
                               </p>
                             </div>
                           </div>
-                          <p className="text-xl font-bold text-[#017172]">
+                          <p className="text-xl font-bold text-[#6355E4]">
                             {formatPrice(selectedBookingDetails.price, selectedBookingDetails.currency)}
                           </p>
                         </div>
                       </div>
 
                       {/* Customer Info */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Kunde</h3>
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm">
+                          <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
                             {selectedBookingDetails.customerName.charAt(0)}
                           </div>
                           <p className="font-medium text-[#1E1E1E]">{selectedBookingDetails.customerName}</p>
@@ -751,18 +751,18 @@ export default function AdminBookingsPage() {
                         <div className="space-y-2">
                           {selectedBookingDetails.customerEmail && (
                             <div className="flex items-center gap-2">
-                              <Mail size={14} className="text-[#017172]" />
+                              <Mail size={14} className="text-[#6355E4]" />
                               <a href={`mailto:${selectedBookingDetails.customerEmail}`}
-                                className="text-sm text-[#1E1E1E] hover:text-[#017172] break-all">
+                                className="text-sm text-[#1E1E1E] hover:text-[#6355E4] break-all">
                                 {selectedBookingDetails.customerEmail}
                               </a>
                             </div>
                           )}
                           {selectedBookingDetails.customerPhone && (
                             <div className="flex items-center gap-2">
-                              <Phone size={14} className="text-[#017172]" />
+                              <Phone size={14} className="text-[#6355E4]" />
                               <a href={`tel:${selectedBookingDetails.customerPhone}`}
-                                className="text-sm text-[#1E1E1E] hover:text-[#017172]">
+                                className="text-sm text-[#1E1E1E] hover:text-[#6355E4]">
                                 {selectedBookingDetails.customerPhone}
                               </a>
                             </div>
@@ -771,7 +771,7 @@ export default function AdminBookingsPage() {
                       </div>
 
                       {/* Status */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Status</h3>
                         <Chip color={getStatusColor(selectedBookingDetails.status)} size="md" variant="flat">
                           {getStatusLabel(selectedBookingDetails.status)}
@@ -780,14 +780,14 @@ export default function AdminBookingsPage() {
 
                       {/* Notes */}
                       {selectedBookingDetails.customerNotes && (
-                        <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                        <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                           <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Notizen</h3>
                           <p className="text-sm text-[#1E1E1E] italic">"{selectedBookingDetails.customerNotes}"</p>
                         </div>
                       )}
 
                       {/* Timestamps */}
-                      <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Zeitstempel</h3>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-white p-3 rounded-lg">
@@ -811,7 +811,7 @@ export default function AdminBookingsPage() {
                 <ModalFooter>
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     startContent={<X size={14} />}
                     onPress={onModalClose}
                   >
@@ -822,11 +822,11 @@ export default function AdminBookingsPage() {
                       variant="flat"
                       className={resendSuccess
                         ? "bg-emerald-50 text-emerald-600 border border-emerald-200 font-semibold"
-                        : "bg-[#F5EDEB] text-[#017172] border border-[#E8C7C3]/40 font-semibold"}
+                        : "bg-[#F6F5FA] text-[#6355E4] border border-[#ECEBF2]/40 font-semibold"}
                       startContent={resendSuccess
                         ? <CheckCircle size={14} />
                         : resending
-                          ? <span className="w-3.5 h-3.5 rounded-full border-2 border-[#017172]/30 border-t-[#017172] animate-spin" />
+                          ? <span className="w-3.5 h-3.5 rounded-full border-2 border-[#6355E4]/30 border-t-[#6355E4] animate-spin" />
                           : <Send size={14} />}
                       isDisabled={resending}
                       onPress={() => handleResendConfirmation(selectedBookingDetails!.id)}
@@ -836,7 +836,7 @@ export default function AdminBookingsPage() {
                   )}
                   {!isEditMode && (
                     <Button
-                      className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                      className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                       onPress={() => openStatusModal(selectedBookingDetails!)}
                     >
                       <Edit size={14} className="mr-2" />
@@ -886,11 +886,11 @@ export default function AdminBookingsPage() {
 
                       </div>
 
-                      <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                      <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                         <p className="text-sm text-[#1E1E1E] font-medium mb-3">Was passiert jetzt?</p>
                         <ul className="text-sm text-[#8A8A8A] space-y-3">
                           <li className="flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#017172] mt-1.5"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
                               Der Name des bestehenden Kunden wird von{' '}
                               <strong className="text-[#1E1E1E]">{conflictData.existingName}</strong> zu{' '}
@@ -898,13 +898,13 @@ export default function AdminBookingsPage() {
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#017172] mt-1.5"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
                               Diese Änderung betrifft <strong>alle vergangenen und zukünftigen Buchungen</strong> dieses Kunden.
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#017172] mt-1.5"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
                               Die Buchung wird mit den neuen Kundendaten erstellt.
                             </span>
@@ -918,7 +918,7 @@ export default function AdminBookingsPage() {
                 <ModalFooter className="gap-2">
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={() => {
                       setShowEmailConflictModal(false);
                       setConflictData(null);
@@ -950,20 +950,20 @@ export default function AdminBookingsPage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/40" }}
+              classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/40" }}
               className="flex-1"
             />
-            <Button className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold" onPress={commitSearch}>
+            <Button className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold" onPress={commitSearch}>
               <Search size={16} />
             </Button>
-            <Button variant="flat" className="bg-[#F5EDEB] text-[#1E1E1E]"
+            <Button variant="flat" className="bg-[#F6F5FA] text-[#1E1E1E]"
               startContent={<Filter size={16} />} onPress={() => setShowMobileFilters(!showMobileFilters)}>
               Filter
             </Button>
           </div>
 
           {showMobileFilters && (
-            <Card className="border border-[#E8C7C3]/30">
+            <Card className="border border-[#ECEBF2]/30">
               <CardBody className="p-4 space-y-3">
                 <Select label="Status" selectedKeys={filter.status ? [filter.status] : [""]}
                   onChange={(e) => handleFilterChange("status", e.target.value)} size="sm">
@@ -985,18 +985,18 @@ export default function AdminBookingsPage() {
         </div>
 
         {/* ── Bookings table ─────────────────────────────────────────────── */}
-        <Card className="border border-[#E8C7C3]/30 shadow-xl">
+        <Card className="border border-[#ECEBF2]/30 shadow-xl">
           <CardBody className="p-0">
             {loading ? (
               <div className="flex items-center justify-center py-16">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#017172]" />
+                <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#6355E4]" />
               </div>
             ) : bookings.length === 0 ? (
               <div className="text-center py-16 text-[#8A8A8A]">
-                <Calendar className="mx-auto mb-4 text-[#E8C7C3]" size={40} />
+                <Calendar className="mx-auto mb-4 text-[#ECEBF2]" size={40} />
                 <p className="font-medium">Keine Buchungen gefunden</p>
                 {hasActiveFilters && (
-                  <Button size="sm" className="mt-3 bg-[#F5EDEB] text-[#1E1E1E]" onPress={clearAllFilters}>
+                  <Button size="sm" className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]" onPress={clearAllFilters}>
                     Filter zurücksetzen
                   </Button>
                 )}
@@ -1006,18 +1006,18 @@ export default function AdminBookingsPage() {
                 {/* Desktop table */}
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-[#F5EDEB] border-b border-[#E8C7C3]/30">
+                    <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                       <tr>
                         {["Buchungsnr.", "Datum & Zeit", "Kunde", "Service", "Status", "Preis", "Aktionen"].map(h => (
                           <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{h}</th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E8C7C3]/10">
+                    <tbody className="divide-y divide-[#ECEBF2]/10">
                       {bookings.map((booking, index) => (
                         <tr key={booking.id}
                           onClick={() => openBookingDetails(booking)}
-                          className={`hover:bg-[#F5EDEB]/60 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F5EDEB]/20"}`}>
+                          className={`hover:bg-[#F6F5FA]/60 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F6F5FA]/20"}`}>
                           <td className="px-5 py-4">
                             <div className="font-mono text-xs text-[#8A8A8A]">{booking.bookingNumber}</div>
                             <div className="text-xs text-[#8A8A8A] mt-0.5">{new Date(booking.createdAt).toLocaleDateString("de-DE")}</div>
@@ -1046,14 +1046,14 @@ export default function AdminBookingsPage() {
                             </Chip>
                           </td>
                           <td className="px-5 py-4">
-                            <div className="font-bold text-[#017172] text-sm">{formatPrice(booking.price, booking.currency)}</div>
+                            <div className="font-bold text-[#6355E4] text-sm">{formatPrice(booking.price, booking.currency)}</div>
                           </td>
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                               <Button size="sm"
                                 isIconOnly
                                 variant="flat"
-                                className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                                className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                 startContent={<Edit size={13} />}
                                 onPress={() => openStatusModal(booking)}>
 
@@ -1080,19 +1080,19 @@ export default function AdminBookingsPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-5 py-4 border-t border-[#E8C7C3]/20">
+                  <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
                     <div className="text-sm text-[#8A8A8A]">Seite {currentPage} von {totalPages}</div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="flat" isDisabled={currentPage === 1}
                         onPress={() => handlePageChange(currentPage - 1)}
                         startContent={<ChevronLeft size={15} />}
-                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold">
+                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold">
                         Zurück
                       </Button>
                       <Button size="sm" variant="flat" isDisabled={currentPage === totalPages}
                         onPress={() => handlePageChange(currentPage + 1)}
                         endContent={<ChevronRight size={15} />}
-                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold">
+                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold">
                         Weiter
                       </Button>
                     </div>
@@ -1111,7 +1111,7 @@ export default function AdminBookingsPage() {
             <>
               <ModalHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#017172] flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-[#6355E4] flex items-center justify-center">
                     <CheckCircle size={18} className="text-white" />
                   </div>
                   <div>
@@ -1123,7 +1123,7 @@ export default function AdminBookingsPage() {
               <ModalBody>
                 {selectedBooking && (
                   <div className="space-y-4">
-                    <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                    <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
                       <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
                       <div className="text-xs text-[#8A8A8A]">
@@ -1137,7 +1137,7 @@ export default function AdminBookingsPage() {
                       onChange={(e) => setNewStatus(e.target.value)}
                       isRequired
                       classNames={{
-                        trigger: "bg-white border border-[#E8C7C3]/40 hover:border-[#017172]",
+                        trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
                         label: "text-[#8A8A8A]",
                       }}
                     >
@@ -1154,17 +1154,17 @@ export default function AdminBookingsPage() {
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
                       minRows={3}
-                      classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/40 hover:border-[#017172]" }}
+                      classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]" }}
                     />
                   </div>
                 )}
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
+                <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
                   Abbrechen
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                  className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                   onPress={handleStatusUpdate}
                   isLoading={updating}
                   startContent={!submitting && <Save size={14} />}
@@ -1203,7 +1203,7 @@ export default function AdminBookingsPage() {
                       </p>
                     </div>
 
-                    <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                    <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
                       <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
                       <div className="text-xs text-[#8A8A8A]">
@@ -1215,7 +1215,7 @@ export default function AdminBookingsPage() {
                 )}
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
+                <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
                   Abbrechen
                 </Button>
                 <Button
@@ -1245,7 +1245,7 @@ export default function AdminBookingsPage() {
             <>
               <ModalHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                     <Plus size={18} className="text-white" />
                   </div>
                   <div>
@@ -1257,10 +1257,10 @@ export default function AdminBookingsPage() {
               <ModalBody>
                 {success && createdBooking ? (
                   <div className="flex-1">
-                    <div className="bg-[#F5EDEB] rounded-xl border-2 border-[#E8C7C3]/30 shadow-lg overflow-hidden">
-                      <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl border-2 border-[#ECEBF2]/30 shadow-lg overflow-hidden">
+                      <div className="p-5 border-b-2 border-[#ECEBF2]/20">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                             <CheckCircle size={20} className="text-white" />
                           </div>
                           <div>
@@ -1270,23 +1270,23 @@ export default function AdminBookingsPage() {
                         </div>
                       </div>
 
-                      <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+                      <div className="p-5 border-b-2 border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-                            <Scissors size={16} className="text-[#017172]" />
+                          <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+                            <Scissors size={16} className="text-[#6355E4]" />
                           </div>
                           <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Service</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="font-medium text-[#1E1E1E] text-base">{createdBooking.booking.serviceName}</p>
-                          <p className="text-xl font-bold text-[#017172]">{formatPrice(createdBooking.booking.price, createdBooking.booking.currency)}</p>
+                          <p className="text-xl font-bold text-[#6355E4]">{formatPrice(createdBooking.booking.price, createdBooking.booking.currency)}</p>
                         </div>
                       </div>
 
-                      <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+                      <div className="p-5 border-b-2 border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-                            <Calendar size={16} className="text-[#017172]" />
+                          <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+                            <Calendar size={16} className="text-[#6355E4]" />
                           </div>
                           <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Datum & Zeit</span>
                         </div>
@@ -1308,10 +1308,10 @@ export default function AdminBookingsPage() {
                         </div>
                       </div>
 
-                      <div className="p-5 border-b-2 border-[#E8C7C3]/20">
+                      <div className="p-5 border-b-2 border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
-                          <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-                            <User size={16} className="text-[#017172]" />
+                          <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+                            <User size={16} className="text-[#6355E4]" />
                           </div>
                           <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Kunde</span>
                         </div>
@@ -1323,13 +1323,13 @@ export default function AdminBookingsPage() {
                       {createdBooking.employee && (
                         <div className="p-5">
                           <div className="flex items-center gap-2 mb-3">
-                            <div className="w-7 h-7 rounded-lg bg-[#017172]/10 flex items-center justify-center">
-                              <User size={16} className="text-[#017172]" />
+                            <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
+                              <User size={16} className="text-[#6355E4]" />
                             </div>
                             <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Fachkraft</span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
                               {createdBooking.employee.name.charAt(0)}
                             </div>
                             <p className="text-[#1E1E1E] font-medium">{createdBooking.employee.name}</p>
@@ -1343,7 +1343,7 @@ export default function AdminBookingsPage() {
                     {error && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
 
                     {/* Step 1: Employee */}
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">1. Fachkraft wählen</p>
                       {loadingEmployees ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
@@ -1357,14 +1357,14 @@ export default function AdminBookingsPage() {
                               key={emp.id}
                               onClick={() => handleEmployeeSelect(emp.id)}
                               className={`text-left p-3 rounded-xl border-2 transition-all ${selectedEmployeeId === emp.id
-                                ? 'border-[#017172] bg-[#017172]/5'
-                                : 'border-[#E8C7C3]/30 bg-white hover:border-[#017172]/30'
+                                ? 'border-[#6355E4] bg-[#6355E4]/5'
+                                : 'border-[#ECEBF2]/30 bg-white hover:border-[#6355E4]/30'
                                 }`}
                             >
                               <div className="flex items-center gap-2">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${selectedEmployeeId === emp.id
-                                  ? 'bg-[#017172] text-white'
-                                  : 'bg-[#E8C7C3]/20 text-[#017172]'
+                                  ? 'bg-[#6355E4] text-white'
+                                  : 'bg-[#ECEBF2]/20 text-[#6355E4]'
                                   }`}>
                                   {emp.name.charAt(0)}
                                 </div>
@@ -1380,7 +1380,7 @@ export default function AdminBookingsPage() {
                     </div>
 
                     {/* Step 2: Service with integrated search */}
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">2. Service auswählen</p>
 
                       {!selectedEmployeeId ? (
@@ -1397,7 +1397,7 @@ export default function AdminBookingsPage() {
                           <PopoverTrigger>
                             <Button
                               variant="flat"
-                              className="w-full justify-start bg-white border border-[#E8C7C3]/30 text-[#1E1E1E] h-12"
+                              className="w-full justify-start bg-white border border-[#ECEBF2]/30 text-[#1E1E1E] h-12"
                               endContent={<Search size={18} className="text-[#8A8A8A]" />}
                               isDisabled={!selectedEmployeeId}
                             >
@@ -1414,7 +1414,7 @@ export default function AdminBookingsPage() {
                                 placeholder="Service suchen..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="border-b border-[#E8C7C3]/20"
+                                className="border-b border-[#ECEBF2]/20"
                                 startContent={<Search size={18} className="text-[#8A8A8A]" />}
                                 classNames={{
                                   inputWrapper: "bg-transparent shadow-none",
@@ -1432,7 +1432,7 @@ export default function AdminBookingsPage() {
                                     .map(service => (
                                       <button
                                         key={service.id}
-                                        className={`w-full text-left p-3 hover:bg-[#F5EDEB] transition-colors border-b border-[#E8C7C3]/10 last:border-0 ${bookingForm.serviceId === service.id ? 'bg-[#017172]/5' : ''
+                                        className={`w-full text-left p-3 hover:bg-[#F6F5FA] transition-colors border-b border-[#ECEBF2]/10 last:border-0 ${bookingForm.serviceId === service.id ? 'bg-[#6355E4]/5' : ''
                                           }`}
                                         onClick={() => {
                                           setBookingForm(prev => ({ ...prev, serviceId: service.id }));
@@ -1442,7 +1442,7 @@ export default function AdminBookingsPage() {
                                       >
                                         <div className="font-medium text-[#1E1E1E]">{service.name}</div>
                                         <div className="flex items-center gap-2 mt-1">
-                                          <span className="text-xs text-[#017172] font-semibold">
+                                          <span className="text-xs text-[#6355E4] font-semibold">
                                             {formatPrice(service.price, service.currency)}
                                           </span>
                                           <span className="text-xs text-[#8A8A8A]">
@@ -1469,7 +1469,7 @@ export default function AdminBookingsPage() {
                     </div>
 
                     {/* Step 3: Date */}
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">3. Datum wählen</p>
                       <Input
                         type="date"
@@ -1478,12 +1478,12 @@ export default function AdminBookingsPage() {
                         max={moment().add(60, 'days').format('YYYY-MM-DD')}
                         onChange={(e) => setBookingForm({ ...bookingForm, bookingDate: e.target.value })}
                         isDisabled={submitting}
-                        classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                        classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                       />
                     </div>
 
                     {/* Step 4: Time */}
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">4. Uhrzeit wählen</p>
                       {loadingSlots ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
@@ -1497,8 +1497,8 @@ export default function AdminBookingsPage() {
                               key={slot.startTime}
                               size="sm"
                               className={`${bookingForm.startTime === slot.startTime
-                                ? 'bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold'
-                                : 'bg-white border border-[#E8C7C3] text-[#1E1E1E] hover:border-[#017172]/40'
+                                ? 'bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold'
+                                : 'bg-white border border-[#ECEBF2] text-[#1E1E1E] hover:border-[#6355E4]/40'
                                 }`}
                               onPress={() => setBookingForm({ ...bookingForm, startTime: slot.startTime })}
                               isDisabled={submitting}
@@ -1515,7 +1515,7 @@ export default function AdminBookingsPage() {
                     </div>
 
                     {/* Step 5: Customer */}
-                    <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                    <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">5. Kundendaten</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <Input
@@ -1525,7 +1525,7 @@ export default function AdminBookingsPage() {
                           onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
                           isRequired
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
                           label="Nachname"
@@ -1534,7 +1534,7 @@ export default function AdminBookingsPage() {
                           onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
                           isRequired
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
                           label="E-Mail (optional)"
@@ -1542,7 +1542,7 @@ export default function AdminBookingsPage() {
                           value={bookingForm.email}
                           onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
                           label="Telefon (optional)"
@@ -1550,7 +1550,7 @@ export default function AdminBookingsPage() {
                           value={bookingForm.phone}
                           onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                       </div>
                       <div className="mt-3">
@@ -1559,14 +1559,14 @@ export default function AdminBookingsPage() {
                           value={bookingForm.customerNotes}
                           onChange={(e) => setBookingForm({ ...bookingForm, customerNotes: e.target.value })}
                           isDisabled={submitting}
-                          classNames={{ inputWrapper: "bg-white border border-[#E8C7C3]/30" }}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                       </div>
                     </div>
 
                     {/* Summary */}
                     {selectedService && (
-                      <div className="bg-[#017172]/5 border border-[#017172]/20 p-3 rounded-xl flex items-center justify-between">
+                      <div className="bg-[#6355E4]/5 border border-[#6355E4]/20 p-3 rounded-xl flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
                           <p className="text-xs text-[#8A8A8A]">
@@ -1576,7 +1576,7 @@ export default function AdminBookingsPage() {
                               : ''}
                           </p>
                         </div>
-                        <p className="text-lg font-bold text-[#017172]">{formatPrice(selectedService.price, selectedService.currency)} </p>
+                        <p className="text-lg font-bold text-[#6355E4]">{formatPrice(selectedService.price, selectedService.currency)} </p>
                       </div>
                     )}
                   </div>
@@ -1585,7 +1585,7 @@ export default function AdminBookingsPage() {
               <ModalFooter>
                 <Button
                   variant="flat"
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                   onPress={onModalClose}
                   startContent={<X size={14} />}
                   isDisabled={submitting}>
@@ -1593,7 +1593,7 @@ export default function AdminBookingsPage() {
                 </Button>
                 {!success && !createdBooking && (
                   <Button
-                    className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                    className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                     onPress={handleCreateManualBooking}
                     isLoading={submitting}
                     isDisabled={!bookingForm.serviceId || !bookingForm.bookingDate || !bookingForm.startTime || !bookingForm.firstName || !bookingForm.lastName}

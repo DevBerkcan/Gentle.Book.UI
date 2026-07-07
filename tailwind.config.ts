@@ -11,75 +11,66 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-      corporate: {
-          rose: '#E8C7C3',
-          charcoal: '#1E1E1E',
-          beige: '#F5EDEB',
-          white: '#FFFFFF',
-          grey: '#8A8A8A',
+        brand: {
+          primary:       '#6355E4',
+          hover:         '#5646D6',
+          active:        '#4A3BC2',
+          soft:          '#EEEBFC',
+          secondary:     '#17A398',
+          secondarySoft: '#E4F5F2',
         },
-        // Keep barber colors for backward compatibility
-        barber: {
-          red: '#dc2626',
-          'dark-red': '#991b1b',
-          gold: '#d4af37',
-          cream: '#F5EDEB', // Map to corporate beige
-          black: '#1E1E1E', // Map to corporate charcoal
-          grey: {
-            50: '#F5EDEB', // Map to corporate beige
-            100: '#F0E6E4',
-            200: '#E8C7C3', // Map to corporate rose
-            300: '#D8B0AC',
-            400: '#C09995',
-            500: '#A8827E',
-            600: '#8A8A8A', // Map to corporate grey
-            700: '#6B6B6B',
-            800: '#4C4C4C',
-            900: '#1E1E1E', // Map to corporate charcoal
-          },
-        }
+        gb: {
+          navy:          '#14162B',
+          offwhite:      '#F6F5FA',
+          surface:       '#FFFFFF',
+          surfaceAlt:    '#FAFAFC',
+          border:        '#ECEBF2',
+          borderStrong:  '#D8D7E2',
+          textSecondary: '#565A72',
+          textMuted:     '#8B8FA6',
+          success:       '#17936B',
+          warning:       '#C77A16',
+          error:         '#D64550',
+          info:          '#3B71D9',
+        },
       },
-      backgroundImage: {
-        "barber-stripes":
-          "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(220, 38, 38, 0.03) 10px, rgba(220, 38, 38, 0.03) 20px)",
+      fontFamily: {
+        display: ['var(--font-display)', 'sans-serif'],
+        ui:      ['var(--font-ui)', 'sans-serif'],
       },
       animation: {
-        "float-slow": "float 3s ease-in-out infinite",
-        "fade-in": "fadeIn 0.5s ease-in-out",
-        "slide-up": "slideUp 0.5s ease-out",
-        // 21st.dev – ShimmerButton
+        "float-slow":    "float 3s ease-in-out infinite",
+        "fade-in":       "fadeIn 0.5s ease-in-out",
+        "slide-up":      "slideUp 0.5s ease-out",
         "shimmer-slide": "shimmer-slide var(--speed) ease-in-out infinite alternate",
-        "spin-around": "spin-around calc(var(--speed) * 2) infinite linear",
-        // 21st.dev – GlowingEffect
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "spin-around":   "spin-around calc(var(--speed) * 2) infinite linear",
+        "glow-pulse":    "glow-pulse 2s ease-in-out infinite",
       },
       keyframes: {
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
+          "50%":      { transform: "translateY(-10px)" },
         },
         fadeIn: {
-          "0%": { opacity: "0" },
+          "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
         },
         slideUp: {
-          "0%": { transform: "translateY(20px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
+          "0%":   { transform: "translateY(20px)", opacity: "0" },
+          "100%": { transform: "translateY(0)",    opacity: "1" },
         },
-        // 21st.dev – ShimmerButton
         "shimmer-slide": {
           to: { transform: "translate(calc(100cqw - 100%), 0)" },
         },
         "spin-around": {
-          "0%": { transform: "translateZ(0) rotate(0)" },
-          "15%, 35%": { transform: "translateZ(0) rotate(90deg)" },
-          "65%, 85%": { transform: "translateZ(0) rotate(270deg)" },
-          "100%": { transform: "translateZ(0) rotate(360deg)" },
+          "0%":        { transform: "translateZ(0) rotate(0)" },
+          "15%, 35%":  { transform: "translateZ(0) rotate(90deg)" },
+          "65%, 85%":  { transform: "translateZ(0) rotate(270deg)" },
+          "100%":      { transform: "translateZ(0) rotate(360deg)" },
         },
-        // 21st.dev – GlowingEffect
         "glow-pulse": {
           "0%, 100%": { opacity: "0.4" },
-          "50%": { opacity: "1" },
+          "50%":      { opacity: "1" },
         },
       },
     },

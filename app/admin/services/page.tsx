@@ -50,14 +50,14 @@ import {
 import { formatPrice } from "@/lib/utils/currency";
 
 const modalClassNames = {
-    base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-    header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-    footer: "border-t border-[#E8C7C3]/20",
+    base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+    header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+    footer: "border-t border-[#ECEBF2]/20",
     body: "py-5",
 };
 
 const inputClassNames = {
-    inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+    inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
 };
 
 type ViewMode = "services" | "categories" | "assignments";
@@ -517,10 +517,10 @@ export default function AdminServicesPage() {
     };
 
     const MobileServiceCard = ({ service }: { service: AdminService }) => (
-        <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white border border-[#ECEBF2]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm shrink-0">
                         {service.name.charAt(0)}
                     </div>
                     <div>
@@ -542,25 +542,25 @@ export default function AdminServicesPage() {
                     <p className="text-sm text-[#8A8A8A] line-clamp-2">{service.description}</p>
                 )}
                 <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="flex items-center gap-1 text-xs bg-[#F5EDEB] px-3 py-1.5 rounded-full">
-                        <Clock size={12} className="text-[#017172]" />
+                    <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-3 py-1.5 rounded-full">
+                        <Clock size={12} className="text-[#6355E4]" />
                         {service.durationMinutes} Min
                     </span>
-                    <span className="flex items-center gap-1 text-xs bg-[#F5EDEB] px-3 py-1.5 rounded-full">
-                        <DollarSign size={12} className="text-[#017172]" />
+                    <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-3 py-1.5 rounded-full">
+                        <DollarSign size={12} className="text-[#6355E4]" />
                         {formatPrice(service.price, service.currency)}
                     </span>
                     {/* Replace the single employeeName with multiple employees */}
                     {service.assignedEmployees && service.assignedEmployees.length > 0 && (
                         <div className="flex flex-wrap gap-1 w-full mt-1">
                             {service.assignedEmployees.slice(0, 2).map(emp => (
-                                <span key={emp.id} className="flex items-center gap-1 text-xs bg-[#F5EDEB] px-2 py-1 rounded-full">
-                                    <Users size={10} className="text-[#017172]" />
+                                <span key={emp.id} className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
+                                    <Users size={10} className="text-[#6355E4]" />
                                     {emp.name.split(' ')[0]}
                                 </span>
                             ))}
                             {service.assignedEmployees.length > 2 && (
-                                <span className="text-xs bg-[#F5EDEB] px-2 py-1 rounded-full">
+                                <span className="text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
                                     +{service.assignedEmployees.length - 2}
                                 </span>
                             )}
@@ -569,7 +569,7 @@ export default function AdminServicesPage() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-[#E8C7C3]/20">
+            <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
                 <div className="text-xs text-[#8A8A8A]">
                     Reihenfolge: {service.displayOrder}
                 </div>
@@ -578,7 +578,7 @@ export default function AdminServicesPage() {
                         size="sm"
                         isIconOnly
                         variant="flat"
-                        className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                        className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                         onPress={() => openServiceModal("view", service)}
                     >
                         <Eye size={14} />
@@ -587,7 +587,7 @@ export default function AdminServicesPage() {
                         size="sm"
                         isIconOnly
                         variant="flat"
-                        className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                        className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                         onPress={() => openServiceModal("edit", service)}
                     >
                         <Edit size={14} />
@@ -609,10 +609,10 @@ export default function AdminServicesPage() {
     const MobileCategoryCard = ({ category }: { category: AdminServiceCategory }) => {
         const icon = categoryIcons[category.name] || <Tag className="w-5 h-5" />;
         return (
-            <div className="bg-white border border-[#E8C7C3]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-white border border-[#ECEBF2]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center text-white">
+                        <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center text-white">
                             {icon}
                         </div>
                         <div>
@@ -635,7 +635,7 @@ export default function AdminServicesPage() {
                     <p className="text-sm text-[#8A8A8A] mb-3 line-clamp-2">{category.description}</p>
                 )}
 
-                <div className="flex items-center justify-between pt-3 border-t border-[#E8C7C3]/20">
+                <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
                     <div className="text-xs text-[#8A8A8A]">
                         Reihenfolge: {category.displayOrder}
                     </div>
@@ -644,7 +644,7 @@ export default function AdminServicesPage() {
                             size="sm"
                             isIconOnly
                             variant="flat"
-                            className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                            className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                             onPress={() => openCategoryModal("view", category)}
                         >
                             <Eye size={14} />
@@ -653,7 +653,7 @@ export default function AdminServicesPage() {
                             size="sm"
                             isIconOnly
                             variant="flat"
-                            className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                            className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                             onPress={() => openCategoryModal("edit", category)}
                         >
                             <Edit size={14} />
@@ -676,9 +676,9 @@ export default function AdminServicesPage() {
 
     if (loading && services.length === 0 && categories.length === 0) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] via-[#F5EDEB] to-white flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-[#F6F5FA] to-white flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 text-[#E8C7C3] animate-spin mx-auto mb-4" />
+                    <Loader2 className="w-12 h-12 text-[#ECEBF2] animate-spin mx-auto mb-4" />
                     <p className="text-[#8A8A8A]">Daten werden geladen...</p>
                 </div>
             </div>
@@ -686,7 +686,7 @@ export default function AdminServicesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white py-6 sm:py-8 px-3 sm:px-4">
+        <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white py-6 sm:py-8 px-3 sm:px-4">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -694,13 +694,13 @@ export default function AdminServicesPage() {
                         <div className="flex items-center gap-3 mb-1">
                             <Link
                                 href="/admin"
-                                className="p-2 hover:bg-[#E8C7C3]/20 rounded-lg transition-colors lg:hidden"
+                                className="p-2 hover:bg-[#ECEBF2]/20 rounded-lg transition-colors lg:hidden"
                             >
                                 <ArrowLeft size={20} className="text-[#8A8A8A]" />
                             </Link>
                             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">Service Verwaltung</h1>
                             {totalCount > 0 && viewMode !== "assignments" && (
-                                <span className="bg-[#017172]/10 text-[#017172] text-sm font-semibold px-3 py-1 rounded-full">
+                                <span className="bg-[#6355E4]/10 text-[#6355E4] text-sm font-semibold px-3 py-1 rounded-full">
                                     {totalCount}
                                 </span>
                             )}
@@ -709,7 +709,7 @@ export default function AdminServicesPage() {
                     </div>
                     {viewMode === "services" && (
                         <Button
-                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                             startContent={<Plus size={18} />}
                             onPress={() => openServiceModal("create")}
                         >
@@ -718,7 +718,7 @@ export default function AdminServicesPage() {
                     )}
                     {viewMode === "categories" && (
                         <Button
-                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                             startContent={<Plus size={18} />}
                             onPress={() => openCategoryModal("create")}
                         >
@@ -731,8 +731,8 @@ export default function AdminServicesPage() {
                 <div className="flex gap-2 mb-6">
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "services"
-                            ? "bg-gradient-to-r from-[#017172] to-[#015f60] text-white shadow-lg shadow-[#017172]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#E8C7C3]/30 hover:bg-[#F5EDEB]"
+                            ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
+                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("services");
@@ -744,8 +744,8 @@ export default function AdminServicesPage() {
                     </Button>
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "categories"
-                            ? "bg-gradient-to-r from-[#017172] to-[#015f60] text-white shadow-lg shadow-[#017172]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#E8C7C3]/30 hover:bg-[#F5EDEB]"
+                            ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
+                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("categories");
@@ -757,8 +757,8 @@ export default function AdminServicesPage() {
                     </Button>
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "assignments"
-                            ? "bg-gradient-to-r from-[#017172] to-[#015f60] text-white shadow-lg shadow-[#017172]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#E8C7C3]/30 hover:bg-[#F5EDEB]"
+                            ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
+                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("assignments");
@@ -772,10 +772,10 @@ export default function AdminServicesPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-6 flex flex-col gap-3 rounded-lg border border-[#017172]/20 bg-[#017172]/5 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="mb-6 flex flex-col gap-3 rounded-lg border border-[#6355E4]/20 bg-[#6355E4]/5 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                     <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#017172] shadow-sm">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#6355E4] shadow-sm">
                             <Info size={18} />
                         </div>
                         <div>
@@ -788,7 +788,7 @@ export default function AdminServicesPage() {
                     <Button
                         size="sm"
                         variant="flat"
-                        className="self-start bg-white text-[#017172] font-semibold sm:self-center"
+                        className="self-start bg-white text-[#6355E4] font-semibold sm:self-center"
                         startContent={<Info size={15} />}
                         onPress={openServicesGuide}
                     >
@@ -798,7 +798,7 @@ export default function AdminServicesPage() {
 
                 {/* Search Bar - Only show for services and categories */}
                 {viewMode !== "assignments" && (
-                    <Card className="mb-6 border border-[#E8C7C3]/30 shadow-lg">
+                    <Card className="mb-6 border border-[#ECEBF2]/30 shadow-lg">
                         <CardBody className="p-4">
                             <div className="flex gap-2">
                                 <Input
@@ -814,7 +814,7 @@ export default function AdminServicesPage() {
                                     className="flex-1"
                                 />
                                 <Button
-                                    className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                                    className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
                                     onPress={() => {
                                         setPage(1);
                                         loadData();
@@ -824,7 +824,7 @@ export default function AdminServicesPage() {
                                 </Button>
                                 {searchTerm && (
                                     <Button
-                                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold"
+                                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                         onPress={() => {
                                             setSearchTerm("");
                                             setPage(1);
@@ -848,7 +848,7 @@ export default function AdminServicesPage() {
                 )}
 
                 {/* Content Card */}
-                <Card className="border border-[#E8C7C3]/30 shadow-xl">
+                <Card className="border border-[#ECEBF2]/30 shadow-xl">
                     <CardBody className="p-0">
                         {loading ? (
                             <div className="flex justify-center py-16">
@@ -858,12 +858,12 @@ export default function AdminServicesPage() {
                             // Services View
                             services.length === 0 ? (
                                 <div className="text-center py-16 text-[#8A8A8A]">
-                                    <Scissors className="mx-auto mb-4 text-[#E8C7C3]" size={48} />
+                                    <Scissors className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                     <p className="font-medium">Keine Services gefunden</p>
                                     {searchTerm && (
                                         <Button
                                             size="sm"
-                                            className="mt-3 bg-[#F5EDEB] text-[#1E1E1E]"
+                                            className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]"
                                             onPress={() => {
                                                 setSearchTerm("");
                                                 setPage(1);
@@ -879,7 +879,7 @@ export default function AdminServicesPage() {
                                     {/* Desktop Table */}
                                     <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-[#F5EDEB] border-b border-[#E8C7C3]/30">
+                                            <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Service</th>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Details</th>
@@ -889,17 +889,17 @@ export default function AdminServicesPage() {
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Aktionen</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-[#E8C7C3]/10">
+                                            <tbody className="divide-y divide-[#ECEBF2]/10">
                                                 {services.map((service, index) => (
                                                     <tr
                                                         key={service.id}
-                                                        className={`hover:bg-[#F5EDEB]/60 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-[#F5EDEB]/20"
+                                                        className={`hover:bg-[#F6F5FA]/60 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-[#F6F5FA]/20"
                                                             }`}
                                                         onClick={() => openServiceModal("view", service)}
                                                     >
                                                         <td className="px-5 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                                                <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm shrink-0">
                                                                     {service.name.charAt(0)}
                                                                 </div>
                                                                 <div>
@@ -910,12 +910,12 @@ export default function AdminServicesPage() {
                                                         </td>
                                                         <td className="px-5 py-4">
                                                             <div className="flex items-center gap-3">
-                                                                <span className="flex items-center gap-1 text-xs bg-[#F5EDEB] px-2 py-1 rounded-full">
-                                                                    <Clock size={10} className="text-[#017172]" />
+                                                                <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
+                                                                    <Clock size={10} className="text-[#6355E4]" />
                                                                     {service.durationMinutes} Min
                                                                 </span>
-                                                                <span className="flex items-center gap-1 text-xs bg-[#F5EDEB] px-2 py-1 rounded-full">
-                                                                    <DollarSign size={10} className="text-[#017172]" />
+                                                                <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
+                                                                    <DollarSign size={10} className="text-[#6355E4]" />
                                                                     {formatPrice(service.price, service.currency)}
                                                                 </span>
                                                                 <span className="text-xs text-[#8A8A8A]">
@@ -929,7 +929,7 @@ export default function AdminServicesPage() {
                                                             )}
                                                         </td>
                                                         <td className="px-5 py-4">
-                                                            <Chip size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                                            <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
                                                                 {service.categoryName}
                                                             </Chip>
                                                         </td>
@@ -937,12 +937,12 @@ export default function AdminServicesPage() {
                                                             {service.assignedEmployees && service.assignedEmployees.length > 0 ? (
                                                                 <div className="flex flex-wrap gap-1">
                                                                     {service.assignedEmployees.slice(0, 2).map(emp => (
-                                                                        <Chip key={emp.id} size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172] text-xs">
+                                                                        <Chip key={emp.id} size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4] text-xs">
                                                                             {emp.name.split(' ')[0]}
                                                                         </Chip>
                                                                     ))}
                                                                     {service.assignedEmployees.length > 2 && (
-                                                                        <Chip size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172] text-xs">
+                                                                        <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4] text-xs">
                                                                             +{service.assignedEmployees.length - 2}
                                                                         </Chip>
                                                                     )}
@@ -966,7 +966,7 @@ export default function AdminServicesPage() {
                                                                     size="sm"
                                                                     isIconOnly
                                                                     variant="flat"
-                                                                    className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                                                                    className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                                                     onPress={() => openServiceModal("edit", service)}
                                                                 >
                                                                     <Edit size={14} />
@@ -1012,12 +1012,12 @@ export default function AdminServicesPage() {
                             // Categories View
                             categories.length === 0 ? (
                                 <div className="text-center py-16 text-[#8A8A8A]">
-                                    <Tag className="mx-auto mb-4 text-[#E8C7C3]" size={48} />
+                                    <Tag className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                     <p className="font-medium">Keine Kategorien gefunden</p>
                                     {searchTerm && (
                                         <Button
                                             size="sm"
-                                            className="mt-3 bg-[#F5EDEB] text-[#1E1E1E]"
+                                            className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]"
                                             onPress={() => {
                                                 setSearchTerm("");
                                                 setPage(1);
@@ -1033,7 +1033,7 @@ export default function AdminServicesPage() {
                                     {/* Desktop Table */}
                                     <div className="hidden md:block overflow-x-auto">
                                         <table className="w-full">
-                                            <thead className="bg-[#F5EDEB] border-b border-[#E8C7C3]/30">
+                                            <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Kategorie</th>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Beschreibung</th>
@@ -1043,19 +1043,19 @@ export default function AdminServicesPage() {
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Aktionen</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-[#E8C7C3]/10">
+                                            <tbody className="divide-y divide-[#ECEBF2]/10">
                                                 {categories.map((category, index) => {
                                                     const icon = categoryIcons[category.name] || <Tag className="w-4 h-4" />;
                                                     return (
                                                         <tr
                                                             key={category.id}
-                                                            className={`hover:bg-[#F5EDEB]/60 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-[#F5EDEB]/20"
+                                                            className={`hover:bg-[#F6F5FA]/60 transition-colors cursor-pointer ${index % 2 === 0 ? "bg-white" : "bg-[#F6F5FA]/20"
                                                                 }`}
                                                             onClick={() => openCategoryModal("view", category)}
                                                         >
                                                             <td className="px-5 py-4">
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 rounded-full bg-[#017172] flex items-center justify-center text-white shrink-0">
+                                                                    <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white shrink-0">
                                                                         {icon}
                                                                     </div>
                                                                     <div className="font-semibold text-[#1E1E1E] text-sm">
@@ -1069,7 +1069,7 @@ export default function AdminServicesPage() {
                                                                 </p>
                                                             </td>
                                                             <td className="px-5 py-4">
-                                                                <Chip size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                                                <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
                                                                     {category.services.length}
                                                                 </Chip>
                                                             </td>
@@ -1091,7 +1091,7 @@ export default function AdminServicesPage() {
                                                                         size="sm"
                                                                         isIconOnly
                                                                         variant="flat"
-                                                                        className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                                                                        className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                                                         onPress={() => openCategoryModal("edit", category)}
                                                                     >
                                                                         <Edit size={14} />
@@ -1128,28 +1128,28 @@ export default function AdminServicesPage() {
                             <div className="p-6">
                                 {employees.length === 0 ? (
                                     <div className="text-center py-16 text-[#8A8A8A]">
-                                        <Users className="mx-auto mb-4 text-[#E8C7C3]" size={48} />
+                                        <Users className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                         <p className="font-medium">Keine Mitarbeiter gefunden</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {employees.map((employee) => (
-                                            <Card key={employee.id} className="border border-[#E8C7C3]/30 hover:shadow-lg transition-shadow">
+                                            <Card key={employee.id} className="border border-[#ECEBF2]/30 hover:shadow-lg transition-shadow">
                                                 <CardBody className="p-5">
                                                     <div className="flex items-start justify-between mb-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-12 h-12 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold text-lg">
+                                                            <div className="w-12 h-12 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-lg">
                                                                 {employee.name.charAt(0)}
                                                             </div>
                                                             <div>
                                                                 <h3 className="font-bold text-[#1E1E1E] text-lg">{employee.name}</h3>
                                                                 <p className="text-sm text-[#8A8A8A]">{employee.role}</p>
                                                                 {employee.specialty && (
-                                                                    <p className="text-xs text-[#017172] mt-1">{employee.specialty}</p>
+                                                                    <p className="text-xs text-[#6355E4] mt-1">{employee.specialty}</p>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <Chip size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                                        <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
                                                             {employee.serviceCount} Services
                                                         </Chip>
                                                     </div>
@@ -1165,13 +1165,13 @@ export default function AdminServicesPage() {
                                                                         key={s.id}
                                                                         size="sm"
                                                                         variant="flat"
-                                                                        className="bg-[#F5EDEB] text-[#1E1E1E]"
+                                                                        className="bg-[#F6F5FA] text-[#1E1E1E]"
                                                                     >
                                                                         {s.name}
                                                                     </Chip>
                                                                 ))}
                                                             {employee.serviceCount > 5 && (
-                                                                <Chip size="sm" variant="flat" className="bg-[#F5EDEB] text-[#1E1E1E]">
+                                                                <Chip size="sm" variant="flat" className="bg-[#F6F5FA] text-[#1E1E1E]">
                                                                     +{employee.serviceCount - 5} weitere
                                                                 </Chip>
                                                             )}
@@ -1183,7 +1183,7 @@ export default function AdminServicesPage() {
 
                                                     <Button
                                                         fullWidth
-                                                        className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                                                        className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                                                         onPress={() => {
                                                             setSelectedEmployee(employee);
                                                             setSelectedServices(new Set(
@@ -1205,7 +1205,7 @@ export default function AdminServicesPage() {
 
                         {/* Pagination - Only for services and categories */}
                         {viewMode !== "assignments" && totalPages > 1 && (
-                            <div className="flex items-center justify-between px-5 py-4 border-t border-[#E8C7C3]/20">
+                            <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
                                 <div className="text-sm text-[#8A8A8A]">
                                     Seite {page} von {totalPages}
                                 </div>
@@ -1216,7 +1216,7 @@ export default function AdminServicesPage() {
                                         isDisabled={page <= 1}
                                         onPress={() => setPage(p => Math.max(1, p - 1))}
                                         startContent={<ChevronLeft size={15} />}
-                                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold"
+                                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                     >
                                         Zurück
                                     </Button>
@@ -1226,7 +1226,7 @@ export default function AdminServicesPage() {
                                         isDisabled={page >= totalPages}
                                         onPress={() => setPage(p => Math.min(totalPages, p + 1))}
                                         endContent={<ChevronRight size={15} />}
-                                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold"
+                                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                     >
                                         Weiter
                                     </Button>
@@ -1252,7 +1252,7 @@ export default function AdminServicesPage() {
                             <>
                                 <ModalHeader>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                                             <Users size={18} className="text-white" />
                                         </div>
                                         <div>
@@ -1354,19 +1354,19 @@ export default function AdminServicesPage() {
                             exit={{ opacity: 0 }}
                         >
                             <motion.div
-                                className="w-full max-w-lg rounded-lg border border-[#E8C7C3]/40 bg-white shadow-2xl"
+                                className="w-full max-w-lg rounded-lg border border-[#ECEBF2]/40 bg-white shadow-2xl"
                                 initial={{ opacity: 0, y: 24, scale: 0.97 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 16, scale: 0.98 }}
                                 transition={{ duration: 0.22, ease: "easeOut" }}
                             >
-                                <div className="flex items-start justify-between gap-4 border-b border-[#E8C7C3]/30 p-5">
+                                <div className="flex items-start justify-between gap-4 border-b border-[#ECEBF2]/30 p-5">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#017172]/10 text-[#017172]">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#6355E4]/10 text-[#6355E4]">
                                             <Info size={20} />
                                         </div>
                                         <div>
-                                            <p className="text-xs font-semibold uppercase tracking-wide text-[#017172]">
+                                            <p className="text-xs font-semibold uppercase tracking-wide text-[#6355E4]">
                                                 Schritt {guideStep + 1} von {servicesGuideSteps.length}
                                             </p>
                                             <h2 className="mt-1 text-lg font-bold text-[#1E1E1E]">
@@ -1407,7 +1407,7 @@ export default function AdminServicesPage() {
                                                 key={step.title}
                                                 type="button"
                                                 className={`h-2 flex-1 rounded-full transition-colors ${
-                                                    index === guideStep ? "bg-[#017172]" : "bg-[#E8C7C3]/45"
+                                                    index === guideStep ? "bg-[#6355E4]" : "bg-[#ECEBF2]/45"
                                                 }`}
                                                 onClick={() => setGuideStep(index)}
                                                 aria-label={`Schritt ${index + 1} anzeigen`}
@@ -1416,10 +1416,10 @@ export default function AdminServicesPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col-reverse gap-2 border-t border-[#E8C7C3]/30 p-5 sm:flex-row sm:justify-between">
+                                <div className="flex flex-col-reverse gap-2 border-t border-[#ECEBF2]/30 p-5 sm:flex-row sm:justify-between">
                                     <Button
                                         variant="flat"
-                                        className="bg-[#F5EDEB] text-[#1E1E1E] font-semibold"
+                                        className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                         isDisabled={guideStep === 0}
                                         startContent={<ChevronLeft size={16} />}
                                         onPress={() => setGuideStep((step) => Math.max(0, step - 1))}
@@ -1428,7 +1428,7 @@ export default function AdminServicesPage() {
                                     </Button>
                                     {guideStep < servicesGuideSteps.length - 1 ? (
                                         <Button
-                                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                                            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
                                             endContent={<ChevronRight size={16} />}
                                             onPress={() => setGuideStep((step) => Math.min(servicesGuideSteps.length - 1, step + 1))}
                                         >
@@ -1436,7 +1436,7 @@ export default function AdminServicesPage() {
                                         </Button>
                                     ) : (
                                         <Button
-                                            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+                                            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
                                             startContent={<Plus size={16} />}
                                             onPress={() => {
                                                 closeServicesGuide();
@@ -1510,7 +1510,7 @@ function ServiceModals({
                     <>
                         <ModalHeader>
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center">
+                                <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center">
                                     {modalMode === "edit" ? (
                                         <Edit size={15} className="text-white" />
                                     ) : (
@@ -1616,9 +1616,9 @@ function ServiceModals({
                                     <motion.div
                                         initial={{ opacity: 0, y: -6 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="flex items-start gap-2 rounded-lg border border-[#017172]/20 bg-[#017172]/5 p-3 text-sm text-[#5F5F5F]"
+                                        className="flex items-start gap-2 rounded-lg border border-[#6355E4]/20 bg-[#6355E4]/5 p-3 text-sm text-[#5F5F5F]"
                                     >
-                                        <Info size={16} className="mt-0.5 shrink-0 text-[#017172]" />
+                                        <Info size={16} className="mt-0.5 shrink-0 text-[#6355E4]" />
                                         <div className="flex-1">
                                             Die Währung gilt systemweit. Bitte ändern Sie die Währung unter Einstellungen, wenn alle Preise eine andere Währung verwenden sollen.
                                         </div>
@@ -1657,7 +1657,7 @@ function ServiceModals({
                                     isRequired
                                     isDisabled={submitting}
                                     classNames={{
-                                        trigger: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+                                        trigger: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
                                         label: "text-[#8A8A8A]",
                                         value: "text-[#1E1E1E]",
                                     }}
@@ -1701,7 +1701,7 @@ function ServiceModals({
                                         return (
                                             <div className="flex flex-wrap gap-1">
                                                 {items.map((item) => (
-                                                    <Chip key={item.key} size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                                    <Chip key={item.key} size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
                                                         {item.textValue}
                                                     </Chip>
                                                 ))}
@@ -1709,7 +1709,7 @@ function ServiceModals({
                                         );
                                     }}
                                     classNames={{
-                                        trigger: "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+                                        trigger: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
                                         label: "text-[#8A8A8A]",
                                         value: "text-[#1E1E1E]",
                                     }}
@@ -1726,7 +1726,7 @@ function ServiceModals({
                         <ModalFooter className="gap-2">
                             <Button
                                 variant="flat"
-                                className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                                className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                                 onPress={onClose}
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}
@@ -1734,7 +1734,7 @@ function ServiceModals({
                                 Abbrechen
                             </Button>
                             <Button
-                                className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                                 onPress={onSave}
                                 isLoading={submitting}
                                 startContent={!submitting && <Save size={14} />}
@@ -1786,7 +1786,7 @@ function CategoryModals({
                     <>
                         <ModalHeader>
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center">
+                                <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center">
                                     {modalMode === "edit-category" ? (
                                         <Edit size={15} className="text-white" />
                                     ) : (
@@ -1848,7 +1848,7 @@ function CategoryModals({
                         <ModalFooter className="gap-2">
                             <Button
                                 variant="flat"
-                                className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                                className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                                 onPress={onClose}
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}
@@ -1856,7 +1856,7 @@ function CategoryModals({
                                 Abbrechen
                             </Button>
                             <Button
-                                className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                                 onPress={onSave}
                                 isLoading={submitting}
                                 startContent={!submitting && <Save size={14} />}
@@ -1924,7 +1924,7 @@ function ViewModals({
                     <>
                         <ModalHeader>
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center">
                                     {isService ? <Scissors size={18} className="text-white" /> : <Tag size={18} className="text-white" />}
                                 </div>
                                 <div>
@@ -1956,14 +1956,14 @@ function ViewModals({
                         <ModalFooter>
                             <Button
                                 variant="flat"
-                                className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                                className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                                 onPress={handleClose}
                                 startContent={<X size={14} />}
                             >
                                 Schließen
                             </Button>
                             <Button
-                                className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                                 onPress={() => {
                                     setHasClosed(true);
                                     setTimeout(() => {
@@ -1989,7 +1989,7 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
     return (
         <div className="space-y-4">
             {/* Basic Info */}
-            <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+            <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Grunddaten</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -2011,23 +2011,23 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
 
             {/* Description */}
             {service.description && (
-                <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                     <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Beschreibung</h3>
                     <p className="text-sm text-[#1E1E1E]">{service.description}</p>
                 </div>
             )}
 
             {/* Service Details */}
-            <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+            <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Leistungsdetails</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
                         <p className="text-xs text-[#8A8A8A]">Dauer</p>
-                        <p className="text-base font-bold text-[#017172]">{service.durationMinutes} Min</p>
+                        <p className="text-base font-bold text-[#6355E4]">{service.durationMinutes} Min</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
                         <p className="text-xs text-[#8A8A8A]">Preis</p>
-                        <p className="text-base font-bold text-[#017172]">{formatPrice(service.price, service.currency)}</p>
+                        <p className="text-base font-bold text-[#6355E4]">{formatPrice(service.price, service.currency)}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
                         <p className="text-xs text-[#8A8A8A]">Sortierreihenfolge</p>
@@ -2036,7 +2036,7 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
                 </div>
             </div>
 
-            <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+            <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Zuordnung</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
@@ -2048,7 +2048,7 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
                         <div className="flex flex-wrap gap-1 mt-1">
                             {service.assignedEmployees && service.assignedEmployees.length > 0 ? (
                                 service.assignedEmployees.map(emp => (
-                                    <Chip key={emp.id} size="sm" variant="flat" className="bg-[#017172]/10 text-[#017172]">
+                                    <Chip key={emp.id} size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
                                         {emp.name}
                                     </Chip>
                                 ))
@@ -2070,7 +2070,7 @@ function CategoryViewContent({ category, services }: { category: AdminServiceCat
     return (
         <div className="space-y-4">
             {/* Basic Info */}
-            <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+            <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Grunddaten</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -2092,14 +2092,14 @@ function CategoryViewContent({ category, services }: { category: AdminServiceCat
 
             {/* Description */}
             {category.description && (
-                <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                     <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Beschreibung</h3>
                     <p className="text-sm text-[#1E1E1E]">{category.description}</p>
                 </div>
             )}
 
             {/* Category Details */}
-            <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+            <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Kategoriedetails</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
@@ -2108,18 +2108,18 @@ function CategoryViewContent({ category, services }: { category: AdminServiceCat
                     </div>
                     <div className="bg-white p-3 rounded-lg">
                         <p className="text-xs text-[#8A8A8A]">Services in dieser Kategorie</p>
-                        <p className="text-base font-bold text-[#017172]">{categoryServices.length}</p>
+                        <p className="text-base font-bold text-[#6355E4]">{categoryServices.length}</p>
                     </div>
                 </div>
             </div>
 
             {/* Services in this category */}
             {categoryServices.length > 0 && (
-                <div className="bg-[#F5EDEB] rounded-xl p-4 border border-[#E8C7C3]/20">
+                <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                     <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Services in dieser Kategorie</h3>
                     <div className="space-y-2">
                         {categoryServices.slice(0, 5).map((service) => (
-                            <div key={service.id} className="bg-white p-3 rounded-lg border border-[#E8C7C3]/20">
+                            <div key={service.id} className="bg-white p-3 rounded-lg border border-[#ECEBF2]/20">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="font-semibold text-[#1E1E1E] text-sm">{service.name}</p>
@@ -2212,7 +2212,7 @@ function AssignmentModalContent({
                     <Button
                         size="sm"
                         variant="flat"
-                        className="bg-[#F5EDEB] text-[#1E1E1E]"
+                        className="bg-[#F6F5FA] text-[#1E1E1E]"
                         onPress={selectAll}
                         isDisabled={submitting}
                     >
@@ -2221,7 +2221,7 @@ function AssignmentModalContent({
                     <Button
                         size="sm"
                         variant="flat"
-                        className="bg-[#F5EDEB] text-[#1E1E1E]"
+                        className="bg-[#F6F5FA] text-[#1E1E1E]"
                         onPress={deselectAll}
                         isDisabled={submitting}
                     >
@@ -2237,14 +2237,14 @@ function AssignmentModalContent({
                         isPressable
                         onPress={() => toggleService(service.id)}
                         className={`w-full transition-all cursor-pointer ${selectedServices.has(service.id)
-                            ? "ring-2 ring-[#017172] ring-offset-2"
-                            : "hover:ring-2 hover:ring-[#017172]/30 hover:ring-offset-1"
+                            ? "ring-2 ring-[#6355E4] ring-offset-2"
+                            : "hover:ring-2 hover:ring-[#6355E4]/30 hover:ring-offset-1"
                             }`}
                     >
                         <CardBody className="p-3">
                             <div className="flex items-center gap-3">
                                 <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${selectedServices.has(service.id)
-                                    ? "bg-[#017172] border-[#017172]"
+                                    ? "bg-[#6355E4] border-[#6355E4]"
                                     : "border-[#8A8A8A]"
                                     }`}>
                                     {selectedServices.has(service.id) && (
@@ -2268,7 +2268,7 @@ function AssignmentModalContent({
             <div className="flex justify-end gap-3">
                 <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={onClose}
                     startContent={<X size={14} />}
                     isDisabled={submitting}
@@ -2276,7 +2276,7 @@ function AssignmentModalContent({
                     Abbrechen
                 </Button>
                 <Button
-                    className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                    className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                     onPress={onAssign}
                     startContent={!submitting && <Save size={14} />}
                     isLoading={submitting}
@@ -2354,9 +2354,9 @@ function DeleteModal({
                                 </div>
 
                                 {/* Item Info */}
-                                <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                                <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-[#017172] flex items-center justify-center text-white font-bold shrink-0">
+                                        <div className="w-10 h-10 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold shrink-0">
                                             {name.charAt(0)}
                                         </div>
                                         <div>
@@ -2435,7 +2435,7 @@ function DeleteModal({
                         <ModalFooter>
                             <Button
                                 variant="flat"
-                                className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                                className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                                 onPress={onModalClose}
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}

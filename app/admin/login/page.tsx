@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, User, Eye, EyeOff, Mail, Building2, Sparkles, ArrowRight } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, Mail, Building2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 
 type LoginMode = 'employee' | 'admin';
 
@@ -73,9 +74,9 @@ export default function AdminLoginPage() {
 
       {/* Animated background blobs */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E8C7C3]/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#D8B0AC]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-2/3 left-1/2 w-56 h-56 bg-[#E8C7C3]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#6355E4]/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#17A398]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-2/3 left-1/2 w-56 h-56 bg-[#6355E4]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '3s' }} />
       </div>
 
       <motion.div
@@ -89,8 +90,8 @@ export default function AdminLoginPage() {
 
           {/* Logo + title */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#E8C7C3]/20">
-              <Sparkles size={28} className="text-white" />
+            <div className="flex justify-center mb-4">
+              <GentleBookMark size={48} />
             </div>
             <h1 className="text-2xl font-bold text-white">GentleBook</h1>
             <p className="text-white/40 text-sm mt-1">Buchungssystem Administration</p>
@@ -104,12 +105,12 @@ export default function AdminLoginPage() {
                 type="button"
                 onClick={() => { setMode(m); setError(''); }}
                 className="relative flex-1 py-2 text-sm font-medium rounded-lg z-10 transition-colors"
-                style={{ color: mode === m ? '#1E1E1E' : 'rgba(255,255,255,0.45)' }}
+                style={{ color: mode === m ? 'white' : 'rgba(255,255,255,0.45)' }}
               >
                 {mode === m && (
                   <motion.div
                     layoutId="tab-indicator"
-                    className="absolute inset-0 bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] rounded-lg"
+                    className="absolute inset-0 bg-gradient-to-r from-[#6355E4] to-[#17A398] rounded-lg"
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -170,7 +171,7 @@ export default function AdminLoginPage() {
             </AnimatePresence>
 
             {/* Password */}
-            <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#E8C7C3]/50 focus-within:bg-white/8 transition-all">
+            <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 focus-within:bg-white/8 transition-all">
               <Lock size={16} className="text-white/30 flex-shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -255,7 +256,7 @@ function InputField({
   autoFocus?: boolean;
 }) {
   return (
-    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#E8C7C3]/50 focus-within:bg-white/8 transition-all">
+    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 focus-within:bg-white/8 transition-all">
       <span className="flex-shrink-0">{icon}</span>
       <input
         type={type}

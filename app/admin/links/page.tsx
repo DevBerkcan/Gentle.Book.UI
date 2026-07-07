@@ -29,8 +29,8 @@ import { HelpTip } from "@/components/ui/help-tip";
 // text-2:      #374151  (body text)
 // text-3:      #6B7280  (captions, hints)
 // text-4:      #9CA3AF  (placeholders, disabled)
-// accent:      #4F46E5  (active states, primary CTA highlight)
-// accent-bg:   #EEF2FF  (accent tint background)
+// accent:      #6355E4  (active states, primary CTA highlight)
+// accent-bg:   #EEEBFC  (accent tint background)
 // accent-bdr:  #C7D2FE  (accent border tint)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -172,7 +172,7 @@ const PAGE_TEMPLATES: {
 const PLAN_ORDER = { starter: 0, pro: 1, business: 2 };
 
 const TPL_VISUAL: Record<PageTemplate, { bg: string; accent: string }> = {
-  classic:    { bg: "linear-gradient(145deg,#FDF6F5,#F5EDEB)", accent: "#E8C7C3" },
+  classic:    { bg: "linear-gradient(145deg,#FDF6F5,#F6F5FA)", accent: "#E8C7C3" },
   soft:       { bg: "linear-gradient(145deg,#FFF0F8,#FFE0F0)", accent: "#F9A8D4" },
   hero:       { bg: "linear-gradient(145deg,#1a1a2e,#16213e)",  accent: "#E8C7C3" },
   neon:       { bg: "linear-gradient(145deg,#0D0D0D,#1a0028)",  accent: "#A855F7" },
@@ -256,7 +256,7 @@ let toastCounter = 0;
 function SectionLabel({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <span className="text-[#4F46E5]">{icon}</span>
+      <span className="text-[#6355E4]">{icon}</span>
       <span className="text-[11px] font-semibold text-[#374151] uppercase tracking-widest">{children}</span>
     </div>
   );
@@ -271,7 +271,7 @@ function OptionPill({
       onClick={onClick}
       className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all duration-150 ${
         active
-          ? "bg-[#EEF2FF] border-[#C7D2FE] text-[#4F46E5] shadow-sm"
+          ? "bg-[#EEEBFC] border-[#C7D2FE] text-[#6355E4] shadow-sm"
           : "bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#C7D2FE] hover:text-[#374151]"
       } ${className}`}
     >
@@ -285,7 +285,7 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <button
       onClick={onToggle}
-      className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${on ? "bg-[#4F46E5]" : "bg-[#D1D5DB]"}`}
+      className={`relative w-10 h-[22px] rounded-full transition-colors duration-200 ${on ? "bg-[#6355E4]" : "bg-[#D1D5DB]"}`}
     >
       <span
         className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${on ? "translate-x-5" : "translate-x-[3px]"}`}
@@ -487,7 +487,7 @@ export default function AdminLinksPage() {
   };
 
   // ── Shared input class ─────────────────────────────────────────────────────
-  const inputCls = "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all";
+  const inputCls = "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
   return (
     <div className="min-h-screen bg-[#F7F7F8] lg:flex lg:flex-row lg:overflow-hidden lg:h-screen">
@@ -569,7 +569,7 @@ export default function AdminLinksPage() {
                   </button>
                 </div>
                 <button onClick={handleDownload}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#4F46E5] text-white hover:bg-[#4338CA] transition-colors">
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#6355E4] text-white hover:bg-[#4338CA] transition-colors">
                   <Download size={14} />SVG herunterladen
                 </button>
               </motion.div>
@@ -589,7 +589,7 @@ export default function AdminLinksPage() {
             <div>
               <div className="flex items-center gap-2.5 mb-1">
                 <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">Meine Links</h1>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#4F46E5] text-white px-2.5 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#6355E4] text-white px-2.5 py-0.5 rounded-full">
                   <Sparkles size={8} />Live
                 </span>
               </div>
@@ -598,25 +598,25 @@ export default function AdminLinksPage() {
             <div className="flex items-center gap-2">
               {tenantSlug && (
                 <button onClick={() => setShowQR(true)}
-                  className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#4F46E5] transition-all">
+                  className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#6355E4] transition-all">
                   <QrCode size={14} /><span className="hidden sm:inline">QR-Code</span>
                 </button>
               )}
               {tenantSlug && (
                 <>
                   <button onClick={() => setShowPreviewModal(true)}
-                    className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#4F46E5] transition-all lg:hidden">
+                    className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#6355E4] transition-all lg:hidden">
                     <Eye size={14} /><span className="hidden sm:inline">Vorschau</span>
                   </button>
                   <a href={`/booking/${tenantSlug}`} target="_blank" rel="noopener noreferrer"
-                    className="hidden lg:flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#4F46E5] transition-all">
+                    className="hidden lg:flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#6355E4] transition-all">
                     <ExternalLink size={14} />Seite öffnen
                   </a>
                 </>
               )}
               <ShimmerButton
                 onClick={() => { setShowAddForm(true); setEditingId(null); }}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-[#4F46E5] text-white hover:bg-[#4338CA]"
+                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-xl bg-[#6355E4] text-white hover:bg-[#4338CA]"
                 shimmerDuration="2.5s"
               >
                 <Plus size={15} />Link hinzufügen
@@ -633,7 +633,7 @@ export default function AdminLinksPage() {
               className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#F7F7F8] transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#4F46E5] flex items-center justify-center shadow-sm flex-shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-[#6355E4] flex items-center justify-center shadow-sm flex-shrink-0">
                   <Palette size={14} className="text-white" />
                 </div>
                 <div className="text-left">
@@ -642,7 +642,7 @@ export default function AdminLinksPage() {
                     <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Template · Farben · Layout · Animationen</p>
                   )}
                 </div>
-                {designSaving && <Loader2 size={12} className="animate-spin text-[#4F46E5] ml-1" />}
+                {designSaving && <Loader2 size={12} className="animate-spin text-[#6355E4] ml-1" />}
               </div>
               <ChevronDown size={15} className={`text-[#9CA3AF] transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
             </button>
@@ -670,7 +670,7 @@ export default function AdminLinksPage() {
                         {PAGE_TEMPLATES.map((tpl) => {
                           const isActive = (config.pageTemplate ?? "classic") === tpl.key;
                           const isLocked = PLAN_ORDER[tpl.plan] > PLAN_ORDER[tenantPlan];
-                          const visual = TPL_VISUAL[tpl.key as PageTemplate] ?? { bg: "#F7F7F8", accent: "#4F46E5" };
+                          const visual = TPL_VISUAL[tpl.key as PageTemplate] ?? { bg: "#F7F7F8", accent: "#6355E4" };
                           return (
                             <MagicCard
                               key={tpl.key}
@@ -679,7 +679,7 @@ export default function AdminLinksPage() {
                               gradientSize={100}
                               className={`relative flex flex-col rounded-xl border transition-all overflow-hidden text-left cursor-pointer ${
                                 isActive
-                                  ? "border-[#A5B4FC] ring-2 ring-[#4F46E5]/20 shadow-sm"
+                                  ? "border-[#A5B4FC] ring-2 ring-[#6355E4]/20 shadow-sm"
                                   : isLocked
                                   ? "border-[#F3F4F6] opacity-45 cursor-not-allowed"
                                   : "border-[#E5E7EB] hover:border-[#C7D2FE]"
@@ -693,7 +693,7 @@ export default function AdminLinksPage() {
                                 <div className="h-[5px] w-9 rounded-md" style={{ background: visual.accent, opacity: 0.38 }} />
                                 <div className="absolute top-1 left-1.5 text-[10px] leading-none">{tpl.emoji}</div>
                                 {isActive && (
-                                  <div className="absolute top-1 right-1 w-[13px] h-[13px] bg-[#4F46E5] rounded-full flex items-center justify-center">
+                                  <div className="absolute top-1 right-1 w-[13px] h-[13px] bg-[#6355E4] rounded-full flex items-center justify-center">
                                     <Check size={7} className="text-white" strokeWidth={3} />
                                   </div>
                                 )}
@@ -705,7 +705,7 @@ export default function AdminLinksPage() {
                                   </div>
                                 )}
                               </div>
-                              <div className={`px-2 py-1.5 ${isActive ? "bg-[#EEF2FF]" : "bg-white"} transition-colors`}>
+                              <div className={`px-2 py-1.5 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
                                 <p className="text-[10px] font-bold text-[#111318] leading-tight">{tpl.name}</p>
                                 <p className="text-[9px] text-[#9CA3AF] leading-tight truncate">{tpl.desc}</p>
                               </div>
@@ -799,7 +799,7 @@ export default function AdminLinksPage() {
                             <button key={pack.key} onClick={() => applyCmsTemplate(pack)}
                               className={`group relative overflow-hidden rounded-xl border p-3 text-left transition-all ${
                                 isActive
-                                  ? "border-[#A5B4FC] bg-[#EEF2FF] ring-1 ring-[#4F46E5]/30"
+                                  ? "border-[#A5B4FC] bg-[#EEEBFC] ring-1 ring-[#6355E4]/30"
                                   : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:shadow-sm"
                               }`}
                             >
@@ -844,7 +844,7 @@ export default function AdminLinksPage() {
                             <button key={palette.key} onClick={() => applyColorScheme(palette)} title={palette.name}
                               className={`flex items-center gap-2 px-2 py-2 rounded-xl border transition-all ${
                                 isActive
-                                  ? "border-[#A5B4FC] ring-1 ring-[#4F46E5]/25 bg-[#EEF2FF]"
+                                  ? "border-[#A5B4FC] ring-1 ring-[#6355E4]/25 bg-[#EEEBFC]"
                                   : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE]"
                               }`}
                             >
@@ -871,7 +871,7 @@ export default function AdminLinksPage() {
                             <button key={key} onClick={() => applyPreset(key)}
                               className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left ${
                                 isActive
-                                  ? "border-[#A5B4FC] bg-[#EEF2FF] ring-1 ring-[#4F46E5]/25"
+                                  ? "border-[#A5B4FC] bg-[#EEEBFC] ring-1 ring-[#6355E4]/25"
                                   : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE]"
                               }`}
                             >
@@ -906,11 +906,11 @@ export default function AdminLinksPage() {
                           return (
                             <button key={t.value} onClick={() => updateTheme(t.value)}
                               className={`flex flex-col items-center gap-1.5 p-1.5 rounded-xl transition-all ${
-                                theme === t.value ? "ring-2 ring-[#4F46E5]/50 ring-offset-1" : "hover:opacity-80"
+                                theme === t.value ? "ring-2 ring-[#6355E4]/50 ring-offset-1" : "hover:opacity-80"
                               }`}>
                               <div className="w-full h-9 rounded-lg"
                                 style={{ background: bgPrev, border: t.value === "minimal" ? "1px solid #E5E7EB" : "none" }} />
-                              <span className={`text-[10px] font-semibold ${theme === t.value ? "text-[#4F46E5]" : "text-[#9CA3AF]"}`}>
+                              <span className={`text-[10px] font-semibold ${theme === t.value ? "text-[#6355E4]" : "text-[#9CA3AF]"}`}>
                                 {t.label}
                               </span>
                             </button>
@@ -922,7 +922,7 @@ export default function AdminLinksPage() {
                     {/* ── Primärfarbe ──────────────────────────────────────── */}
                     <div>
                       <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5 flex items-center gap-1.5">
-                        <Pipette size={11} className="text-[#4F46E5]" />Primärfarbe
+                        <Pipette size={11} className="text-[#6355E4]" />Primärfarbe
                       </p>
                       <div className="flex items-center gap-3">
                         <input type="color" value={primaryColor} onChange={(e) => updateColor(e.target.value)}
@@ -931,7 +931,7 @@ export default function AdminLinksPage() {
                         <div className="flex gap-1.5 flex-wrap">
                           {["#E8C7C3","#C9A96E","#2C3E50","#6B8E7F","#D4A5C9","#4A90D9","#1A1A2E","#E74C3C","#2ECC71","#9B59B6","#F39C12","#1ABC9C"].map((c) => (
                             <button key={c} onClick={() => updateColor(c)}
-                              className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${primaryColor === c ? "border-[#4F46E5] scale-110" : "border-white shadow-sm"}`}
+                              className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${primaryColor === c ? "border-[#6355E4] scale-110" : "border-white shadow-sm"}`}
                               style={{ background: c }} />
                           ))}
                         </div>
@@ -969,7 +969,7 @@ export default function AdminLinksPage() {
                           <button key={v} onClick={() => updateConfig("buttonStyle", v)}
                             className={`flex-1 flex flex-col items-center gap-2 py-3 border text-xs font-medium transition-all ${cls} ${
                               config.buttonStyle === v
-                                ? "bg-[#EEF2FF] border-[#A5B4FC] text-[#4F46E5]"
+                                ? "bg-[#EEEBFC] border-[#A5B4FC] text-[#6355E4]"
                                 : "bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#C7D2FE]"
                             }`}
                           >
@@ -983,7 +983,7 @@ export default function AdminLinksPage() {
                     {/* ── CTA-Text ─────────────────────────────────────────── */}
                     <div>
                       <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                        <Type size={11} className="text-[#4F46E5]" />CTA-Text (Buchungsbutton)
+                        <Type size={11} className="text-[#6355E4]" />CTA-Text (Buchungsbutton)
                       </p>
                       <input type="text" value={config.ctaText} onChange={(e) => updateConfig("ctaText", e.target.value)}
                         placeholder="Termin buchen" className={inputCls} />
@@ -1003,7 +1003,7 @@ export default function AdminLinksPage() {
                           <button key={v} onClick={() => updateConfig("fontFamily", v)}
                             className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border text-center transition-all ${
                               (config.fontFamily ?? "inter") === v
-                                ? "bg-[#EEF2FF] border-[#A5B4FC] ring-1 ring-[#4F46E5]/20"
+                                ? "bg-[#EEEBFC] border-[#A5B4FC] ring-1 ring-[#6355E4]/20"
                                 : "bg-white border-[#E5E7EB] hover:border-[#C7D2FE]"
                             }`}
                             style={{ fontFamily: font }}
@@ -1018,7 +1018,7 @@ export default function AdminLinksPage() {
                     {/* ── Button-Farbe ─────────────────────────────────────── */}
                     <div>
                       <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                        <Pipette size={11} className="text-[#4F46E5]" />Button-Farbe <span className="text-[#9CA3AF] font-normal">(optional)</span>
+                        <Pipette size={11} className="text-[#6355E4]" />Button-Farbe <span className="text-[#9CA3AF] font-normal">(optional)</span>
                       </p>
                       <div className="flex items-center gap-3">
                         <input type="color" value={config.ctaColor ?? primaryColor} onChange={(e) => updateConfig("ctaColor", e.target.value)}
@@ -1027,7 +1027,7 @@ export default function AdminLinksPage() {
                         <div className="flex gap-1.5 flex-wrap">
                           {["#ffffff","#111318","#C9A96E","#E74C3C","#2ECC71","#4A90D9"].map((c) => (
                             <button key={c} onClick={() => updateConfig("ctaColor", c)}
-                              className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${config.ctaColor === c ? "border-[#4F46E5] scale-110" : "border-white shadow-sm"}`}
+                              className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 ${config.ctaColor === c ? "border-[#6355E4] scale-110" : "border-white shadow-sm"}`}
                               style={{ background: c }} />
                           ))}
                         </div>
@@ -1052,7 +1052,7 @@ export default function AdminLinksPage() {
                           <button key={v} onClick={() => updateConfig("avatarShape", v)}
                             className={`flex-1 flex flex-col items-center gap-2 py-3 border rounded-xl text-xs font-medium transition-all ${
                               (config.avatarShape ?? "circle") === v
-                                ? "bg-[#EEF2FF] border-[#A5B4FC] text-[#4F46E5]"
+                                ? "bg-[#EEEBFC] border-[#A5B4FC] text-[#6355E4]"
                                 : "bg-white border-[#E5E7EB] text-[#6B7280] hover:border-[#C7D2FE]"
                             }`}
                           >
@@ -1076,7 +1076,7 @@ export default function AdminLinksPage() {
                           <button key={v} onClick={() => updateConfig("cardStyle", v)}
                             className={`flex flex-col items-center gap-1.5 py-2.5 rounded-xl border text-xs font-medium transition-all ${
                               (config.cardStyle ?? "filled") === v
-                                ? "border-[#A5B4FC] bg-[#EEF2FF] text-[#4F46E5]"
+                                ? "border-[#A5B4FC] bg-[#EEEBFC] text-[#6355E4]"
                                 : "border-[#E5E7EB] text-[#6B7280] bg-white hover:border-[#C7D2FE]"
                             }`}
                           >
@@ -1103,7 +1103,7 @@ export default function AdminLinksPage() {
                     {/* ── Animationsgeschwindigkeit ────────────────────────── */}
                     <div>
                       <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                        <Wind size={11} className="text-[#4F46E5]" />Animationsgeschwindigkeit
+                        <Wind size={11} className="text-[#6355E4]" />Animationsgeschwindigkeit
                       </p>
                       <div className="flex gap-1.5">
                         {(["none","slow","normal","fast"] as const).map((v) => (
@@ -1161,7 +1161,7 @@ export default function AdminLinksPage() {
                               <button key={v} onClick={() => updateConfig("bookingTheme", v)}
                                 className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 border rounded-xl text-xs font-medium transition-all ${
                                   (config.bookingTheme ?? "light") === v
-                                    ? "border-[#A5B4FC] bg-[#EEF2FF] text-[#4F46E5]"
+                                    ? "border-[#A5B4FC] bg-[#EEEBFC] text-[#6355E4]"
                                     : "border-[#E5E7EB] text-[#6B7280] bg-white hover:border-[#C7D2FE]"
                                 }`}
                               >
@@ -1196,7 +1196,7 @@ export default function AdminLinksPage() {
 
                         <div>
                           <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                            <Sparkles size={11} className="text-[#4F46E5]" />Button-Badge <span className="text-[#9CA3AF] font-normal">(optional)</span>
+                            <Sparkles size={11} className="text-[#6355E4]" />Button-Badge <span className="text-[#9CA3AF] font-normal">(optional)</span>
                           </p>
                           <input type="text" value={config.ctaBadge ?? ""}
                             onChange={(e) => updateConfig("ctaBadge", e.target.value)}
@@ -1210,7 +1210,7 @@ export default function AdminLinksPage() {
                     {/* Vorschau mobile link */}
                     {tenantSlug && (
                       <button onClick={() => setShowPreviewModal(true)}
-                        className="flex items-center gap-1.5 text-xs text-[#4F46E5] hover:underline font-medium lg:hidden">
+                        className="flex items-center gap-1.5 text-xs text-[#6355E4] hover:underline font-medium lg:hidden">
                         <Eye size={12} />Vorschau öffnen
                       </button>
                     )}
@@ -1242,7 +1242,7 @@ export default function AdminLinksPage() {
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-2">
                     <select value={newIcon} onChange={(e) => setNewIcon(e.target.value)}
-                      className="flex-shrink-0 border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm bg-white text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all">
+                      className="flex-shrink-0 border border-[#E5E7EB] rounded-xl px-3 py-2.5 text-sm bg-white text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all">
                       {ICON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                     </select>
                     <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Titel (z.B. Instagram)" autoFocus
@@ -1256,7 +1256,7 @@ export default function AdminLinksPage() {
                       Abbrechen
                     </button>
                     <ShimmerButton onClick={handleCreate} disabled={saving || !newTitle.trim() || !newUrl.trim()}
-                      className="px-5 py-2 text-sm rounded-xl disabled:opacity-40 flex items-center gap-1.5 bg-[#4F46E5] text-white hover:bg-[#4338CA]"
+                      className="px-5 py-2 text-sm rounded-xl disabled:opacity-40 flex items-center gap-1.5 bg-[#6355E4] text-white hover:bg-[#4338CA]"
                       shimmerDuration="2.5s">
                       {saving
                         ? <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
@@ -1273,10 +1273,10 @@ export default function AdminLinksPage() {
               FIXED BOOKING BUTTON
           ══════════════════════════════════════════════════════════════════ */}
           <div className="relative bg-white rounded-2xl border border-[#E5E7EB] shadow-sm mb-3 overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#4F46E5] rounded-l-2xl" />
+            <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-[#6355E4] rounded-l-2xl" />
             <div className="flex items-center gap-3 px-4 py-3.5 pl-5">
               <div className="flex-shrink-0 text-[#D1D5DB]"><GripVertical size={15} /></div>
-              <div className="flex-shrink-0 p-2 rounded-xl bg-[#EEF2FF] text-[#4F46E5]">
+              <div className="flex-shrink-0 p-2 rounded-xl bg-[#EEEBFC] text-[#6355E4]">
                 <Calendar size={15} />
               </div>
               <div className="flex-1 min-w-0">
@@ -1292,7 +1292,7 @@ export default function AdminLinksPage() {
           ══════════════════════════════════════════════════════════════════ */}
           {loading ? (
             <div className="text-center py-16 text-[#9CA3AF]">
-              <div className="inline-block w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin mb-3" />
+              <div className="inline-block w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin mb-3" />
               <p className="text-sm">Lade Links…</p>
             </div>
           ) : links.length === 0 && !showAddForm ? (
@@ -1302,7 +1302,7 @@ export default function AdminLinksPage() {
               <p className="text-[#111318] font-semibold text-sm">Noch keine Links</p>
               <p className="text-sm text-[#9CA3AF] mt-1 mb-5">Füge Instagram, WhatsApp oder andere Links hinzu</p>
               <button onClick={() => setShowAddForm(true)}
-                className="inline-flex items-center gap-1.5 text-sm bg-[#4F46E5] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#4338CA] transition-colors">
+                className="inline-flex items-center gap-1.5 text-sm bg-[#6355E4] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#4338CA] transition-colors">
                 <Plus size={13} />Ersten Link hinzufügen
               </button>
             </motion.div>
@@ -1321,7 +1321,7 @@ export default function AdminLinksPage() {
                       <div className="p-4 flex flex-col gap-3">
                         <div className="flex gap-2">
                           <select value={editIcon} onChange={(e) => setEditIcon(e.target.value)}
-                            className="flex-shrink-0 border border-[#E5E7EB] rounded-xl px-2 py-2 text-sm bg-white text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#4F46E5]/25 focus:border-[#A5B4FC] transition-all">
+                            className="flex-shrink-0 border border-[#E5E7EB] rounded-xl px-2 py-2 text-sm bg-white text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all">
                             {ICON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                           </select>
                           <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Titel" autoFocus
@@ -1335,7 +1335,7 @@ export default function AdminLinksPage() {
                             Abbrechen
                           </button>
                           <button onClick={() => handleSaveEdit(link.id)} disabled={saving}
-                            className="px-4 py-2 text-sm rounded-xl bg-[#4F46E5] text-white font-semibold hover:bg-[#4338CA] disabled:opacity-40 flex items-center gap-1.5 transition-colors">
+                            className="px-4 py-2 text-sm rounded-xl bg-[#6355E4] text-white font-semibold hover:bg-[#4338CA] disabled:opacity-40 flex items-center gap-1.5 transition-colors">
                             {saving
                               ? <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                               : <Check size={13} />}
@@ -1372,7 +1372,7 @@ export default function AdminLinksPage() {
                             {link.isActive ? "Aktiv" : "Aus"}
                           </button>
                           <button onClick={() => startEdit(link)}
-                            className="p-1.5 text-[#9CA3AF] hover:text-[#4F46E5] hover:bg-[#EEF2FF] transition-all rounded-lg">
+                            className="p-1.5 text-[#9CA3AF] hover:text-[#6355E4] hover:bg-[#EEEBFC] transition-all rounded-lg">
                             <Edit2 size={13} />
                           </button>
                           <button onClick={() => handleDelete(link.id, link.title)}
@@ -1410,7 +1410,7 @@ export default function AdminLinksPage() {
               </div>
               <div className="h-4 w-px bg-[#D1D5DB] mx-1" />
               <span className="text-xs font-semibold text-[#6B7280]">Live-Vorschau</span>
-              {designSaving && <Loader2 size={11} className="animate-spin text-[#4F46E5]" />}
+              {designSaving && <Loader2 size={11} className="animate-spin text-[#6355E4]" />}
             </div>
             <div className="flex items-center gap-2">
               <div className="flex rounded-xl bg-white border border-[#E5E7EB] shadow-sm p-1">
@@ -1421,7 +1421,7 @@ export default function AdminLinksPage() {
                 ] as const).map(({ v, icon: Icon }) => (
                   <button key={v} onClick={() => setPreviewDevice(v)} title={previewDeviceStyle[v].label}
                     className={`p-1.5 rounded-lg transition-all ${
-                      previewDevice === v ? "bg-[#EEF2FF] text-[#4F46E5]" : "text-[#9CA3AF] hover:text-[#374151]"
+                      previewDevice === v ? "bg-[#EEEBFC] text-[#6355E4]" : "text-[#9CA3AF] hover:text-[#374151]"
                     }`}>
                     <Icon size={13} />
                   </button>
@@ -1471,7 +1471,7 @@ export default function AdminLinksPage() {
             >
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F3F4F6]">
                 <p className="font-semibold text-sm text-[#111318] flex items-center gap-2">
-                  <Eye size={13} className="text-[#4F46E5]" />Live-Vorschau
+                  <Eye size={13} className="text-[#6355E4]" />Live-Vorschau
                 </p>
                 <button onClick={() => setShowPreviewModal(false)}
                   className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">

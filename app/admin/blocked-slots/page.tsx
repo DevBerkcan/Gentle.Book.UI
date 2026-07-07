@@ -39,14 +39,14 @@ function getMiniCalDays(year: number, month: number): (number | null)[] {
 }
 
 const MODAL_CLS = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20 bg-[#F5EDEB]/30",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20 bg-[#F6F5FA]/30",
   body: "py-4",
 };
 const INPUT_CLS = {
   inputWrapper:
-    "bg-[#F5EDEB] border border-[#E8C7C3]/30 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+    "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
 };
 
 type ModalMode = "create" | "edit";
@@ -280,7 +280,7 @@ export default function BlockedSlotsPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -292,7 +292,7 @@ export default function BlockedSlotsPage() {
             <p className="text-sm text-[#8A8A8A]">Blockierte Zeitslots verwalten</p>
           </div>
           <Button
-            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
             startContent={<Ban size={18} />}
             onPress={() => openCreate()}
           >
@@ -344,7 +344,7 @@ export default function BlockedSlotsPage() {
                       </div>
 
                       {/* Slot Info */}
-                      <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                      <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-[#6b7280]/10 flex items-center justify-center">
                             <Ban size={18} className="text-[#6b7280]" />
@@ -377,7 +377,7 @@ export default function BlockedSlotsPage() {
                 <ModalFooter className="gap-2">
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={() => {
                       onModalClose();
                       setSelectedSlotForDelete(null);
@@ -402,8 +402,8 @@ export default function BlockedSlotsPage() {
         </Modal>
 
         {/* Mini-Calendar */}
-        <Card className="mb-6 border border-[#E8C7C3]/20 shadow-xl">
-          <div className="flex items-center justify-between w-full px-4 py-3 bg-gradient-to-r from-[#F5EDEB] to-white border-b border-[#E8C7C3]/20 rounded-t-xl">
+        <Card className="mb-6 border border-[#ECEBF2]/20 shadow-xl">
+          <div className="flex items-center justify-between w-full px-4 py-3 bg-gradient-to-r from-[#F6F5FA] to-white border-b border-[#ECEBF2]/20 rounded-t-xl">
             <Button isIconOnly variant="flat" className="bg-white/60 min-w-8 h-8" onPress={prevMonth}>
               <ChevronLeft size={16} />
             </Button>
@@ -440,27 +440,27 @@ export default function BlockedSlotsPage() {
                     title={isBlocked ? "Blockiert – Doppelklick zum Erstellen" : "Doppelklick zum Erstellen"}
                     className={`relative flex flex-col items-center justify-center rounded-xl h-10 text-sm font-medium transition-all cursor-pointer
                       ${isSel
-                        ? "bg-[#017172] text-white shadow-md"
+                        ? "bg-[#6355E4] text-white shadow-md"
                         : isToday
-                          ? "ring-2 ring-[#017172] text-[#017172]"
+                          ? "ring-2 ring-[#6355E4] text-[#6355E4]"
                           : isBlocked
-                            ? "bg-[#017172]/10 text-[#017172] hover:bg-[#017172]/20"
-                            : "text-[#1E1E1E] hover:bg-[#F5EDEB]"
+                            ? "bg-[#6355E4]/10 text-[#6355E4] hover:bg-[#6355E4]/20"
+                            : "text-[#1E1E1E] hover:bg-[#F6F5FA]"
                       }`}
                   >
                     {day}
                     {isBlocked && !isSel && (
-                      <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#017172]" />
+                      <span className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-[#6355E4]" />
                     )}
                   </button>
                 );
               })}
             </div>
             {selDate && (
-              <div className="mt-3 pt-3 border-t border-[#E8C7C3]/20 flex items-center justify-between">
+              <div className="mt-3 pt-3 border-t border-[#ECEBF2]/20 flex items-center justify-between">
                 <p className="text-sm text-[#8A8A8A]">
                   Filter:{" "}
-                  <span className="font-semibold text-[#017172]">
+                  <span className="font-semibold text-[#6355E4]">
                     {new Date(selDate + "T00:00").toLocaleDateString("de-DE", {
                       day: "2-digit", month: "long", year: "numeric",
                     })}
@@ -469,7 +469,7 @@ export default function BlockedSlotsPage() {
                 <Button
                   size="sm"
                   variant="flat"
-                  className="bg-[#F5EDEB] text-[#8A8A8A] text-xs"
+                  className="bg-[#F6F5FA] text-[#8A8A8A] text-xs"
                   onPress={() => setSelDate(null)}
                 >
                   Aufheben
@@ -504,12 +504,12 @@ export default function BlockedSlotsPage() {
         {/* Slot list */}
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#017172]" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#6355E4]" />
           </div>
         ) : filteredSlots.length === 0 ? (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-[#F5EDEB] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Ban size={28} className="text-[#E8C7C3]" />
+            <div className="w-16 h-16 bg-[#F6F5FA] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Ban size={28} className="text-[#ECEBF2]" />
             </div>
             <p className="text-[#8A8A8A] font-medium">
               {selDate
@@ -526,7 +526,7 @@ export default function BlockedSlotsPage() {
               {pagedSlots.map((slot) => (
                 <Card
                   key={slot.id}
-                  className="border border-[#E8C7C3]/20 shadow-sm hover:shadow-md transition-shadow"
+                  className="border border-[#ECEBF2]/20 shadow-sm hover:shadow-md transition-shadow"
                 >
                   <CardBody className="p-4">
                     <div className="flex items-center justify-between gap-4">
@@ -558,7 +558,7 @@ export default function BlockedSlotsPage() {
                       <div className="flex items-center gap-1.5 shrink-0">
                         <Button
                           isIconOnly size="sm" variant="flat"
-                          className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                          className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                           onPress={() => openEdit(slot)}
                           title="Bearbeiten"
                         >
@@ -583,7 +583,7 @@ export default function BlockedSlotsPage() {
               <div className="flex items-center justify-center gap-2 mt-6">
                 <Button
                   isIconOnly size="sm" variant="flat"
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E]"
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E]"
                   isDisabled={safePage <= 1}
                   onPress={() => setPage((p) => Math.max(1, p - 1))}
                 >
@@ -600,8 +600,8 @@ export default function BlockedSlotsPage() {
                     <Button
                       key={p} size="sm" variant="flat"
                       className={`min-w-9 h-9 font-semibold ${p === safePage
-                          ? "bg-[#017172] text-white"
-                          : "bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] hover:bg-[#F5EDEB]"
+                          ? "bg-[#6355E4] text-white"
+                          : "bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] hover:bg-[#F6F5FA]"
                         }`}
                       onPress={() => setPage(p)}
                     >
@@ -612,7 +612,7 @@ export default function BlockedSlotsPage() {
 
                 <Button
                   isIconOnly size="sm" variant="flat"
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E]"
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E]"
                   isDisabled={safePage >= totalPages}
                   onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
                 >
@@ -637,7 +637,7 @@ export default function BlockedSlotsPage() {
             <>
               <ModalHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center">
                     {modalMode === "edit" ? (
                       <Edit size={15} className="text-white" />
                     ) : (
@@ -669,7 +669,7 @@ export default function BlockedSlotsPage() {
 
                   {/* Range toggle — create mode only */}
                   {modalMode === "create" && (
-                    <div className="flex items-center gap-3 p-3 bg-[#F5EDEB] rounded-xl border border-[#E8C7C3]/30">
+                    <div className="flex items-center gap-3 p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
                       <Switch
                         isSelected={isRange}
                         onValueChange={setIsRange}
@@ -780,7 +780,7 @@ export default function BlockedSlotsPage() {
               <ModalFooter className="gap-2">
                 <Button
                   variant="flat"
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                   onPress={handleClose}
                   isDisabled={submitting}
                   startContent={<X size={14} />}
@@ -788,7 +788,7 @@ export default function BlockedSlotsPage() {
                   Abbrechen
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                  className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                   onPress={handleSubmit}
                   isLoading={submitting}
                   startContent={

@@ -62,7 +62,7 @@ const PLANS = [
     name: 'Pro',
     price: 59,
     key: 'Professional',
-    color: 'border-[#017172]',
+    color: 'border-[#6355E4]',
     highlight: true,
     employees: 10,
     services: 50,
@@ -101,7 +101,7 @@ const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, tra
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
 
 function UsageBar({ label, current, limit, isUnlimited, percentage }: { label: string; current: number; limit: number; isUnlimited: boolean; percentage: number }) {
-  const color = percentage >= 100 ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-[#017172]';
+  const color = percentage >= 100 ? 'bg-red-500' : percentage >= 80 ? 'bg-amber-500' : 'bg-[#6355E4]';
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-sm">
@@ -231,7 +231,7 @@ export default function AdminSubscriptionPage() {
             const total = 14;
             const used = total - sub.trialDaysRemaining;
             const pct = (used / total) * 100;
-            const barColor = sub.trialDaysRemaining <= 3 ? 'bg-red-500' : sub.trialDaysRemaining <= 7 ? 'bg-amber-500' : 'bg-[#017172]';
+            const barColor = sub.trialDaysRemaining <= 3 ? 'bg-red-500' : sub.trialDaysRemaining <= 7 ? 'bg-amber-500' : 'bg-[#6355E4]';
             return (
               <div className="mt-4">
                 <div className="h-2 bg-white/50 rounded-full overflow-hidden">
@@ -248,7 +248,7 @@ export default function AdminSubscriptionPage() {
       {usage && (
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <BarChart2 size={18} className="text-[#017172]" />
+            <BarChart2 size={18} className="text-[#6355E4]" />
             Aktuelle Nutzung ({usage.planDisplayName}-Plan)
           </h2>
           <div className="space-y-4">
@@ -316,13 +316,13 @@ export default function AdminSubscriptionPage() {
               <div
                 key={plan.key}
                 className={`relative rounded-2xl border-2 p-6 flex flex-col
-                  ${plan.highlight ? 'border-[#017172] shadow-lg' : 'border-gray-200'}
-                  ${isCurrent ? 'ring-2 ring-[#017172]/30' : ''}
+                  ${plan.highlight ? 'border-[#6355E4] shadow-lg' : 'border-gray-200'}
+                  ${isCurrent ? 'ring-2 ring-[#6355E4]/30' : ''}
                   bg-white`}
               >
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-[#017172] text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="bg-[#6355E4] text-white text-xs font-semibold px-3 py-1 rounded-full">
                       Empfohlen
                     </span>
                   </div>
@@ -347,7 +347,7 @@ export default function AdminSubscriptionPage() {
                 <ul className="space-y-2.5 flex-1 mb-6">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
-                      <Check size={15} className="text-[#017172] shrink-0 mt-0.5" />
+                      <Check size={15} className="text-[#6355E4] shrink-0 mt-0.5" />
                       {f}
                     </li>
                   ))}
@@ -364,7 +364,7 @@ export default function AdminSubscriptionPage() {
                           : requestedPlan
                             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                             : plan.highlight
-                              ? 'bg-[#017172] hover:bg-[#015f5f] text-white'
+                              ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
                               : 'bg-gray-900 hover:bg-gray-700 text-white'}`}
                     >
                       {requestedPlan === plan.key ? (

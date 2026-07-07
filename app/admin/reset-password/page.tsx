@@ -3,7 +3,8 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowLeft, Sparkles } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 import Link from 'next/link';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -67,8 +68,8 @@ function ResetPasswordForm() {
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden bg-[#0f0f1a]">
       {/* Blobs */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#E8C7C3]/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#017172]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#6355E4]/8 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#17A398]/8 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
       </div>
 
       <motion.div
@@ -81,8 +82,8 @@ function ResetPasswordForm() {
 
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#017172] to-[#01a0a2] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#017172]/20">
-              <Sparkles size={28} className="text-white" />
+            <div className="flex justify-center mb-0">
+              <GentleBookMark size={48} />
             </div>
             <h1 className="text-2xl font-bold text-white">Neues Passwort</h1>
             <p className="text-white/40 text-sm mt-1">Wähle ein sicheres neues Passwort</p>
@@ -105,7 +106,7 @@ function ResetPasswordForm() {
                 <Link
                   href="/admin/login"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg, #017172, #01a0a2)' }}
+                  style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
                   Zum Login
                 </Link>
@@ -126,7 +127,7 @@ function ResetPasswordForm() {
                 <Link
                   href="/admin/forgot-password"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg, #017172, #01a0a2)' }}
+                  style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
                   Neuen Link anfordern
                 </Link>
@@ -134,7 +135,7 @@ function ResetPasswordForm() {
             ) : (
               <motion.form key="form" onSubmit={handleSubmit} className="space-y-4">
                 {/* Password */}
-                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#017172]/50 transition-all">
+                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 transition-all">
                   <Lock size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type={showPw ? 'text' : 'password'}
@@ -154,7 +155,7 @@ function ResetPasswordForm() {
                 </div>
 
                 {/* Confirm */}
-                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#017172]/50 transition-all">
+                <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 gap-3 focus-within:border-[#6355E4]/50 transition-all">
                   <Lock size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type={showConfirm ? 'text' : 'password'}
@@ -213,7 +214,7 @@ function ResetPasswordForm() {
                   disabled={status === 'loading'}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm text-white disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #017172, #01a0a2)' }}
+                  style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
                   {status === 'loading' ? (
                     <span className="flex items-center gap-2">

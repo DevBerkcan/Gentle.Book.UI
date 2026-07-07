@@ -59,7 +59,7 @@ export function SupportWidget() {
         whileHover={{ scale: 1.07 }}
         whileTap={{ scale: 0.95 }}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center text-white"
-        style={{ background: "linear-gradient(135deg, #017172, #01a0a2)", boxShadow: "0 8px 32px rgba(1,113,114,0.35)" }}
+        style={{ background: "linear-gradient(135deg, #6355E4, #17A398)", boxShadow: "0 8px 32px rgba(1,113,114,0.35)" }}
         aria-label="Support kontaktieren"
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -75,7 +75,7 @@ export function SupportWidget() {
         </AnimatePresence>
         {/* Pulse ring when closed */}
         {!open && (
-          <span className="absolute inset-0 rounded-2xl animate-ping bg-[#017172]/30 pointer-events-none" />
+          <span className="absolute inset-0 rounded-2xl animate-ping bg-[#6355E4]/30 pointer-events-none" />
         )}
       </motion.button>
 
@@ -92,7 +92,7 @@ export function SupportWidget() {
             style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }}
           >
             {/* Header */}
-            <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #017172, #01a0a2)" }}>
+            <div className="px-5 py-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #6355E4, #17A398)" }}>
               <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
                 <Sparkles size={18} className="text-white" />
               </div>
@@ -126,7 +126,7 @@ export function SupportWidget() {
                       Unser Team meldet sich so schnell wie möglich bei dir.
                     </p>
                     <p className="text-xs text-[#8A8A8A] mt-3 flex items-center justify-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-[#017172] rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-[#6355E4] rounded-full animate-pulse" />
                       support@gentlegroup.de
                     </p>
                   </motion.div>
@@ -145,8 +145,8 @@ export function SupportWidget() {
                             onClick={() => setSubject(p)}
                             className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
                               subject === p
-                                ? "bg-[#017172] text-white border-[#017172]"
-                                : "bg-white text-[#8A8A8A] border-gray-200 hover:border-[#017172]/40 hover:text-[#017172]"
+                                ? "bg-[#6355E4] text-white border-[#6355E4]"
+                                : "bg-white text-[#8A8A8A] border-gray-200 hover:border-[#6355E4]/40 hover:text-[#6355E4]"
                             }`}
                           >
                             {p}
@@ -159,7 +159,7 @@ export function SupportWidget() {
                         value={subject}
                         onChange={(e) => setSubject(e.target.value)}
                         maxLength={120}
-                        className="w-full text-sm border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#017172] focus:ring-1 focus:ring-[#017172]/20 transition-all placeholder-gray-300 text-[#1E1E1E]"
+                        className="w-full text-sm border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#6355E4] focus:ring-1 focus:ring-[#6355E4]/20 transition-all placeholder-gray-300 text-[#1E1E1E]"
                       />
                     </div>
 
@@ -172,7 +172,7 @@ export function SupportWidget() {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         maxLength={2000}
-                        className="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#017172] focus:ring-1 focus:ring-[#017172]/20 transition-all resize-none placeholder-gray-300 text-[#1E1E1E]"
+                        className="w-full text-sm border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#6355E4] focus:ring-1 focus:ring-[#6355E4]/20 transition-all resize-none placeholder-gray-300 text-[#1E1E1E]"
                       />
                       <p className="text-right text-[10px] text-gray-300 mt-0.5">{message.length}/2000</p>
                     </div>
@@ -197,7 +197,7 @@ export function SupportWidget() {
                       whileHover={canSubmit ? { scale: 1.01 } : {}}
                       whileTap={canSubmit ? { scale: 0.98 } : {}}
                       className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm text-white transition-opacity disabled:opacity-40"
-                      style={{ background: "linear-gradient(135deg, #017172, #01a0a2)" }}
+                      style={{ background: "linear-gradient(135deg, #6355E4, #17A398)" }}
                     >
                       {status === "sending" ? (
                         <>

@@ -24,7 +24,7 @@ import { formatPrice } from "@/lib/utils/currency";
 // surface:    #FFFFFF
 // border:     #E5E7EB   subtle: #F3F4F6
 // text-1:     #111318   text-2: #374151   text-3: #6B7280   text-4: #9CA3AF
-// accent:     #4F46E5   accent-bg: #EEF2FF   accent-bdr: #C7D2FE
+// accent:     #6355E4   accent-bg: #EEEBFC   accent-bdr: #C7D2FE
 // success:    #059669   error: #EF4444   warning: #D97706
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -82,12 +82,12 @@ function RevenuePeriodCard({
   icon: React.ElementType;
 }) {
   return (
-    <GlowingEffect glowColor="#4F46E5" spread={35}>
+    <GlowingEffect glowColor="#6355E4" spread={35}>
       <div className="relative overflow-hidden bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-        <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-[#4F46E5] to-[#4F46E555]" />
+        <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-2xl bg-gradient-to-r from-[#6355E4] to-[#6355E455]" />
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
-            <Icon size={15} className="text-[#4F46E5]" />
+          <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
+            <Icon size={15} className="text-[#6355E4]" />
           </div>
           <p className="text-sm font-semibold text-[#111318]">{label}</p>
         </div>
@@ -147,7 +147,7 @@ export default function TrackingPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
       </div>
     );
   }
@@ -229,12 +229,12 @@ export default function TrackingPage() {
               {
                 label: "Meist geklickter Link",
                 value: topLink ? `${topLink.linkName} · ${topLink.clickCount} Klicks` : "Noch keine Klicks",
-                icon: <MousePointerClick size={14} className="text-[#4F46E5]" />,
+                icon: <MousePointerClick size={14} className="text-[#6355E4]" />,
               },
               {
                 label: "Top-Service",
                 value: topService ? `${topService.serviceName} · ${topService.bookingCount} Buchungen` : "Noch keine Daten",
-                icon: <Calendar size={14} className="text-[#4F46E5]" />,
+                icon: <Calendar size={14} className="text-[#6355E4]" />,
               },
             ].map(({ label, value, icon }) => (
               <div key={label}
@@ -255,7 +255,7 @@ export default function TrackingPage() {
             label="Seitenaufrufe (gesamt)"
             value={stats.totalPageViews}
             icon={Eye}
-            accent="#4F46E5"
+            accent="#6355E4"
             helpText="Wie oft deine Buchungsseite von Besuchern aufgerufen wurde — inkl. wiederholter Besuche"
           />
           <OverviewTile
@@ -291,7 +291,7 @@ export default function TrackingPage() {
         </div>
 
         {/* ── Total Revenue Banner ──────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#4F46E5] rounded-2xl p-5 sm:p-6 border border-[#C7D2FE]">
+        <div className="relative overflow-hidden bg-[#6355E4] rounded-2xl p-5 sm:p-6 border border-[#C7D2FE]">
           <div className="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full" />
           <div className="absolute -bottom-3 right-20 w-16 h-16 bg-white/6 rounded-full" />
           <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -349,8 +349,8 @@ export default function TrackingPage() {
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#F3F4F6]">
-            <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
-              <MousePointerClick size={15} className="text-[#4F46E5]" />
+            <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
+              <MousePointerClick size={15} className="text-[#6355E4]" />
             </div>
             <div>
               <p className="font-semibold text-sm text-[#111318]">Klicks nach Link</p>
@@ -380,8 +380,8 @@ export default function TrackingPage() {
                       <div key={link.linkName} className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-[#EEF2FF] flex items-center justify-center flex-shrink-0">
-                              <Icon size={13} className="text-[#4F46E5]" />
+                            <div className="w-7 h-7 rounded-lg bg-[#EEEBFC] flex items-center justify-center flex-shrink-0">
+                              <Icon size={13} className="text-[#6355E4]" />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center gap-2">
@@ -402,7 +402,7 @@ export default function TrackingPage() {
                         {/* Progress bar */}
                         <div className="w-full bg-[#F3F4F6] rounded-full h-1.5">
                           <div
-                            className="h-1.5 rounded-full bg-[#4F46E5] transition-all duration-700"
+                            className="h-1.5 rounded-full bg-[#6355E4] transition-all duration-700"
                             style={{ width: `${link.percentage}%` }}
                           />
                         </div>

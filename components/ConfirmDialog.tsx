@@ -21,9 +21,9 @@ export interface ConfirmDialogProps {
 }
 
 const MODAL_CLASS = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20 bg-[#F5EDEB]/30",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20 bg-[#F6F5FA]/30",
 };
 
 const VARIANT_CFG: Record<ConfirmVariant, { iconBg: string; icon: React.ReactNode; btnClass: string }> = {
@@ -38,9 +38,9 @@ const VARIANT_CFG: Record<ConfirmVariant, { iconBg: string; icon: React.ReactNod
     btnClass: "bg-amber-500 text-white font-semibold shadow-lg shadow-amber-500/20",
   },
   info: {
-    iconBg: "bg-[#017172]/10",
-    icon: <Ban size={18} className="text-[#017172]" />,
-    btnClass: "bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20",
+    iconBg: "bg-[#6355E4]/10",
+    icon: <Ban size={18} className="text-[#6355E4]" />,
+    btnClass: "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20",
   },
 };
 
@@ -70,7 +70,7 @@ export function ConfirmDialog({
             <ModalFooter className="gap-2">
               <Button
                 variant="flat"
-                className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                 onPress={close}
                 isDisabled={loading}
                 startContent={<X size={14} />}

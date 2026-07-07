@@ -7,7 +7,7 @@ export function HelpTip({ text }: { text: string }) {
     <Tooltip content={text} placement="right" className="max-w-xs text-xs">
       <HelpCircle
         size={14}
-        className="text-[#8A8A8A] hover:text-[#017172] cursor-help transition-colors shrink-0"
+        className="text-[#8A8A8A] hover:text-[#6355E4] cursor-help transition-colors shrink-0"
       />
     </Tooltip>
   );

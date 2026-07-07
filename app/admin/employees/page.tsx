@@ -20,19 +20,19 @@ import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 
 const MODAL_CLS = {
-  base: "bg-white border border-[#E8C7C3]/30 shadow-2xl",
-  header: "border-b border-[#E8C7C3]/20 bg-gradient-to-r from-[#F5EDEB] to-white",
-  footer: "border-t border-[#E8C7C3]/20 bg-[#F5EDEB]/30",
+  base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
+  header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
+  footer: "border-t border-[#ECEBF2]/20 bg-[#F6F5FA]/30",
   body: "py-5",
 };
 const INPUT_CLS = {
-  inputWrapper: "bg-[#F5EDEB] border border-[#E8C7C3]/40 hover:border-[#017172] data-[focus=true]:border-[#017172]",
+  inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/40 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
   label: "text-[#8A8A8A] font-medium",
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
-  "bg-[#017172]", "bg-[#C09995]", "bg-[#D8B0AC]", "bg-[#6b7280]",
+  "bg-[#6355E4]", "bg-[#8B8FA6]", "bg-[#D8D7E2]", "bg-[#6b7280]",
   "bg-emerald-600", "bg-amber-600", "bg-violet-600",
 ];
 const initials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "?";
@@ -378,7 +378,7 @@ export default function EmployeesPage() {
   const inactiveCount = employees.length - activeCount;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
@@ -388,7 +388,7 @@ export default function EmployeesPage() {
             <p className="text-sm text-[#8A8A8A]">Fachkräfte verwalten und zuweisen</p>
           </div>
           <Button
-            className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+            className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
             startContent={<Plus size={18} />}
             onPress={openCreate}
           >
@@ -436,7 +436,7 @@ export default function EmployeesPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                      <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                         <div className="flex items-center gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(selectedEmployeeForDelete.name)}`}>
                             {initials(selectedEmployeeForDelete.name)}
@@ -453,7 +453,7 @@ export default function EmployeesPage() {
                           <Chip
                             size="sm"
                             variant="flat"
-                            className={selectedEmployeeForDelete.isActive ? "bg-[#017172]/10 text-[#017172]" : "bg-[#6b7280]/10 text-[#6b7280]"}
+                            className={selectedEmployeeForDelete.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}
                           >
                             {selectedEmployeeForDelete.isActive ? "Aktiv" : "Inaktiv"}
                           </Chip>
@@ -469,8 +469,8 @@ export default function EmployeesPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#017172]/5 p-4 rounded-xl border border-[#017172]/20">
-                        <p className="text-sm text-[#017172] flex items-start gap-2">
+                      <div className="bg-[#6355E4]/5 p-4 rounded-xl border border-[#6355E4]/20">
+                        <p className="text-sm text-[#6355E4] flex items-start gap-2">
                           <UserX size={16} className="shrink-0 mt-0.5" />
                           <span>
                             <strong>Alternative:</strong> Statt zu löschen, können Sie den Mitarbeiter auch <strong>deaktivieren</strong>.
@@ -484,7 +484,7 @@ export default function EmployeesPage() {
                 <ModalFooter className="gap-2">
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={() => {
                       onModalClose();
                       setSelectedEmployeeForDelete(null);
@@ -524,7 +524,7 @@ export default function EmployeesPage() {
               <>
                 <ModalHeader>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedEmployeeForToggle?.isActive ? "bg-amber-500" : "bg-[#017172]"}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${selectedEmployeeForToggle?.isActive ? "bg-amber-500" : "bg-[#6355E4]"}`}>
                       {selectedEmployeeForToggle?.isActive
                         ? <UserX size={20} className="text-white" />
                         : <UserCheck size={20} className="text-white" />
@@ -542,8 +542,8 @@ export default function EmployeesPage() {
                 <ModalBody>
                   {selectedEmployeeForToggle && (
                     <div className="space-y-4">
-                      <div className={`p-4 rounded-xl border ${selectedEmployeeForToggle.isActive ? "bg-amber-50 border-amber-200" : "bg-[#017172]/5 border-[#017172]/20"}`}>
-                        <p className={`text-sm flex items-start gap-2 ${selectedEmployeeForToggle.isActive ? "text-amber-700" : "text-[#017172]"}`}>
+                      <div className={`p-4 rounded-xl border ${selectedEmployeeForToggle.isActive ? "bg-amber-50 border-amber-200" : "bg-[#6355E4]/5 border-[#6355E4]/20"}`}>
+                        <p className={`text-sm flex items-start gap-2 ${selectedEmployeeForToggle.isActive ? "text-amber-700" : "text-[#6355E4]"}`}>
                           {selectedEmployeeForToggle.isActive
                             ? <UserX size={16} className="shrink-0 mt-0.5" />
                             : <UserCheck size={16} className="shrink-0 mt-0.5" />
@@ -562,7 +562,7 @@ export default function EmployeesPage() {
                         </p>
                       </div>
 
-                      <div className="bg-[#F5EDEB] p-4 rounded-xl border border-[#E8C7C3]/30">
+                      <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                         <div className="flex items-center gap-3">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(selectedEmployeeForToggle.name)}`}>
                             {initials(selectedEmployeeForToggle.name)}
@@ -577,7 +577,7 @@ export default function EmployeesPage() {
                             )}
                           </div>
                           <Chip size="sm" variant="flat"
-                            className={selectedEmployeeForToggle.isActive ? "bg-[#017172]/10 text-[#017172]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
+                            className={selectedEmployeeForToggle.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
                             {selectedEmployeeForToggle.isActive ? "Aktiv" : "Inaktiv"}
                           </Chip>
                         </div>
@@ -600,7 +600,7 @@ export default function EmployeesPage() {
                 <ModalFooter className="gap-2">
                   <Button
                     variant="flat"
-                    className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                    className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                     onPress={() => {
                       onModalClose();
                       setSelectedEmployeeForToggle(null);
@@ -613,7 +613,7 @@ export default function EmployeesPage() {
                   <Button
                     className={selectedEmployeeForToggle?.isActive
                       ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-lg shadow-amber-500/20"
-                      : "bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                      : "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                     }
                     onPress={handleToggleConfirm}
                     isLoading={toggling}
@@ -630,12 +630,12 @@ export default function EmployeesPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: "Gesamt", value: employees.length, cls: "text-[#1E1E1E]", glow: "#E8C7C3" },
-            { label: "Aktiv", value: activeCount, cls: "text-[#017172]", glow: "#017172" },
-            { label: "Inaktiv", value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#E8C7C3" },
+            { label: "Gesamt", value: employees.length, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
+            { label: "Aktiv", value: activeCount, cls: "text-[#6355E4]", glow: "#6355E4" },
+            { label: "Inaktiv", value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#ECEBF2" },
           ].map(({ label, value, cls, glow }) => (
             <GlowingEffect key={label} glowColor={glow} spread={40}>
-              <Card className="border border-[#E8C7C3]/30 shadow-md relative z-[1]">
+              <Card className="border border-[#ECEBF2]/30 shadow-md relative z-[1]">
                 <CardBody className="p-4">
                   <div className={`text-2xl sm:text-3xl font-bold ${cls}`}>{value}</div>
                   <div className="text-xs text-[#8A8A8A] mt-0.5">{label}</div>
@@ -646,7 +646,7 @@ export default function EmployeesPage() {
         </div>
 
         {/* Toggle */}
-        <div className="flex items-center gap-3 mb-5 p-3 bg-white border border-[#E8C7C3]/30 rounded-xl shadow-sm w-fit">
+        <div className="flex items-center gap-3 mb-5 p-3 bg-white border border-[#ECEBF2]/30 rounded-xl shadow-sm w-fit">
           <Switch
             isSelected={showInactive}
             onValueChange={setShowInactive}
@@ -666,16 +666,16 @@ export default function EmployeesPage() {
         {/* List */}
         {loading ? (
           <div className="flex justify-center py-16">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#017172]" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#6355E4]" />
           </div>
         ) : employees.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-[#F5EDEB] rounded-full flex items-center justify-center mx-auto mb-4">
-              <Users size={28} className="text-[#E8C7C3]" />
+            <div className="w-16 h-16 bg-[#F6F5FA] rounded-full flex items-center justify-center mx-auto mb-4">
+              <Users size={28} className="text-[#ECEBF2]" />
             </div>
             <p className="text-[#8A8A8A] font-medium">Noch keine Mitarbeiter vorhanden</p>
             <Button
-              className="mt-4 bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold"
+              className="mt-4 bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
               startContent={<Plus size={16} />}
               onPress={openCreate}
             >
@@ -685,9 +685,9 @@ export default function EmployeesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {employees.map((emp) => (
-              <GlowingEffect key={emp.id} glowColor="#017172" spread={45} disabled={!emp.isActive}>
+              <GlowingEffect key={emp.id} glowColor="#6355E4" spread={45} disabled={!emp.isActive}>
                 <Card
-                  className={`border shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 relative z-[1] ${emp.isActive ? "border-[#E8C7C3]/30" : "border-[#E8C7C3]/10 opacity-60"}`}>
+                  className={`border shadow-md transition-all hover:shadow-lg hover:-translate-y-0.5 relative z-[1] ${emp.isActive ? "border-[#ECEBF2]/30" : "border-[#ECEBF2]/10 opacity-60"}`}>
                   <CardBody className="p-5">
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
@@ -699,7 +699,7 @@ export default function EmployeesPage() {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="font-bold text-[#1E1E1E]">{emp.name}</span>
                         <Chip size="sm" variant="flat"
-                          className={emp.isActive ? "bg-[#017172]/10 text-[#017172]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
+                          className={emp.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
                           {emp.isActive ? "Aktiv" : "Inaktiv"}
                         </Chip>
                       </div>
@@ -723,7 +723,7 @@ export default function EmployeesPage() {
                     <div className="flex flex-col gap-1.5 shrink-0">
                       <Button
                         isIconOnly size="sm" variant="flat"
-                        className="bg-[#F5EDEB] text-[#017172] hover:bg-[#017172]/10"
+                        className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                         onPress={() => openEdit(emp)}
                         title="Bearbeiten"
                       >
@@ -731,7 +731,7 @@ export default function EmployeesPage() {
                       </Button>
                       <Button
                         isIconOnly size="sm" variant="flat"
-                        className="bg-[#F5EDEB] text-[#8A8A8A] hover:bg-[#E8C7C3]/30"
+                        className="bg-[#F6F5FA] text-[#8A8A8A] hover:bg-[#ECEBF2]/30"
                         onPress={() => openSchedule(emp)}
                         title="Arbeitszeiten"
                       >
@@ -747,7 +747,7 @@ export default function EmployeesPage() {
                       </Button>
                       <Button
                         isIconOnly size="sm" variant="flat"
-                        className={emp.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-[#017172]/10 text-[#017172] hover:bg-[#017172]/20"}
+                        className={emp.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-[#6355E4]/10 text-[#6355E4] hover:bg-[#6355E4]/20"}
                         onPress={() => handleToggle(emp)}
                         title={emp.isActive ? "Deaktivieren" : "Aktivieren"}
                       >
@@ -779,7 +779,7 @@ export default function EmployeesPage() {
             <>
               <ModalHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#017172] flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center">
                     {editing ? <Edit size={16} className="text-white" /> : <Plus size={18} className="text-white" />}
                   </div>
                   <div>
@@ -865,7 +865,7 @@ export default function EmployeesPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-[#8A8A8A] hover:text-[#017172] transition-colors"
+                          className="text-[#8A8A8A] hover:text-[#6355E4] transition-colors"
                           tabIndex={-1}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -877,12 +877,12 @@ export default function EmployeesPage() {
                   {editing && (
                     <>
                       {!resetPassword ? (
-                        <div className="p-3 bg-[#F5EDEB] rounded-xl border border-[#E8C7C3]/30">
+                        <div className="p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
                           <p className="text-sm text-[#8A8A8A] mb-2">Passwort ändern?</p>
                           <Button
                             size="sm"
                             variant="flat"
-                            className="bg-[#017172]/10 text-[#017172] font-semibold"
+                            className="bg-[#6355E4]/10 text-[#6355E4] font-semibold"
                             startContent={<Lock size={14} />}
                             onPress={() => setResetPassword(true)}
                           >
@@ -905,7 +905,7 @@ export default function EmployeesPage() {
                               <button
                                 type="button"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="text-[#8A8A8A] hover:text-[#017172] transition-colors"
+                                className="text-[#8A8A8A] hover:text-[#6355E4] transition-colors"
                                 tabIndex={-1}
                               >
                                 {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -929,7 +929,7 @@ export default function EmployeesPage() {
                   )}
 
                   {editing && (
-                    <div className="flex items-center gap-3 p-3 bg-[#F5EDEB] rounded-xl border border-[#E8C7C3]/30">
+                    <div className="flex items-center gap-3 p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
                       <Switch
                         isSelected={formActive}
                         onValueChange={setFormActive}
@@ -950,7 +950,7 @@ export default function EmployeesPage() {
               <ModalFooter className="gap-2">
                 <Button
                   variant="flat"
-                  className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold"
+                  className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold"
                   onPress={close}
                   isDisabled={submitting}
                   startContent={<X size={14} />}
@@ -958,7 +958,7 @@ export default function EmployeesPage() {
                   Abbrechen
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-[#017172] to-[#015f60] text-white font-semibold shadow-lg shadow-[#017172]/20"
+                  className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
                   onPress={handleSubmit}
                   isLoading={submitting}
                   isDisabled={
@@ -984,7 +984,7 @@ export default function EmployeesPage() {
             <>
               <ModalHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#E8C7C3] flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-full bg-[#ECEBF2] flex items-center justify-center">
                     <Clock size={16} className="text-white" />
                   </div>
                   <div>
@@ -996,21 +996,21 @@ export default function EmployeesPage() {
               <ModalBody>
                 {scheduleLoading ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-[#E8C7C3]" />
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-[#ECEBF2]" />
                   </div>
                 ) : (
                   <div className="space-y-2">
                     {DAYS.map((day) => {
                       const item = schedule.find((s) => s.dayOfWeek === day.value)!;
                       return (
-                        <div key={day.value} className={`rounded-xl p-3 border-2 transition-colors ${item.isWorkingDay ? 'border-[#E8C7C3]/40 bg-white' : 'border-gray-100 bg-gray-50'}`}>
+                        <div key={day.value} className={`rounded-xl p-3 border-2 transition-colors ${item.isWorkingDay ? 'border-[#ECEBF2]/40 bg-white' : 'border-gray-100 bg-gray-50'}`}>
                           <div className="flex items-center gap-3">
                             <input
                               type="checkbox"
                               id={`sched-${day.value}`}
                               checked={item.isWorkingDay}
                               onChange={(e) => updateScheduleItem(day.value, 'isWorkingDay', e.target.checked)}
-                              className="w-4 h-4 accent-[#E8C7C3] cursor-pointer"
+                              className="w-4 h-4 accent-[#ECEBF2] cursor-pointer"
                             />
                             <label htmlFor={`sched-${day.value}`} className={`font-semibold text-sm cursor-pointer w-8 ${item.isWorkingDay ? 'text-[#1E1E1E]' : 'text-[#8A8A8A]'}`}>
                               {day.label}
@@ -1044,11 +1044,11 @@ export default function EmployeesPage() {
                 )}
               </ModalBody>
               <ModalFooter className="gap-2">
-                <Button variant="flat" className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
+                <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
                   Schließen
                 </Button>
                 <Button
-                  className="bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white font-semibold"
+                  className="bg-gradient-to-r from-[#ECEBF2] to-[#D8D7E2] text-white font-semibold"
                   onPress={saveSchedule}
                   isLoading={scheduleSaving}
                   startContent={!scheduleSaving && <Save size={14} />}
@@ -1141,7 +1141,7 @@ export default function EmployeesPage() {
                             type="date"
                             value={vacationForm.startDate}
                             onChange={(e) => setVacationForm(prev => ({ ...prev, startDate: e.target.value }))}
-                            className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                            className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
                           />
                         </div>
                         <div>
@@ -1151,7 +1151,7 @@ export default function EmployeesPage() {
                             value={vacationForm.endDate}
                             min={vacationForm.startDate || undefined}
                             onChange={(e) => setVacationForm(prev => ({ ...prev, endDate: e.target.value }))}
-                            className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                            className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
                           />
                         </div>
                       </div>
@@ -1161,7 +1161,7 @@ export default function EmployeesPage() {
                         <select
                           value={vacationForm.type}
                           onChange={(e) => setVacationForm(prev => ({ ...prev, type: e.target.value }))}
-                          className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                          className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
                         >
                           {VACATION_TYPES.map(t => (
                             <option key={t.value} value={t.value}>{t.label}</option>
@@ -1176,7 +1176,7 @@ export default function EmployeesPage() {
                           placeholder="z.B. Genehmigt am 01.05."
                           value={vacationForm.note}
                           onChange={(e) => setVacationForm(prev => ({ ...prev, note: e.target.value }))}
-                          className="w-full text-sm border border-[#E8C7C3]/40 bg-[#F5EDEB] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#017172]"
+                          className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
                         />
                       </div>
 
@@ -1200,7 +1200,7 @@ export default function EmployeesPage() {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button variant="flat" className="bg-white border border-[#E8C7C3]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
+                <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
                   Schließen
                 </Button>
               </ModalFooter>

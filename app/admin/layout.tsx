@@ -45,8 +45,8 @@ function TrialExpiredModal() {
 
       {/* Blobs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: '#C09995' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: '#017172' }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: '#6355E4' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: '#17A398' }} />
       </div>
 
       <div className="relative w-full max-w-lg">
@@ -87,13 +87,13 @@ function TrialExpiredModal() {
                     disabled={requesting || !!requestedPlan}
                     className={`relative rounded-2xl p-4 text-left border transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
                       plan.highlight
-                        ? 'border-[#017172] bg-[#017172]/20'
+                        ? 'border-[#6355E4] bg-[#6355E4]/20'
                         : 'border-white/10 bg-white/5 hover:bg-white/10'
                     }`}
                   >
                     {plan.highlight && (
                       <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                        <span className="bg-[#017172] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{t.admin.recommended}</span>
+                        <span className="bg-[#6355E4] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{t.admin.recommended}</span>
                       </div>
                     )}
                     <p className="text-[11px] text-white/50 font-medium mb-1">{plan.name}</p>
@@ -223,8 +223,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#E8C7C3]" />
+      <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#6355E4]" />
       </div>
     );
   }
@@ -241,13 +241,13 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   if (isAuthenticated) {
     return (
-      <div className="flex min-h-screen bg-[#F2EFED]">
+      <div className="flex min-h-screen bg-[#F6F5FA]">
         <AdminNav />
         {/* Sidebar spacer: collapsible width on desktop (var(--admin-sidebar-width)), 56px (top bar) on mobile */}
         <div className="flex-1 min-w-0 md:ml-[var(--admin-sidebar-width,230px)] transition-[margin] duration-200 flex flex-col pt-14 md:pt-0 overflow-x-hidden">
           <ImpersonateBanner />
           {showOnboardingBanner && (
-            <div className="bg-[#017172] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
+            <div className="bg-[#6355E4] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
               <p className="text-white text-sm font-medium flex items-center gap-2">
                 <Rocket size={16} />
                 {t.admin.setupWizard}

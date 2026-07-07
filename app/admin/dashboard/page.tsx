@@ -22,7 +22,7 @@ import { HelpTip } from "@/components/ui/help-tip";
 // surface:    #FFFFFF
 // border:     #E5E7EB   subtle: #F3F4F6
 // text-1:     #111318   text-2: #374151   text-3: #6B7280   text-4: #9CA3AF
-// accent:     #4F46E5   accent-bg: #EEF2FF   accent-bdr: #A5B4FC / #C7D2FE
+// accent:     #6355E4   accent-bg: #EEEBFC   accent-bdr: #A5B4FC / #C7D2FE
 // success:    #065F46 on #D1FAE5   error: #991B1B on #FEE2E2
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ import { HelpTip } from "@/components/ui/help-tip";
 const STATUS_MAP: Record<string, { label: string; dot: string; bg: string; text: string }> = {
   Confirmed: { label: "Bestätigt",        dot: "bg-emerald-400", bg: "bg-[#D1FAE5]", text: "text-[#065F46]" },
   Pending:   { label: "Ausstehend",       dot: "bg-amber-400",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  Completed: { label: "Abgeschlossen",    dot: "bg-[#4F46E5]",   bg: "bg-[#EEF2FF]", text: "text-[#4F46E5]" },
+  Completed: { label: "Abgeschlossen",    dot: "bg-[#6355E4]",   bg: "bg-[#EEEBFC]", text: "text-[#6355E4]" },
   Cancelled: { label: "Storniert",        dot: "bg-red-400",     bg: "bg-[#FEE2E2]", text: "text-[#991B1B]" },
   NoShow:    { label: "Nicht erschienen", dot: "bg-[#9CA3AF]",   bg: "bg-[#F3F4F6]", text: "text-[#374151]" },
 };
@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F7F8]">
-        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#4F46E5] rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
       </div>
     );
   }
@@ -222,7 +222,7 @@ export default function AdminDashboardPage() {
         {isTenantAdmin && user?.tenantSlug && (
           <motion.div
             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="relative overflow-hidden rounded-2xl p-5 border border-[#C7D2FE] bg-[#4F46E5]"
+            className="relative overflow-hidden rounded-2xl p-5 border border-[#C7D2FE] bg-[#6355E4]"
           >
             {/* Decorative shapes */}
             <div className="absolute -top-6 -right-6 w-28 h-28 bg-white/10 rounded-full" />
@@ -257,7 +257,7 @@ export default function AdminDashboardPage() {
                   href={`/booking/${user.tenantSlug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-white text-[#4F46E5] px-3.5 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm"
+                  className="flex items-center gap-1.5 bg-white text-[#6355E4] px-3.5 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm"
                 >
                   <ArrowUpRight size={13} />Öffnen
                 </a>
@@ -275,8 +275,8 @@ export default function AdminDashboardPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
-                  <Sparkles size={15} className="text-[#4F46E5]" />
+                <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
+                  <Sparkles size={15} className="text-[#6355E4]" />
                 </div>
                 <div>
                   <p className="font-semibold text-sm text-[#111318]">Setup-Checkliste</p>
@@ -291,7 +291,7 @@ export default function AdminDashboardPage() {
                   {Array.from({ length: onboarding.totalSteps }).map((_, i) => (
                     <div key={i}
                       className={`h-1.5 w-5 rounded-full transition-colors ${
-                        i < onboarding.completedSteps ? "bg-[#4F46E5]" : "bg-[#F3F4F6]"
+                        i < onboarding.completedSteps ? "bg-[#6355E4]" : "bg-[#F3F4F6]"
                       }`}
                     />
                   ))}
@@ -326,7 +326,7 @@ export default function AdminDashboardPage() {
                   }`}
                 >
                   {done
-                    ? <CheckCircle2 size={17} className="text-[#4F46E5] flex-shrink-0" />
+                    ? <CheckCircle2 size={17} className="text-[#6355E4] flex-shrink-0" />
                     : <Circle size={17} className="text-[#D1D5DB] flex-shrink-0" />}
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium ${done ? "line-through text-[#9CA3AF]" : "text-[#111318]"}`}>{label}</p>
@@ -345,11 +345,11 @@ export default function AdminDashboardPage() {
           variants={stagger} initial="hidden" animate="visible"
         >
           <StatCard
-            icon={<Calendar size={18} style={{ color: "#4F46E5" }} />}
+            icon={<Calendar size={18} style={{ color: "#6355E4" }} />}
             value={statistics.totalBookingsThisMonth}
             label="Buchungen diesen Monat"
             growth={monthGrowth}
-            accent="#4F46E5"
+            accent="#6355E4"
             helpText="Alle neuen Buchungen die in diesem Kalendermonat erstellt wurden"
           />
           <StatCard
@@ -378,13 +378,13 @@ export default function AdminDashboardPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <BarChart2 size={15} className="text-[#4F46E5]" />
+                <BarChart2 size={15} className="text-[#6355E4]" />
                 <span className="text-sm font-semibold text-[#111318]">
                   Plan-Nutzung <span className="text-[#9CA3AF] font-normal">({usage.planDisplayName})</span>
                 </span>
               </div>
               <Link href="/admin/subscription"
-                className="text-xs font-medium text-[#4F46E5] hover:text-[#4338CA] transition-colors">
+                className="text-xs font-medium text-[#6355E4] hover:text-[#4338CA] transition-colors">
                 Upgraden →
               </Link>
             </div>
@@ -397,7 +397,7 @@ export default function AdminDashboardPage() {
                 const pct = data.isUnlimited ? 10 : Math.min(data.percentage, 100);
                 const barColor = data.percentage >= 100 ? "bg-[#EF4444]"
                   : data.percentage >= 80 ? "bg-[#F59E0B]"
-                  : "bg-[#4F46E5]";
+                  : "bg-[#6355E4]";
                 return (
                   <div key={label} className="space-y-1.5">
                     <div className="flex justify-between text-xs text-[#6B7280]">
@@ -430,21 +430,21 @@ export default function AdminDashboardPage() {
         >
           {/* Primary CTA */}
           <Link href="/admin/bookings?new=1"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#4F46E5] hover:bg-[#4338CA] shadow-sm active:scale-[0.97] transition-all">
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#6355E4] hover:bg-[#4338CA] shadow-sm active:scale-[0.97] transition-all">
             <Calendar size={14} />Neue Buchung
           </Link>
           {/* Secondary actions */}
           {[
-            { href: "/admin/bookings",      icon: <Clock size={14} className="text-[#4F46E5]" />,   label: "Buchungen heute", badge: today.totalBookings > 0 ? today.totalBookings : null },
+            { href: "/admin/bookings",      icon: <Clock size={14} className="text-[#6355E4]" />,   label: "Buchungen heute", badge: today.totalBookings > 0 ? today.totalBookings : null },
             { href: "/admin/customers",     icon: <Users size={14} className="text-[#8B5CF6]" />,   label: "Kunden",          badge: null },
             { href: "/admin/calendar",      icon: <CalendarDays size={14} className="text-[#059669]" />, label: "Kalender",    badge: null },
             { href: "/admin/blocked-slots", icon: <Ban size={14} className="text-[#EF4444]" />,     label: "Sperrzeiten",     badge: null },
           ].map(({ href, icon, label, badge }) => (
             <Link key={href} href={href}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-white text-[#374151] border border-[#E5E7EB] shadow-sm hover:border-[#C7D2FE] hover:text-[#4F46E5] active:scale-[0.97] transition-all">
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-white text-[#374151] border border-[#E5E7EB] shadow-sm hover:border-[#C7D2FE] hover:text-[#6355E4] active:scale-[0.97] transition-all">
               {icon}{label}
               {badge && (
-                <span className="bg-[#4F46E5] text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
+                <span className="bg-[#6355E4] text-white text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center">
                   {badge}
                 </span>
               )}
@@ -548,15 +548,15 @@ export default function AdminDashboardPage() {
                 className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden"
               >
                 <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#F3F4F6]">
-                  <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] flex items-center justify-center">
-                    <Clock size={15} className="text-[#4F46E5]" />
+                  <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
+                    <Clock size={15} className="text-[#6355E4]" />
                   </div>
                   <h3 className="font-bold text-[#111318] text-sm">Nächster Termin</h3>
                 </div>
                 <div className="p-5">
                   {/* Countdown */}
-                  <div className="text-center mb-4 py-4 bg-[#EEF2FF] rounded-xl border border-[#C7D2FE]">
-                    <div className="text-4xl font-black text-[#4F46E5] tabular-nums leading-none">
+                  <div className="text-center mb-4 py-4 bg-[#EEEBFC] rounded-xl border border-[#C7D2FE]">
+                    <div className="text-4xl font-black text-[#6355E4] tabular-nums leading-none">
                       {formatTime(nextBooking.minutesUntil)}
                     </div>
                     <div className="text-[11px] text-[#6B7280] mt-1.5">bis zum nächsten Termin</div>

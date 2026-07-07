@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import { Suspense } from "react";
 import { NextUIProvider } from "@nextui-org/react";
 import { Toaster } from "sonner";
@@ -8,7 +9,12 @@ import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { TrackingProvider } from "@/components/analytics/TrackingProvider";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const jakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -44,7 +50,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={inter.className}>
+      <body className={`${jakartaSans.variable} ${GeistSans.variable} font-ui`}>
         <GoogleAnalytics />
         <NextUIProvider>
           <Toaster position="top-right" richColors closeButton />
