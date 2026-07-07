@@ -364,7 +364,7 @@ export default function TenantLinktreePage() {
     : cfg.animationSpeed;
   const { container, item: itemVariant } = buildAnimVariants(resolvedAnimSpeed);
   const isGrid      = cfg.layoutMode === "grid";
-  const avatarSize  = cfg.mediaScale === "lg" ? "w-32 h-32" : cfg.mediaScale === "sm" ? "w-20 h-20" : "w-24 h-24";
+  const avatarSize  = cfg.mediaScale === "lg" ? "w-28 h-28" : cfg.mediaScale === "sm" ? "w-16 h-16" : "w-20 h-20";
   const avatarText  = cfg.mediaScale === "lg" ? "text-5xl" : cfg.mediaScale === "sm" ? "text-2xl" : "text-3xl";
   const heroGap     = cfg.heroStyle === "immersive" ? "gap-7 py-16" : cfg.heroStyle === "editorial" ? "gap-6 py-14" : "gap-5 py-14";
   const buttonPad   = cfg.buttonSpacing === "airy" ? "px-6 py-5" : cfg.buttonSpacing === "tight" ? "px-4 py-3" : "px-5 py-4";
@@ -443,8 +443,8 @@ export default function TenantLinktreePage() {
             )}
             {logoSrc ? (
               <img src={logoSrc} alt={tenantName}
-                className={`relative ${avatarSize} object-cover shadow-2xl border-4`}
-                style={{ borderRadius: avRadius, borderColor: t.avatarBorder }} />
+                className={`relative ${avatarSize} object-contain shadow-2xl border-4 bg-white`}
+                style={{ borderRadius: avRadius, borderColor: t.avatarBorder, padding: '6px' }} />
             ) : (
               <div className={`relative ${avatarSize} flex items-center justify-center shadow-2xl border-4`}
                 style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`, borderRadius: avRadius, borderColor: t.avatarBorder }}>

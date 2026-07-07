@@ -172,7 +172,10 @@ export default function AdminBookingsPage() {
     try {
       const data = await getEmployees();
       setEmployees(data);
-      if (data.length > 0) setSelectedEmployeeId(data[0].id);
+      if (data.length > 0) {
+        setSelectedEmployeeId(data[0].id);
+        await loadServicesForEmployee(data[0].id);
+      }
     } catch (err) {
       /* silent */
     } finally {
