@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList,
 } from "lucide-react";
 import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
@@ -75,6 +75,7 @@ export function AdminNav() {
         { href: "/admin/dashboard",    label: t.admin.dashboard, icon: LayoutDashboard },
         { href: "/admin/calendar",     label: t.admin.calendar,  icon: Calendar },
         { href: "/admin/bookings",     label: t.admin.bookings,  icon: BookOpen },
+        { href: "/admin/waitlist",     label: "Warteliste",      icon: ClipboardList },
         { href: "/admin/customers",    label: t.admin.customers, icon: Users },
       ],
     },

@@ -19,6 +19,7 @@ import {
   type CustomerInfo,
   type Employee,
 } from "@/lib/api/booking";
+import { joinWaitlist } from "@/lib/api/waitlist";
 import { BookingEvents } from "@/lib/tracking";
 import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -97,6 +98,11 @@ function BookingPageInner() {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
 
+  const [waitlistForm, setWaitlistForm] = useState({ firstName: '', lastName: '', email: '', phone: '', notes: '' });
+  const [waitlistSubmitting, setWaitlistSubmitting] = useState(false);
+  const [waitlistDone, setWaitlistDone] = useState(false);
+  const [waitlistError, setWaitlistError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!slug) return;
 
@@ -160,6 +166,37 @@ function BookingPageInner() {
       setSelectedTime(null);
     }
     setSelectedEmployee(employee);
+  };
+
+  const handleWaitlistJoin = async () => {
+    setWaitlistError(null);
+    if (!waitlistForm.firstName.trim() || !waitlistForm.lastName.trim()) {
+      setWaitlistError('Vor- und Nachname sind erforderlich.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(waitlistForm.email.trim())) {
+      setWaitlistError('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+      return;
+    }
+    setWaitlistSubmitting(true);
+    try {
+      await joinWaitlist(slug, {
+        firstName: waitlistForm.firstName.trim(),
+        lastName:  waitlistForm.lastName.trim(),
+        email:     waitlistForm.email.trim(),
+        phone:     waitlistForm.phone.trim() || undefined,
+        notes:     waitlistForm.notes.trim() || undefined,
+        serviceId: selectedService?.id,
+        employeeId: selectedEmployee?.id,
+        preferredDate: selectedDate ?? undefined,
+      });
+      setWaitlistDone(true);
+    } catch (err: any) {
+      setWaitlistError(err?.response?.data?.message || 'Fehler beim Eintragen in die Warteliste.');
+    } finally {
+      setWaitlistSubmitting(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -400,6 +437,106 @@ function BookingPageInner() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Waitlist section — shown when step 3, date selected, no available slots */}
+        {currentStep === 3 && selectedDate && !loadingSlots && availableSlots.length === 0 && (
+          <motion.div
+            key="waitlist"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`mt-6 shadow-xl p-5 sm:p-8 ${isDark ? 'bg-white/10 backdrop-blur-md ring-1 ring-white/10' : 'bg-white ring-1'}`}
+            style={{
+              borderRadius: getBorderRadius(buttonStyle),
+              ...(isDark ? {} : { '--tw-ring-color': `${primaryColor}33` } as any),
+            }}
+          >
+            {waitlistDone ? (
+              <div className="text-center py-6">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: `${primaryColor}20` }}
+                >
+                  <Check size={28} style={{ color: primaryColor }} />
+                </div>
+                <p className={`font-bold text-lg mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Sie stehen auf der Warteliste!
+                </p>
+                <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
+                  Wir benachrichtigen Sie per E-Mail, sobald ein Termin frei wird.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-5">
+                  <h3 className={`font-bold text-base mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Kein Termin frei – Warteliste beitreten
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-white/60' : 'text-gray-500'}`}>
+                    Wir informieren Sie sofort, wenn ein Termin für{' '}
+                    <strong>{selectedService?.name}</strong> am{' '}
+                    <strong>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}</strong> frei wird.
+                  </p>
+                </div>
+
+                {waitlistError && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                    {waitlistError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  {[
+                    { key: 'firstName', label: 'Vorname *', type: 'text' },
+                    { key: 'lastName',  label: 'Nachname *', type: 'text' },
+                    { key: 'email',     label: 'E-Mail *',   type: 'email' },
+                    { key: 'phone',     label: 'Telefon',    type: 'tel' },
+                  ].map(({ key, label, type }) => (
+                    <div key={key}>
+                      <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                        {label}
+                      </label>
+                      <input
+                        type={type}
+                        value={(waitlistForm as any)[key]}
+                        onChange={e => setWaitlistForm(f => ({ ...f, [key]: e.target.value }))}
+                        className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all ${
+                          isDark
+                            ? 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-white/50'
+                            : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-[var(--wl-primary)]'
+                        }`}
+                        style={{ '--wl-primary': primaryColor } as any}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mb-5">
+                  <label className={`block text-xs font-medium mb-1 ${isDark ? 'text-white/70' : 'text-gray-600'}`}>
+                    Anmerkungen (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={waitlistForm.notes}
+                    onChange={e => setWaitlistForm(f => ({ ...f, notes: e.target.value }))}
+                    className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all resize-none ${
+                      isDark
+                        ? 'bg-white/10 border-white/20 text-white placeholder:text-white/30 focus:border-white/50'
+                        : 'bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400'
+                    }`}
+                  />
+                </div>
+
+                <button
+                  onClick={handleWaitlistJoin}
+                  disabled={waitlistSubmitting}
+                  className="w-full py-3 px-6 rounded-xl font-semibold text-sm text-white transition-opacity disabled:opacity-60"
+                  style={{ backgroundColor: primaryColor, borderRadius: getBorderRadius(buttonStyle) }}
+                >
+                  {waitlistSubmitting ? 'Wird eingetragen…' : 'Auf Warteliste setzen'}
+                </button>
+              </>
+            )}
+          </motion.div>
+        )}
       </div>
     </div>
   );
