@@ -3,7 +3,7 @@
 
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
-import Image from "next/image";
+import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 
 export const ProfileCard = () => {
   return (
@@ -71,14 +71,7 @@ export const ProfileCard = () => {
         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
         className="mx-auto mb-6 flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-white shadow-lg ring-4 ring-white"
       >
-        <Image
-          src="/logo.png"
-          alt="GentleBook Logo"
-          width={128}
-          height={128}
-          className="h-full w-full object-contain"
-          priority
-        />
+        <GentleBookMark size={96} />
       </motion.div>
 
       <motion.h1
@@ -87,7 +80,7 @@ export const ProfileCard = () => {
         transition={{ delay: 0.3 }}
         className="mb-3 text-3xl font-extrabold tracking-tight text-[#14162B]"
       >
-        GentleBook<span className="text-[#ECEBF2]">.</span>
+        GentleBook<span className="text-[#17A398]">.</span>
       </motion.h1>
 
       <motion.p
