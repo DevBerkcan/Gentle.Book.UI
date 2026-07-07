@@ -24,7 +24,7 @@ function lighten(hex: string, amount = 0.85) {
     const g = parseInt(clean.slice(2, 4), 16);
     const b = parseInt(clean.slice(4, 6), 16);
     return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 
 export function EmployeeSelector({
@@ -34,7 +34,7 @@ export function EmployeeSelector({
   onNext,
   onBack,
   tenantSlug,
-  primaryColor = "#E8C7C3",
+  primaryColor = "#6355E4",
 }: EmployeeSelectorProps) {
   const { t } = useTranslation();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -109,7 +109,7 @@ export function EmployeeSelector({
     <>
       <div className={`space-y-6 px-4 sm:px-0 ${selectedEmployee ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">{t.booking.chooseEmployee}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseEmployee}</h2>
           <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step2of4}</p>
           {selectedService && (
             <p className="text-xs mt-1" style={{ color: primaryColor }}>{t.booking.for}: {selectedService.name}</p>
@@ -140,7 +140,7 @@ export function EmployeeSelector({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-[#1E1E1E] text-sm sm:text-base break-words pr-1">{emp.name}</h4>
+                          <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words pr-1">{emp.name}</h4>
                           <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 break-words">{emp.role}</p>
 
                           {emp.location ? (
@@ -151,7 +151,7 @@ export function EmployeeSelector({
                                 </div>
                                 <div className="flex-1">
                                   <p className="text-xs font-medium text-[#8A8A8A]">{t.booking.location}</p>
-                                  <p className="text-sm font-bold text-[#1E1E1E]">{emp.location}</p>
+                                  <p className="text-sm font-bold text-[#14162B]">{emp.location}</p>
                                 </div>
                               </div>
                             </div>
@@ -214,7 +214,7 @@ export function EmployeeSelector({
             <div className="max-w-3xl mx-auto flex items-center gap-3">
               <button
                 onClick={onBack}
-                className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#1E1E1E] font-semibold py-3 px-4 rounded-xl transition-all"
+                className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#14162B] font-semibold py-3 px-4 rounded-xl transition-all"
                 style={{ backgroundColor: lighten(primaryColor, 0.88) }}
               >
                 <ArrowLeft size={18} />
@@ -227,7 +227,7 @@ export function EmployeeSelector({
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-[#8A8A8A]">{t.booking.selected}</p>
-                  <p className="font-bold text-[#1E1E1E] text-sm truncate">{selectedEmployee.name}</p>
+                  <p className="font-bold text-[#14162B] text-sm truncate">{selectedEmployee.name}</p>
                   <p className="text-xs text-[#8A8A8A] truncate">{selectedEmployee.role}</p>
                 </div>
               </div>

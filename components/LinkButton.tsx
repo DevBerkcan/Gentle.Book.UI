@@ -66,8 +66,8 @@ export const LinkButton = ({
         hover:shadow-xl focus-visible:shadow-xl cursor-pointer
         ${
           isPrimary
-            ? "bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white hover:from-[#D8B0AC] hover:to-[#C09995]"
-            : "border-2 border-[#E8C7C3] bg-white text-[#1E1E1E] hover:border-[#D8B0AC] hover:bg-[#F5EDEB]"
+            ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white hover:from-[#5646D6] hover:to-[#15907F]"
+            : "border-2 border-[#ECEBF2] bg-white text-[#14162B] hover:border-[#D8D7E2] hover:bg-[#F6F5FA]"
         }
       `}
       aria-label={`${label} öffnen`}
@@ -75,7 +75,7 @@ export const LinkButton = ({
       {/* Background gradient effect on hover */}
       <motion.div
         className={`absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-10 ${
-          isPrimary ? "bg-white" : "bg-[#E8C7C3]"
+          isPrimary ? "bg-white" : "bg-[#ECEBF2]"
         }`}
         initial={false}
       />
@@ -88,7 +88,7 @@ export const LinkButton = ({
       >
         <Icon
           size={24}
-          className={isPrimary ? "text-white" : "text-[#E8C7C3]"}
+          className={isPrimary ? "text-white" : "text-[#ECEBF2]"}
         />
       </motion.div>
 
@@ -136,7 +136,7 @@ export const LinkButton = ({
         >
           <Sparkles
             size={16}
-            className={isPrimary ? "text-white" : "text-[#E8C7C3]"}
+            className={isPrimary ? "text-white" : "text-[#ECEBF2]"}
           />
         </motion.div>
       )}

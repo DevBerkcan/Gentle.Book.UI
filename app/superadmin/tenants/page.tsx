@@ -41,7 +41,7 @@ const DEFAULT_NEW = {
   name: '',
   slug: '',
   industryType: 'Hairdresser',
-  primaryColor: '#E8C7C3',
+  primaryColor: '#6355E4',
   currency: 'CHF',
   timeZone: 'Europe/Zurich',
   adminFirstName: '',
@@ -641,7 +641,7 @@ export default function TenantsPage() {
                   <td className="px-4 py-3">
                     <div
                       className="w-8 h-8 rounded-lg border border-gray-200 flex-shrink-0"
-                      style={{ backgroundColor: t.primaryColor || '#E8C7C3' }}
+                      style={{ backgroundColor: t.primaryColor || '#6355E4' }}
                       title={t.primaryColor}
                     />
                   </td>

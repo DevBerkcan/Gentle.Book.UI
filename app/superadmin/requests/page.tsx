@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 const PLAN_COLORS: Record<string, string> = {
   Starter: 'bg-blue-50 text-blue-700 border-blue-200',
-  Professional: 'bg-teal-50 text-[#017172] border-[#017172]/30',
+  Professional: 'bg-teal-50 text-[#6355E4] border-[#6355E4]/30',
   Agency: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
@@ -166,7 +166,7 @@ export default function SubscriptionRequestsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link
                       href={`/superadmin/tenants/${item.tenantId}`}
-                      className="font-semibold text-gray-900 hover:text-[#017172] transition-colors"
+                      className="font-semibold text-gray-900 hover:text-[#6355E4] transition-colors"
                     >
                       {item.tenantName}
                     </Link>
@@ -183,7 +183,7 @@ export default function SubscriptionRequestsPage() {
                     </span>
                     <a
                       href={`mailto:${item.contactEmail}`}
-                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#017172] transition-colors"
+                      className="flex items-center gap-1 text-xs text-gray-500 hover:text-[#6355E4] transition-colors"
                     >
                       <Mail size={12} /> {item.contactEmail}
                     </a>
@@ -202,7 +202,7 @@ export default function SubscriptionRequestsPage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <Link
                     href={`/superadmin/tenants/${item.tenantId}`}
-                    className="p-2 text-gray-400 hover:text-[#017172] hover:bg-gray-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-400 hover:text-[#6355E4] hover:bg-gray-50 rounded-lg transition-colors"
                     title="System öffnen"
                   >
                     <ExternalLink size={16} />
@@ -219,7 +219,7 @@ export default function SubscriptionRequestsPage() {
                       <button
                         onClick={() => handleActivate(item)}
                         disabled={isLoading}
-                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#017172] hover:bg-[#015f60] text-white rounded-xl transition-colors disabled:opacity-50"
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#6355E4] hover:bg-[#5646D6] text-white rounded-xl transition-colors disabled:opacity-50"
                       >
                         {isLoading ? (
                           <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

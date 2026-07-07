@@ -672,7 +672,7 @@ export default function TenantDetailPage() {
                       <p className="text-xs text-gray-400">Buchungen</p>
                     </div>
                     <div className="text-center border-x border-gray-200">
-                      <p className="text-lg font-bold text-[#017172]">
+                      <p className="text-lg font-bold text-[#6355E4]">
                         {tenantStats.totalRevenue > 0
                           ? `${(tenantStats.totalRevenue / 100).toLocaleString('de-DE', { minimumFractionDigits: 2 })} ${sub.plan}`
                           : '–'}

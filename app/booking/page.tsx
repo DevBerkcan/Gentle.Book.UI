@@ -132,11 +132,11 @@ export default function BookingPage() {
   const back = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] via-[#F5EDEB] to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-[#F6F5FA] to-white">
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-[#8A8A8A] hover:text-[#E8C7C3] transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-[#8A8A8A] hover:text-[#ECEBF2] transition-colors mb-6"
         >
           <Home size={20} />
           <span>Zurück zur Startseite</span>
@@ -150,10 +150,10 @@ export default function BookingPage() {
                 <div
                   className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
                     currentStep > step
-                      ? "bg-[#E8C7C3] text-white"
+                      ? "bg-[#ECEBF2] text-white"
                       : currentStep === step
-                      ? "bg-[#E8C7C3] text-white ring-4 ring-[#E8C7C3]/20"
-                      : "bg-[#F0E6E4] text-[#8A8A8A]"
+                      ? "bg-[#ECEBF2] text-white ring-4 ring-[#ECEBF2]/20"
+                      : "bg-[#F6F5FA] text-[#8A8A8A]"
                   }`}
                 >
                   {currentStep > step ? <Check size={18} /> : step}
@@ -161,7 +161,7 @@ export default function BookingPage() {
                 {step < TOTAL_STEPS && (
                   <div
                     className={`w-8 sm:w-12 h-1 mx-1 sm:mx-2 rounded transition-all ${
-                      currentStep > step ? "bg-[#E8C7C3]" : "bg-[#F0E6E4]"
+                      currentStep > step ? "bg-[#ECEBF2]" : "bg-[#F6F5FA]"
                     }`}
                   />
                 )}
@@ -183,7 +183,7 @@ export default function BookingPage() {
           )}
         </AnimatePresence>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 ring-1 ring-[#E8C7C3]/20">
+        <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 ring-1 ring-[#ECEBF2]/20">
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>

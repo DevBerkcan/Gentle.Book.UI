@@ -18,7 +18,7 @@ interface BookingPreview {
 
 type State = 'loading' | 'preview' | 'confirming' | 'cancelled' | 'already_cancelled' | 'error';
 
-const PRIMARY = '#E8C7C3';
+const PRIMARY = '#ECEBF2';
 
 const stagger = {
   hidden: {},
@@ -73,7 +73,7 @@ export default function CancelBookingPage() {
 
   if (state === 'loading') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F5EDEB] to-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-[#F6F5FA] to-white flex items-center justify-center">
         <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin"
           style={{ borderColor: `${PRIMARY} transparent ${PRIMARY} ${PRIMARY}` }} />
       </div>
@@ -81,7 +81,7 @@ export default function CancelBookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F5EDEB] to-white flex items-center justify-center p-5">
+    <div className="min-h-screen bg-gradient-to-b from-[#F6F5FA] to-white flex items-center justify-center p-5">
       <AnimatePresence mode="wait">
 
         {/* Error */}
@@ -93,10 +93,10 @@ export default function CancelBookingPage() {
             <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={28} className="text-red-500" />
             </div>
-            <h1 className="text-xl font-bold text-[#1E1E1E] mb-2">Ungültiger Link</h1>
+            <h1 className="text-xl font-bold text-[#14162B] mb-2">Ungültiger Link</h1>
             <p className="text-[#8A8A8A] mb-6 text-sm">{errorMessage}</p>
             <a href="mailto:support@gentlegroup.de"
-              className="inline-block bg-[#1E1E1E] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
+              className="inline-block bg-[#14162B] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
               Support kontaktieren
             </a>
           </motion.div>
@@ -111,7 +111,7 @@ export default function CancelBookingPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <XCircle size={28} className="text-gray-400" />
             </div>
-            <h1 className="text-xl font-bold text-[#1E1E1E] mb-2">Bereits storniert</h1>
+            <h1 className="text-xl font-bold text-[#14162B] mb-2">Bereits storniert</h1>
             <p className="text-[#8A8A8A] text-sm">Diese Buchung wurde bereits storniert.</p>
           </motion.div>
         )}
@@ -146,7 +146,7 @@ export default function CancelBookingPage() {
             className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
           >
             {/* Header */}
-            <div className="px-8 pt-8 pb-6 text-center" style={{ background: `linear-gradient(135deg, ${PRIMARY}, #D8B0AC)` }}>
+            <div className="px-8 pt-8 pb-6 text-center" style={{ background: `linear-gradient(135deg, ${PRIMARY}, #D8D7E2)` }}>
               <div className="w-16 h-16 bg-white/25 rounded-full flex items-center justify-center mx-auto mb-3 border-4 border-white/40">
                 <Sparkles size={28} className="text-white" />
               </div>
@@ -159,42 +159,42 @@ export default function CancelBookingPage() {
                 <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-3 mb-5">
                   {preview.bookingNumber && (
                     <motion.p variants={slideUp} className="text-xs text-[#8A8A8A] text-center">
-                      Buchungsnummer: <span className="font-semibold text-[#1E1E1E]">{preview.bookingNumber}</span>
+                      Buchungsnummer: <span className="font-semibold text-[#14162B]">{preview.bookingNumber}</span>
                     </motion.p>
                   )}
                   {preview.serviceName && (
-                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F5EDEB] rounded-2xl p-3.5">
+                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F6F5FA] rounded-2xl p-3.5">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: PRIMARY }}>
                         <CheckCircle size={14} className="text-white" />
                       </div>
                       <div>
                         <p className="text-xs text-[#8A8A8A]">Leistung</p>
-                        <p className="font-semibold text-[#1E1E1E] text-sm">{preview.serviceName}</p>
+                        <p className="font-semibold text-[#14162B] text-sm">{preview.serviceName}</p>
                       </div>
                     </motion.div>
                   )}
                   {preview.bookingDate && (
-                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F5EDEB] rounded-2xl p-3.5">
+                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F6F5FA] rounded-2xl p-3.5">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: PRIMARY }}>
                         <Calendar size={14} className="text-white" />
                       </div>
                       <div>
                         <p className="text-xs text-[#8A8A8A]">Datum</p>
-                        <p className="font-semibold text-[#1E1E1E] text-sm">{preview.bookingDate}</p>
+                        <p className="font-semibold text-[#14162B] text-sm">{preview.bookingDate}</p>
                       </div>
                     </motion.div>
                   )}
                   {preview.startTime && (
-                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F5EDEB] rounded-2xl p-3.5">
+                    <motion.div variants={slideUp} className="flex items-center gap-3 bg-[#F6F5FA] rounded-2xl p-3.5">
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{ background: PRIMARY }}>
                         <Clock size={14} className="text-white" />
                       </div>
                       <div>
                         <p className="text-xs text-[#8A8A8A]">Uhrzeit</p>
-                        <p className="font-semibold text-[#1E1E1E] text-sm">{preview.startTime} – {preview.endTime} Uhr</p>
+                        <p className="font-semibold text-[#14162B] text-sm">{preview.startTime} – {preview.endTime} Uhr</p>
                       </div>
                     </motion.div>
                   )}
@@ -220,7 +220,7 @@ export default function CancelBookingPage() {
                 </motion.button>
                 <button
                   onClick={() => window.history.back()}
-                  className="w-full flex items-center justify-center gap-1.5 text-sm text-[#8A8A8A] hover:text-[#1E1E1E] transition-colors py-2"
+                  className="w-full flex items-center justify-center gap-1.5 text-sm text-[#8A8A8A] hover:text-[#14162B] transition-colors py-2"
                 >
                   <ArrowLeft size={14} /> Abbrechen
                 </button>

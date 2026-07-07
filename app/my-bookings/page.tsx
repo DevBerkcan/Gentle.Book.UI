@@ -90,16 +90,16 @@ export default function MyBookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-[#1E1E1E] mb-3">Meine Buchungen</h1>
+          <h1 className="text-4xl font-bold text-[#14162B] mb-3">Meine Buchungen</h1>
           <p className="text-[#8A8A8A]">
             Gib deine E-Mail-Adresse ein, um deine Termine zu sehen
           </p>
         </div>
 
-        <Card className="mb-8 border-2 border-[#E8C7C3]/20 shadow-xl">
+        <Card className="mb-8 border-2 border-[#ECEBF2]/20 shadow-xl">
           <CardBody className="p-6">
             <form onSubmit={handleSearch} className="flex gap-4">
               <Input
@@ -110,14 +110,14 @@ export default function MyBookingsPage() {
                 startContent={<Mail size={18} className="text-[#8A8A8A]" />}
                 isRequired
                 classNames={{
-                  input: "text-[#1E1E1E]",
-                  inputWrapper: "bg-white border-2 border-[#E8C7C3]/30 hover:border-[#E8C7C3]",
+                  input: "text-[#14162B]",
+                  inputWrapper: "bg-white border-2 border-[#ECEBF2]/30 hover:border-[#ECEBF2]",
                 }}
                 size="lg"
               />
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-[#E8C7C3] to-[#D8B0AC] text-white font-semibold px-8 shadow-lg"
+                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold px-8 shadow-lg"
                 size="lg"
                 isLoading={loading}
               >
@@ -144,10 +144,10 @@ export default function MyBookingsPage() {
         {searched && !loading && (
           <>
             {bookings.length === 0 ? (
-              <Card className="border-2 border-[#E8C7C3]/20 shadow-xl">
+              <Card className="border-2 border-[#ECEBF2]/20 shadow-xl">
                 <CardBody className="p-12 text-center">
-                  <Calendar className="mx-auto mb-4 text-[#E8C7C3]" size={48} />
-                  <h3 className="text-xl font-semibold text-[#1E1E1E] mb-2">
+                  <Calendar className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
+                  <h3 className="text-xl font-semibold text-[#14162B] mb-2">
                     Keine Buchungen gefunden
                   </h3>
                   <p className="text-[#8A8A8A]">
@@ -158,18 +158,18 @@ export default function MyBookingsPage() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-[#1E1E1E]">
+                  <h2 className="text-2xl font-bold text-[#14162B]">
                     Deine Termine ({bookings.length})
                   </h2>
                 </div>
 
                 {bookings.map((booking) => (
-                  <Card key={booking.id} className="border-2 border-[#E8C7C3]/20 shadow-xl">
+                  <Card key={booking.id} className="border-2 border-[#ECEBF2]/20 shadow-xl">
                     <CardBody className="p-6">
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-bold text-[#1E1E1E]">
+                            <h3 className="text-xl font-bold text-[#14162B]">
                               {booking.booking.serviceName}
                             </h3>
                             <Chip color={getStatusColor(booking.status)} size="sm" variant="flat">
@@ -188,17 +188,17 @@ export default function MyBookingsPage() {
                             size="sm"
                             startContent={<X size={16} />}
                             onPress={() => openCancelModal(booking)}
-                            className="bg-[#D8B0AC]/20 text-[#1E1E1E] hover:bg-[#D8B0AC] hover:text-white"
+                            className="bg-[#D8D7E2]/20 text-[#14162B] hover:bg-[#D8D7E2] hover:text-white"
                           >
                             Stornieren
                           </Button>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F5EDEB] p-4 rounded-lg border border-[#E8C7C3]/30">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F6F5FA] p-4 rounded-lg border border-[#ECEBF2]/30">
                         <div>
                           <div className="text-sm text-[#8A8A8A] mb-1">Datum</div>
-                          <div className="font-semibold text-[#1E1E1E]">
+                          <div className="font-semibold text-[#14162B]">
                             {new Date(booking.booking.bookingDate).toLocaleDateString('de-DE', {
                               weekday: 'long',
                               year: 'numeric',
@@ -210,21 +210,21 @@ export default function MyBookingsPage() {
 
                         <div>
                           <div className="text-sm text-[#8A8A8A] mb-1">Uhrzeit</div>
-                          <div className="font-semibold text-[#1E1E1E]">
+                          <div className="font-semibold text-[#14162B]">
                             {booking.booking.startTime} - {booking.booking.endTime} Uhr
                           </div>
                         </div>
 
                         <div>
                           <div className="text-sm text-[#8A8A8A] mb-1">Preis</div>
-                          <div className="font-semibold text-[#E8C7C3]">
+                          <div className="font-semibold text-[#ECEBF2]">
                             ab {booking.booking.price.toFixed(2)} {booking.booking.currency ?? 'CHF'}
                           </div>
                         </div>
                       </div>
 
                       {booking.confirmationSent && (
-                        <div className="mt-4 text-sm text-[#C09995] bg-[#F5EDEB] p-3 rounded-lg border border-[#C09995]/30">
+                        <div className="mt-4 text-sm text-[#8B8FA6] bg-[#F6F5FA] p-3 rounded-lg border border-[#8B8FA6]/30">
                           📧 Bestätigungsemail wurde an {booking.customer.email} gesendet
                         </div>
                       )}
@@ -238,14 +238,14 @@ export default function MyBookingsPage() {
 
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#E8C7C3]" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#ECEBF2]" />
           </div>
         )}
       </div>
 
       <Modal isOpen={isOpen} onClose={onClose} size="md" className="bg-white">
         <ModalContent>
-          <ModalHeader className="text-2xl font-bold text-[#1E1E1E] border-b border-[#E8C7C3]/20">
+          <ModalHeader className="text-2xl font-bold text-[#14162B] border-b border-[#ECEBF2]/20">
             Termin stornieren
           </ModalHeader>
           <ModalBody className="py-6">
@@ -263,8 +263,8 @@ export default function MyBookingsPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#F5EDEB] p-4 rounded-lg border border-[#E8C7C3]/30">
-                  <div className="font-semibold text-[#1E1E1E] mb-2">
+                <div className="bg-[#F6F5FA] p-4 rounded-lg border border-[#ECEBF2]/30">
+                  <div className="font-semibold text-[#14162B] mb-2">
                     {selectedBooking.booking.serviceName}
                   </div>
                   <div className="text-sm text-[#8A8A8A]">
@@ -278,7 +278,7 @@ export default function MyBookingsPage() {
               </div>
             )}
           </ModalBody>
-          <ModalFooter className="border-t border-[#E8C7C3]/20">
+          <ModalFooter className="border-t border-[#ECEBF2]/20">
             <Button 
               color="default" 
               variant="light" 
@@ -291,7 +291,7 @@ export default function MyBookingsPage() {
               color="danger"
               onPress={handleCancel}
               isLoading={cancelling}
-              className="bg-gradient-to-r from-[#D8B0AC] to-[#C09995] text-white"
+              className="bg-gradient-to-r from-[#D8D7E2] to-[#8B8FA6] text-white"
             >
               Termin stornieren
             </Button>

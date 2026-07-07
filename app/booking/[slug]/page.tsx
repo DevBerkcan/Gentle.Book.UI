@@ -99,7 +99,7 @@ function lighten(hex: string, amount = 0.85) {
   try {
     const { r, g, b } = hexToRgb(hex);
     return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 function withAlpha(hex: string, alpha: number) {
   try {
@@ -277,7 +277,7 @@ export default function TenantLinktreePage() {
   const [tenantName, setTenantName]   = useState("");
   const [tagline,    setTagline]       = useState<string | null>(null);
   const [welcomeMsg, setWelcomeMsg]    = useState<string | null>(null);
-  const [primaryColor, setPrimary]     = useState("#E8C7C3");
+  const [primaryColor, setPrimary]     = useState("#6355E4");
   const [logoUrl,    setLogoUrl]       = useState<string | null>(null);
   const [linktreeStyle, setStyle]      = useState<Theme>("gradient");
   const [industryType, setIndustry]    = useState<string | null>(null);

@@ -28,7 +28,7 @@ export const Footer = () => {
             transition={{ delay: 0.9 + index * 0.1 }}
             whileHover={{ scale: 1.2, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F0E6E4] text-[#8A8A8A] transition-colors hover:bg-[#E8C7C3] hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F5FA] text-[#8A8A8A] transition-colors hover:bg-[#ECEBF2] hover:text-white"
           >
             <social.icon size={18} />
           </motion.a>
@@ -38,18 +38,18 @@ export const Footer = () => {
       <div className="mb-4 flex items-center justify-center gap-4 text-xs text-[#8A8A8A]">
         <a
           href="/impressum"
-          className="transition-colors hover:text-[#E8C7C3] hover:underline"
+          className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           Impressum
         </a>
-        <span className="text-[#F0E6E4]">•</span>
+        <span className="text-[#ECEBF2]">•</span>
         <a
           href="/datenschutz"
-          className="transition-colors hover:text-[#E8C7C3] hover:underline"
+          className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           Datenschutz
         </a>
-        <span className="text-[#F0E6E4]">•</span>
+        <span className="text-[#ECEBF2]">•</span>
         <KlaroCookieSettingsButton />
       </div>
 

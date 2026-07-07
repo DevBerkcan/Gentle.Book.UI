@@ -30,7 +30,7 @@ function lighten(hex: string, amount = 0.85) {
     const g = parseInt(clean.slice(2, 4), 16);
     const b = parseInt(clean.slice(4, 6), 16);
     return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 
 export function DateTimePicker({
@@ -46,7 +46,7 @@ export function DateTimePicker({
   onNext,
   onBack,
   loading,
-  primaryColor = "#E8C7C3",
+  primaryColor = "#6355E4",
 }: DateTimePickerProps) {
   const { t, lang } = useTranslation();
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
@@ -103,7 +103,7 @@ export function DateTimePicker({
     <>
       <div className={`space-y-6 ${canProceed ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">{t.booking.chooseDatetime}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseDatetime}</h2>
           <p className="text-sm sm:text-base text-[#8A8A8A]">
             {t.booking.step3of4} • {service.name} • {selectedEmployee.name}
           </p>
@@ -163,7 +163,7 @@ export function DateTimePicker({
 
         {selectedDate && (
           <div className="space-y-4">
-            <h3 className="font-semibold text-[#1E1E1E] text-sm sm:text-base">
+            <h3 className="font-semibold text-[#14162B] text-sm sm:text-base">
               {t.booking.availableTimesOn}{" "}
               {new Date(selectedDate + "T00:00:00").toLocaleDateString(locale, { weekday: "long", day: "2-digit", month: "long" })}
             </h3>
@@ -220,7 +220,7 @@ export function DateTimePicker({
             <div className="max-w-3xl mx-auto flex items-center gap-3">
               <button
                 onClick={onBack}
-                className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#1E1E1E] font-semibold py-3 px-4 rounded-xl transition-all"
+                className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#14162B] font-semibold py-3 px-4 rounded-xl transition-all"
                 style={{ backgroundColor: veryLight }}
               >
                 <ArrowLeft size={18} />
@@ -233,7 +233,7 @@ export function DateTimePicker({
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-[#8A8A8A]">{t.booking.selected}</p>
-                  <p className="font-bold text-[#1E1E1E] text-sm truncate">
+                  <p className="font-bold text-[#14162B] text-sm truncate">
                     {new Date(selectedDate! + "T00:00:00").toLocaleDateString(locale, { day: "2-digit", month: "2-digit" })}{" "}
                     {lang === "en" ? "at" : "um"} {selectedTime}
                   </p>

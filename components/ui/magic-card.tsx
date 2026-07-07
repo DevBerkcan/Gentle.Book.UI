@@ -15,7 +15,7 @@ interface MagicCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function MagicCard({
   children,
   className,
-  gradientColor = "#E8C7C3",
+  gradientColor = "#6355E4",
   gradientOpacity = 0.15,
   gradientSize = 200,
   ...props

@@ -106,7 +106,7 @@ export function lighten(hex: string, amount = 0.85) {
   try {
     const { r, g, b } = hexToRgb(hex);
     return `rgb(${Math.round(r+(255-r)*amount)},${Math.round(g+(255-g)*amount)},${Math.round(b+(255-b)*amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 export function withAlpha(hex: string, alpha: number) {
   try {

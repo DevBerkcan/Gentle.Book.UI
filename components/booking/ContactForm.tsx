@@ -34,7 +34,7 @@ function lighten(hex: string, amount = 0.85) {
     const g = parseInt(clean.slice(2, 4), 16);
     const b = parseInt(clean.slice(4, 6), 16);
     return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 
 export function ContactForm({
@@ -51,7 +51,7 @@ export function ContactForm({
   onBack,
   onSubmit,
   submitting,
-  primaryColor = "#E8C7C3",
+  primaryColor = "#6355E4",
   tenantAddress,
 }: ContactFormProps) {
   const { t, lang } = useTranslation();
@@ -109,7 +109,7 @@ export function ContactForm({
     <>
       <div className="space-y-6 pb-28">
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">{t.booking.contactData}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.contactData}</h2>
           <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step4of4}</p>
         </div>
 
@@ -126,7 +126,7 @@ export function ContactForm({
             </div>
             <div>
               <p className="text-xs text-[#8A8A8A]">{t.booking.dateTime}</p>
-              <p className="font-semibold text-[#1E1E1E] text-sm">{formatDate(selectedDate)}</p>
+              <p className="font-semibold text-[#14162B] text-sm">{formatDate(selectedDate)}</p>
               <p className="flex items-center gap-1 text-[#8A8A8A] text-xs mt-0.5">
                 <Clock size={12} />
                 {formatTimeRange(selectedTime, service.durationMinutes)}
@@ -140,7 +140,7 @@ export function ContactForm({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-[#8A8A8A]">{t.booking.treatmentLabel}</p>
-              <p className="font-semibold text-[#1E1E1E] text-sm">{service.name}</p>
+              <p className="font-semibold text-[#14162B] text-sm">{service.name}</p>
               <p className="text-[#8A8A8A] text-xs">{service.durationMinutes} {t.booking.minutes}</p>
             </div>
             <div className="text-right flex-shrink-0">
@@ -156,7 +156,7 @@ export function ContactForm({
               </div>
               <div>
                 <p className="text-xs text-[#8A8A8A]">{t.booking.specialist}</p>
-                <p className="font-semibold text-[#1E1E1E] text-sm">{selectedEmployee.name}</p>
+                <p className="font-semibold text-[#14162B] text-sm">{selectedEmployee.name}</p>
                 <p className="text-[#8A8A8A] text-xs">
                   {selectedEmployee.role}
                   {selectedEmployee.specialty && ` • ${selectedEmployee.specialty}`}
@@ -173,17 +173,17 @@ export function ContactForm({
               <div>
                 <p className="text-xs text-[#8A8A8A]">{t.booking.location}</p>
                 {locationLine1 && (
-                  <p className="font-semibold text-[#1E1E1E] text-sm">{locationLine1}</p>
+                  <p className="font-semibold text-[#14162B] text-sm">{locationLine1}</p>
                 )}
                 {locationLine2 && (
-                  <p className="font-semibold text-[#1E1E1E] text-sm">{locationLine2}</p>
+                  <p className="font-semibold text-[#14162B] text-sm">{locationLine2}</p>
                 )}
               </div>
             </div>
           )}
 
           <div className="pt-2 flex justify-between items-center" style={{ borderTop: `1px solid ${borderRgba}` }}>
-            <span className="font-medium text-[#1E1E1E] text-sm">{t.booking.totalAmount}</span>
+            <span className="font-medium text-[#14162B] text-sm">{t.booking.totalAmount}</span>
             <div className="text-right">
               <p className="text-lg font-bold" style={{ color: primaryColor }}>{formatPrice(service.price, service.currency)}</p>
               <p className="text-xs text-[#8A8A8A]">{t.booking.inclVat}</p>
@@ -228,7 +228,7 @@ export function ContactForm({
               isInvalid={!!showError("firstName")}
               isRequired
               classNames={{
-                input: "text-[#1E1E1E]",
+                input: "text-[#14162B]",
                 inputWrapper: ["border-2", showError("firstName") ? "border-red-500" : ""],
                 label: "text-[#8A8A8A] font-medium",
               }}
@@ -244,7 +244,7 @@ export function ContactForm({
               isInvalid={!!showError("lastName")}
               isRequired
               classNames={{
-                input: "text-[#1E1E1E]",
+                input: "text-[#14162B]",
                 inputWrapper: ["border-2", showError("lastName") ? "border-red-500" : ""],
                 label: "text-[#8A8A8A] font-medium",
               }}
@@ -263,7 +263,7 @@ export function ContactForm({
             isInvalid={!!showError("email")}
             isRequired
             classNames={{
-              input: "text-[#1E1E1E]",
+              input: "text-[#14162B]",
               inputWrapper: ["border-2", showError("email") ? "border-red-500" : ""],
               label: "text-[#8A8A8A] font-medium",
             }}
@@ -281,7 +281,7 @@ export function ContactForm({
             isInvalid={!!showError("phone")}
             isRequired
             classNames={{
-              input: "text-[#1E1E1E]",
+              input: "text-[#14162B]",
               inputWrapper: ["border-2", showError("phone") ? "border-red-500" : ""],
               label: "text-[#8A8A8A] font-medium",
             }}
@@ -337,7 +337,7 @@ export function ContactForm({
         <div className="max-w-3xl mx-auto flex items-center gap-3 p-4">
           <button
             onClick={onBack}
-            className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#1E1E1E] font-semibold py-3 px-4 rounded-xl transition-all"
+            className="flex-shrink-0 flex items-center gap-1 hover:opacity-80 active:scale-95 text-[#14162B] font-semibold py-3 px-4 rounded-xl transition-all"
             style={{ backgroundColor: veryLight }}
           >
             <ArrowLeft size={18} />
@@ -346,7 +346,7 @@ export function ContactForm({
 
           <div className="flex-1 min-w-0">
             <p className="text-xs text-[#8A8A8A]">{t.booking.totalAmount}</p>
-            <p className="font-bold text-[#1E1E1E] text-sm">{formatPrice(service.price, service.currency)}</p>
+            <p className="font-bold text-[#14162B] text-sm">{formatPrice(service.price, service.currency)}</p>
           </div>
 
           <button

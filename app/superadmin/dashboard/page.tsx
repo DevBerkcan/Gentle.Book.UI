@@ -237,7 +237,7 @@ export default function SuperAdminDashboard() {
                 {pendingRequests.length} offene {pendingRequests.length === 1 ? 'Abo-Anfrage' : 'Abo-Anfragen'}
               </h2>
             </div>
-            <Link href="/superadmin/requests" className="text-xs text-[#017172] hover:underline flex items-center gap-1 font-medium">
+            <Link href="/superadmin/requests" className="text-xs text-[#6355E4] hover:underline flex items-center gap-1 font-medium">
               Alle verwalten <ArrowRight size={11} />
             </Link>
           </div>
@@ -250,7 +250,7 @@ export default function SuperAdminDashboard() {
               >
                 <Bell size={13} />
                 {r.tenantName}
-                <span className="text-xs bg-[#017172] text-white px-1.5 py-0.5 rounded-md font-semibold">{r.requestedPlan}</span>
+                <span className="text-xs bg-[#6355E4] text-white px-1.5 py-0.5 rounded-md font-semibold">{r.requestedPlan}</span>
               </Link>
             ))}
             {pendingRequests.length > 5 && (
@@ -431,7 +431,7 @@ export default function SuperAdminDashboard() {
                   >
                     <div
                       className="w-8 h-8 rounded-lg flex-shrink-0"
-                      style={{ backgroundColor: t.primaryColor || '#E8C7C3' }}
+                      style={{ backgroundColor: t.primaryColor || '#6355E4' }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">

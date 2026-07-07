@@ -15,7 +15,7 @@ interface GlowingEffectProps {
 export function GlowingEffect({
   children,
   className,
-  glowColor = "#E8C7C3",
+  glowColor = "#6355E4",
   spread = 40,
   blur = 0,
   disabled = false,

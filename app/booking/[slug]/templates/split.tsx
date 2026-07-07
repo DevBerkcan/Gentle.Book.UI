@@ -12,7 +12,7 @@ export function SplitTemplate({
   slug, tenantName, tagline, welcomeMsg, primaryColor, logoSrc,
   industryType, cfg, links, handleCtaClick, showFloating,
 }: TemplateProps) {
-  const accent     = primaryColor || "#017172";
+  const accent     = primaryColor || "#17A398";
   const btnRadius  = getBorderRadius(cfg.buttonStyle || "rounded");
   const avRadius   = getAvatarRadius(cfg.avatarShape || "circle");
   const ctaText    = cfg.ctaText?.trim() || "Termin buchen";

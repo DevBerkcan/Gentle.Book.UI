@@ -29,10 +29,10 @@ function lighten(hex: string, amount = 0.85) {
     const g = parseInt(clean.slice(2, 4), 16);
     const b = parseInt(clean.slice(4, 6), 16);
     return `rgb(${Math.round(r + (255 - r) * amount)},${Math.round(g + (255 - g) * amount)},${Math.round(b + (255 - b) * amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 
-export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext, tenantSlug, primaryColor = "#E8C7C3" }: ServiceSelectorProps) {
+export function ServiceSelector({ services: fallbackServices, selectedService, onSelect, onNext, tenantSlug, primaryColor = "#6355E4" }: ServiceSelectorProps) {
   const { t } = useTranslation();
   const [categories, setCategories] = useState<ServiceCategory[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -117,9 +117,9 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
     return (
       <div className="text-center py-12 px-4">
         <Sparkles size={40} className="mx-auto mb-4" style={{ color: primaryColor }} />
-        <h2 className="text-xl font-bold text-[#1E1E1E] mb-2">{t.booking.noServicesTitle}</h2>
+        <h2 className="text-xl font-bold text-[#14162B] mb-2">{t.booking.noServicesTitle}</h2>
         <p className="text-[#8A8A8A] mb-6">{t.booking.noServicesDesc}</p>
-        <a href="javascript:history.back()" className="inline-block text-sm text-[#017172] underline">
+        <a href="javascript:history.back()" className="inline-block text-sm text-[#17A398] underline">
           {t.booking.backToProfile}
         </a>
       </div>
@@ -148,7 +148,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-[#1E1E1E] text-sm">{service.name}</h4>
+                  <h4 className="font-semibold text-[#14162B] text-sm">{service.name}</h4>
                   {service.description && (
                     <p className="text-xs text-[#8A8A8A] mt-0.5 line-clamp-1">{service.description}</p>
                   )}
@@ -193,7 +193,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-[#1E1E1E] text-sm sm:text-base break-words pr-1">{service.name}</h4>
+                  <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words pr-1">{service.name}</h4>
                   {service.description && (
                     <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 line-clamp-2 break-words">{service.description}</p>
                   )}
@@ -224,7 +224,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
     <>
       <div className={`space-y-6 px-4 sm:px-0 ${selectedService ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#1E1E1E] mb-2">{t.booking.chooseService}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseService}</h2>
           <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step1of4}</p>
         </div>
 
@@ -241,14 +241,14 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             startContent={<Search size={18} className="text-[#8A8A8A]" />}
             endContent={
               searchTerm ? (
-                <button onClick={clearSearch} className="text-[#8A8A8A] hover:text-[#1E1E1E] transition-colors">
+                <button onClick={clearSearch} className="text-[#8A8A8A] hover:text-[#14162B] transition-colors">
                   <X size={16} />
                 </button>
               ) : null
             }
             classNames={{
               inputWrapper: "bg-white border-2",
-              input: "text-[#1E1E1E]",
+              input: "text-[#14162B]",
             }}
             style={{ borderColor: primaryColor } as any}
           />
@@ -295,7 +295,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                     style={{ backgroundColor: isExpanded ? `${primaryColor}22` : lightBg }}
                   >
                     <div className="text-left flex-1 min-w-0 pr-2">
-                      <h3 className="font-bold text-[#1E1E1E] text-sm sm:text-base truncate">{category.name}</h3>
+                      <h3 className="font-bold text-[#14162B] text-sm sm:text-base truncate">{category.name}</h3>
                       {category.description && (
                         <p className="text-xs sm:text-sm text-[#8A8A8A] truncate">{category.description}</p>
                       )}
@@ -344,7 +344,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs text-[#8A8A8A]">{t.booking.selectedTreatment}</p>
-                  <p className="font-bold text-[#1E1E1E] text-sm truncate">{selectedService.name}</p>
+                  <p className="font-bold text-[#14162B] text-sm truncate">{selectedService.name}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-[#8A8A8A]">
                       <Clock size={10} className="inline mr-0.5" />

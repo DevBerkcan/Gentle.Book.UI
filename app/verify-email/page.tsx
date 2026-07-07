@@ -44,15 +44,15 @@ function VerifyEmailContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-br from-[#1a1a1a] via-[#2d2824] to-[#1a1a1a] px-8 py-10 text-center border-b-4 border-[#C09995]">
-          <span className="text-[#C09995] text-5xl block mb-3">✧</span>
+        <div className="bg-gradient-to-br from-[#1a1a1a] via-[#2d2824] to-[#1a1a1a] px-8 py-10 text-center border-b-4 border-[#6355E4]">
+          <span className="text-[#6355E4] text-5xl block mb-3">✧</span>
           <h1 className="text-white text-xl font-semibold">E-Mail bestätigen</h1>
         </div>
 
         <div className="p-8 text-center">
           {status === 'loading' && (
             <>
-              <Loader2 className="mx-auto mb-4 text-[#C09995] animate-spin" size={48} />
+              <Loader2 className="mx-auto mb-4 text-[#6355E4] animate-spin" size={48} />
               <p className="text-slate-600">Wird überprüft…</p>
             </>
           )}
@@ -77,7 +77,7 @@ function VerifyEmailContent() {
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2824] px-8 py-5 text-center border-t-4 border-[#C09995]">
+        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#2d2824] px-8 py-5 text-center border-t-4 border-[#6355E4]">
           <p className="text-[#a3a3a3] text-xs">
             Buchungssystem powered by GentleBook
           </p>
@@ -91,7 +91,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="text-[#C09995] animate-spin" size={40} />
+        <Loader2 className="text-[#6355E4] animate-spin" size={40} />
       </div>
     }>
       <VerifyEmailContent />

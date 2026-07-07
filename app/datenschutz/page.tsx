@@ -9,27 +9,27 @@ export const metadata = {
 
 export default function DatenschutzPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5EDEB] to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white">
       <div className="max-w-4xl mx-auto px-4 py-12">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-[#8A8A8A] hover:text-[#E8C7C3] transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-[#8A8A8A] hover:text-[#ECEBF2] transition-colors mb-8"
         >
           <ArrowLeft size={20} />
           Zurück zur Startseite
         </Link>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-[#E8C7C3]/20">
-          <h1 className="text-4xl font-bold text-[#1E1E1E] mb-2">Datenschutzerklärung</h1>
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-[#ECEBF2]/20">
+          <h1 className="text-4xl font-bold text-[#14162B] mb-2">Datenschutzerklärung</h1>
           <p className="text-[#8A8A8A] mb-8">GentleBook – Stand: März 2026</p>
 
           <div className="space-y-10 text-[#8A8A8A]">
 
             {/* 1 */}
             <section>
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">1. Datenschutz auf einen Blick</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">1. Datenschutz auf einen Blick</h2>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Allgemeine Hinweise</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Allgemeine Hinweise</h3>
               <p className="mb-4">
                 Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren
                 personenbezogenen Daten passiert, wenn Sie diese Website besuchen oder über unser
@@ -39,7 +39,7 @@ export default function DatenschutzPage() {
                 die Europäische Datenschutz-Grundverordnung (DSGVO).
               </p>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Datenerfassung auf dieser Website</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Datenerfassung auf dieser Website</h3>
               <p className="mb-2"><strong>Wer ist verantwortlich?</strong></p>
               <p className="mb-4">
                 Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen
@@ -69,9 +69,9 @@ export default function DatenschutzPage() {
 
             {/* 2 */}
             <section>
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">2. Buchungssystem – Verarbeitung von Kundendaten</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">2. Buchungssystem – Verarbeitung von Kundendaten</h2>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Welche Daten werden gespeichert?</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Welche Daten werden gespeichert?</h3>
               <p className="mb-4">
                 Bei der Online-Terminbuchung erheben wir folgende personenbezogene Daten:
               </p>
@@ -82,7 +82,7 @@ export default function DatenschutzPage() {
                 <li>Gewünschte Behandlung und Terminzeitpunkt</li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Zweck und Rechtsgrundlage</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Zweck und Rechtsgrundlage</h3>
               <p className="mb-4">
                 Die Verarbeitung erfolgt zur Erfüllung des Buchungsvertrags (Art. 6 Abs. 1 lit. b DSGVO /
                 Art. 31 Abs. 2 lit. a revDSG). Ohne diese Daten ist eine Terminbuchung nicht möglich. Eine
@@ -90,7 +90,7 @@ export default function DatenschutzPage() {
                 (z. B. Terminbestätigung und Erinnerungs-E-Mail über unseren E-Mail-Dienstleister IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, Deutschland).
               </p>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Speicherdauer</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Speicherdauer</h3>
               <p className="mb-4">
                 Ihre Buchungsdaten werden nur so lange gespeichert, wie dies für die Durchführung und
                 Dokumentation des Termins notwendig ist. Sofern keine gesetzlichen Aufbewahrungspflichten
@@ -98,7 +98,7 @@ export default function DatenschutzPage() {
                 gelöscht bzw. anonymisiert.
               </p>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Datensicherheit</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Datensicherheit</h3>
               <p>
                 Wir treffen geeignete technische und organisatorische Massnahmen, um Ihre Daten vor
                 unberechtigtem Zugriff, Verlust oder Missbrauch zu schützen. Die Datenübertragung erfolgt
@@ -108,9 +108,9 @@ export default function DatenschutzPage() {
 
             {/* 2b */}
             <section>
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">3. Hosting</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">3. Hosting</h2>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Vercel</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Vercel</h3>
               <p className="mb-4">
                 Wir hosten unsere Website bei Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA.
                 Beim Aufruf unserer Website werden automatisch technische Daten (IP-Adresse, Browser,
@@ -123,7 +123,7 @@ export default function DatenschutzPage() {
                   href="https://vercel.com/legal/privacy-policy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#E8C7C3] hover:underline"
+                  className="text-[#ECEBF2] hover:underline"
                 >
                   https://vercel.com/legal/privacy-policy
                 </a>
@@ -132,9 +132,9 @@ export default function DatenschutzPage() {
 
             {/* 4 */}
             <section>
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">4. Allgemeine Hinweise und Betroffenenrechte</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">4. Allgemeine Hinweise und Betroffenenrechte</h2>
 
-              <h3 className="text-xl font-semibold text-[#1E1E1E] mt-4 mb-2">Ihre Rechte im Überblick</h3>
+              <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Ihre Rechte im Überblick</h3>
               <ul className="list-disc list-inside mb-4 space-y-1">
                 <li>Recht auf Auskunft (Art. 15 DSGVO / Art. 25 revDSG)</li>
                 <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
@@ -153,7 +153,7 @@ export default function DatenschutzPage() {
 
             {/* 5 */}
             <section>
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">5. Server-Log-Dateien</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">5. Server-Log-Dateien</h2>
               <p className="mb-4">
                 Der Provider der Seiten erhebt und speichert automatisch Informationen in
                 Server-Log-Dateien, die Ihr Browser automatisch übermittelt:
@@ -174,19 +174,19 @@ export default function DatenschutzPage() {
             </section>
 
             {/* Kontakt */}
-            <section className="bg-[#F5EDEB] p-6 rounded-xl border border-[#E8C7C3]/30">
-              <h2 className="text-2xl font-bold text-[#1E1E1E] mb-4">Kontakt bei Datenschutzfragen</h2>
+            <section className="bg-[#F6F5FA] p-6 rounded-xl border border-[#ECEBF2]/30">
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">Kontakt bei Datenschutzfragen</h2>
               <p className="mb-4">
                 Bei Fragen zum Datenschutz oder zur Ausübung Ihrer Rechte wenden Sie sich jederzeit an uns:
               </p>
               <p className="mb-2">
-                <strong className="text-[#1E1E1E]">E-Mail:</strong>{" "}
-                <a href="mailto:info@gentlebook.app" className="text-[#E8C7C3] hover:underline">
+                <strong className="text-[#14162B]">E-Mail:</strong>{" "}
+                <a href="mailto:info@gentlebook.app" className="text-[#ECEBF2] hover:underline">
                   info@gentlebook.app
                 </a>
               </p>
               <p className="mb-2">
-                <strong className="text-[#1E1E1E]">Telefon:</strong>{" "}
+                <strong className="text-[#14162B]">Telefon:</strong>{" "}
                 <span className="text-[#8A8A8A]">+41 78 241 87 04</span>
               </p>
               <p className="mt-4 text-sm">
@@ -195,7 +195,7 @@ export default function DatenschutzPage() {
                   href="https://www.edoeb.admin.ch"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#E8C7C3] hover:underline"
+                  className="text-[#ECEBF2] hover:underline"
                 >
                   Eidgenössischer Datenschutz- und Öffentlichkeitsbeauftragter (EDÖB)
                 </a>
@@ -207,10 +207,10 @@ export default function DatenschutzPage() {
             </p>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-[#E8C7C3]/20">
+          <div className="mt-12 pt-8 border-t border-[#ECEBF2]/20">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-[#E8C7C3] hover:text-[#D8B0AC] font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-[#ECEBF2] hover:text-[#D8D7E2] font-semibold transition-colors"
             >
               <ArrowLeft size={20} />
               Zurück zur Startseite

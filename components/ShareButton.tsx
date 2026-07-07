@@ -71,7 +71,7 @@ export const ShareButton = ({ variant = "floating" }: ShareButtonProps) => {
         onClick={handleNativeShare}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 rounded-xl border-2 border-[#E8C7C3] bg-white px-4 py-2 text-sm font-semibold text-[#1E1E1E] transition-colors hover:border-[#D8B0AC] hover:bg-[#F5EDEB]"
+        className="flex items-center gap-2 rounded-xl border-2 border-[#ECEBF2] bg-white px-4 py-2 text-sm font-semibold text-[#14162B] transition-colors hover:border-[#D8D7E2] hover:bg-[#F6F5FA]"
       >
         <Share2 size={18} />
         <span>Teilen</span>
@@ -88,7 +88,7 @@ export const ShareButton = ({ variant = "floating" }: ShareButtonProps) => {
         transition={{ delay: 1, type: "spring", stiffness: 200 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#E8C7C3] to-[#D8B0AC] text-white shadow-lg transition-shadow hover:shadow-xl"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#6355E4] to-[#17A398] text-white shadow-lg transition-shadow hover:shadow-xl"
         aria-label="Seite teilen"
       >
         <AnimatePresence mode="wait">
@@ -132,21 +132,21 @@ export const ShareButton = ({ variant = "floating" }: ShareButtonProps) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 100, scale: 0.9 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed bottom-24 right-6 z-40 w-80 rounded-2xl border-2 border-[#E8C7C3] bg-white p-6 shadow-2xl"
+              className="fixed bottom-24 right-6 z-40 w-80 rounded-2xl border-2 border-[#ECEBF2] bg-white p-6 shadow-2xl"
             >
-              <h3 className="mb-4 text-lg font-bold text-[#1E1E1E]">
+              <h3 className="mb-4 text-lg font-bold text-[#14162B]">
                 Seite teilen
               </h3>
 
               <button
                 onClick={copyToClipboard}
-                className="mb-4 flex w-full items-center justify-between rounded-xl border-2 border-[#E8C7C3] bg-[#F5EDEB] px-4 py-3 text-sm transition-colors hover:border-[#D8B0AC]"
+                className="mb-4 flex w-full items-center justify-between rounded-xl border-2 border-[#ECEBF2] bg-[#F6F5FA] px-4 py-3 text-sm transition-colors hover:border-[#D8D7E2]"
               >
-                <span className="truncate font-medium text-[#1E1E1E]">
+                <span className="truncate font-medium text-[#14162B]">
                   {shareUrl.replace(/^https?:\/\//, "")}
                 </span>
                 {copied ? (
-                  <Check size={18} className="text-[#E8C7C3]" />
+                  <Check size={18} className="text-[#6355E4]" />
                 ) : (
                   <Copy size={18} className="text-[#8A8A8A]" />
                 )}
@@ -157,7 +157,7 @@ export const ShareButton = ({ variant = "floating" }: ShareButtonProps) => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="mb-3 text-center text-sm text-[#E8C7C3]"
+                  className="mb-3 text-center text-sm text-[#6355E4]"
                 >
                   ✓ Link kopiert!
                 </motion.p>
@@ -168,37 +168,37 @@ export const ShareButton = ({ variant = "floating" }: ShareButtonProps) => {
                   href={shareLinks.whatsapp}
                   label="WhatsApp"
                   icon={MessageCircle}
-                  color="bg-[#E8C7C3]"
+                  color="bg-[#25D366]"
                 />
                 <ShareLink
                   href={shareLinks.telegram}
                   label="Telegram"
                   icon={Send}
-                  color="bg-[#D8B0AC]"
+                  color="bg-[#2AABEE]"
                 />
                 <ShareLink
                   href={shareLinks.facebook}
                   label="Facebook"
                   icon={Facebook}
-                  color="bg-[#C09995]"
+                  color="bg-[#1877F2]"
                 />
                 <ShareLink
                   href={shareLinks.twitter}
                   label="Twitter"
                   icon={Twitter}
-                  color="bg-[#A8827E]"
+                  color="bg-[#14162B]"
                 />
                 <ShareLink
                   href={shareLinks.linkedin}
                   label="LinkedIn"
                   icon={Linkedin}
-                  color="bg-[#8A8A8A]"
+                  color="bg-[#0A66C2]"
                 />
                 <ShareLink
                   href={shareLinks.email}
                   label="E-Mail"
                   icon={Mail}
-                  color="bg-[#6B6B6B]"
+                  color="bg-[#6355E4]"
                 />
               </div>
             </motion.div>

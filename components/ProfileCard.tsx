@@ -23,7 +23,7 @@ export const ProfileCard = () => {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute -top-6 right-8 text-[#E8C7C3] opacity-40"
+        className="absolute -top-6 right-8 text-[#ECEBF2] opacity-40"
         aria-hidden="true"
       >
         <motion.div
@@ -59,7 +59,7 @@ export const ProfileCard = () => {
             delay: 0.5,
           },
         }}
-        className="absolute -top-4 left-6 text-[#C09995] opacity-30"
+        className="absolute -top-4 left-6 text-[#8B8FA6] opacity-30"
         aria-hidden="true"
       >
         <Sparkles size={28} strokeWidth={2} />
@@ -85,9 +85,9 @@ export const ProfileCard = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
-        className="mb-3 text-3xl font-extrabold tracking-tight text-[#1E1E1E]"
+        className="mb-3 text-3xl font-extrabold tracking-tight text-[#14162B]"
       >
-        GentleBook<span className="text-[#E8C7C3]">.</span>
+        GentleBook<span className="text-[#ECEBF2]">.</span>
       </motion.h1>
 
       <motion.p
@@ -106,7 +106,7 @@ export const ProfileCard = () => {
         className="flex flex-col items-center justify-center gap-2 text-sm text-[#8A8A8A]"
       >
         <div className="flex items-center gap-2">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#E8C7C3]" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#ECEBF2]" />
           <span>Elisabethenstrasse 41, 4051 Basel, Schweiz</span>
         </div>
         <span className="text-xs">Termine bequem online buchen oder telefonisch vereinbaren</span>
@@ -116,7 +116,7 @@ export const ProfileCard = () => {
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-[#E8C7C3] via-[#C09995] to-[#E8C7C3]"
+        className="mx-auto mt-6 h-1 w-16 rounded-full bg-gradient-to-r from-[#6355E4] via-[#17A398] to-[#6355E4]"
       />
     </motion.div>
   );

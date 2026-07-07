@@ -45,7 +45,7 @@ function lighten(hex: string, amount = 0.7) {
   try {
     const {r,g,b} = hexToRgb(hex);
     return `rgb(${Math.round(r+(255-r)*amount)},${Math.round(g+(255-g)*amount)},${Math.round(b+(255-b)*amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } } };
@@ -77,7 +77,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
     load();
   }, [params.id, slug, API_URL]);
 
-  const primary   = tenantInfo?.primaryColor ?? "#E8C7C3";
+  const primary   = tenantInfo?.primaryColor ?? "#6355E4";
   const lightBg   = lighten(primary, 0.88);
   const name      = tenantInfo?.companyName ?? tenantInfo?.name ?? null;
 

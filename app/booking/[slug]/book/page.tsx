@@ -48,7 +48,7 @@ function lighten(hex: string, amount = 0.85) {
   try {
     const { r, g, b } = hexToRgb(hex);
     return `rgb(${Math.round(r+(255-r)*amount)},${Math.round(g+(255-g)*amount)},${Math.round(b+(255-b)*amount)})`;
-  } catch { return "#F5EDEB"; }
+  } catch { return "#F6F5FA"; }
 }
 function getBorderRadius(style?: string) {
   if (style === "pill")   return "9999px";
@@ -72,7 +72,7 @@ function BookingPageInner() {
   const { lang, setLang, t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [tenantName, setTenantName] = useState<string>('');
-  const [primaryColor, setPrimaryColor] = useState<string>('#E8C7C3');
+  const [primaryColor, setPrimaryColor] = useState<string>('#6355E4');
   const [tenantAddress, setTenantAddress] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string>('inter');
   const [buttonStyle, setButtonStyle] = useState<string>('rounded');
