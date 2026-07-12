@@ -57,7 +57,7 @@ export default function AdminLoginPage() {
           password,
         });
         if (result.success) {
-          router.push('/admin/calendar');
+          router.push('/admin/employee-dashboard');
         } else {
           setError(result.message || 'Ungültige Anmeldedaten');
         }

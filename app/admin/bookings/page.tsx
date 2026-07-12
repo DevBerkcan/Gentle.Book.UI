@@ -48,11 +48,8 @@ const manualBookingModalClassNames = {
 };
 
 export default function AdminBookingsPage() {
-  const { employee, hasRole, isEmployee } = useAuth();
-  const router = useRouter();
-  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
-
-  const isAdmin = hasRole(['Admin', 'Owner']);
+  const { user, employee, hasRole, isEmployee, isTenantAdmin } = useAuth();
+  const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']) || isTenantAdmin;
 
   const [bookings, setBookings] = useState<BookingListItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -195,8 +192,11 @@ export default function AdminBookingsPage() {
   async function loadBookings() {
     setLoading(true);
     try {
-      // Only add all=true for admin users, otherwise show only user's bookings
-      const response = await getBookings(filter);
+      // Employees only see their own bookings
+      const effectiveFilter = isEmployee && user?.id
+        ? { ...filter, employeeId: user.id }
+        : filter;
+      const response = await getBookings(effectiveFilter);
       setBookings(response.items);
       setTotalPages(response.totalPages);
       setCurrentPage(response.page);

@@ -61,9 +61,11 @@ export function AdminNav() {
     {
       label: t.admin.myArea,
       items: [
-        { href: "/admin/calendar",        label: t.admin.myCalendar,  icon: Calendar },
-        { href: "/admin/blocked-slots",   label: t.admin.absences,    icon: Ban },
-        { href: "/admin/employee-notes",  label: t.admin.noteToAdmin, icon: MessageSquare },
+        { href: "/admin/employee-dashboard", label: "Mein Bereich",       icon: LayoutDashboard },
+        { href: "/admin/calendar",           label: t.admin.myCalendar,   icon: Calendar },
+        { href: "/admin/bookings",           label: t.admin.bookings,     icon: BookOpen },
+        { href: "/admin/blocked-slots",      label: t.admin.absences,     icon: Ban },
+        { href: "/admin/employee-notes",     label: t.admin.noteToAdmin,  icon: MessageSquare },
       ],
     },
   ];

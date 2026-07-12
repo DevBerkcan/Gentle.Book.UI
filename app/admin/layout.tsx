@@ -183,7 +183,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && isEmployee && pathname === '/admin/dashboard') {
-      router.replace('/admin/calendar');
+      router.replace('/admin/employee-dashboard');
     }
   }, [isEmployee, loading, pathname, router]);
 

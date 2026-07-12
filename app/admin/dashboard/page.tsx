@@ -120,9 +120,9 @@ export default function AdminDashboardPage() {
   const { user, isTenantAdmin, isEmployee } = useAuth();
   const router = useRouter();
 
-  // Redirect employees to calendar immediately — no admin API calls for them
+  // Redirect employees to their own dashboard — no admin API calls for them
   useEffect(() => {
-    if (isEmployee) router.replace('/admin/calendar');
+    if (isEmployee) router.replace('/admin/employee-dashboard');
   }, [isEmployee, router]);
 
   const [dashboard,            setDashboard]           = useState<DashboardOverview | null>(null);
