@@ -119,7 +119,12 @@ function StatCard({
 export default function AdminDashboardPage() {
   const { user, isTenantAdmin, isEmployee } = useAuth();
   const router = useRouter();
-  useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
+
+  // Redirect employees to calendar immediately — no admin API calls for them
+  useEffect(() => {
+    if (isEmployee) router.replace('/admin/calendar');
+  }, [isEmployee, router]);
+
   const [dashboard,            setDashboard]           = useState<DashboardOverview | null>(null);
   const [onboarding,           setOnboarding]          = useState<OnboardingStatus | null>(null);
   const [onboardingDismissed,  setOnboardingDismissed] = useState(false);
@@ -130,6 +135,9 @@ export default function AdminDashboardPage() {
   const [usage,                setUsage]               = useState<any>(null);
 
   useEffect(() => {
+    // Never load admin dashboard data for employees
+    if (isEmployee) return;
+
     getDashboard()
       .then(setDashboard)
       .catch((e) => setError(e.message))
@@ -152,7 +160,17 @@ export default function AdminDashboardPage() {
     if (typeof window !== "undefined" && sessionStorage.getItem("onboarding_dismissed")) {
       setOnboardingDismissed(true);
     }
-  }, [isTenantAdmin]);
+  }, [isTenantAdmin, isEmployee]);
+
+  // ── Employee redirect (no admin content for employees) ───────────────────
+
+  if (isEmployee) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F7F7F8]">
+        <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // ── Loading ──────────────────────────────────────────────────────────────
 

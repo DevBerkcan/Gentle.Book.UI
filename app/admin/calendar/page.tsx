@@ -60,8 +60,8 @@ const modalClassNames = {
 };
 
 export default function AdminCalendarPage() {
-  const { hasRole } = useAuth();
-  const isAdmin = hasRole(['Admin', 'Owner']);
+  const { hasRole, isEmployee, user } = useAuth();
+  const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']);
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -171,20 +171,21 @@ async function loadServicesForEmployee(employeeId: string) {
       const startOfMonth = moment(date).startOf('month').format('YYYY-MM-DD');
       const endOfMonth = moment(date).endOf('month').format('YYYY-MM-DD');
 
-      // Load bookings (admin sees all)
+      // Employees only see their own bookings; admins see all
       const bookingsResponse = await adminApi.getBookings({
         fromDate: startOfMonth,
         toDate: endOfMonth,
-        pageSize: 100
+        pageSize: 100,
+        ...(isEmployee && user?.id ? { employeeId: user.id } : {}),
       });
 
-      // Load blocked slots (admin sees all with all=true)
+      // Load blocked slots — employees only see own, admins see all
       const startDate = new Date(date);
       startDate.setMonth(startDate.getMonth() - 1);
       const endDate = new Date(date);
       endDate.setMonth(endDate.getMonth() + 1);
 
-      const blockedSlots = await blockedTimeSlotsApi.getAll(startDate, endDate, isAdmin);
+      const blockedSlots = await blockedTimeSlotsApi.getAll(startDate, endDate, !isEmployee && isAdmin);
 
       const bookingEvents: BookingEvent[] = bookingsResponse.items.map((booking: BookingListItem) => ({
         id: booking.id,
@@ -211,7 +212,7 @@ async function loadServicesForEmployee(employeeId: string) {
     } finally {
       setLoading(false);
     }
-  }, [date, isAdmin]);
+  }, [date, isAdmin, isEmployee, user?.id]);
 
   useEffect(() => { loadEvents(); }, [loadEvents]);
 

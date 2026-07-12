@@ -121,6 +121,7 @@ export interface BookingFilter {
   page?: number;
   pageSize?: number;
   all?: boolean;
+  employeeId?: string;
 }
 
 export interface UpdateBookingStatus {
@@ -305,6 +306,7 @@ export async function getBookings(
   if (filter.page) params.append("page", filter.page.toString());
   if (filter.pageSize) params.append("pageSize", filter.pageSize.toString());
   if (filter.all) params.append("all", "true");
+  if (filter.employeeId) params.append("employeeId", filter.employeeId);
 
   const response = await api.get(`/admin/bookings?${params}`);
   return response.data;

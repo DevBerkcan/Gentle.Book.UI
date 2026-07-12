@@ -70,7 +70,17 @@ api.interceptors.response.use(
 
     if (status === 402) {
       if (!path.includes('/admin/subscription') && !path.includes('/admin/login')) {
-        window.location.href = '/admin/subscription';
+        // Only redirect TenantAdmin to subscription page — employees can't manage billing
+        try {
+          const authUser = localStorage.getItem('auth_user');
+          const u = authUser ? JSON.parse(authUser) : null;
+          const isEmployee = u && u.role !== 'SuperAdmin' && u.role !== 'TenantAdmin';
+          if (!isEmployee) {
+            window.location.href = '/admin/subscription';
+          }
+        } catch {
+          window.location.href = '/admin/subscription';
+        }
       }
     }
 
