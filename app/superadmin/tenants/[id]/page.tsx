@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import { superAdminApi, UpdateTenantSettingsPayload, TenantStats } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { setAccessToken } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
 
 type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats';
@@ -192,7 +193,7 @@ export default function TenantDetailPage() {
     setImpersonating(true);
     try {
       const result = await superAdminApi.impersonate(id);
-      localStorage.setItem('access_token', result.access_token);
+      setAccessToken(result.access_token);
       localStorage.setItem('tenant_slug', result.tenant_slug);
       localStorage.setItem('impersonating', 'true');
       localStorage.setItem('impersonating_from', window.location.href);

@@ -1,5 +1,18 @@
 // lib/api/client.ts
 import axios from 'axios';
+import {
+  clearAuthStorage,
+  clearSuperAdminStorage,
+  getAccessToken,
+  getAuthUser,
+  getSuperAdminToken,
+  getSuperAdminUser,
+  removeAccessToken,
+  removeAuthUser,
+  removeLegacyEmployee,
+  removeSuperAdminToken,
+  removeSuperAdminUser,
+} from '@/lib/auth/storage';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 if (!API_BASE_URL) {
@@ -23,8 +36,8 @@ api.interceptors.request.use(
     if (typeof window !== 'undefined') {
       const isSuperAdminRoute = config.url?.includes('/superadmin');
       const token = isSuperAdminRoute
-        ? localStorage.getItem('superadmin_token')
-        : localStorage.getItem('access_token');
+        ? getSuperAdminToken()
+        : getAccessToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -53,15 +66,12 @@ api.interceptors.response.use(
 
     if (status === 401) {
       if (path.startsWith('/superadmin')) {
-        localStorage.removeItem('superadmin_token');
-        localStorage.removeItem('superadmin_user');
+        clearSuperAdminStorage();
         if (!path.includes('/superadmin/login')) {
           showSessionExpiredToast(() => { window.location.href = '/superadmin/login'; });
         }
       } else {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('employee');
+        clearAuthStorage();
         if (!path.includes('/admin/login')) {
           showSessionExpiredToast(() => { window.location.href = '/admin/login'; });
         }
@@ -72,7 +82,7 @@ api.interceptors.response.use(
       if (!path.includes('/admin/subscription') && !path.includes('/admin/login')) {
         // Only redirect TenantAdmin to subscription page — employees can't manage billing
         try {
-          const authUser = localStorage.getItem('auth_user');
+          const authUser = getAuthUser();
           const u = authUser ? JSON.parse(authUser) : null;
           const isEmployee = u && u.role !== 'SuperAdmin' && u.role !== 'TenantAdmin';
           if (!isEmployee) {

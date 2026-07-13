@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ShieldAlert, ArrowLeft } from "lucide-react";
+import { removeAccessToken } from '@/lib/auth/storage';
 
 export function ImpersonateBanner() {
   const [active, setActive] = useState(false);
@@ -15,7 +16,7 @@ export function ImpersonateBanner() {
     const from = localStorage.getItem("impersonating_from");
     localStorage.removeItem("impersonating");
     localStorage.removeItem("impersonating_from");
-    localStorage.removeItem("access_token");
+    removeAccessToken();
     localStorage.removeItem("tenant_slug");
     window.location.href = from || "/superadmin/tenants";
   }

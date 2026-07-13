@@ -4,6 +4,18 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authApi, Employee, LoginCredentials, TenantAdminLoginCredentials } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import {
+  clearAuthStorage,
+  getAccessToken,
+  getAuthUser,
+  getLegacyEmployee,
+  removeAccessToken,
+  removeAuthUser,
+  removeLegacyEmployee,
+  setAccessToken,
+  setAuthUser,
+  setLegacyEmployee,
+} from '@/lib/auth/storage';
 
 // Extended to support TenantAdmin and Employee roles
 export interface AuthUser {
@@ -46,8 +58,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const stored = localStorage.getItem('auth_user') || localStorage.getItem('employee');
+    const token = getAccessToken();
+    const stored = getAuthUser() || getLegacyEmployee();
 
     if (token && stored) {
       try {
@@ -67,9 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         };
         setUser(normalized);
       } catch {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('auth_user');
-        localStorage.removeItem('employee');
+        clearAuthStorage();
       }
     }
 
@@ -95,10 +105,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         username: emp.username,
       };
 
-      localStorage.setItem('access_token', result.token);
-      localStorage.setItem('auth_user', JSON.stringify(normalized));
+      setAccessToken(result.token);
+      setAuthUser(JSON.stringify(normalized));
       // Keep legacy key for existing components
-      localStorage.setItem('employee', JSON.stringify(result.employee));
+      setLegacyEmployee(JSON.stringify(result.employee));
       setUser(normalized);
     }
 
@@ -123,8 +133,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         tenantName: u.tenantName,
       };
 
-      localStorage.setItem('access_token', result.token);
-      localStorage.setItem('auth_user', JSON.stringify(normalized));
+      setAccessToken(result.token);
+      setAuthUser(JSON.stringify(normalized));
       setUser(normalized);
     }
 
@@ -133,9 +143,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = async () => {
     try { await authApi.logout(); } catch { /* ignore */ }
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('auth_user');
-    localStorage.removeItem('employee');
+    removeAccessToken();
+    removeAuthUser();
+    removeLegacyEmployee();
     setUser(null);
     router.push('/admin/login');
   };
@@ -143,7 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const refreshEmployee = async () => {
     const result = await authApi.getCurrentEmployee();
     if (result.success && result.employee) {
-      localStorage.setItem('employee', JSON.stringify(result.employee));
+      setLegacyEmployee(JSON.stringify(result.employee));
     } else {
       await logout();
     }

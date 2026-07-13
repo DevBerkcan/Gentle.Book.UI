@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
+import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 
 function useSuperAdminAuth() {
   const router = useRouter();
@@ -14,8 +15,8 @@ function useSuperAdminAuth() {
   useEffect(() => {
     if (pathname === '/superadmin/login') return;
 
-    const token = localStorage.getItem('superadmin_token');
-    const user = localStorage.getItem('superadmin_user');
+    const token = getSuperAdminToken();
+    const user = getSuperAdminUser();
 
     if (!token || !user) {
       router.push('/superadmin/login');
@@ -33,8 +34,8 @@ function useSuperAdminAuth() {
   }, [pathname, router]);
 
   const logout = () => {
-    localStorage.removeItem('superadmin_token');
-    localStorage.removeItem('superadmin_user');
+    removeSuperAdminToken();
+    removeSuperAdminUser();
     router.push('/superadmin/login');
   };
 

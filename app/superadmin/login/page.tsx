@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { superAdminLogin } from '@/lib/api/superadmin';
+import { setSuperAdminToken, setSuperAdminUser } from '@/lib/auth/storage';
 
 export default function SuperAdminLoginPage() {
   const router = useRouter();
@@ -19,8 +20,8 @@ export default function SuperAdminLoginPage() {
 
     try {
       const result = await superAdminLogin(email, password);
-      localStorage.setItem('superadmin_token', result.token);
-      localStorage.setItem('superadmin_user', JSON.stringify(result.user));
+      setSuperAdminToken(result.token);
+      setSuperAdminUser(JSON.stringify(result.user));
       router.push('/superadmin/tenants');
     } catch (err: any) {
       setError(err.message ?? 'Login fehlgeschlagen');

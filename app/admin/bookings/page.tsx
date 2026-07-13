@@ -30,6 +30,7 @@ import {
 } from "@/lib/api/admin";
 import { getAvailability, getEmployees, type TimeSlot, type Employee } from "@/lib/api/booking";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { getAccessToken } from "@/lib/auth/storage";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { formatPrice } from "@/lib/utils/currency";
 
@@ -475,7 +476,7 @@ export default function AdminBookingsPage() {
   async function handleExportCsv() {
     setExportLoading(true);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      const token = typeof window !== 'undefined' ? getAccessToken() : null;
       const url = getBookingsExportUrl();
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
