@@ -59,8 +59,8 @@ export default function EmployeeNotesPage() {
       toast.success(t.admin.noteSent);
       fetchSentNotes();
       setTimeout(() => setSent(false), 3000);
-    } catch {
-      toast.error(t.error);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || t.error);
     } finally {
       setSending(false);
     }
