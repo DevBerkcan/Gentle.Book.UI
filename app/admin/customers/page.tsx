@@ -191,7 +191,7 @@ export default function CustomersPage() {
       await loadCustomers();
       handleClose();
     } catch (err: any) {
-      setModalError(err.message || "Fehler beim Speichern");
+      setModalError(err.response?.data?.message || err.message || "Fehler beim Speichern");
     } finally {
       setSubmitting(false);
     }
@@ -207,7 +207,7 @@ export default function CustomersPage() {
       onDeleteModalClose();
       setDeleteReason("");
     } catch (err: any) {
-      setError(err.message || "Fehler beim Löschen");
+      setError(err.response?.data?.message || err.message || "Fehler beim Löschen");
     } finally {
       setDeleting(false);
     }

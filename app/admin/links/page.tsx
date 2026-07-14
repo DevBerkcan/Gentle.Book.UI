@@ -319,6 +319,8 @@ export default function AdminLinksPage() {
   const [config, setConfig] = useState<LinktreeConfig>(DEFAULT_CONFIG);
   const [industryType, setIndustryType] = useState<string>("Other");
   const [designOpen, setDesignOpen] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [brandColors, setBrandColors] = useState<{ primary?: string; secondary?: string; accent?: string }>({});
   const [designSaving, setDesignSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -342,6 +344,7 @@ export default function AdminLinksPage() {
       const d = res.data?.data ?? res.data;
       if (d?.linktreeStyle) setTheme(d.linktreeStyle as Theme);
       if (d?.primaryColor) setPrimaryColor(d.primaryColor);
+      setBrandColors({ primary: d?.primaryColor, secondary: d?.secondaryColor, accent: d?.accentColor });
       if (d?.linktreeConfig) {
         try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(d.linktreeConfig) }); } catch {}
       }
@@ -392,6 +395,19 @@ export default function AdminLinksPage() {
     setTheme(pack.theme); setPrimaryColor(pack.primaryColor); setConfig(next);
     await saveDesign(pack.theme, pack.primaryColor, next, false);
     showToast("success", `Paket „${pack.name}" angewendet`);
+  }
+
+  function applyBrandColors() {
+    if (!brandColors.primary) return;
+    const next: LinktreeConfig = {
+      ...config,
+      colorScheme: "brand",
+      ctaColor: brandColors.accent || undefined,
+    };
+    setConfig(next);
+    setPrimaryColor(brandColors.primary);
+    saveDesign(theme, brandColors.primary, next, false);
+    showToast("success", "Markenfarben aus den Einstellungen übernommen");
   }
 
   function applyColorScheme(palette: typeof COLOR_PALETTES[number]) {
@@ -658,6 +674,82 @@ export default function AdminLinksPage() {
                 >
                   <div className="border-t border-[#F3F4F6] px-5 pb-6 space-y-6 pt-5">
 
+                    {/* ── Markenfarben aus den Einstellungen ──────────────── */}
+                    <div>
+                      <SectionLabel icon={<Pipette size={13} />}>Markenfarben</SectionLabel>
+                      <div className="flex items-center justify-between gap-3 p-3.5 bg-[#F7F7F8] rounded-xl border border-[#F3F4F6]">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex -space-x-1.5 flex-shrink-0">
+                            {[brandColors.primary, brandColors.secondary, brandColors.accent].filter(Boolean).map((c, i) => (
+                              <span key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ background: c }} />
+                            ))}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-[#111318]">Farben aus den Einstellungen</p>
+                            <p className="text-[10px] text-[#9CA3AF] truncate">
+                              Primär-, Sekundär- & Akzentfarbe deines Studios ·{" "}
+                              <a href="/admin/settings" className="underline hover:text-[#6355E4]">bearbeiten</a>
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={applyBrandColors}
+                          disabled={!brandColors.primary}
+                          className="flex-shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-[#6355E4] text-white hover:bg-[#4338CA] disabled:opacity-40 transition-colors"
+                        >
+                          Übernehmen
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[#9CA3AF] mt-1.5">
+                        Primärfarbe wird zur Seitenfarbe, Akzentfarbe zum Buchungsbutton
+                      </p>
+                    </div>
+
+                    {/* ── CMS Template Packs ──────────────────────────────── */}
+                    <div className="border-t border-[#F3F4F6] pt-5">
+                      <SectionLabel icon={<Sparkles size={13} />}>Fertige Pakete</SectionLabel>
+                      <div className="grid grid-cols-2 gap-2">
+                        {CMS_TEMPLATE_PACKS.map((pack) => {
+                          const isActive = (config.colorScheme ?? "") === pack.key;
+                          return (
+                            <button key={pack.key} onClick={() => applyCmsTemplate(pack)}
+                              className={`group relative overflow-hidden rounded-xl border p-3 text-left transition-all ${
+                                isActive
+                                  ? "border-[#A5B4FC] bg-[#EEEBFC] ring-1 ring-[#6355E4]/30"
+                                  : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:shadow-sm"
+                              }`}
+                            >
+                              <motion.div aria-hidden
+                                className="absolute -right-4 -top-4 h-14 w-14 rounded-xl opacity-20"
+                                style={{ background: pack.primaryColor }}
+                                animate={{ rotateX: [0, 15, 0], rotateY: [0, -18, 0], y: [0, 3, 0] }}
+                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                              />
+                              <div className="relative flex items-start gap-2">
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm"
+                                  style={{ background: `${pack.primaryColor}18`, color: pack.primaryColor }}>
+                                  {pack.icon}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-[#111318]">{pack.name}</p>
+                                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{pack.desc}</p>
+                                </div>
+                              </div>
+                              <div className="relative mt-3 flex items-center gap-1.5">
+                                {[pack.primaryColor, "#ffffff", "#111318"].map((c) => (
+                                  <span key={c} className="h-2.5 w-2.5 rounded-full border border-[#E5E7EB]" style={{ background: c }} />
+                                ))}
+                                <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
+                                  {(pack.config.pageTemplate ?? "classic").toString()}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <p className="text-[10px] text-[#9CA3AF] mt-2">Komplettes Seiten-Design in einem Klick: Layout, Farben, Animation und CTA</p>
+                    </div>
+
                     {/* ── Seitenvorlage ───────────────────────────────────── */}
                     <div>
                       <div className="flex items-center justify-between mb-3">
@@ -714,6 +806,30 @@ export default function AdminLinksPage() {
                         })}
                       </div>
                     </div>
+
+                    {/* ── CTA-Text ─────────────────────────────────────────── */}
+                    <div className="border-t border-[#F3F4F6] pt-5">
+                      <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
+                        <Type size={11} className="text-[#6355E4]" />CTA-Text (Buchungsbutton)
+                      </p>
+                      <input type="text" value={config.ctaText} onChange={(e) => updateConfig("ctaText", e.target.value)}
+                        placeholder="Termin buchen" className={inputCls} />
+                    </div>
+
+                    {/* ── Erweiterte Optionen (eingeklappt) ───────────────── */}
+                    <button
+                      onClick={() => setShowAdvanced((v) => !v)}
+                      className="w-full flex items-center justify-between px-3.5 py-3 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] hover:border-[#C7D2FE] transition-all"
+                    >
+                      <span className="flex items-center gap-2 text-xs font-semibold text-[#374151]">
+                        <SlidersHorizontal size={13} className="text-[#6355E4]" />
+                        Erweiterte Design-Optionen
+                        <span className="text-[10px] font-normal text-[#9CA3AF]">Feintuning · Schrift · Layout · Buchungsflow</span>
+                      </span>
+                      <ChevronDown size={14} className={`text-[#9CA3AF] transition-transform duration-200 ${showAdvanced ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {showAdvanced && (<>
 
                     {/* ── Template Feintuning ─────────────────────────────── */}
                     <div className="border-t border-[#F3F4F6] pt-5">
@@ -787,51 +903,6 @@ export default function AdminLinksPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* ── CMS Template Packs ──────────────────────────────── */}
-                    <div className="border-t border-[#F3F4F6] pt-5">
-                      <SectionLabel icon={<Sparkles size={13} />}>Fertige Pakete</SectionLabel>
-                      <div className="grid grid-cols-2 gap-2">
-                        {CMS_TEMPLATE_PACKS.map((pack) => {
-                          const isActive = (config.colorScheme ?? "") === pack.key;
-                          return (
-                            <button key={pack.key} onClick={() => applyCmsTemplate(pack)}
-                              className={`group relative overflow-hidden rounded-xl border p-3 text-left transition-all ${
-                                isActive
-                                  ? "border-[#A5B4FC] bg-[#EEEBFC] ring-1 ring-[#6355E4]/30"
-                                  : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:shadow-sm"
-                              }`}
-                            >
-                              <motion.div aria-hidden
-                                className="absolute -right-4 -top-4 h-14 w-14 rounded-xl opacity-20"
-                                style={{ background: pack.primaryColor }}
-                                animate={{ rotateX: [0, 15, 0], rotateY: [0, -18, 0], y: [0, 3, 0] }}
-                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                              />
-                              <div className="relative flex items-start gap-2">
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm"
-                                  style={{ background: `${pack.primaryColor}18`, color: pack.primaryColor }}>
-                                  {pack.icon}
-                                </span>
-                                <div className="min-w-0">
-                                  <p className="text-xs font-semibold text-[#111318]">{pack.name}</p>
-                                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{pack.desc}</p>
-                                </div>
-                              </div>
-                              <div className="relative mt-3 flex items-center gap-1.5">
-                                {[pack.primaryColor, "#ffffff", "#111318"].map((c) => (
-                                  <span key={c} className="h-2.5 w-2.5 rounded-full border border-[#E5E7EB]" style={{ background: c }} />
-                                ))}
-                                <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                                  {(pack.config.pageTemplate ?? "classic").toString()}
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <p className="text-[10px] text-[#9CA3AF] mt-2">Setzt Layout, Farben, Animation und CTA in einem Schritt</p>
                     </div>
 
                     {/* ── Farbpalette ─────────────────────────────────────── */}
@@ -978,15 +1049,6 @@ export default function AdminLinksPage() {
                           </button>
                         ))}
                       </div>
-                    </div>
-
-                    {/* ── CTA-Text ─────────────────────────────────────────── */}
-                    <div>
-                      <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                        <Type size={11} className="text-[#6355E4]" />CTA-Text (Buchungsbutton)
-                      </p>
-                      <input type="text" value={config.ctaText} onChange={(e) => updateConfig("ctaText", e.target.value)}
-                        placeholder="Termin buchen" className={inputCls} />
                     </div>
 
                     {/* ── Schriftart ───────────────────────────────────────── */}
@@ -1206,6 +1268,8 @@ export default function AdminLinksPage() {
                         </div>
                       </div>
                     </div>
+
+                    </>)}
 
                     {/* Vorschau mobile link */}
                     {tenantSlug && (

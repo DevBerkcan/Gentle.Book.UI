@@ -83,6 +83,7 @@ export default function AdminCalendarPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [slotsMessage, setSlotsMessage] = useState<string | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [isRange, setIsRange] = useState(false);
@@ -251,6 +252,7 @@ async function loadServicesForEmployee(employeeId: string) {
   async function loadAvailableSlots() {
     if (!bookingForm.serviceId || !bookingForm.bookingDate || !selectedEmployeeId) {
       setAvailableSlots([]);
+      setSlotsMessage(null);
       return;
     }
 
@@ -260,6 +262,7 @@ async function loadServicesForEmployee(employeeId: string) {
       const data = await getAvailability(bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId);
       const available = data.availableSlots?.filter(slot => slot.isAvailable) || [];
       setAvailableSlots(available);
+      setSlotsMessage(available.length === 0 ? (data.message ?? null) : null);
 
       if (bookingForm.startTime) {
         const isStillAvailable = available.some(slot => slot.startTime === bookingForm.startTime);
@@ -267,6 +270,7 @@ async function loadServicesForEmployee(employeeId: string) {
       }
     } catch {
       setAvailableSlots([]);
+      setSlotsMessage(null);
     } finally {
       setLoadingSlots(false);
     }
@@ -1158,7 +1162,9 @@ const handleCreateManualBooking = async () => {
                           </div>
                         ) : (
                           <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
-                            {bookingForm.serviceId ? "Keine verfügbaren Zeiten" : "Bitte zuerst Service und Datum wählen"}
+                            {bookingForm.serviceId
+                              ? (slotsMessage || "Keine verfügbaren Zeiten — prüfen Sie Öffnungszeiten (Einstellungen) und Arbeitszeiten des Mitarbeiters")
+                              : "Bitte zuerst Service und Datum wählen"}
                           </div>
                         )}
                       </div>

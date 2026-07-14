@@ -85,6 +85,7 @@ export default function AdminBookingsPage() {
   const { isOpen: isBookingDetailsModalOpen, onOpen: onBookingDetailsModalOpen, onClose: onBookingDetailsModalClose } = useDisclosure();
   const [isEditMode, setIsEditMode] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [slotsMessage, setSlotsMessage] = useState<string | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [isServicePopoverOpen, setIsServicePopoverOpen] = useState(false);
@@ -236,6 +237,7 @@ export default function AdminBookingsPage() {
   async function loadAvailableSlots() {
     if (!bookingForm.serviceId || !bookingForm.bookingDate || !selectedEmployeeId) {
       setAvailableSlots([]);
+      setSlotsMessage(null);
       return;
     }
 
@@ -245,6 +247,7 @@ export default function AdminBookingsPage() {
       const data = await getAvailability(bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId);
       const available = data.availableSlots?.filter(slot => slot.isAvailable) || [];
       setAvailableSlots(available);
+      setSlotsMessage(available.length === 0 ? (data.message ?? null) : null);
 
       if (bookingForm.startTime) {
         const isStillAvailable = available.some(slot => slot.startTime === bookingForm.startTime);
@@ -252,6 +255,7 @@ export default function AdminBookingsPage() {
       }
     } catch {
       setAvailableSlots([]);
+      setSlotsMessage(null);
     } finally {
       setLoadingSlots(false);
     }
@@ -1537,7 +1541,9 @@ export default function AdminBookingsPage() {
                         </div>
                       ) : (
                         <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
-                          {bookingForm.serviceId ? "Keine verfügbaren Zeiten" : "Bitte zuerst Service und Datum wählen"}
+                          {bookingForm.serviceId
+                            ? (slotsMessage || "Keine verfügbaren Zeiten — prüfen Sie Öffnungszeiten (Einstellungen) und Arbeitszeiten des Mitarbeiters")
+                            : "Bitte zuerst Service und Datum wählen"}
                         </div>
                       )}
                     </div>
