@@ -4,6 +4,8 @@
 // when the user is authenticated (e.g. an employee using the admin UI).
 // Anonymous callers simply have no cookie and the server treats them as guests.
 
+import api from '@/lib/api/client';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 if (!API_BASE_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not configured');
@@ -112,16 +114,10 @@ export interface BookingResponse {
  * Get employees by service ID - only returns employees that can perform this service
  */
 export async function getEmployeesByService(serviceId: string, tenantSlug?: string): Promise<Employee[]> {
-  let url = `${API_BASE_URL}/employees/by-service/${serviceId}?activeOnly=true`;
-  if (tenantSlug) url += `&tenantSlug=${tenantSlug}`;
-  const res = await fetch(url, {
-    credentials: "include",
+  const response = await api.get(`/employees/by-service/${serviceId}`, {
+    params: { activeOnly: true, ...(tenantSlug ? { tenantSlug } : {}) },
   });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.message || "Fehler beim Laden der Mitarbeiter für diesen Service");
-  }
-  return res.json();
+  return response.data;
 }
 
 // ── Employees ─────────────────────────────────────────────────────────────────
@@ -132,12 +128,10 @@ export async function getEmployeesByService(serviceId: string, tenantSlug?: stri
  * credentials:include so the JWT cookie is forwarded when present.
  */
 export async function getEmployees(tenantSlug?: string): Promise<Employee[]> {
-  const url = tenantSlug
-    ? `${API_BASE_URL}/employees?activeOnly=true&tenantSlug=${tenantSlug}`
-    : `${API_BASE_URL}/employees?activeOnly=true`;
-  const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error("Fehler beim Laden der Mitarbeiter");
-  return res.json();
+  const response = await api.get('/employees', {
+    params: { activeOnly: true, ...(tenantSlug ? { tenantSlug } : {}) },
+  });
+  return response.data;
 }
 
 // ── Services ──────────────────────────────────────────────────────────────────
@@ -203,12 +197,14 @@ export async function getAvailability(
   employeeId?: string,
   tenantSlug?: string,
 ): Promise<AvailabilityResponse> {
-  let url = `${API_BASE_URL}/availability/${serviceId}?date=${date}`;
-  if (employeeId) url += `&employeeId=${employeeId}`;
-  if (tenantSlug) url += `&tenantSlug=${tenantSlug}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Fehler beim Laden der Verfügbarkeit");
-  return res.json();
+  const response = await api.get(`/availability/${serviceId}`, {
+    params: {
+      date,
+      ...(employeeId ? { employeeId } : {}),
+      ...(tenantSlug ? { tenantSlug } : {}),
+    },
+  });
+  return response.data;
 }
 
 // ── Bookings ──────────────────────────────────────────────────────────────────

@@ -7,6 +7,10 @@ export interface Employee {
   username: string;
   role: string;
   specialty: string | null;
+  location?: string | null;
+  tenantId?: string;
+  tenantSlug?: string;
+  tenantName?: string;
 }
 
 export interface LoginCredentials {

@@ -60,7 +60,7 @@ const modalClassNames = {
 };
 
 export default function AdminCalendarPage() {
-  const { hasRole, isEmployee, user } = useAuth();
+  const { hasRole, isEmployee, user, loading: authLoading } = useAuth();
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']);
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -124,16 +124,39 @@ const [loadingEmployeeServices, setLoadingEmployeeServices] = useState(false);
     customerNotes: ''
   });
 
-  // Load employees from API on mount
+  // Employees may only book for themselves. Tenant admins can choose any active employee.
   useEffect(() => {
+    if (authLoading) return;
+
+    if (isEmployee) {
+      if (!user?.id) return;
+
+      const currentEmployee: Employee = {
+        id: user.id,
+        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
+        role: user.role,
+        specialty: user.specialty || null,
+        location: user.location || null,
+        isActive: true,
+      };
+      setEmployees([currentEmployee]);
+      setSelectedEmployeeId(currentEmployee.id);
+      void loadServicesForEmployee(currentEmployee.id);
+      setLoadingEmployees(false);
+      return;
+    }
+
     bookingApi.getEmployees()
       .then((data: Employee[]) => {
         setEmployees(data);
-        if (data.length > 0) setSelectedEmployeeId(data[0].id);
+        if (data.length > 0) {
+          setSelectedEmployeeId(data[0].id);
+          void loadServicesForEmployee(data[0].id);
+        }
       })
-      .catch(() => {})
+      .catch(() => setEmployees([]))
       .finally(() => setLoadingEmployees(false));
-  }, []);
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location]);
 
   useEffect(() => { loadServices(); }, []);
 
@@ -303,7 +326,11 @@ const handleCreateManualBooking = async () => {
     
     if (!selectedService) throw new Error("Service nicht gefunden");
 
-    const availabilityCheck = await bookingApi.getAvailability(bookingForm.serviceId, bookingForm.bookingDate);
+    const availabilityCheck = await bookingApi.getAvailability(
+      bookingForm.serviceId,
+      bookingForm.bookingDate,
+      selectedEmployeeId,
+    );
     const isSlotAvailable = availabilityCheck.availableSlots?.some(
       (slot: { startTime: string; isAvailable: any; }) => slot.startTime === bookingForm.startTime && slot.isAvailable
     );

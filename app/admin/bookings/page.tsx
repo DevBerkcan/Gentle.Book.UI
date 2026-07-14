@@ -49,7 +49,7 @@ const manualBookingModalClassNames = {
 };
 
 export default function AdminBookingsPage() {
-  const { user, employee, hasRole, isEmployee, isTenantAdmin } = useAuth();
+  const { user, employee, hasRole, isEmployee, isTenantAdmin, loading: authLoading } = useAuth();
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']) || isTenantAdmin;
 
   const [bookings, setBookings] = useState<BookingListItem[]>([]);
@@ -145,8 +145,32 @@ export default function AdminBookingsPage() {
   useEffect(() => {
     loadBookings();
     loadServices();
-    loadEmployees();
   }, []);
+
+  // Employees may only book for themselves. Tenant admins can choose any active employee.
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (isEmployee) {
+      if (!user?.id) return;
+
+      const currentEmployee: Employee = {
+        id: user.id,
+        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
+        role: user.role,
+        specialty: user.specialty || null,
+        location: user.location || null,
+        isActive: true,
+      };
+      setEmployees([currentEmployee]);
+      setSelectedEmployeeId(currentEmployee.id);
+      void loadServicesForEmployee(currentEmployee.id);
+      setLoadingEmployees(false);
+      return;
+    }
+
+    void loadEmployees();
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location]);
 
   useEffect(() => {
     loadBookings();
