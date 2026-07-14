@@ -79,7 +79,10 @@ api.interceptors.response.use(
     }
 
     if (status === 402) {
-      if (!path.includes('/admin/subscription') && !path.includes('/admin/login')) {
+      // Feature-Gate-402s (z.B. Analytics ab Pro-Plan) werden von der Seite selbst
+      // als Upsell dargestellt — nicht global zur Subscription-Seite umleiten.
+      const isFeatureGate = !!error.response?.data?.feature;
+      if (!isFeatureGate && !path.includes('/admin/subscription') && !path.includes('/admin/login')) {
         // Only redirect TenantAdmin to subscription page — employees can't manage billing
         try {
           const authUser = getAuthUser();

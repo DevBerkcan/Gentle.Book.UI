@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Check, AlertCircle, ChevronDown, Sparkles } from "lucide-react";
 import api from "@/lib/api/client";
+import { supportConfig } from "@/lib/config";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -127,7 +128,7 @@ export function SupportWidget() {
                     </p>
                     <p className="text-xs text-[#8A8A8A] mt-3 flex items-center justify-center gap-1">
                       <span className="w-1.5 h-1.5 bg-[#6355E4] rounded-full animate-pulse" />
-                      support@gentlegroup.de
+                      {supportConfig.email}
                     </p>
                   </motion.div>
                 )}
@@ -210,7 +211,7 @@ export function SupportWidget() {
                     </motion.button>
 
                     <p className="text-center text-[11px] text-gray-300">
-                      Geht direkt an support@gentlegroup.de
+                      Geht direkt an {supportConfig.email}
                     </p>
                   </motion.div>
                 )}

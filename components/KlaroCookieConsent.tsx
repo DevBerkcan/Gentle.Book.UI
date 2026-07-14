@@ -135,10 +135,6 @@ export const KlaroCookieConsent = () => {
       <Script
         src="https://cdn.jsdelivr.net/npm/klaro@0.7.18/dist/klaro.js"
         strategy="afterInteractive"
-        onLoad={() => {
-          // Klaro lädt automatisch window.klaroConfig
-          console.log("Klaro loaded successfully");
-        }}
       />
     </>
   );

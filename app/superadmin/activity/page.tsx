@@ -60,14 +60,16 @@ export default function ActivityPage() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [filter,   setFilter]   = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
+    setLoadError(null);
     try {
       const data = await superAdminApi.getActivity(100);
       setActivity(data);
-    } catch (e) {
-      // silent fail
+    } catch (e: any) {
+      setLoadError(e.response?.data?.message || e.message || 'Aktivitäten konnten nicht geladen werden');
     }
     setLoading(false);
   }
@@ -97,11 +99,22 @@ export default function ActivityPage() {
         </div>
         <button
           onClick={load}
+          aria-label="Aktivitäten neu laden"
           className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg border border-gray-100 shadow-sm transition-colors"
         >
           <RefreshCw size={16} />
         </button>
       </div>
+
+      {/* Fehlerzustand */}
+      {!loading && loadError && (
+        <div className="bg-white border border-red-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+          <p className="text-sm text-gray-700">{loadError}</p>
+          <button onClick={load} className="text-xs font-semibold text-gray-900 underline hover:no-underline">
+            Erneut versuchen
+          </button>
+        </div>
+      )}
 
       {/* Summary pills */}
       <div className="flex flex-wrap gap-2">

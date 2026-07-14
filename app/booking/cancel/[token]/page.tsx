@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XCircle, CheckCircle, AlertTriangle, Calendar, Clock, Sparkles, ArrowLeft } from 'lucide-react';
+import { supportConfig } from '@/lib/config';
 
 interface BookingPreview {
   alreadyCancelled: boolean;
@@ -95,7 +96,7 @@ export default function CancelBookingPage() {
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Ungültiger Link</h1>
             <p className="text-[#8A8A8A] mb-6 text-sm">{errorMessage}</p>
-            <a href="mailto:support@gentlegroup.de"
+            <a href={supportConfig.mailto("Problem mit Stornierungslink")}
               className="inline-block bg-[#14162B] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
               Support kontaktieren
             </a>

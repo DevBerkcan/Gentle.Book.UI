@@ -1,18 +1,25 @@
-// app/meine-buchungen/page.tsx
+// app/my-bookings/page.tsx
+// Zugriff nur noch per Magic-Link: E-Mail eingeben → signierter Link per Mail →
+// erst mit gültigem ?token= werden Buchungen angezeigt (Schutz vor Fremdzugriff).
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Chip } from "@nextui-org/chip";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/modal";
-import { Calendar, Mail, AlertCircle, X } from "lucide-react";
+import { Calendar, Mail, AlertCircle, X, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { getBookingsByEmail, cancelBooking, type BookingResponse } from "@/lib/api/booking";
+import { requestMyBookingsLink, getMyBookings, cancelBooking, type BookingResponse } from "@/lib/api/booking";
 
-export default function MyBookingsPage() {
+function MyBookingsContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const [email, setEmail] = useState("");
+  const [linkSent, setLinkSent] = useState(false);
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -22,15 +29,27 @@ export default function MyBookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState<BookingResponse | null>(null);
   const [cancelling, setCancelling] = useState(false);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  // Mit Token in der URL: Buchungen direkt laden
+  useEffect(() => {
+    if (!token) return;
+    let active = true;
     setLoading(true);
     setError(null);
     setSearched(true);
+    getMyBookings(token)
+      .then((data) => { if (active) setBookings(data); })
+      .catch((err: any) => { if (active) setError(err.message); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [token]);
 
+  async function handleRequestLink(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
-      const data = await getBookingsByEmail(email);
-      setBookings(data);
+      await requestMyBookingsLink(email);
+      setLinkSent(true);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -95,37 +114,65 @@ export default function MyBookingsPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#14162B] mb-3">Meine Buchungen</h1>
           <p className="text-[#8A8A8A]">
-            Gib deine E-Mail-Adresse ein, um deine Termine zu sehen
+            {token
+              ? "Ihre Termine im Überblick"
+              : "Gib deine E-Mail-Adresse ein — wir senden dir einen sicheren Zugriffslink"}
           </p>
         </div>
 
-        <Card className="mb-8 border-2 border-[#ECEBF2]/20 shadow-xl">
-          <CardBody className="p-6">
-            <form onSubmit={handleSearch} className="flex gap-4">
-              <Input
-                type="email"
-                placeholder="deine-email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                startContent={<Mail size={18} className="text-[#8A8A8A]" />}
-                isRequired
-                classNames={{
-                  input: "text-[#14162B]",
-                  inputWrapper: "bg-white border-2 border-[#ECEBF2]/30 hover:border-[#ECEBF2]",
-                }}
-                size="lg"
-              />
+        {!token && !linkSent && (
+          <Card className="mb-8 border-2 border-[#ECEBF2]/20 shadow-xl">
+            <CardBody className="p-6">
+              <form onSubmit={handleRequestLink} className="flex gap-4">
+                <Input
+                  type="email"
+                  placeholder="deine-email@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  startContent={<Mail size={18} className="text-[#8A8A8A]" />}
+                  isRequired
+                  classNames={{
+                    input: "text-[#14162B]",
+                    inputWrapper: "bg-white border-2 border-[#ECEBF2]/30 hover:border-[#ECEBF2]",
+                  }}
+                  size="lg"
+                />
+                <Button
+                  type="submit"
+                  className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold px-8 shadow-lg"
+                  size="lg"
+                  isLoading={loading}
+                >
+                  Link anfordern
+                </Button>
+              </form>
+              <p className="text-xs text-[#8A8A8A] mt-3">
+                Zum Schutz deiner Daten senden wir dir einen Link per E-Mail, über den du deine
+                Termine ansehen und stornieren kannst. Der Link ist 1 Stunde gültig.
+              </p>
+            </CardBody>
+          </Card>
+        )}
+
+        {!token && linkSent && (
+          <Card className="mb-8 border-2 border-green-200 shadow-xl">
+            <CardBody className="p-8 text-center">
+              <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
+              <h3 className="text-xl font-semibold text-[#14162B] mb-2">Prüfe dein Postfach</h3>
+              <p className="text-[#8A8A8A]">
+                Wenn Buchungen zu <strong>{email}</strong> existieren, haben wir dir soeben einen
+                Zugriffslink gesendet. Der Link ist 1 Stunde gültig.
+              </p>
               <Button
-                type="submit"
-                className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold px-8 shadow-lg"
-                size="lg"
-                isLoading={loading}
+                variant="light"
+                className="mt-4 text-[#6355E4]"
+                onPress={() => { setLinkSent(false); setEmail(""); }}
               >
-                Suchen
+                Andere E-Mail-Adresse verwenden
               </Button>
-            </form>
-          </CardBody>
-        </Card>
+            </CardBody>
+          </Card>
+        )}
 
         {error && (
           <Card className="mb-6 border-2 border-red-200 shadow-xl">
@@ -299,5 +346,19 @@ export default function MyBookingsPage() {
         </ModalContent>
       </Modal>
     </div>
+  );
+}
+
+export default function MyBookingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-[#6355E4]" />
+        </div>
+      }
+    >
+      <MyBookingsContent />
+    </Suspense>
   );
 }

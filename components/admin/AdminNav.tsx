@@ -195,6 +195,7 @@ export function AdminNav() {
               onClick={() => setLang(lang === "de" ? "en" : "de")}
               className="text-[10px] font-bold text-white/40 hover:text-white transition-colors"
               title={lang === "de" ? "Switch to English" : "Zu Deutsch wechseln"}
+              aria-label={lang === "de" ? "Switch to English" : "Zu Deutsch wechseln"}
             >
               {lang === "de" ? "EN" : "DE"}
             </button>
@@ -203,6 +204,7 @@ export function AdminNav() {
               onClick={logout}
               className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
               title={t.admin.logout}
+              aria-label={t.admin.logout}
             >
               <LogOut size={15} />
             </button>
@@ -230,6 +232,7 @@ export function AdminNav() {
                 onClick={logout}
                 className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
                 title={t.admin.logout}
+                aria-label={t.admin.logout}
               >
                 <LogOut size={15} />
               </button>
@@ -252,6 +255,7 @@ export function AdminNav() {
           onClick={toggleCollapsed}
           className="hidden md:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
           title={collapsed ? "Sidebar einblenden" : "Sidebar ausblenden"}
+          aria-label={collapsed ? "Sidebar einblenden" : "Sidebar ausblenden"}
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>

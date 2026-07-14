@@ -12,6 +12,7 @@ import {
 import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
+import { supportConfig } from '@/lib/config';
 
 interface Subscription {
   plan: string;
@@ -384,7 +385,7 @@ export default function AdminSubscriptionPage() {
                   {/* Secondary: WhatsApp / Email */}
                   <div className="flex gap-2">
                     <a
-                      href={`https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20den%20${plan.name}-Plan%20buchen.`}
+                      href={supportConfig.whatsappUrl(`Hallo, ich möchte den ${plan.name}-Plan buchen.`)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
@@ -392,7 +393,7 @@ export default function AdminSubscriptionPage() {
                       <MessageCircle size={13} /> WhatsApp
                     </a>
                     <a
-                      href={`mailto:support@gentlegroup.de?subject=${plan.name}-Plan%20Anfrage`}
+                      href={supportConfig.mailto(`${plan.name}-Plan Anfrage`)}
                       className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
                     >
                       <Mail size={13} /> E-Mail
@@ -413,7 +414,7 @@ export default function AdminSubscriptionPage() {
         </div>
         <div className="flex gap-3">
           <a
-            href="https://wa.me/491754701892"
+            href={supportConfig.whatsappUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors"
@@ -421,7 +422,7 @@ export default function AdminSubscriptionPage() {
             <MessageCircle size={16} /> WhatsApp
           </a>
           <a
-            href="mailto:support@gentlegroup.de"
+            href={supportConfig.mailto()}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium transition-colors"
           >
             <Mail size={16} /> E-Mail

@@ -12,6 +12,7 @@ import Link from 'next/link';
 import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
 import { LanguageProvider, useTranslation } from '@/lib/i18n/LanguageContext';
+import { supportConfig } from '@/lib/config';
 
 const MODAL_PLANS = [
   { key: 'Starter',      name: 'Starter',      price: 29,  employees: '2 Mitarbeiter' },
@@ -114,7 +115,7 @@ function TrialExpiredModal() {
               {/* Backup CTAs */}
               <div className="px-6 pb-4 flex gap-2.5">
                 <a
-                  href="https://wa.me/491754701892?text=Hallo%2C%20ich%20m%C3%B6chte%20GentleBook%20upgraden"
+                  href={supportConfig.whatsappUrl("Hallo, ich möchte GentleBook upgraden")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90"
@@ -123,7 +124,7 @@ function TrialExpiredModal() {
                   <MessageCircle size={14} /> WhatsApp
                 </a>
                 <a
-                  href="mailto:support@gentlegroup.de?subject=Upgrade GentleBook"
+                  href={supportConfig.mailto("Upgrade GentleBook")}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white border border-white/15 transition-all hover:bg-white/10"
                 >
                   <Mail size={14} /> E-Mail

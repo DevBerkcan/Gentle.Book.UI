@@ -8,6 +8,17 @@ export const siteConfig = {
   image: "/og-image.jpg",
 };
 
+// Zentraler Betreiber-Support-Kontakt — bitte NUR hier pflegen,
+// alle Seiten/Komponenten importieren diese Werte.
+export const supportConfig = {
+  email: "support@gentlegroup.de",
+  whatsappNumber: "491754701892", // ohne "+" für wa.me-Links
+  whatsappUrl: (text?: string) =>
+    `https://wa.me/491754701892${text ? `?text=${encodeURIComponent(text)}` : ""}`,
+  mailto: (subject?: string) =>
+    `mailto:support@gentlegroup.de${subject ? `?subject=${encodeURIComponent(subject)}` : ""}`,
+};
+
 export const socialLinks = [
   {
     label: "Online buchen",

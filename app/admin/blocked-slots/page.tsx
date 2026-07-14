@@ -61,7 +61,7 @@ const EMPTY_RANGE: CreateBlockedDateRangeDto = {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function BlockedSlotsPage() {
   const { hasRole } = useAuth();
-  const isAdmin = hasRole(['Admin', 'Owner']);
+  const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']);
 
   const [slots, setSlots] = useState<BlockedTimeSlot[]>([]);
   const [loading, setLoading] = useState(true);

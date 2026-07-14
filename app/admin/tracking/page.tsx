@@ -127,6 +127,7 @@ export default function TrackingPage() {
   const [dashboardStats, setDashboardStats] = useState<DashboardStatistics | null>(null);
   const [loading,        setLoading]        = useState(true);
   const [error,          setError]          = useState<string | null>(null);
+  const [needsUpgrade,   setNeedsUpgrade]   = useState(false);
 
   useEffect(() => { loadStatistics(); }, []);
 
@@ -138,7 +139,12 @@ export default function TrackingPage() {
       ]);
       setStats(statsData); setRevenue(revenueData); setDashboardStats(dashboardData);
     } catch (err: any) {
-      setError(err.message || "Fehler beim Laden der Statistiken");
+      // 402 mit feature-Flag = Analytics ist im aktuellen Plan nicht enthalten
+      if (err.response?.status === 402 && err.response?.data?.feature) {
+        setNeedsUpgrade(true);
+      } else {
+        setError(err.response?.data?.message || err.message || "Fehler beim Laden der Statistiken");
+      }
     } finally { setLoading(false); }
   }
 
@@ -148,6 +154,32 @@ export default function TrackingPage() {
     return (
       <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center">
         <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // ── Upsell: Analytics ist ab Professional-Plan verfügbar ─────────────────
+
+  if (needsUpgrade) {
+    return (
+      <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-8 text-center max-w-md">
+          <div className="w-12 h-12 bg-[#EEEBFC] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <BarChart3 size={20} className="text-[#6355E4]" />
+          </div>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">Statistiken & Analytics</h2>
+          <p className="text-sm text-[#6B7280] mb-6">
+            Detaillierte Auswertungen zu Klicks, Seitenaufrufen und Umsatz sind ab dem{" "}
+            <strong>Professional-Plan</strong> verfügbar. Upgraden Sie, um zu sehen, wie Ihre
+            Buchungsseite performt.
+          </p>
+          <a
+            href="/admin/subscription"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors"
+          >
+            <TrendingUp size={15} /> Jetzt upgraden
+          </a>
+        </div>
       </div>
     );
   }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Calendar, Users, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { supportConfig } from "@/lib/config";
 
 export default function HomePage() {
   return (
@@ -90,7 +91,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="text-center py-6 text-xs text-[#B0A0A0]">
         Made with ♥ by{" "}
-        <a href="mailto:support@gentlegroup.de" className="hover:text-[#5646D6] transition-colors">
+        <a href={supportConfig.mailto()} className="hover:text-[#5646D6] transition-colors">
           GentleGroup
         </a>
       </footer>

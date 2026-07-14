@@ -138,6 +138,8 @@ export const superAdminApi = {
       activeSubscriptions: number;
       expiredTenants: number;
       totalBookings: number;
+      mrr: number;
+      planDistribution: { plan: string; count: number; monthlyPrice: number }[];
     };
   },
 

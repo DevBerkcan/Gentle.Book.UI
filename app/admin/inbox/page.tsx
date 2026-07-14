@@ -29,14 +29,17 @@ export default function AdminInboxPage() {
 
   const [notes, setNotes] = useState<AdminNote[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
 
   const fetchNotes = async () => {
+    setLoadError(null);
     try {
       const res = await api.get("/admin/employee-notes");
       setNotes(res.data?.data ?? res.data ?? []);
-    } catch {
-      // no notes
+    } catch (err: any) {
+      // Echten Fehler von "keine Notizen" unterscheiden
+      setLoadError(err.response?.data?.message || err.message || "Nachrichten konnten nicht geladen werden");
     } finally {
       setLoading(false);
     }
@@ -94,6 +97,16 @@ export default function AdminInboxPage() {
         {loading ? (
           <div className="flex justify-center py-12">
             <span className="w-6 h-6 border-2 border-[#6355E4]/30 border-t-[#6355E4] rounded-full animate-spin" />
+          </div>
+        ) : loadError ? (
+          <div className="bg-white rounded-2xl border border-red-200 p-8 text-center">
+            <p className="text-sm font-medium text-[#374151]">{loadError}</p>
+            <button
+              onClick={() => { setLoading(true); fetchNotes(); }}
+              className="mt-3 text-xs font-semibold text-[#6355E4] underline hover:no-underline"
+            >
+              Erneut versuchen
+            </button>
           </div>
         ) : notes.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#E5E7EB] p-12 text-center">

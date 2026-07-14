@@ -19,6 +19,8 @@ interface Stats {
   activeSubscriptions: number;
   expiredTenants: number;
   totalBookings: number;
+  mrr?: number;
+  planDistribution?: { plan: string; count: number; monthlyPrice: number }[];
 }
 
 const ACTIVITY_ICONS: Record<string, React.ReactNode> = {
@@ -55,9 +57,11 @@ export default function SuperAdminDashboard() {
   const [overview,       setOverview]       = useState<OverviewData | null>(null);
   const [pendingRequests,setPendingRequests] = useState<SubscriptionRequestItem[]>([]);
   const [loading,        setLoading]        = useState(true);
+  const [loadError,      setLoadError]      = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
+    setLoadError(null);
     try {
       const [s, t, a, ov, req] = await Promise.all([
         superAdminApi.getStats(),
@@ -71,8 +75,8 @@ export default function SuperAdminDashboard() {
       setActivity(a);
       setOverview(ov);
       setPendingRequests(req.data);
-    } catch {
-      // silent fail — UI shows empty state
+    } catch (err: any) {
+      setLoadError(err.response?.data?.message || err.message || 'Daten konnten nicht geladen werden');
     }
     setLoading(false);
   }
@@ -93,7 +97,8 @@ export default function SuperAdminDashboard() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  const statCards = stats ? [
+  const statCards: { label: string; value: number; icon: React.ReactNode; accent: string; bg: string; help: string; suffix?: string }[] = stats ? [
+    { label: 'MRR',               value: stats.mrr ?? 0,           icon: <TrendingUp size={18} />, accent: '#16a34a', bg: '#f0fdf4', suffix: ' €', help: 'Monatlich wiederkehrender Umsatz: Summe der Monatspreise aller aktiven Abos' },
     { label: 'Systeme gesamt',    value: stats.totalTenants,       icon: <Building2 size={18} />, accent: '#3b82f6', bg: '#eff6ff', help: 'Alle registrierten Buchungssysteme auf der Plattform (aktiv + inaktiv)' },
     { label: 'Aktiv',             value: stats.activeTenants,      icon: <CheckCircle size={18} />, accent: '#22c55e', bg: '#f0fdf4', help: 'Systeme die aktuell aktiv sind und von Kunden genutzt werden können' },
     { label: 'Im Trial',          value: stats.trialTenants,       icon: <Clock size={18} />, accent: '#eab308', bg: '#fefce8', help: 'Systeme die sich noch in der kostenlosen 14-Tage-Testphase befinden' },
@@ -116,6 +121,7 @@ export default function SuperAdminDashboard() {
         <div className="flex items-center gap-2">
           <button
             onClick={load}
+            aria-label="Dashboard aktualisieren"
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-colors shadow-sm border border-gray-100"
           >
             <RefreshCw size={16} />
@@ -130,23 +136,45 @@ export default function SuperAdminDashboard() {
         </div>
       </div>
 
+      {/* ── Fehlerzustand ──────────────────────────────────────────────── */}
+      {!loading && loadError && (
+        <div className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center">
+              <AlertTriangle size={16} className="text-red-500" />
+            </div>
+            <div>
+              <p className="font-semibold text-gray-900 text-sm">Daten konnten nicht geladen werden</p>
+              <p className="text-xs text-gray-400">{loadError}</p>
+            </div>
+          </div>
+          <button
+            onClick={load}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-700 transition-colors"
+            aria-label="Daten neu laden"
+          >
+            <RefreshCw size={13} /> Erneut versuchen
+          </button>
+        </div>
+      )}
+
       {/* ── Stats ──────────────────────────────────────────────────────── */}
       {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
+        <div className="grid grid-cols-2 lg:grid-cols-7 gap-3">
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-24 bg-white rounded-xl animate-pulse border border-gray-100" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-          {statCards.map(({ label, value, icon, accent, bg, help }) => (
+        <div className="grid grid-cols-2 lg:grid-cols-7 gap-3">
+          {statCards.map(({ label, value, icon, accent, bg, help, suffix }) => (
             <GlowingEffect key={label} glowColor={accent} spread={45}>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-[1] hover:-translate-y-0.5 transition-all duration-200">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
                   <span style={{ color: accent }}>{icon}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 leading-none">
-                  <AnimatedNumber value={value} duration={1.4} />
+                  <AnimatedNumber value={value} duration={1.4} />{suffix ?? ''}
                 </p>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                   {label}

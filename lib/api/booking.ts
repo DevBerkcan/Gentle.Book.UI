@@ -18,7 +18,8 @@ if (!API_BASE_URL) {
   getServices,
   getAvailability,
   createBooking,
-  getBookingsByEmail,
+  requestMyBookingsLink,
+  getMyBookings,
   cancelBooking,
   getEmployeesByService,
 };
@@ -234,12 +235,27 @@ export async function createBooking(
   return res.json();
 }
 
-export async function getBookingsByEmail(
-  email: string
-): Promise<BookingResponse[]> {
+/**
+ * Request a magic link for the customer booking portal.
+ * The backend always returns 200 (no e-mail enumeration).
+ */
+export async function requestMyBookingsLink(email: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/bookings/my-bookings/request`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error("Anfrage fehlgeschlagen. Bitte später erneut versuchen.");
+}
+
+/** Load bookings behind a valid magic-link token. */
+export async function getMyBookings(token: string): Promise<BookingResponse[]> {
   const res = await fetch(
-    `${API_BASE_URL}/bookings/by-email/${encodeURIComponent(email)}`
+    `${API_BASE_URL}/bookings/my?token=${encodeURIComponent(token)}`
   );
+  if (res.status === 401) {
+    throw new Error("Der Zugriffslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.");
+  }
   if (!res.ok) throw new Error("Fehler beim Laden der Buchungen");
   return res.json();
 }
