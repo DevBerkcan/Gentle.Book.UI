@@ -40,7 +40,7 @@ export default function CancelBookingPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch(`${apiBase}/api/bookings/cancel/preview/${token}`)
+    fetch(`${apiBase}/bookings/cancel/preview/${token}`)
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) {
@@ -60,7 +60,7 @@ export default function CancelBookingPage() {
   const handleConfirmCancel = async () => {
     setState('confirming');
     try {
-      const res = await fetch(`${apiBase}/api/bookings/cancel/${token}`);
+      const res = await fetch(`${apiBase}/bookings/cancel/${token}`);
       if (res.ok || res.redirected) {
         setState('cancelled');
       } else {
@@ -68,7 +68,8 @@ export default function CancelBookingPage() {
         setState('error');
       }
     } catch {
-      setState('cancelled');
+      setErrorMessage('Verbindungsfehler. Bitte versuche es erneut.');
+      setState('error');
     }
   };
 

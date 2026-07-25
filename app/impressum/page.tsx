@@ -24,12 +24,19 @@ export default function ImpressumPage() {
 
           <div className="space-y-8 text-[#8A8A8A]">
             <section>
-              <h2 className="text-2xl font-bold text-[#14162B] mb-4">Angaben gemäß § 5 TMG</h2>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">Angaben gemäß § 5 DDG</h2>
               <p className="mb-2 text-[#14162B] font-semibold">
-                GentleBook
+                Berk-Can Atesoglu
               </p>
-              <p>Elisabethenstrasse 41</p>
-              <p>4051 Basel, Schweiz</p>
+              <p>Girardetstraße 17</p>
+              <p>42109 Wuppertal</p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-[#14162B] mb-4">Umsatzsteuer</h2>
+              <p>
+                Gemäß § 19 UStG wird keine Umsatzsteuer berechnet (Kleinunternehmerregelung).
+              </p>
             </section>
 
             <section>
@@ -53,11 +60,11 @@ export default function ImpressumPage() {
 
             <section>
               <h2 className="text-2xl font-bold text-[#14162B] mb-4">
-                Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV
+                Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
               </h2>
-              <p className="text-[#14162B] font-semibold">Inhaber: Marianna Topchanali</p>
-              <p>Elisabethenstrasse 41</p>
-              <p>4051 Basel, Schweiz</p>
+              <p className="text-[#14162B] font-semibold">Berk-Can Atesoglu</p>
+              <p>Girardetstraße 17</p>
+              <p>42109 Wuppertal</p>
             </section>
 
             <section className="bg-[#F6F5FA] p-6 rounded-xl border border-[#ECEBF2]/30">
