@@ -38,6 +38,16 @@ export const adminApi = {
       } | null;
     };
   },
+
+  async startMollieMandateFlow(plan: string) {
+    const { data } = await api.post('/tenant/subscription/mollie/start', { plan });
+    return data as { checkoutUrl: string };
+  },
+
+  async getMollieStatus() {
+    const { data } = await api.get('/tenant/subscription/mollie/status');
+    return data as { plan: string; status: string; hasMollieSubscription: boolean };
+  },
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────

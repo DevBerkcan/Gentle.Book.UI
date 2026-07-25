@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
@@ -124,6 +124,7 @@ function UsageBar({ label, current, limit, isUnlimited, percentage }: { label: s
 export default function AdminSubscriptionPage() {
   const { isEmployee } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const [sub, setSub] = useState<Subscription | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
@@ -132,6 +133,8 @@ export default function AdminSubscriptionPage() {
   const [requestedPlan, setRequestedPlan] = useState<string | null>(null);
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [requestError, setRequestError] = useState('');
+  const [mollieLoadingPlan, setMollieLoadingPlan] = useState<string | null>(null);
+  const [mollieProcessing, setMollieProcessing] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -146,6 +149,46 @@ export default function AdminSubscriptionPage() {
       }
     }).finally(() => setLoading(false));
   }, []);
+
+  // After returning from the Mollie-hosted checkout, poll briefly until the webhook has
+  // been processed and the subscription is actually Active (redirect and webhook arrival
+  // aren't perfectly synchronized).
+  useEffect(() => {
+    if (searchParams.get('mollieReturn') !== '1') return;
+    setMollieProcessing(true);
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts += 1;
+      try {
+        const status = await adminApi.getMollieStatus();
+        if (status.hasMollieSubscription) {
+          clearInterval(interval);
+          setMollieProcessing(false);
+          const subData = await api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null);
+          setSub(subData);
+          return;
+        }
+      } catch { /* keep polling */ }
+      if (attempts >= 8) {
+        clearInterval(interval);
+        setMollieProcessing(false);
+      }
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [searchParams]);
+
+  const handleMollieStart = async (planKey: string) => {
+    if (mollieLoadingPlan || requesting) return;
+    setMollieLoadingPlan(planKey);
+    setRequestError('');
+    try {
+      const { checkoutUrl } = await adminApi.startMollieMandateFlow(planKey);
+      window.location.href = checkoutUrl;
+    } catch (err: any) {
+      setRequestError(err.response?.data?.message || 'SEPA-Zahlung konnte nicht gestartet werden.');
+      setMollieLoadingPlan(null);
+    }
+  };
 
   const handlePlanRequest = async (planKey: string) => {
     if (requesting) return;
@@ -296,6 +339,17 @@ export default function AdminSubscriptionPage() {
         </motion.div>
       )}
 
+      {/* Mollie processing banner (after checkout redirect) */}
+      {mollieProcessing && (
+        <motion.div variants={fadeUp} className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex gap-4">
+          <span className="w-5 h-5 mt-0.5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin shrink-0" />
+          <div>
+            <p className="font-semibold text-blue-800">Zahlung wird verarbeitet…</p>
+            <p className="text-blue-700 text-sm mt-1">Dein SEPA-Mandat wird gerade bestätigt. Das dauert normalerweise nur wenige Sekunden.</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Pending Request Banner */}
       {requestedPlan && !requestSuccess && (
         <motion.div variants={fadeUp} className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
@@ -371,27 +425,21 @@ export default function AdminSubscriptionPage() {
                   ))}
                 </ul>
                 <div className="space-y-2">
-                  {/* Primary: In-App Plan Request */}
+                  {/* Primary: Mollie SEPA checkout */}
                   {!isCurrent && (
                     <button
-                      onClick={() => handlePlanRequest(plan.key)}
-                      disabled={requesting || requestedPlan === plan.key}
-                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
+                      onClick={() => handleMollieStart(plan.key)}
+                      disabled={!!mollieLoadingPlan || requestedPlan === plan.key}
                       className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
-                        ${requestedPlan === plan.key
-                          ? 'bg-green-100 text-green-700 cursor-default'
-                          : requestedPlan
-                            ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                            : plan.highlight
-                              ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
-                              : 'bg-gray-900 hover:bg-gray-700 text-white'}`}
+                        ${plan.highlight
+                          ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
+                          : 'bg-gray-900 hover:bg-gray-700 text-white'}
+                        ${mollieLoadingPlan && mollieLoadingPlan !== plan.key ? 'opacity-50' : ''}`}
                     >
-                      {requestedPlan === plan.key ? (
-                        <><Check size={15} /> Anfrage gesendet</>
-                      ) : requesting ? (
+                      {mollieLoadingPlan === plan.key ? (
                         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>{plan.name} anfragen <ArrowRight size={14} /></>
+                        <>{plan.name} per SEPA abonnieren <ArrowRight size={14} /></>
                       )}
                     </button>
                   )}
@@ -399,6 +447,17 @@ export default function AdminSubscriptionPage() {
                     <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-green-50 text-green-700">
                       <Check size={15} /> Aktueller Plan
                     </div>
+                  )}
+                  {/* Fallback: manual request (no SEPA) */}
+                  {!isCurrent && (
+                    <button
+                      onClick={() => handlePlanRequest(plan.key)}
+                      disabled={requesting || !!requestedPlan}
+                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
+                      className="w-full text-center text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors py-1 disabled:opacity-50"
+                    >
+                      {requestedPlan === plan.key ? 'Manuelle Anfrage gesendet ✓' : 'Andere Zahlungsart? Manuell anfragen'}
+                    </button>
                   )}
                   {/* Secondary: WhatsApp / Email */}
                   <div className="flex gap-2">

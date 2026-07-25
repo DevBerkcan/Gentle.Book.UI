@@ -9,7 +9,7 @@ import { Input, Textarea } from '@nextui-org/input';
 import { Button } from '@nextui-org/button';
 import {
   Settings, Save, Building2, Phone, Globe, Palette, Lock,
-  ImageIcon, Upload, Clock, AlertTriangle, Sliders, Trash2,
+  ImageIcon, Upload, Clock, AlertTriangle, Sliders, Trash2, CreditCard,
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import api, { apiOrigin } from '@/lib/api/client';
@@ -63,6 +63,13 @@ interface TenantSettings {
   cancellationHoursNotice: number;
   cancellationFeePercent: number;
   logoUrl?: string;
+  legalCompanyName?: string;
+  billingStreet?: string;
+  billingZipCode?: string;
+  billingCity?: string;
+  billingCountry?: string;
+  vatId?: string;
+  hasCompleteBillingProfile?: boolean;
 }
 
 // ── Shared UI primitives ──────────────────────────────────────────────────────
@@ -145,6 +152,12 @@ export default function AdminSettingsPage() {
     cancellationHoursNotice: 0,
     cancellationFeePercent: 0,
     logoUrl: '',
+    legalCompanyName: '',
+    billingStreet: '',
+    billingZipCode: '',
+    billingCity: '',
+    billingCountry: '',
+    vatId: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -459,6 +472,49 @@ export default function AdminSettingsPage() {
                   placeholder="Musterstraße 1, 10115 Berlin" className={inputCls} />
               </Field>
             </div>
+          </SectionCard>
+
+          {/* ── Rechnungsadresse ── */}
+          <SectionCard
+            icon={<CreditCard size={15} className="text-white" />}
+            title="Rechnungsadresse"
+            subtitle="Wird für Abo-Zahlungen und Rechnungen benötigt"
+            accentClass="bg-[#1F2937]"
+          >
+            {settings.hasCompleteBillingProfile === false && (
+              <div className="flex items-center gap-2 px-3.5 py-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-sm text-[#92400E]">
+                <AlertTriangle size={13} className="shrink-0" />
+                Bitte vollständig ausfüllen, um dein Abo per SEPA-Lastschrift bezahlen zu können.
+              </div>
+            )}
+            <Field label="Rechtlicher Firmenname / Inhaber">
+              <input type="text" value={settings.legalCompanyName} onChange={(e) => set('legalCompanyName', e.target.value)}
+                placeholder="Max Mustermann" required className={inputCls} />
+            </Field>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Straße & Hausnummer">
+                <input type="text" value={settings.billingStreet} onChange={(e) => set('billingStreet', e.target.value)}
+                  placeholder="Musterstraße 1" required className={inputCls} />
+              </Field>
+              <Field label="PLZ">
+                <input type="text" value={settings.billingZipCode} onChange={(e) => set('billingZipCode', e.target.value)}
+                  placeholder="10115" required className={inputCls} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field label="Ort">
+                <input type="text" value={settings.billingCity} onChange={(e) => set('billingCity', e.target.value)}
+                  placeholder="Berlin" required className={inputCls} />
+              </Field>
+              <Field label="Land (ISO-Code)">
+                <input type="text" value={settings.billingCountry} onChange={(e) => set('billingCountry', e.target.value.toUpperCase())}
+                  placeholder="DE" maxLength={2} required className={inputCls} />
+              </Field>
+            </div>
+            <Field label="USt-IdNr. (optional)">
+              <input type="text" value={settings.vatId} onChange={(e) => set('vatId', e.target.value)}
+                placeholder="DE123456789" className={inputCls} />
+            </Field>
           </SectionCard>
 
           {/* ── Farben ── */}
