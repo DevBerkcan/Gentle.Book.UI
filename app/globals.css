@@ -100,3 +100,83 @@
     border-radius: 8px;
   }
 }
+/* Compact admin calendar: keep the complete month visible within the viewport. */
+.gentle-calendar {
+  color: #1e1e1e;
+  font-size: 0.875rem;
+}
+
+.gentle-calendar .rbc-toolbar {
+  gap: 0.5rem;
+  margin: 0;
+  min-height: 46px;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid #ecebf2;
+}
+
+.gentle-calendar .rbc-toolbar button {
+  border-color: #d8d7e2;
+  padding: 0.35rem 0.75rem;
+}
+
+.gentle-calendar .rbc-toolbar button:hover,
+.gentle-calendar .rbc-toolbar button:focus {
+  border-color: #6355e4;
+  background: #eeebfc;
+  color: #4a3bc2;
+}
+
+.gentle-calendar .rbc-toolbar button.rbc-active {
+  border-color: #6355e4;
+  background: #6355e4;
+  color: white;
+  box-shadow: none;
+}
+
+.gentle-calendar .rbc-header {
+  padding: 0.35rem 0.25rem;
+  border-color: #ecebf2;
+  color: #565a72;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.gentle-calendar .rbc-month-view,
+.gentle-calendar .rbc-time-view,
+.gentle-calendar .rbc-agenda-view {
+  border-color: #ecebf2;
+}
+
+.gentle-calendar .rbc-month-row,
+.gentle-calendar .rbc-day-bg,
+.gentle-calendar .rbc-time-content,
+.gentle-calendar .rbc-timeslot-group {
+  border-color: #ecebf2;
+}
+
+.gentle-calendar .rbc-date-cell {
+  padding-right: 0.4rem;
+  font-size: 0.78rem;
+}
+
+.gentle-calendar .rbc-event {
+  min-height: 18px;
+  padding: 1px 4px;
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.gentle-calendar .rbc-today {
+  background: #eeebfc;
+}
+
+@media (max-width: 767px) {
+  .gentle-calendar .rbc-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .gentle-calendar .rbc-toolbar-label {
+    padding: 0.2rem;
+  }
+}

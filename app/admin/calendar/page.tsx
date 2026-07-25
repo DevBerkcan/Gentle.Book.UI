@@ -13,7 +13,7 @@ import { Select, SelectItem } from "@nextui-org/select";
 import { Input, Textarea } from "@nextui-org/input";
 import {
   Calendar as CalendarIconLucide, Clock, User, Phone, Mail, Plus, AlertCircle,
-  CheckCircle, XCircle, Ban, Scissors, MessageCircle, Hash, CreditCard,
+  CheckCircle, Ban, Scissors, MessageCircle, Hash, CreditCard,
   CalendarDays, ChevronRight, Search
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
@@ -47,11 +47,6 @@ const statusLabels = {
   Confirmed: "Bestätigt", Pending: "Ausstehend", Completed: "Abgeschlossen",
   Cancelled: "Storniert", NoShow: "Nicht erschienen"
 };
-const statusIcons = {
-  Confirmed: CheckCircle, Pending: Clock, Completed: CheckCircle,
-  Cancelled: XCircle, NoShow: XCircle
-};
-
 const modalClassNames = {
   base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
   header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
@@ -476,27 +471,29 @@ const handleCreateManualBooking = async () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-5 lg:h-dvh lg:min-h-0 lg:overflow-hidden lg:p-5">
+      <div className="mx-auto max-w-[1600px] lg:flex lg:h-full lg:min-h-0 lg:flex-col">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="mb-3 flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">Kalender</h1>
-            <p className="text-[#8A8A8A] flex items-center gap-2 text-sm">
+            <h1 className="text-2xl font-bold leading-tight text-[#1E1E1E] sm:text-[28px]">Kalender</h1>
+            <p className="mt-0.5 flex items-center gap-2 text-xs text-[#8A8A8A] sm:text-sm">
               Verwalten Sie Termine und blockierte Zeiten
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button
-              className="bg-gradient-to-r from-[#6b7280] to-[#4b5563] text-white font-semibold shadow-lg"
-              startContent={<Ban size={18} />}
+              size="sm"
+              className="h-9 bg-gradient-to-r from-[#6b7280] to-[#4b5563] px-4 font-semibold text-white shadow-md"
+              startContent={<Ban size={16} />}
               onPress={() => setIsBlockedSlotModalOpen(true)}
             >
               Zeitslot blockieren
             </Button>
             <Button
-              className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
-              startContent={<Plus size={18} />}
+              size="sm"
+              className="h-9 bg-gradient-to-r from-[#6355E4] to-[#17A398] px-4 font-semibold text-white shadow-md shadow-[#6355E4]/20"
+              startContent={<Plus size={16} />}
               onPress={handleOpenManualBooking}
             >
               Buchung erstellen
@@ -504,16 +501,17 @@ const handleCreateManualBooking = async () => {
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <Card className="mb-4 border border-[#ECEBF2]/20 shadow-xl">
-          <CardBody className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
+        {/* Filter and legend */}
+        <Card className="mb-3 shrink-0 border border-[#ECEBF2]/60 shadow-md">
+          <CardBody className="p-2.5 sm:px-3">
+            <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
               <Select
+                size="sm"
                 label="Filter nach Status"
                 selectedKeys={filterStatus ? [filterStatus] : []}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="max-w-xs"
-                classNames={{ trigger: "bg-white border border-[#ECEBF2]/30" }}
+                className="w-full shrink-0 sm:w-64"
+                classNames={{ trigger: "h-10 min-h-10 bg-white border border-[#ECEBF2]" }}
               >
                 <SelectItem key="all" value="all">Alle Termine</SelectItem>
                 <SelectItem key="blocked" value="blocked">Blockierte Zeiten</SelectItem>
@@ -523,15 +521,31 @@ const handleCreateManualBooking = async () => {
                 <SelectItem key="Cancelled" value="Cancelled">Storniert</SelectItem>
                 <SelectItem key="NoShow" value="NoShow">Nicht erschienen</SelectItem>
               </Select>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-[#565A72]">
+                {Object.entries(statusLabels).map(([status, label]) => (
+                  <div key={status} className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: statusColors[status as keyof typeof statusColors] }}
+                    />
+                    <span>{label}</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-1.5 whitespace-nowrap">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#6b7280]" />
+                  <span>Blockiert</span>
+                </div>
+              </div>
             </div>
           </CardBody>
         </Card>
 
         {/* Calendar */}
-        <Card className="border border-[#ECEBF2]/20 shadow-xl overflow-hidden">
-          <CardBody className="p-0">
-            <div className="h-[600px] lg:h-[700px]">
+        <Card className="overflow-hidden border border-[#ECEBF2]/60 shadow-lg lg:min-h-0 lg:flex-1">
+          <CardBody className="h-full p-0">
+            <div className="h-[620px] lg:h-full">
               <Calendar
+                className="gentle-calendar"
                 localizer={localizer}
                 events={filteredEvents}
                 startAccessor="start"
@@ -570,31 +584,6 @@ const handleCreateManualBooking = async () => {
                 }}
                 culture="de"
               />
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Legend */}
-        <Card className="mt-4 border border-[#ECEBF2]/20 shadow-xl">
-          <CardBody className="p-4">
-            <div className="flex flex-wrap items-center gap-6 text-sm">
-              {Object.entries(statusLabels).map(([status, label]) => {
-                const Icon = statusIcons[status as keyof typeof statusIcons];
-                return (
-                  <div key={status} className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded" style={{ backgroundColor: statusColors[status as keyof typeof statusColors] }} />
-                    <span className="text-[#1E1E1E] flex items-center gap-1">
-                      {Icon && <Icon size={14} className="text-[#8A8A8A]" />}{label}
-                    </span>
-                  </div>
-                );
-              })}
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-[#6b7280]" />
-                <span className="text-[#1E1E1E] flex items-center gap-1">
-                  <Ban size={14} className="text-[#8A8A8A]" />Blockierte Zeit
-                </span>
-              </div>
             </div>
           </CardBody>
         </Card>
