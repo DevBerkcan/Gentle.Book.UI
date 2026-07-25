@@ -309,19 +309,11 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
 
           {/* ── Back button ── */}
           <motion.div variants={slideUp} className="flex flex-col sm:flex-row gap-3">
-            {slug && (
-              <Link href={`/booking/${slug}`}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] text-white"
-                style={{ background: primary, boxShadow: `0 4px 20px ${withAlpha(primary, 0.35)}` }}
-              >
-                <ArrowLeft size={15} /> Zurück zum Profil
-              </Link>
-            )}
-            <Link href="/"
-              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold border bg-white text-gray-600 hover:bg-gray-50 transition-all active:scale-[0.98]"
-              style={{ borderColor: withAlpha(primary, 0.2) }}
+            <Link href={slug ? `/booking/${slug}` : "/"}
+              className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold transition-all hover:opacity-90 active:scale-[0.98] text-white"
+              style={{ background: primary, boxShadow: `0 4px 20px ${withAlpha(primary, 0.35)}` }}
             >
-              Zur Startseite
+              <ArrowLeft size={15} /> Zurück zur Buchungsseite
             </Link>
           </motion.div>
         </motion.div>

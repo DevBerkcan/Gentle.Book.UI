@@ -131,6 +131,7 @@ export default function AdminSubscriptionPage() {
   const [requesting, setRequesting] = useState(false);
   const [requestedPlan, setRequestedPlan] = useState<string | null>(null);
   const [requestSuccess, setRequestSuccess] = useState(false);
+  const [requestError, setRequestError] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -147,14 +148,19 @@ export default function AdminSubscriptionPage() {
   }, []);
 
   const handlePlanRequest = async (planKey: string) => {
-    if (requesting || requestedPlan) return;
+    if (requesting) return;
+    if (requestedPlan) {
+      setRequestError(`Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan. Bitte warte, bis diese bearbeitet wurde, bevor du einen anderen Plan anfragst.`);
+      return;
+    }
     setRequesting(true);
+    setRequestError('');
     try {
       await adminApi.requestPlan(planKey);
       setRequestedPlan(planKey);
       setRequestSuccess(true);
-    } catch {
-      alert('Anfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
+    } catch (err: any) {
+      setRequestError(err.response?.data?.message || 'Anfrage konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere den Support.');
     } finally {
       setRequesting(false);
     }
@@ -303,6 +309,17 @@ export default function AdminSubscriptionPage() {
         </motion.div>
       )}
 
+      {/* Request Error Banner */}
+      {requestError && (
+        <motion.div variants={fadeUp} className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-4">
+          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-red-800">Anfrage nicht möglich</p>
+            <p className="text-red-700 text-sm mt-1">{requestError}</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Pricing Cards */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center gap-2 mb-2">
@@ -358,12 +375,13 @@ export default function AdminSubscriptionPage() {
                   {!isCurrent && (
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
-                      disabled={requesting || !!requestedPlan}
+                      disabled={requesting || requestedPlan === plan.key}
+                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
                       className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
                         ${requestedPlan === plan.key
                           ? 'bg-green-100 text-green-700 cursor-default'
                           : requestedPlan
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                             : plan.highlight
                               ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
                               : 'bg-gray-900 hover:bg-gray-700 text-white'}`}

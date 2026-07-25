@@ -246,6 +246,9 @@ export default function AdminWaitlistPage() {
                         <span className="flex items-center gap-1">
                           <Calendar size={11} />
                           {new Date(entry.preferredDate).toLocaleDateString('de-DE')}
+                          {entry.preferredStartTime
+                            ? ` · ${entry.preferredStartTime}${entry.preferredEndTime ? `–${entry.preferredEndTime}` : ''} Uhr`
+                            : ' · flexibel'}
                         </span>
                       )}
                     </div>
@@ -257,6 +260,8 @@ export default function AdminWaitlistPage() {
                     <p className="mt-1 text-[10px] text-[#D1D5DB]">
                       Eingetragen: {new Date(entry.createdAt).toLocaleString('de-DE')}
                       {entry.notifiedAt && ` · Benachrichtigt: ${new Date(entry.notifiedAt).toLocaleString('de-DE')}`}
+                      {entry.reservationExpiresAt && entry.status === 'Notified' &&
+                        ` · Reserviert bis: ${new Date(entry.reservationExpiresAt).toLocaleString('de-DE')}`}
                     </p>
                   </div>
 

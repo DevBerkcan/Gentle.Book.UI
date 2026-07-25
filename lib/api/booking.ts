@@ -82,6 +82,7 @@ export interface CreateBookingRequest {
   customer: CustomerInfo;
   customerNotes?: string;
   employeeId?: string | null;
+  waitlistToken?: string;
 }
 
 export interface BookingResponse {
@@ -197,12 +198,14 @@ export async function getAvailability(
   date: string,
   employeeId?: string,
   tenantSlug?: string,
+  waitlistToken?: string,
 ): Promise<AvailabilityResponse> {
   const response = await api.get(`/availability/${serviceId}`, {
     params: {
       date,
       ...(employeeId ? { employeeId } : {}),
       ...(tenantSlug ? { tenantSlug } : {}),
+      ...(waitlistToken ? { waitlistToken } : {}),
     },
   });
   return response.data;

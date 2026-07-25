@@ -82,8 +82,8 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#F3F4F6]">
+    <div className="bg-white rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-3 px-1 pb-4">
         <div className={`w-8 h-8 ${accentClass} rounded-xl flex items-center justify-center shrink-0`}>
           {icon}
         </div>
@@ -92,7 +92,7 @@ function SectionCard({
           <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{subtitle}</p>
         </div>
       </div>
-      <div className="px-5 py-5 space-y-4">{children}</div>
+      <div className="px-1 space-y-4">{children}</div>
     </div>
   );
 }
@@ -161,9 +161,9 @@ export default function AdminSettingsPage() {
   const [businessHours, setBusinessHours] = useState<BusinessHoursItem[]>(
     DAYS.map((d) => ({
       dayOfWeek: d.value,
-      isOpen: d.value >= 1 && d.value <= 5,
-      openTime: '09:00',
-      closeTime: '18:00',
+      isOpen: false,
+      openTime: '',
+      closeTime: '',
       breakStartTime: '',
       breakEndTime: '',
     }))
@@ -208,8 +208,8 @@ export default function AdminSettingsPage() {
           DAYS.map((d) => {
             const existing = data.find((bh: any) => bh.dayOfWeek === d.value);
             return existing
-              ? { dayOfWeek: d.value, isOpen: existing.isOpen, openTime: existing.openTime ?? '09:00', closeTime: existing.closeTime ?? '18:00', breakStartTime: existing.breakStartTime ?? '', breakEndTime: existing.breakEndTime ?? '' }
-              : { dayOfWeek: d.value, isOpen: d.value >= 1 && d.value <= 5, openTime: '09:00', closeTime: '18:00', breakStartTime: '', breakEndTime: '' };
+              ? { dayOfWeek: d.value, isOpen: existing.isOpen, openTime: existing.openTime ?? '', closeTime: existing.closeTime ?? '', breakStartTime: existing.breakStartTime ?? '', breakEndTime: existing.breakEndTime ?? '' }
+              : { dayOfWeek: d.value, isOpen: false, openTime: '', closeTime: '', breakStartTime: '', breakEndTime: '' };
           })
         );
       }
@@ -325,7 +325,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        <form onSubmit={saveSettings} className="space-y-4">
+        <form onSubmit={saveSettings} className="space-y-8">
 
           {/* ── Logo ── */}
           <SectionCard
@@ -570,17 +570,13 @@ export default function AdminSettingsPage() {
             subtitle="Wochentage und Geschäftszeiten"
             accentClass="bg-[#1F2937]"
           >
-            <div className="space-y-2">
+            <div className="divide-y divide-[#F3F4F6]">
               {DAYS.map((day) => {
                 const bh = businessHours.find((b) => b.dayOfWeek === day.value)!;
                 return (
                   <div
                     key={day.value}
-                    className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border transition-all ${
-                      bh.isOpen
-                        ? 'border-[#E5E7EB] bg-white'
-                        : 'border-[#F3F4F6] bg-[#F7F7F8]'
-                    }`}
+                    className="flex items-center gap-3 py-3"
                   >
                     {/* Checkbox */}
                     <label className="relative flex items-center cursor-pointer flex-shrink-0">

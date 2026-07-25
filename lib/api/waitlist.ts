@@ -11,6 +11,10 @@ export interface WaitlistEntry {
   createdAt: string;
   notifiedAt?: string;
   preferredDate?: string;
+  preferredStartTime?: string;
+  preferredEndTime?: string;
+  reservedStartTime?: string;
+  reservationExpiresAt?: string;
   serviceName?: string;
   employeeName?: string;
 }
@@ -24,6 +28,8 @@ export interface JoinWaitlistDto {
   serviceId?: string;
   employeeId?: string;
   preferredDate?: string;
+  preferredStartTime?: string;
+  preferredEndTime?: string;
 }
 
 /** Public: customer joins the waitlist (no auth needed) */

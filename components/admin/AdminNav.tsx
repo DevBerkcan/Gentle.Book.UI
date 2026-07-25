@@ -112,7 +112,13 @@ export function AdminNav() {
   const displayName = user?.name
     || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "")
     || employee?.name || "?";
-  const displayRole = user?.role || employee?.role || "";
+  const ROLE_LABELS: Record<string, string> = {
+    TenantAdmin: "Inhaber",
+    Employee: "Mitarbeiter",
+    SuperAdmin: "Betreiber",
+  };
+  const rawRole = user?.role || employee?.role || "";
+  const displayRole = ROLE_LABELS[rawRole] || rawRole;
   const initials = displayName === "?"
     ? "?"
     : displayName.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
