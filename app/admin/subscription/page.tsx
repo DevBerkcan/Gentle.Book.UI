@@ -135,18 +135,23 @@ export default function AdminSubscriptionPage() {
   const [requestError, setRequestError] = useState('');
   const [mollieLoadingPlan, setMollieLoadingPlan] = useState<string | null>(null);
   const [mollieProcessing, setMollieProcessing] = useState(false);
+  // null while unknown — deliberately don't show the SEPA button until we know for sure,
+  // so a real customer can never see a Mollie test-mode checkout by mistake.
+  const [mollieLiveMode, setMollieLiveMode] = useState<boolean | null>(null);
 
   useEffect(() => {
     Promise.all([
       api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null),
       api.get('/tenant/usage').then(r => r.data).catch(() => null),
       adminApi.getSubscriptionRequestStatus().catch(() => null),
-    ]).then(([subData, usageData, requestStatus]) => {
+      adminApi.getMollieStatus().catch(() => null),
+    ]).then(([subData, usageData, requestStatus, mollieStatus]) => {
       setSub(subData);
       setUsage(usageData);
       if (requestStatus?.request?.status === 'Pending') {
         setRequestedPlan(requestStatus.request.requestedPlan);
       }
+      setMollieLiveMode(mollieStatus?.isLiveMode ?? false);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -425,8 +430,9 @@ export default function AdminSubscriptionPage() {
                   ))}
                 </ul>
                 <div className="space-y-2">
-                  {/* Primary: Mollie SEPA checkout */}
-                  {!isCurrent && (
+                  {/* Primary: Mollie SEPA checkout — only ever shown once we've confirmed
+                      live mode server-side, so no real customer can hit a test-mode checkout. */}
+                  {!isCurrent && mollieLiveMode === true && (
                     <button
                       onClick={() => handleMollieStart(plan.key)}
                       disabled={!!mollieLoadingPlan || requestedPlan === plan.key}
@@ -442,6 +448,14 @@ export default function AdminSubscriptionPage() {
                         <>{plan.name} per SEPA abonnieren <ArrowRight size={14} /></>
                       )}
                     </button>
+                  )}
+                  {!isCurrent && mollieLiveMode === false && (
+                    <div
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
+                      title="SEPA-Zahlung ist bald verfügbar"
+                    >
+                      SEPA-Zahlung bald verfügbar
+                    </div>
                   )}
                   {isCurrent && (
                     <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-green-50 text-green-700">

@@ -46,7 +46,7 @@ export const adminApi = {
 
   async getMollieStatus() {
     const { data } = await api.get('/tenant/subscription/mollie/status');
-    return data as { plan: string; status: string; hasMollieSubscription: boolean };
+    return data as { isLiveMode: boolean; plan: string; status: string; hasMollieSubscription: boolean };
   },
 };
 
