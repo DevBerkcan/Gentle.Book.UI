@@ -25,6 +25,8 @@ export interface AdminService {
   employeeId?: string | null;
   employeeName?: string | null;
   isActive: boolean;
+  locationId?: string | null;
+  locationName?: string | null;
 }
 
 export interface AdminServiceCategory {
@@ -48,6 +50,7 @@ export interface CreateServiceData {
   categoryId: string;
   employeeIds?: string[] | null;
   employeeId?: string | null;
+  locationId?: string | null;
 }
 
 // Updated to use array of employee IDs with backward compatibility
@@ -63,6 +66,7 @@ export interface UpdateServiceData {
   employeeIds?: string[] | null;  // Primary - array of employee IDs
   employeeId?: string | null;      // Backward compatibility - single employee ID
   isActive: boolean;
+  locationId?: string | null;
 }
 
 export interface CreateCategoryData {

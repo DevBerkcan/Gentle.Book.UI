@@ -10,9 +10,18 @@ import { Button } from '@nextui-org/button';
 import {
   Settings, Save, Building2, Phone, Globe, Palette, Lock,
   ImageIcon, Upload, Clock, AlertTriangle, Sliders, Trash2, CreditCard,
+  MapPin, Plus, Pencil, Star,
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import api, { apiOrigin } from '@/lib/api/client';
+import {
+  createBusinessLocation,
+  deleteBusinessLocation,
+  getBusinessLocations,
+  updateBusinessLocation,
+  type BusinessLocation,
+  type BusinessLocationInput,
+} from '@/lib/api/locations';
 
 // ── Design Tokens (matching AdminLinksPage) ───────────────────────────────────
 // bg:         #F7F7F8
@@ -123,6 +132,18 @@ const inputCls =
 const selectCls =
   'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all appearance-none';
 
+const emptyLocation = (currency = 'EUR', timeZone = 'Europe/Berlin'): BusinessLocationInput => ({
+  name: '',
+  street: '',
+  postalCode: '',
+  city: '',
+  countryCode: 'DE',
+  currency,
+  timeZone,
+  isDefault: false,
+  isActive: true,
+});
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminSettingsPage() {
@@ -163,6 +184,12 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [locations, setLocations] = useState<BusinessLocation[]>([]);
+  const [locationForm, setLocationForm] = useState<BusinessLocationInput>(() => emptyLocation());
+  const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
+  const [showLocationForm, setShowLocationForm] = useState(false);
+  const [locationSaving, setLocationSaving] = useState(false);
+  const [locationError, setLocationError] = useState('');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -193,6 +220,7 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     loadSettings();
     loadBusinessHours();
+    loadLocations();
   }, []);
 
   useEffect(() => {
@@ -229,6 +257,73 @@ export default function AdminSettingsPage() {
     } catch {}
   }
 
+  async function loadLocations() {
+    try {
+      setLocations(await getBusinessLocations());
+    } catch {
+      setLocationError('Standorte konnten nicht geladen werden.');
+    }
+  }
+
+  function openNewLocation() {
+    setEditingLocationId(null);
+    setLocationForm(emptyLocation(settings.defaultCurrency, settings.timeZone));
+    setLocationError('');
+    setShowLocationForm(true);
+  }
+
+  function openEditLocation(location: BusinessLocation) {
+    setEditingLocationId(location.id);
+    setLocationForm({
+      name: location.name,
+      street: location.street ?? '',
+      postalCode: location.postalCode ?? '',
+      city: location.city,
+      countryCode: location.countryCode,
+      currency: location.currency,
+      timeZone: location.timeZone,
+      isDefault: location.isDefault,
+      isActive: location.isActive,
+    });
+    setLocationError('');
+    setShowLocationForm(true);
+  }
+
+  async function saveLocation() {
+    setLocationSaving(true);
+    setLocationError('');
+    try {
+      const payload = {
+        ...locationForm,
+        countryCode: locationForm.countryCode.trim().toUpperCase(),
+        currency: locationForm.currency.trim().toUpperCase(),
+      };
+      if (editingLocationId) {
+        await updateBusinessLocation(editingLocationId, payload);
+      } else {
+        await createBusinessLocation(payload);
+      }
+      setShowLocationForm(false);
+      setEditingLocationId(null);
+      await Promise.all([loadLocations(), loadSettings()]);
+    } catch (err: any) {
+      setLocationError(err.response?.data?.message || 'Standort konnte nicht gespeichert werden.');
+    } finally {
+      setLocationSaving(false);
+    }
+  }
+
+  async function removeLocation(location: BusinessLocation) {
+    if (!window.confirm(`Standort „${location.name}“ wirklich löschen?`)) return;
+    setLocationError('');
+    try {
+      await deleteBusinessLocation(location.id);
+      await loadLocations();
+    } catch (err: any) {
+      setLocationError(err.response?.data?.message || 'Standort konnte nicht gelöscht werden.');
+    }
+  }
+
   async function saveBusinessHours() {
     setBhSaving(true); setBhError(''); setBhSaved(false);
     try {
@@ -254,7 +349,12 @@ export default function AdminSettingsPage() {
     e.preventDefault();
     setSaving(true); setError(''); setSaved(false);
     try {
-      await api.put('/tenant/settings', settings);
+      const normalizedSettings = {
+        ...settings,
+        defaultCurrency: settings.defaultCurrency.trim().toUpperCase(),
+      };
+      await api.put('/tenant/settings', normalizedSettings);
+      setSettings(normalizedSettings);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
@@ -474,6 +574,180 @@ export default function AdminSettingsPage() {
             </div>
           </SectionCard>
 
+          {/* ── Standorte ── */}
+          <SectionCard
+            icon={<MapPin size={15} className="text-white" />}
+            title="Standorte"
+            subtitle="Adressen, Zeitzonen und Währungen je Filiale"
+            accentClass="bg-[#17A398]"
+          >
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-[#C7D2FE] bg-[#F8F7FF] p-3.5">
+              <p className="text-xs leading-relaxed text-[#565A72]">
+                Jeder Service wird einem Standort zugeordnet und übernimmt automatisch dessen Währung.
+                Der Standardstandort gilt für bestehende Services und allgemeine Einstellungen.
+              </p>
+              <button
+                type="button"
+                onClick={openNewLocation}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE]"
+              >
+                <Plus size={13} /> Standort
+              </button>
+            </div>
+
+            {locationError && (
+              <div className="rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-xs text-[#991B1B]">
+                {locationError}
+              </div>
+            )}
+
+            <div className="space-y-2.5">
+              {locations.map((location) => (
+                <div key={location.id} className="rounded-xl border border-[#E5E7EB] bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-[#111318]">{location.name}</p>
+                        {location.isDefault && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#EEEBFC] px-2 py-0.5 text-[10px] font-semibold text-[#6355E4]">
+                            <Star size={10} fill="currentColor" /> Standard
+                          </span>
+                        )}
+                        {!location.isActive && (
+                          <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold text-[#6B7280]">
+                            Inaktiv
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs text-[#6B7280]">
+                        {[location.street, `${location.postalCode ?? ''} ${location.city}`.trim(), location.countryCode]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-semibold">
+                        <span className="rounded-md bg-[#F3F4F6] px-2 py-1 text-[#374151]">{location.currency}</span>
+                        <span className="rounded-md bg-[#F3F4F6] px-2 py-1 text-[#374151]">{location.timeZone}</span>
+                        <span className="rounded-md bg-[#F3F4F6] px-2 py-1 text-[#374151]">
+                          {location.serviceCount} Service{location.serviceCount === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 gap-1">
+                      <button type="button" onClick={() => openEditLocation(location)}
+                        className="rounded-lg p-2 text-[#6B7280] hover:bg-[#EEEBFC] hover:text-[#6355E4]"
+                        aria-label={`${location.name} bearbeiten`}>
+                        <Pencil size={14} />
+                      </button>
+                      {!location.isDefault && (
+                        <button type="button" onClick={() => removeLocation(location)}
+                          className="rounded-lg p-2 text-[#9CA3AF] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                          aria-label={`${location.name} löschen`}>
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {locations.length === 0 && (
+                <div className="rounded-xl border border-dashed border-[#D1D5DB] p-5 text-center text-xs text-[#9CA3AF]">
+                  Noch kein Standort angelegt. Der erste Standort wird automatisch zum Standard.
+                </div>
+              )}
+            </div>
+
+            {showLocationForm && (
+              <div className="space-y-4 rounded-2xl border-2 border-[#C7D2FE] bg-[#F8F7FF] p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-[#111318]">
+                    {editingLocationId ? 'Standort bearbeiten' : 'Neuer Standort'}
+                  </p>
+                  <button type="button" onClick={() => setShowLocationForm(false)}
+                    className="text-xs font-medium text-[#6B7280] hover:text-[#111318]">
+                    Schließen
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <Field label="Name">
+                    <input className={inputCls} value={locationForm.name}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, name: e.target.value }))}
+                      placeholder="Filiale Basel" />
+                  </Field>
+                  <Field label="Straße & Hausnummer">
+                    <input className={inputCls} value={locationForm.street ?? ''}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, street: e.target.value }))}
+                      placeholder="Freie Straße 10" />
+                  </Field>
+                  <Field label="PLZ">
+                    <input className={inputCls} value={locationForm.postalCode ?? ''}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, postalCode: e.target.value }))}
+                      placeholder="4001" />
+                  </Field>
+                  <Field label="Ort">
+                    <input className={inputCls} value={locationForm.city}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, city: e.target.value }))}
+                      placeholder="Basel" />
+                  </Field>
+                  <Field label="Land">
+                    <select className={selectCls} value={locationForm.countryCode}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, countryCode: e.target.value }))}>
+                      <option value="DE">Deutschland</option>
+                      <option value="CH">Schweiz</option>
+                      <option value="AT">Österreich</option>
+                      <option value="FR">Frankreich</option>
+                      <option value="NL">Niederlande</option>
+                      <option value="GB">Großbritannien</option>
+                      <option value="US">USA</option>
+                    </select>
+                  </Field>
+                  <Field label="Währung">
+                    <select className={selectCls} value={locationForm.currency}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, currency: e.target.value }))}>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="CHF">CHF</option>
+                      <option value="USD">USD ($)</option>
+                      <option value="GBP">GBP (£)</option>
+                    </select>
+                  </Field>
+                  <Field label="Zeitzone">
+                    <select className={selectCls} value={locationForm.timeZone}
+                      onChange={(e) => setLocationForm((form) => ({ ...form, timeZone: e.target.value }))}>
+                      <option value="Europe/Berlin">Europe/Berlin</option>
+                      <option value="Europe/Zurich">Europe/Zurich</option>
+                      <option value="Europe/Vienna">Europe/Vienna</option>
+                      <option value="Europe/London">Europe/London</option>
+                      <option value="America/New_York">America/New_York</option>
+                      <option value="America/Los_Angeles">America/Los_Angeles</option>
+                    </select>
+                  </Field>
+                  <div className="flex items-end gap-4 pb-2">
+                    <label className="flex items-center gap-2 text-xs font-medium text-[#374151]">
+                      <input type="checkbox" checked={locationForm.isDefault}
+                        onChange={(e) => setLocationForm((form) => ({ ...form, isDefault: e.target.checked }))}
+                        disabled={locations.find((location) => location.id === editingLocationId)?.isDefault} />
+                      Standardstandort
+                    </label>
+                    <label className="flex items-center gap-2 text-xs font-medium text-[#374151]">
+                      <input type="checkbox" checked={locationForm.isActive}
+                        onChange={(e) => setLocationForm((form) => ({ ...form, isActive: e.target.checked }))} />
+                      Aktiv
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button type="button" onClick={() => setShowLocationForm(false)}
+                    className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151]">
+                    Abbrechen
+                  </button>
+                  <button type="button" onClick={saveLocation} disabled={locationSaving}
+                    className="rounded-xl bg-[#6355E4] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                    {locationSaving ? 'Speichert…' : 'Standort speichern'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </SectionCard>
+
           {/* ── Rechnungsadresse ── */}
           <SectionCard
             icon={<CreditCard size={15} className="text-white" />}
@@ -573,9 +847,15 @@ export default function AdminSettingsPage() {
                   min={7} max={365} className={inputCls} />
               </Field>
               <Field label="Währung">
-                <input type="text" value={settings.defaultCurrency}
+                <select
+                  value={settings.defaultCurrency.toUpperCase()}
                   onChange={(e) => set('defaultCurrency', e.target.value)}
-                  placeholder="EUR" maxLength={3} className={inputCls} />
+                  className={selectCls}
+                >
+                  <option value="EUR">EUR (€)</option>
+                  <option value="CHF">CHF</option>
+                  <option value="USD">USD ($)</option>
+                </select>
               </Field>
               <Field label="Zeitzone">
                 <select value={settings.timeZone} onChange={(e) => set('timeZone', e.target.value)} className={selectCls}>

@@ -6,7 +6,7 @@ import {
     Plus, Edit, Trash2, Loader2, Search, X, Check,
     Clock, DollarSign, Eye, EyeOff, Users, Tag,
     ArrowLeft, Save, AlertCircle, ChevronLeft, ChevronRight,
-    Sparkles, Scissors, Heart, Droplets, Zap, Info
+    Sparkles, Scissors, Heart, Droplets, Zap, Info, MapPin
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,6 +48,7 @@ import {
     type UpdateCategoryData
 } from "@/lib/api/admin-services";
 import { formatPrice } from "@/lib/utils/currency";
+import { getBusinessLocations, type BusinessLocation } from "@/lib/api/locations";
 
 const modalClassNames = {
     base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
@@ -134,6 +135,7 @@ export default function AdminServicesPage() {
     const [showServicesGuide, setShowServicesGuide] = useState(false);
     const [guideStep, setGuideStep] = useState(0);
     const [tenantCurrency, setTenantCurrency] = useState("EUR");
+    const [locations, setLocations] = useState<BusinessLocation[]>([]);
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -184,6 +186,19 @@ export default function AdminServicesPage() {
                 setTenantCurrency("EUR");
                 setServiceForm((prev) => ({ ...prev, currency: prev.currency || "EUR" }));
             });
+        getBusinessLocations()
+            .then((items) => {
+                setLocations(items.filter((location) => location.isActive));
+                const defaultLocation = items.find((location) => location.isDefault);
+                if (defaultLocation) {
+                    setServiceForm((prev) => ({
+                        ...prev,
+                        locationId: prev.locationId || defaultLocation.id,
+                        currency: defaultLocation.currency,
+                    }));
+                }
+            })
+            .catch(() => setLocations([]));
     }, []);
 
     const loadData = async () => {
@@ -299,6 +314,7 @@ export default function AdminServicesPage() {
                 displayOrder: serviceForm.displayOrder!,
                 categoryId: serviceForm.categoryId,
                 employeeIds: serviceForm.employeeIds || [],
+                locationId: serviceForm.locationId || null,
             });
             setServices(prev => [newService, ...prev]);
             handleClose();
@@ -324,6 +340,7 @@ export default function AdminServicesPage() {
                 categoryId: serviceForm.categoryId!,
                 employeeIds: serviceForm.employeeIds || [],
                 isActive: selectedItem.isActive,
+                locationId: serviceForm.locationId || null,
             });
             setServices(services.map(s => s.id === updated.id ? updated : s));
             handleClose();
@@ -445,6 +462,7 @@ export default function AdminServicesPage() {
             categoryId: "",
             employeeIds: [],
             currency: tenantCurrency,
+            locationId: locations.find((location) => location.isDefault)?.id || null,
         });
         setCategoryForm({
             name: "",
@@ -486,9 +504,15 @@ export default function AdminServicesPage() {
                 displayOrder: service.displayOrder,
                 categoryId: service.categoryId,
                 employeeIds: employeeIds,
+                locationId: service.locationId || locations.find((location) => location.isDefault)?.id || null,
             });
         } else if (mode === "create") {
-            setServiceForm((prev) => ({ ...prev, currency: tenantCurrency }));
+            const defaultLocation = locations.find((location) => location.isDefault);
+            setServiceForm((prev) => ({
+                ...prev,
+                currency: defaultLocation?.currency || tenantCurrency,
+                locationId: defaultLocation?.id || null,
+            }));
         } else if (mode === "view" && service) {
             setSelectedItem(service);
         }
@@ -927,6 +951,11 @@ export default function AdminServicesPage() {
                                                                     {service.description}
                                                                 </p>
                                                             )}
+                                                            {service.locationName && (
+                                                                <p className="mt-1 flex items-center gap-1 text-xs text-[#6355E4]">
+                                                                    <MapPin size={10} /> {service.locationName}
+                                                                </p>
+                                                            )}
                                                         </td>
                                                         <td className="px-5 py-4">
                                                             <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
@@ -1275,6 +1304,7 @@ export default function AdminServicesPage() {
                                         onAssign={handleBulkAssign}
                                         onClose={onClose}
                                         submitting={submitting}
+                                        tenantCurrency={tenantCurrency}
                                     />
                                 </ModalBody>
                             </>
@@ -1292,6 +1322,7 @@ export default function AdminServicesPage() {
                     categories={categories}
                     employees={employees}
                     tenantCurrency={tenantCurrency}
+                    locations={locations}
                     modalError={modalError}
                     submitting={submitting}
                     onSave={modalMode === "create" ? handleCreateService : handleUpdateService}
@@ -1319,6 +1350,7 @@ export default function AdminServicesPage() {
                     categories={categories}
                     employees={employees}
                     services={services}
+                    tenantCurrency={tenantCurrency}
                     onClose={handleClose}
                     onEdit={() => {
                         if (selectedItem && 'categoryId' in selectedItem) {
@@ -1469,6 +1501,7 @@ function ServiceModals({
     categories,
     employees,
     tenantCurrency,
+    locations,
     modalError,
     submitting,
     onSave,
@@ -1482,6 +1515,7 @@ function ServiceModals({
     categories: AdminServiceCategory[];
     employees: EmployeeForAssignment[];
     tenantCurrency: string;
+    locations: BusinessLocation[];
     modalError: string | null;
     submitting: boolean;
     onSave: () => void;
@@ -1489,7 +1523,8 @@ function ServiceModals({
 }) {
     const isCreateOrEdit = modalMode === "create" || modalMode === "edit";
     const [showCurrencyInfo, setShowCurrencyInfo] = useState(false);
-    const selectedCurrency = (tenantCurrency || serviceForm.currency || "EUR").toUpperCase();
+    const selectedLocation = locations.find((location) => location.id === serviceForm.locationId);
+    const selectedCurrency = (selectedLocation?.currency || tenantCurrency || serviceForm.currency || "EUR").toUpperCase();
     const selectedCurrencyLabel = currencyLabels[selectedCurrency] || selectedCurrency;
     const selectedCurrencySymbol = currencySymbols[selectedCurrency] || selectedCurrency;
     const employeeOptions = [
@@ -1582,6 +1617,31 @@ function ServiceModals({
                                     />
                                 </div>
 
+                                <Select
+                                    label="Standort *"
+                                    selectedKeys={serviceForm.locationId ? [serviceForm.locationId] : []}
+                                    onSelectionChange={(keys) => {
+                                        const locationId = Array.from(keys)[0]?.toString() || "";
+                                        const location = locations.find((item) => item.id === locationId);
+                                        setServiceForm({
+                                            ...serviceForm,
+                                            locationId,
+                                            currency: location?.currency || tenantCurrency,
+                                        });
+                                    }}
+                                    isRequired
+                                    isDisabled={submitting || locations.length === 0}
+                                    description={locations.length === 0
+                                        ? "Bitte zuerst unter Einstellungen einen Standort anlegen"
+                                        : "Die Währung wird vom Standort übernommen"}
+                                >
+                                    {locations.map((location) => (
+                                        <SelectItem key={location.id} textValue={`${location.name} (${location.currency})`}>
+                                            {location.name} · {location.city} · {location.currency}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button
                                         type="button"
@@ -1594,7 +1654,7 @@ function ServiceModals({
                                             value={selectedCurrencyLabel}
                                             isReadOnly
                                             isDisabled={submitting}
-                                            description="Wird zentral in den Einstellungen verwaltet"
+                                            description="Wird durch den Standort festgelegt"
                                             classNames={inputClassNames}
                                         />
                                     </button>
@@ -1620,7 +1680,7 @@ function ServiceModals({
                                     >
                                         <Info size={16} className="mt-0.5 shrink-0 text-[#6355E4]" />
                                         <div className="flex-1">
-                                            Die Währung gilt systemweit. Bitte ändern Sie die Währung unter Einstellungen, wenn alle Preise eine andere Währung verwenden sollen.
+                                            Die Währung wird durch den gewählten Standort festgelegt. Standortwährungen verwalten Sie unter Einstellungen → Standorte.
                                         </div>
                                         <button
                                             type="button"
@@ -1879,6 +1939,7 @@ function ViewModals({
     categories,
     employees,
     services,
+    tenantCurrency,
     onClose,
     onEdit
 }: {
@@ -1888,17 +1949,18 @@ function ViewModals({
     categories: AdminServiceCategory[];
     employees: EmployeeForAssignment[];
     services: AdminService[];
+    tenantCurrency: string;
     onClose: () => void;
     onEdit: () => void;
 }) {
+    const [hasClosed, setHasClosed] = useState(false);
     const isView = modalMode === "view" || modalMode === "view-category";
     const isService = modalMode === "view" && selectedItem && 'categoryId' in selectedItem;
     const isCategory = modalMode === "view-category" && selectedItem && 'services' in selectedItem;
 
-    if (!isView || !selectedItem) return null;
-
-    // Use a ref to track if this is the first render
-    const [hasClosed, setHasClosed] = useState(false);
+    useEffect(() => {
+        if (isOpen) setHasClosed(false);
+    }, [isOpen, selectedItem]);
 
     const handleClose = () => {
         setHasClosed(true);
@@ -1907,6 +1969,8 @@ function ViewModals({
             onClose();
         }, 10);
     };
+
+    if (!isView || !selectedItem) return null;
 
     // If we've closed, don't render anything
     if (hasClosed) return null;
@@ -1944,11 +2008,13 @@ function ViewModals({
                                     service={selectedItem as AdminService}
                                     categories={categories}
                                     employees={employees}
+                                    tenantCurrency={tenantCurrency}
                                 />
                             ) : (
                                 <CategoryViewContent
                                     category={selectedItem as AdminServiceCategory}
                                     services={services}
+                                    tenantCurrency={tenantCurrency}
                                 />
                             )}
                         </ModalBody>
@@ -1983,7 +2049,7 @@ function ViewModals({
     );
 }
 // Service View Content
-function ServiceViewContent({ service, categories, employees }: { service: AdminService; categories: AdminServiceCategory[]; employees: EmployeeForAssignment[] }) {
+function ServiceViewContent({ service, categories, employees, tenantCurrency }: { service: AdminService; categories: AdminServiceCategory[]; employees: EmployeeForAssignment[]; tenantCurrency: string }) {
     const category = categories.find(c => c.id === service.categoryId);
 
     return (
@@ -1995,6 +2061,10 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
                     <div>
                         <p className="text-xs text-[#8A8A8A]">Name</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{service.name}</p>
+                    </div>
+                    <div>
+                        <p className="text-xs text-[#8A8A8A]">Standort</p>
+                        <p className="text-sm font-medium text-[#1E1E1E]">{service.locationName || "Standardstandort"}</p>
                     </div>
                     <div>
                         <p className="text-xs text-[#8A8A8A]">Status</p>
@@ -2064,7 +2134,7 @@ function ServiceViewContent({ service, categories, employees }: { service: Admin
 }
 
 // Category View Content
-function CategoryViewContent({ category, services }: { category: AdminServiceCategory; services: AdminService[] }) {
+function CategoryViewContent({ category, services, tenantCurrency }: { category: AdminServiceCategory; services: AdminService[]; tenantCurrency: string }) {
     const categoryServices = services.filter(s => s.categoryId === category.id);
 
     return (
@@ -2157,7 +2227,8 @@ function AssignmentModalContent({
     setSelectedServices,
     onAssign,
     onClose,
-    submitting
+    submitting,
+    tenantCurrency
 }: {
     employee: EmployeeForAssignment;
     services: AdminService[];
@@ -2166,6 +2237,7 @@ function AssignmentModalContent({
     onAssign: () => void;
     onClose: () => void;
     submitting: boolean;
+    tenantCurrency: string;
 }) {
     const [searchTerm, setSearchTerm] = useState("");
 

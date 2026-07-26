@@ -34,6 +34,8 @@ export interface Service {
   price: number;
   displayOrder: number;
   currency: string;
+  locationId?: string | null;
+  locationName?: string | null;
 }
 
 export interface ServiceCategory {

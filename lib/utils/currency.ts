@@ -1,15 +1,22 @@
-export const formatPrice = (price: number | undefined | null, currency: string = 'CHF'): string => {
-  if (price === undefined || price === null || isNaN(price)) {
-    price = 0;
-  }
-  
-  switch(currency?.toUpperCase()) {
-    case 'EUR':
-      return `${price.toFixed(2).replace('.', ',')} €`;
-    case 'USD':
-      return `$${price.toFixed(2)}`;
-    case 'CHF':
-    default:
-      return `${price.toFixed(2)} CHF`;
+export const formatPrice = (
+  price: number | undefined | null,
+  currency: string = 'EUR',
+  locale: string = 'de-DE',
+): string => {
+  const value = typeof price === 'number' && Number.isFinite(price) ? price : 0;
+  const normalizedCurrency = currency?.trim().toUpperCase() || 'EUR';
+
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: normalizedCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} ${normalizedCurrency}`;
   }
 };

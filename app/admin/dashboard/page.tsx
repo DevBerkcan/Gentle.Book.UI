@@ -202,6 +202,10 @@ export default function AdminDashboardPage() {
 
   const revenueThis = defaultCurrency === "CHF" ? statistics.revenueThisMonthCHF  : statistics.revenueThisMonthEUR;
   const revenueLast = defaultCurrency === "CHF" ? statistics.revenueLastMonthCHF  : statistics.revenueLastMonthEUR;
+  const monthlyRevenueEntries = Object.entries(statistics.revenueThisMonthByCurrency ?? {});
+  const monthlyRevenueDisplay = monthlyRevenueEntries.length > 0
+    ? monthlyRevenueEntries.map(([currency, value]) => formatPrice(value, currency)).join(" · ")
+    : formatPrice(revenueThis, defaultCurrency);
 
   const monthGrowth   = statistics.totalBookingsLastMonth > 0
     ? ((statistics.totalBookingsThisMonth - statistics.totalBookingsLastMonth) / statistics.totalBookingsLastMonth) * 100 : 0;
@@ -372,9 +376,9 @@ export default function AdminDashboardPage() {
           />
           <StatCard
             icon={<Euro size={18} style={{ color: "#059669" }} />}
-            value={formatPrice(revenueThis, defaultCurrency)}
-            label={`Umsatz ${defaultCurrency} diesen Monat`}
-            growth={revenueGrowth}
+            value={monthlyRevenueDisplay}
+            label="Umsatz diesen Monat"
+            growth={monthlyRevenueEntries.length <= 1 ? revenueGrowth : null}
             accent="#059669"
             helpText="Summe aller nicht-stornierten Buchungen dieses Monats basierend auf dem Servicepreis"
           />

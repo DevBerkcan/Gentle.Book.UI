@@ -89,6 +89,8 @@ export interface DashboardStatistics {
   totalCustomers: number;
   newCustomersThisMonth: number;
   popularServices: PopularService[];
+  revenueThisMonthByCurrency: Record<string, number>;
+  revenueLastMonthByCurrency: Record<string, number>;
 }
 
 export interface PopularService {
@@ -242,6 +244,8 @@ export interface SimplifiedTrackingStatistics {
   totalRevenueEUR: number;
   averageBookingValueCHF: number;
   averageBookingValueEUR: number;
+  totalRevenueByCurrency: Record<string, number>;
+  averageBookingValueByCurrency: Record<string, number>;
   linkClicks: LinkClickStatistic[];
 }
 
@@ -264,6 +268,10 @@ export interface RevenueStatistics {
   monthBookings: number;
   allTimeRevenueCHF: number;
   allTimeRevenueEUR: number;
+  todayRevenueByCurrency: Record<string, number>;
+  weekRevenueByCurrency: Record<string, number>;
+  monthRevenueByCurrency: Record<string, number>;
+  allTimeRevenueByCurrency: Record<string, number>;
   allTimeBookings: number;
 }
 

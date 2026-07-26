@@ -6,7 +6,7 @@ import { Card, CardBody } from "@nextui-org/card";
 import { Input } from "@nextui-org/input";
 import {
   Sparkles, Clock, ChevronDown, ChevronUp, Loader2,
-  Search, X, CheckCircle, ArrowRight
+  Search, X, CheckCircle, ArrowRight, MapPin
 } from "lucide-react";
 import type { Service, ServiceCategory } from "@/lib/api/booking";
 import { getServiceCategories, getServicesByCategory } from "@/lib/api/booking";
@@ -161,6 +161,11 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                       {formatPrice(service.price, service.currency)}
                     </span>
                   </div>
+                  {service.locationName && (
+                    <span className="mt-1.5 flex items-center gap-1 text-xs text-[#6B7280]">
+                      <MapPin size={11} /> {service.locationName}
+                    </span>
+                  )}
                 </div>
                 {isSelected && <CheckCircle size={16} className="flex-shrink-0" style={{ color: primaryColor }} />}
               </div>
@@ -206,6 +211,11 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                       {formatPrice(service.price, service.currency)}
                     </span>
                   </div>
+                  {service.locationName && (
+                    <span className="mt-2 flex items-center gap-1 text-xs text-[#6B7280]">
+                      <MapPin size={11} /> {service.locationName}
+                    </span>
+                  )}
                 </div>
                 {isSelected && (
                   <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ml-1" style={{ backgroundColor: primaryColor }}>

@@ -9,7 +9,7 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import {
   TrendingUp, Users, BarChart3, MousePointerClick,
   Calendar, Instagram, MapPin, MessageCircle, FileText, Shield,
-  Clock, Eye, DollarSign, Euro, AlertTriangle,
+  Clock, Eye, DollarSign, AlertTriangle,
 } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
 import {
@@ -75,10 +75,10 @@ function OverviewTile({
 
 // ── Revenue period card ───────────────────────────────────────────────────────
 function RevenuePeriodCard({
-  label, bookings, revCHF, revEUR, icon: Icon,
+  label, bookings, revenueByCurrency, icon: Icon,
 }: {
   label: string; bookings: number;
-  revCHF: number; revEUR: number;
+  revenueByCurrency: Record<string, number>;
   icon: React.ElementType;
 }) {
   return (
@@ -92,14 +92,11 @@ function RevenuePeriodCard({
           <p className="text-sm font-semibold text-[#111318]">{label}</p>
         </div>
         <div className="space-y-2.5">
-          {[
-            { cur: "CHF", val: revCHF },
-            { cur: "EUR", val: revEUR },
-          ].map(({ cur, val }) => (
-            <div key={cur} className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#9CA3AF]">{cur}</span>
+          {Object.entries(revenueByCurrency ?? {}).map(([currency, value]) => (
+            <div key={currency} className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[#9CA3AF]">{currency}</span>
               <span className="text-lg font-bold text-[#111318] tabular-nums">
-                <AnimatedNumber value={val} formatFn={(n) => formatPrice(n, cur)} />
+                <AnimatedNumber value={value} formatFn={(n) => formatPrice(n, currency)} />
               </span>
             </div>
           ))}
@@ -304,22 +301,17 @@ export default function TrackingPage() {
             accent="#059669"
             helpText="Gesamtzahl aller Buchungen die über deine Buchungsseite eingegangen sind"
           />
-          <OverviewTile
-            label="Ø Buchungswert CHF"
-            value={stats.averageBookingValueCHF}
-            icon={DollarSign}
-            accent="#D97706"
-            formatFn={(n) => formatPrice(n, "CHF")}
-            helpText="Durchschnittlicher Buchungswert in Schweizer Franken über alle abgeschlossenen Buchungen"
-          />
-          <OverviewTile
-            label="Ø Buchungswert EUR"
-            value={stats.averageBookingValueEUR}
-            icon={Euro}
-            accent="#0EA5E9"
-            formatFn={(n) => formatPrice(n, "EUR")}
-            helpText="Durchschnittlicher Buchungswert in Euro über alle abgeschlossenen Buchungen"
-          />
+          {Object.entries(stats.averageBookingValueByCurrency ?? {}).map(([currency, value]) => (
+            <OverviewTile
+              key={currency}
+              label={`Ø Buchungswert ${currency}`}
+              value={value}
+              icon={DollarSign}
+              accent="#D97706"
+              formatFn={(n) => formatPrice(n, currency)}
+              helpText={`Durchschnittlicher Wert aller abgeschlossenen Buchungen in ${currency}`}
+            />
+          ))}
         </div>
 
         {/* ── Total Revenue Banner ──────────────────────────────────────── */}
@@ -336,15 +328,12 @@ export default function TrackingPage() {
                 <p className="text-white/55 text-xs">{revenue.allTimeBookings} Buchungen insgesamt</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
-              {[
-                { cur: "CHF", val: revenue.allTimeRevenueCHF },
-                { cur: "EUR", val: revenue.allTimeRevenueEUR },
-              ].map(({ cur, val }) => (
-                <div key={cur}>
-                  <p className="text-white/50 text-xs font-medium">{cur}</p>
+            <div className="flex flex-wrap gap-6">
+              {Object.entries(revenue.allTimeRevenueByCurrency ?? {}).map(([currency, value]) => (
+                <div key={currency}>
+                  <p className="text-white/50 text-xs font-medium">{currency}</p>
                   <p className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-tight">
-                    {formatPrice(val, cur)}
+                    {formatPrice(value, currency)}
                   </p>
                 </div>
               ))}
@@ -357,22 +346,19 @@ export default function TrackingPage() {
           <RevenuePeriodCard
             label="Heute"
             bookings={revenue.todayBookings}
-            revCHF={revenue.todayRevenueCHF}
-            revEUR={revenue.todayRevenueEUR}
+            revenueByCurrency={revenue.todayRevenueByCurrency}
             icon={Clock}
           />
           <RevenuePeriodCard
             label="Letzte 7 Tage"
             bookings={revenue.weekBookings}
-            revCHF={revenue.weekRevenueCHF}
-            revEUR={revenue.weekRevenueEUR}
+            revenueByCurrency={revenue.weekRevenueByCurrency}
             icon={Calendar}
           />
           <RevenuePeriodCard
             label="Letzte 30 Tage"
             bookings={revenue.monthBookings}
-            revCHF={revenue.monthRevenueCHF}
-            revEUR={revenue.monthRevenueEUR}
+            revenueByCurrency={revenue.monthRevenueByCurrency}
             icon={Calendar}
           />
         </div>

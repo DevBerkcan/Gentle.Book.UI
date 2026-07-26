@@ -407,7 +407,6 @@ const handleCreateManualBooking = async () => {
           opacity: 0.8,
           color: "white",
           border: "2px dashed #9ca3af",
-          display: "block"
         }
       };
     }
@@ -419,7 +418,6 @@ const handleCreateManualBooking = async () => {
         opacity: 0.9,
         color: "white",
         border: "none",
-        display: "block",
         fontWeight: 500,
         fontSize: '0.85rem'
       }

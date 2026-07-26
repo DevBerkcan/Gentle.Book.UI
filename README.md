@@ -23,6 +23,11 @@ npm install
 npm run dev
 ```
 
+## Development, Staging und Production
+
+Der Branch- und Deployment-Ablauf sowie alle benötigten Environment Variables
+sind in [DEPLOYMENT_ENVIRONMENTS.md](./DEPLOYMENT_ENVIRONMENTS.md) beschrieben.
+
 ## API
 ```bash
 cd Skinbloom.API-main
