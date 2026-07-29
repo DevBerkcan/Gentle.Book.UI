@@ -21,7 +21,7 @@ export default function DatenschutzPage() {
 
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-[#ECEBF2]/20">
           <h1 className="text-4xl font-bold text-[#14162B] mb-2">Datenschutzerklärung</h1>
-          <p className="text-[#8A8A8A] mb-8">GentleBook – Stand: März 2026</p>
+          <p className="text-[#8A8A8A] mb-8">GentleBook – Stand: Juli 2026</p>
 
           <div className="space-y-10 text-[#8A8A8A]">
 
@@ -34,9 +34,8 @@ export default function DatenschutzPage() {
                 Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren
                 personenbezogenen Daten passiert, wenn Sie diese Website besuchen oder über unser
                 Buchungssystem einen Termin vereinbaren. Personenbezogene Daten sind alle Daten, mit denen
-                Sie persönlich identifiziert werden können. Grundlage ist die Schweizerische
-                Datenschutzgesetzgebung (revDSG, in Kraft seit 1. September 2023) sowie, soweit anwendbar,
-                die Europäische Datenschutz-Grundverordnung (DSGVO).
+                Sie persönlich identifiziert werden können. Grundlage ist die Datenschutz-Grundverordnung
+                (DSGVO) sowie das Bundesdatenschutzgesetz (BDSG).
               </p>
 
               <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Datenerfassung auf dieser Website</h3>
@@ -84,8 +83,8 @@ export default function DatenschutzPage() {
 
               <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Zweck und Rechtsgrundlage</h3>
               <p className="mb-4">
-                Die Verarbeitung erfolgt zur Erfüllung des Buchungsvertrags (Art. 6 Abs. 1 lit. b DSGVO /
-                Art. 31 Abs. 2 lit. a revDSG). Ohne diese Daten ist eine Terminbuchung nicht möglich. Eine
+                Die Verarbeitung erfolgt zur Erfüllung des Buchungsvertrags (Art. 6 Abs. 1 lit. b DSGVO).
+                Ohne diese Daten ist eine Terminbuchung nicht möglich. Eine
                 Weitergabe an Dritte findet nicht statt, ausser es ist zur Vertragserfüllung erforderlich
                 (z. B. Terminbestätigung und Erinnerungs-E-Mail über unseren E-Mail-Dienstleister IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, Deutschland).
               </p>
@@ -136,7 +135,7 @@ export default function DatenschutzPage() {
 
               <h3 className="text-xl font-semibold text-[#14162B] mt-4 mb-2">Ihre Rechte im Überblick</h3>
               <ul className="list-disc list-inside mb-4 space-y-1">
-                <li>Recht auf Auskunft (Art. 15 DSGVO / Art. 25 revDSG)</li>
+                <li>Recht auf Auskunft (Art. 15 DSGVO)</li>
                 <li>Recht auf Berichtigung (Art. 16 DSGVO)</li>
                 <li>Recht auf Löschung (Art. 17 DSGVO)</li>
                 <li>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
@@ -146,8 +145,8 @@ export default function DatenschutzPage() {
               </ul>
               <p>
                 Zur Ausübung Ihrer Rechte wenden Sie sich bitte an uns über die unten angegebenen
-                Kontaktdaten. Sie haben ausserdem das Recht, sich bei der zuständigen Aufsichtsbehörde
-                (Eidgenössischer Datenschutz- und Öffentlichkeitsbeauftragter, EDÖB) zu beschweren.
+                Kontaktdaten. Sie haben außerdem das Recht, sich bei der zuständigen Aufsichtsbehörde
+                zu beschweren.
               </p>
             </section>
 
@@ -187,23 +186,23 @@ export default function DatenschutzPage() {
               </p>
               <p className="mb-2">
                 <strong className="text-[#14162B]">Telefon:</strong>{" "}
-                <span className="text-[#8A8A8A]">+41 78 241 87 04</span>
+                <span className="text-[#8A8A8A]">+49 157 35985449</span>
               </p>
               <p className="mt-4 text-sm">
-                Zuständige Aufsichtsbehörde (Schweiz):{" "}
+                Zuständige Aufsichtsbehörde:{" "}
                 <a
-                  href="https://www.edoeb.admin.ch"
+                  href="https://www.ldi.nrw.de"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#ECEBF2] hover:underline"
                 >
-                  Eidgenössischer Datenschutz- und Öffentlichkeitsbeauftragter (EDÖB)
+                  Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen (LDI NRW)
                 </a>
               </p>
             </section>
 
             <p className="text-sm text-[#8A8A8A] italic mt-8">
-              Stand: März 2026
+              Stand: Juli 2026
             </p>
           </div>
 

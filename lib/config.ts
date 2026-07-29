@@ -4,8 +4,7 @@ import { Calendar, Instagram, MapPin, MessageCircle } from "lucide-react";
 export const siteConfig = {
   title: "GentleBook",
   description: "Das Buchungssystem für Salons, Beauty & mehr",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://gentlebook.vercel.app",
-  image: "/og-image.jpg",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://app.gentlebook.app",
 };
 
 // Zentraler Betreiber-Support-Kontakt — bitte NUR hier pflegen,

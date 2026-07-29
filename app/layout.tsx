@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { KlaroCookieConsent } from "@/components/KlaroCookieConsent";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { TrackingProvider } from "@/components/analytics/TrackingProvider";
+import { siteConfig } from "@/lib/config";
 import "./globals.css";
 
 const jakartaSans = Plus_Jakarta_Sans({
@@ -22,6 +23,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: "GentleBook – Online Buchungssystem",
   description: "GentleBook – Das smarte Buchungssystem für Salons, Beauty, Barbershops und mehr.",
   keywords: ["GentleBook", "Buchungssystem", "Online Termin", "Salon", "Beauty", "Barbershop"],
