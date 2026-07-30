@@ -191,19 +191,26 @@ const TPL_VISUAL: Record<PageTemplate, { bg: string; accent: string }> = {
 
 const CMS_TEMPLATE_PACKS: {
   key: string; name: string; desc: string; icon: string;
-  primaryColor: string; theme: Theme; config: LinktreeConfig;
+  primaryColor: string; theme: Theme; plan: "starter" | "pro" | "business";
+  config: LinktreeConfig;
 }[] = [
-  { key: "salon-launch", name: "Salon Launch", desc: "Friseur, Beauty, Nails", icon: "✂️", primaryColor: "#C9A96E", theme: "bold",
+  { key: "salon-launch", name: "Salon Launch", desc: "Friseur, Beauty, Nails", icon: "✂️", primaryColor: "#C9A96E", theme: "bold", plan: "starter",
     config: { pageTemplate: "beauty", fontFamily: "playfair", buttonStyle: "pill", cardStyle: "filled", bgPattern: "dots", layoutMode: "list", animationSpeed: "normal", ctaText: "Wunschtermin buchen", ctaBadge: "Beliebt", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" } },
-  { key: "medical-trust", name: "Medical Trust", desc: "Praxis, Physio, Beratung", icon: "🏥", primaryColor: "#0EA5E9", theme: "minimal",
+  { key: "barbershop-classic", name: "Barbershop Classic", desc: "Fade, Bart & klassische Rasur", icon: "🪒", primaryColor: "#C9A96E", theme: "bold", plan: "starter",
+    config: { pageTemplate: "barbershop", fontFamily: "montserrat", buttonStyle: "square", cardStyle: "outlined", bgPattern: "grid", layoutMode: "list", animationSpeed: "normal", ctaText: "Rasur & Schnitt buchen", ctaBadge: "Direkt startklar", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "compact", mediaScale: "md", buttonSpacing: "normal", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" } },
+  { key: "hair-beauty-elegant", name: "Hair & Beauty Elegant", desc: "Friseur, Colorist, Styling", icon: "💇‍♀️", primaryColor: "#F9A8D4", theme: "gradient", plan: "starter",
+    config: { pageTemplate: "soft", fontFamily: "playfair", buttonStyle: "pill", cardStyle: "filled", bgPattern: "dots", layoutMode: "list", animationSpeed: "slow", ctaText: "Wohlfühltermin buchen", ctaBadge: "Beliebt", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" } },
+  { key: "medical-trust", name: "Medical Trust", desc: "Praxis, Physio, Beratung", icon: "🏥", primaryColor: "#0EA5E9", theme: "minimal", plan: "starter",
     config: { pageTemplate: "clinic", fontFamily: "inter", buttonStyle: "rounded", cardStyle: "outlined", bgPattern: "grid", layoutMode: "list", animationSpeed: "slow", ctaText: "Termin vereinbaren", ctaBadge: "Online", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "md", buttonSpacing: "normal", cardDensity: "tight", motionIntensity: "subtle", startFocus: "cta" } },
-  { key: "fitness-energy", name: "Fitness Energy", desc: "Gym, Coaching, Yoga", icon: "🔥", primaryColor: "#EF4444", theme: "dark",
+  { key: "fitness-energy", name: "Fitness Energy", desc: "Gym, Coaching, Yoga", icon: "🔥", primaryColor: "#EF4444", theme: "dark", plan: "pro",
     config: { pageTemplate: "fitness", fontFamily: "montserrat", buttonStyle: "rounded", cardStyle: "gradient", bgPattern: "grid", layoutMode: "grid", animationSpeed: "fast", ctaText: "Training buchen", ctaBadge: "Neu", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, confetti: true, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" } },
-  { key: "food-reservation", name: "Food Reservation", desc: "Restaurant, Cafe, Bar", icon: "🍽️", primaryColor: "#B45309", theme: "bold",
+  { key: "barber-dark-pro", name: "Barber Dark Pro", desc: "Edler Look für Premium-Barbershops", icon: "🖤", primaryColor: "#A855F7", theme: "dark", plan: "pro",
+    config: { pageTemplate: "neon", fontFamily: "josefin", buttonStyle: "square", cardStyle: "outlined", bgPattern: "grid", layoutMode: "grid", animationSpeed: "normal", ctaText: "Premium-Slot sichern", ctaBadge: "Pro", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "normal", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" } },
+  { key: "food-reservation", name: "Food Reservation", desc: "Restaurant, Cafe, Bar", icon: "🍽️", primaryColor: "#B45309", theme: "bold", plan: "pro",
     config: { pageTemplate: "restaurant", fontFamily: "dm-serif", buttonStyle: "rounded", cardStyle: "filled", bgPattern: "none", layoutMode: "list", animationSpeed: "normal", ctaText: "Tisch reservieren", ctaBadge: "Heute", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "md", buttonSpacing: "normal", cardDensity: "airy", motionIntensity: "subtle", startFocus: "cta" } },
-  { key: "creator-pro", name: "Creator Pro", desc: "Coach, Portfolio, Beratung", icon: "◼", primaryColor: "#18181B", theme: "minimal",
+  { key: "creator-pro", name: "Creator Pro", desc: "Coach, Portfolio, Beratung", icon: "◼", primaryColor: "#18181B", theme: "minimal", plan: "business",
     config: { pageTemplate: "portfolio", fontFamily: "josefin", buttonStyle: "square", cardStyle: "ghost", bgPattern: "none", layoutMode: "grid", animationSpeed: "normal", ctaText: "Call buchen", ctaBadge: "Limited", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "sm", buttonSpacing: "tight", cardDensity: "tight", motionIntensity: "subtle", startFocus: "links" } },
-  { key: "night-studio", name: "Night Studio", desc: "Tattoo, Barber, Events", icon: "⚡", primaryColor: "#A855F7", theme: "dark",
+  { key: "night-studio", name: "Night Studio", desc: "Tattoo, Barber, Events", icon: "⚡", primaryColor: "#A855F7", theme: "dark", plan: "pro",
     config: { pageTemplate: "neon", fontFamily: "josefin", buttonStyle: "square", cardStyle: "outlined", bgPattern: "grid", layoutMode: "grid", animationSpeed: "fast", ctaText: "Slot sichern", ctaBadge: "Live", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, confetti: true, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" } },
 ];
 
@@ -253,11 +260,22 @@ let toastCounter = 0;
 // ── Reusable sub-components ───────────────────────────────────────────────────
 
 /** Consistent section label inside design accordion */
-function SectionLabel({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+function SectionLabel({ icon, children, tip }: { icon: React.ReactNode; children: React.ReactNode; tip?: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       <span className="text-[#6355E4]">{icon}</span>
       <span className="text-[11px] font-semibold text-[#374151] uppercase tracking-widest">{children}</span>
+      {tip && <HelpTip text={tip} />}
+    </div>
+  );
+}
+
+/** Small inline tip banner with a lightbulb, used to guide non-technical admins */
+function TipBanner({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-3 flex items-start gap-2 rounded-xl border border-[#C7D2FE] bg-[#F8F7FF] px-3 py-2.5">
+      <Sparkles size={13} className="mt-0.5 shrink-0 text-[#6355E4]" />
+      <p className="text-[11px] leading-relaxed text-[#4C4B63]">{children}</p>
     </div>
   );
 }
@@ -391,6 +409,11 @@ export default function AdminLinksPage() {
   }
 
   async function applyCmsTemplate(pack: typeof CMS_TEMPLATE_PACKS[number]) {
+    if (PLAN_ORDER[pack.plan] > PLAN_ORDER[tenantPlan]) {
+      showToast("error", `„${pack.name}" ist ab dem ${pack.plan === "business" ? "Business" : "Pro"}-Plan verfügbar`);
+      router.push("/admin/subscription");
+      return;
+    }
     const next: LinktreeConfig = { ...DEFAULT_CONFIG, ...config, ...pack.config, colorScheme: pack.key };
     setTheme(pack.theme); setPrimaryColor(pack.primaryColor); setConfig(next);
     await saveDesign(pack.theme, pack.primaryColor, next, false);
@@ -674,86 +697,68 @@ export default function AdminLinksPage() {
                 >
                   <div className="border-t border-[#F3F4F6] px-5 pb-6 space-y-6 pt-5">
 
-                    {/* ── Markenfarben aus den Einstellungen ──────────────── */}
+                    {/* ── CMS Template Packs (Schnellstart) ───────────────── */}
                     <div>
-                      <SectionLabel icon={<Pipette size={13} />}>Markenfarben</SectionLabel>
-                      <div className="flex items-center justify-between gap-3 p-3.5 bg-[#F7F7F8] rounded-xl border border-[#F3F4F6]">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="flex -space-x-1.5 flex-shrink-0">
-                            {[brandColors.primary, brandColors.secondary, brandColors.accent].filter(Boolean).map((c, i) => (
-                              <span key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ background: c }} />
-                            ))}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold text-[#111318]">Farben aus den Einstellungen</p>
-                            <p className="text-[10px] text-[#9CA3AF] truncate">
-                              Primär-, Sekundär- & Akzentfarbe deines Studios ·{" "}
-                              <a href="/admin/settings" className="underline hover:text-[#6355E4]">bearbeiten</a>
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={applyBrandColors}
-                          disabled={!brandColors.primary}
-                          className="flex-shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-[#6355E4] text-white hover:bg-[#4338CA] disabled:opacity-40 transition-colors"
-                        >
-                          Übernehmen
-                        </button>
-                      </div>
-                      <p className="text-[10px] text-[#9CA3AF] mt-1.5">
-                        Primärfarbe wird zur Seitenfarbe, Akzentfarbe zum Buchungsbutton
-                      </p>
-                    </div>
-
-                    {/* ── CMS Template Packs ──────────────────────────────── */}
-                    <div className="border-t border-[#F3F4F6] pt-5">
-                      <SectionLabel icon={<Sparkles size={13} />}>Fertige Pakete</SectionLabel>
-                      <div className="grid grid-cols-2 gap-2">
+                      <SectionLabel icon={<Sparkles size={13} />} tip="Ein Paket setzt in einem Klick Vorlage, Farben, Schrift, Button-Stil und Buchungsablauf passend zu deiner Branche. Danach kannst du unten in den erweiterten Optionen jedes Detail einzeln anpassen.">
+                        Fertige Pakete
+                      </SectionLabel>
+                      <TipBanner>
+                        <span className="font-semibold text-[#111318]">Schnellstart:</span> Wähle unten das Paket, das am besten zu deinem Salon oder Barbershop passt.
+                        Für Barbershops empfehlen wir „Barbershop Classic", für Friseure & Beauty-Studios „Hair &amp; Beauty Elegant" oder „Salon Launch" — beide sind sofort ohne Zusatzkosten nutzbar.
+                      </TipBanner>
+                      <div className="grid grid-cols-2 gap-2.5">
                         {CMS_TEMPLATE_PACKS.map((pack) => {
                           const isActive = (config.colorScheme ?? "") === pack.key;
+                          const isLocked = PLAN_ORDER[pack.plan] > PLAN_ORDER[tenantPlan];
+                          const visual = TPL_VISUAL[(pack.config.pageTemplate as PageTemplate) ?? "classic"] ?? { bg: "#F7F7F8", accent: pack.primaryColor };
                           return (
                             <button key={pack.key} onClick={() => applyCmsTemplate(pack)}
-                              className={`group relative overflow-hidden rounded-xl border p-3 text-left transition-all ${
+                              className={`group relative overflow-hidden rounded-xl border text-left transition-all ${
                                 isActive
-                                  ? "border-[#A5B4FC] bg-[#EEEBFC] ring-1 ring-[#6355E4]/30"
+                                  ? "border-[#A5B4FC] ring-2 ring-[#6355E4]/20 shadow-sm"
+                                  : isLocked
+                                  ? "border-[#F3F4F6] opacity-60"
                                   : "border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:shadow-sm"
                               }`}
                             >
-                              <motion.div aria-hidden
-                                className="absolute -right-4 -top-4 h-14 w-14 rounded-xl opacity-20"
-                                style={{ background: pack.primaryColor }}
-                                animate={{ rotateX: [0, 15, 0], rotateY: [0, -18, 0], y: [0, 3, 0] }}
-                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-                              />
-                              <div className="relative flex items-start gap-2">
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm"
-                                  style={{ background: `${pack.primaryColor}18`, color: pack.primaryColor }}>
-                                  {pack.icon}
-                                </span>
-                                <div className="min-w-0">
-                                  <p className="text-xs font-semibold text-[#111318]">{pack.name}</p>
-                                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{pack.desc}</p>
+                              <div className="relative flex h-[46px] items-center gap-1.5 overflow-hidden px-3"
+                                style={{ background: visual.bg }}>
+                                <span className="text-base leading-none">{pack.icon}</span>
+                                <div className="flex items-center gap-1">
+                                  {[pack.primaryColor, "#ffffff", "#111318"].map((c) => (
+                                    <span key={c} className="h-2 w-2 rounded-full border border-white/60 shadow-sm" style={{ background: c }} />
+                                  ))}
                                 </div>
+                                {isActive && (
+                                  <div className="absolute top-1.5 right-1.5 w-[15px] h-[15px] bg-[#6355E4] rounded-full flex items-center justify-center">
+                                    <Check size={8} className="text-white" strokeWidth={3} />
+                                  </div>
+                                )}
+                                {isLocked && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
+                                    <span className="text-[8px] font-bold bg-[#111318] text-white px-1.5 py-0.5 rounded-full">
+                                      {pack.plan === "business" ? "BUSINESS" : "PRO"}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                              <div className="relative mt-3 flex items-center gap-1.5">
-                                {[pack.primaryColor, "#ffffff", "#111318"].map((c) => (
-                                  <span key={c} className="h-2.5 w-2.5 rounded-full border border-[#E5E7EB]" style={{ background: c }} />
-                                ))}
-                                <span className="ml-auto text-[9px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                                  {(pack.config.pageTemplate ?? "classic").toString()}
-                                </span>
+                              <div className={`px-3 py-2 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
+                                <p className="text-xs font-semibold text-[#111318] leading-tight">{pack.name}</p>
+                                <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{pack.desc}</p>
                               </div>
                             </button>
                           );
                         })}
                       </div>
-                      <p className="text-[10px] text-[#9CA3AF] mt-2">Komplettes Seiten-Design in einem Klick: Layout, Farben, Animation und CTA</p>
+                      <p className="text-[10px] text-[#9CA3AF] mt-2">Komplettes Seiten-Design in einem Klick: Layout, Farben, Animation und CTA · gesperrte Pakete zeigen den benötigten Plan</p>
                     </div>
 
                     {/* ── Seitenvorlage ───────────────────────────────────── */}
-                    <div>
+                    <div className="border-t border-[#F3F4F6] pt-5">
                       <div className="flex items-center justify-between mb-3">
-                        <SectionLabel icon={<LayoutGrid size={13} />}>Seitenvorlage</SectionLabel>
+                        <SectionLabel icon={<LayoutGrid size={13} />} tip="Die Seitenvorlage bestimmt das Grundlayout deiner Buchungsseite (Header, Anordnung, Bildgröße). Sie wird automatisch mitgesetzt, wenn du oben ein fertiges Paket wählst — du kannst sie hier aber auch einzeln ändern.">
+                          Seitenvorlage
+                        </SectionLabel>
                         <span className="text-[10px] font-semibold text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded-full">
                           {PAGE_TEMPLATES.length} Designs
                         </span>
@@ -805,6 +810,39 @@ export default function AdminLinksPage() {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* ── Markenfarben aus den Einstellungen ──────────────── */}
+                    <div className="border-t border-[#F3F4F6] pt-5">
+                      <SectionLabel icon={<Pipette size={13} />} tip="Übernimmt die Firmenfarben, die du unter Einstellungen → Farben hinterlegt hast, direkt in dein Buchungsseiten-Design.">
+                        Markenfarben
+                      </SectionLabel>
+                      <div className="flex items-center justify-between gap-3 p-3.5 bg-[#F7F7F8] rounded-xl border border-[#F3F4F6]">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex -space-x-1.5 flex-shrink-0">
+                            {[brandColors.primary, brandColors.secondary, brandColors.accent].filter(Boolean).map((c, i) => (
+                              <span key={i} className="w-6 h-6 rounded-full border-2 border-white shadow-sm" style={{ background: c }} />
+                            ))}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-[#111318]">Farben aus den Einstellungen</p>
+                            <p className="text-[10px] text-[#9CA3AF] truncate">
+                              Primär-, Sekundär- & Akzentfarbe deines Studios ·{" "}
+                              <a href="/admin/settings" className="underline hover:text-[#6355E4]">bearbeiten</a>
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={applyBrandColors}
+                          disabled={!brandColors.primary}
+                          className="flex-shrink-0 text-xs font-semibold px-3 py-2 rounded-xl bg-[#6355E4] text-white hover:bg-[#4338CA] disabled:opacity-40 transition-colors"
+                        >
+                          Übernehmen
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-[#9CA3AF] mt-1.5">
+                        Primärfarbe wird zur Seitenfarbe, Akzentfarbe zum Buchungsbutton
+                      </p>
                     </div>
 
                     {/* ── CTA-Text ─────────────────────────────────────────── */}

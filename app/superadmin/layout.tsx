@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 
@@ -63,6 +63,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/dashboard',  label: 'Dashboard',       icon: LayoutDashboard },
     { href: '/superadmin/tenants',    label: 'Buchungssysteme', icon: Building2 },
     { href: '/superadmin/requests',   label: 'Abo-Anfragen',    icon: Bell, badge: pendingRequests },
+    { href: '/superadmin/invoices',   label: 'Rechnungen',      icon: FileText },
     { href: '/superadmin/email-logs', label: 'E-Mail Logs',     icon: Mail },
     { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
   ];

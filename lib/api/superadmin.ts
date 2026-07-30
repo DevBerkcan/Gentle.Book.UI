@@ -201,6 +201,22 @@ export const superAdminApi = {
     const { data } = await api.post(`/superadmin/subscription-requests/${id}/decline`);
     return data as { message: string };
   },
+
+  // ── Invoices ─────────────────────────────────────────────────
+  async getInvoices(params?: { tenantId?: string; page?: number; pageSize?: number }) {
+    const { data } = await api.get('/superadmin/invoices', { params });
+    return data as {
+      items: InvoiceItem[];
+      totalCount: number;
+      page: number;
+      pageSize: number;
+      totalAmount: number;
+    };
+  },
+
+  invoicePdfUrl(id: string) {
+    return `${process.env.NEXT_PUBLIC_API_URL}/superadmin/invoices/${id}/pdf`;
+  },
 };
 
 // ── Extra Types ───────────────────────────────────────────────────────────────
@@ -216,6 +232,23 @@ export interface SubscriptionRequestItem {
   tenantId: string;
   tenantName: string;
   tenantSlug: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  invoiceNumber: string;
+  issueDate: string;
+  periodStart: string;
+  periodEnd: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  molliePaymentId: string;
+  emailSent: boolean;
+  emailSentAt?: string;
 }
 
 export interface EmailLogItem {

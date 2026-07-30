@@ -665,6 +665,54 @@ export default function TenantDetailPage() {
                   </div>
                 </div>
 
+                {/* Mollie / Zahlungsdetails */}
+                {(sub.mollieCustomerId || sub.mollieSubscriptionId) && (
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-gray-900">Mollie-Zahlungsdetails</p>
+                      <a
+                        href="https://my.mollie.com/dashboard/"
+                        target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-[#6355E4] hover:underline flex items-center gap-1"
+                      >
+                        Im Mollie-Dashboard öffnen <ExternalLink size={11} />
+                      </a>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
+                      <div>
+                        <p className="text-gray-400">Mollie-Kunde</p>
+                        <p className="font-mono text-gray-700 truncate">{sub.mollieCustomerId ?? '–'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Mollie-Abo</p>
+                        <p className="font-mono text-gray-700 truncate">{sub.mollieSubscriptionId ?? '–'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">SEPA-Mandat</p>
+                        <p className="font-mono text-gray-700 truncate">{sub.mollieMandateId ?? '–'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Mandat signiert am</p>
+                        <p className="text-gray-700">
+                          {sub.mollieMandateSignedAt ? new Date(sub.mollieMandateSignedAt).toLocaleDateString('de-DE') : '–'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Letzte Zahlung (Mollie-ID)</p>
+                        <p className="font-mono text-gray-700 truncate">{sub.lastMolliePaymentId ?? '–'}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Aktuelle Abrechnungsperiode</p>
+                        <p className="text-gray-700">
+                          {sub.currentPeriodStart && sub.currentPeriodEnd
+                            ? `${new Date(sub.currentPeriodStart).toLocaleDateString('de-DE')} – ${new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE')}`
+                            : '–'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Revenue Overview */}
                 {tenantStats && (
                   <div className="grid grid-cols-3 gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
