@@ -49,6 +49,11 @@ export const adminApi = {
     return data as { isLiveMode: boolean; plan: string; status: string; hasMollieSubscription: boolean };
   },
 
+  async getPlanPricing() {
+    const { data } = await api.get('/tenant/plan-pricing');
+    return data as { plan: string; displayName: string; monthlyPrice: number; maxEmployees: number; maxServices: number }[];
+  },
+
   async cancelSubscription(reason?: string) {
     const { data } = await api.post('/tenant/subscription/cancel', { reason: reason ?? null });
     return data as { cancelRequestedAt: string; currentPeriodEnd: string | null; message: string };

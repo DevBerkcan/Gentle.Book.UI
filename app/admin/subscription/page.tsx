@@ -142,6 +142,9 @@ export default function AdminSubscriptionPage() {
   const [mollieLiveMode, setMollieLiveMode] = useState<boolean | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const { confirm, dialog } = useConfirm();
+  // Live prices from the backend (SuperAdmin-editable) — overrides the hardcoded PLANS
+  // defaults below so this page never shows a stale price after a SuperAdmin price change.
+  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
 
   useEffect(() => {
     Promise.all([
@@ -149,13 +152,15 @@ export default function AdminSubscriptionPage() {
       api.get('/tenant/usage').then(r => r.data).catch(() => null),
       adminApi.getSubscriptionRequestStatus().catch(() => null),
       adminApi.getMollieStatus().catch(() => null),
-    ]).then(([subData, usageData, requestStatus, mollieStatus]) => {
+      adminApi.getPlanPricing().catch(() => []),
+    ]).then(([subData, usageData, requestStatus, mollieStatus, pricing]) => {
       setSub(subData);
       setUsage(usageData);
       if (requestStatus?.request?.status === 'Pending') {
         setRequestedPlan(requestStatus.request.requestedPlan);
       }
       setMollieLiveMode(mollieStatus?.isLiveMode ?? false);
+      setLivePrices(Object.fromEntries((pricing ?? []).map(p => [p.plan, p.monthlyPrice])));
     }).finally(() => setLoading(false));
   }, []);
 
@@ -454,6 +459,7 @@ export default function AdminSubscriptionPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {
             const isCurrent = currentPlanKey === plan.key;
+            const price = livePrices[plan.key] ?? plan.price;
             return (
               <div
                 key={plan.key}
@@ -479,7 +485,7 @@ export default function AdminSubscriptionPage() {
                 <div className="mb-4">
                   <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
                   <div className="flex items-end gap-1 mt-2">
-                    <span className="text-3xl font-bold text-gray-900">€{plan.price}</span>
+                    <span className="text-3xl font-bold text-gray-900">€{price}</span>
                     <span className="text-gray-500 mb-1">/Monat</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
