@@ -335,7 +335,7 @@ export default function TenantDetailPage() {
               </code>
               <button
                 onClick={() => copyLink(bookingUrl)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors shrink-0"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#6355E4] text-white text-sm rounded-lg hover:bg-[#5646D6] transition-colors shrink-0"
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
                 {copied ? 'Kopiert' : 'Kopieren'}
@@ -346,7 +346,7 @@ export default function TenantDetailPage() {
           {/* Admin login link */}
           <div className="bg-gray-50 rounded-xl border border-gray-200 p-4">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#6355E4] flex items-center justify-center">
                 <Users size={14} className="text-white" />
               </div>
               <div>
@@ -551,7 +551,7 @@ export default function TenantDetailPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-[#6355E4] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors disabled:opacity-50"
           >
             <Save size={15} />
             {saving ? 'Speichern...' : saved ? '✓ Gespeichert' : 'Speichern'}
@@ -619,7 +619,7 @@ export default function TenantDetailPage() {
             <button
               onClick={handleCreateUser}
               disabled={creatingUser || !newUser.email || !newUser.password}
-              className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50"
+              className="flex items-center gap-2 bg-[#6355E4] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5646D6] disabled:opacity-50"
             >
               <Users size={15} />
               {creatingUser ? 'Anlegen...' : userCreated ? '✓ Angelegt' : 'User anlegen'}
@@ -787,7 +787,7 @@ export default function TenantDetailPage() {
                           onClick={() => setSelectedPlan(value)}
                           className={`p-4 border-2 rounded-xl text-left transition-all hover:-translate-y-0.5 ${
                             isSelected
-                              ? 'border-gray-900 shadow-md'
+                              ? 'border-[#6355E4] shadow-md'
                               : active
                               ? 'border-gray-300 bg-gray-50'
                               : 'border-gray-100 hover:border-gray-300'
@@ -825,7 +825,7 @@ export default function TenantDetailPage() {
                   <button
                     onClick={handleChangePlan}
                     disabled={changingPlan || !selectedPlan || selectedPlan === (sub.isInTrial ? 'Trial' : sub.plan)}
-                    className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-40 transition-colors shadow-sm"
+                    className="flex items-center gap-2 bg-[#6355E4] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5646D6] disabled:opacity-40 transition-colors shadow-sm"
                   >
                     <CreditCard size={15} />
                     {changingPlan ? 'Wird gespeichert...' : planChanged ? '✓ Gespeichert' : 'Plan speichern'}
@@ -874,7 +874,7 @@ export default function TenantDetailPage() {
             <button
               onClick={handleResendWelcome}
               disabled={resendingWelcome || welcomeResent}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
+              className="flex items-center gap-2 bg-[#6355E4] hover:bg-[#5646D6] text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
             >
               <Mail size={15} />
               {resendingWelcome ? 'Senden...' : welcomeResent ? '✓ Gesendet' : 'Willkommens-Mail erneut senden'}

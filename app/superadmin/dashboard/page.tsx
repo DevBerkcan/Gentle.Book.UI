@@ -131,7 +131,7 @@ export default function SuperAdminDashboard() {
           </button>
           <Link
             href="/superadmin/tenants/new"
-            className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-[#6355E4] text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors shadow-sm"
           >
             <Plus size={15} />
             Neues System
@@ -153,7 +153,7 @@ export default function SuperAdminDashboard() {
           </div>
           <button
             onClick={load}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gray-900 text-white text-xs font-semibold hover:bg-gray-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#6355E4] text-white text-xs font-semibold hover:bg-[#5646D6] transition-colors"
             aria-label="Daten neu laden"
           >
             <RefreshCw size={13} /> Erneut versuchen

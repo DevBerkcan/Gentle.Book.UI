@@ -346,7 +346,7 @@ export default function TenantsPage() {
           </button>
           <button
             onClick={() => setShowAddForm(v => !v)}
-            className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 bg-[#6355E4] text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors shadow-sm"
           >
             {showAddForm ? <X size={15} /> : <Plus size={15} />}
             {showAddForm ? 'Abbrechen' : 'Neues System'}
@@ -561,7 +561,7 @@ export default function TenantsPage() {
             <button
               onClick={createTenant}
               disabled={creating || !newTenant.name || !newTenant.slug || !newTenant.adminEmail}
-              className="flex items-center gap-2 px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-5 py-2 bg-[#6355E4] text-white text-sm font-medium rounded-lg hover:bg-[#5646D6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {creating ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
               {creating ? 'Wird angelegt…' : 'System anlegen'}
@@ -586,7 +586,7 @@ export default function TenantsPage() {
             <button
               key={f}
               onClick={() => setStatusFilter(f)}
-              className={`px-3 py-2 transition-colors ${statusFilter === f ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-50'}`}
+              className={`px-3 py-2 transition-colors ${statusFilter === f ? 'bg-[#6355E4] text-white' : 'text-gray-500 hover:bg-gray-50'}`}
             >
               {f === 'all' ? 'Alle' : f === 'active' ? 'Aktiv' : 'Inaktiv'}
             </button>
@@ -610,7 +610,7 @@ export default function TenantsPage() {
           {!search && statusFilter === 'all' && (
             <button
               onClick={() => setShowAddForm(true)}
-              className="mt-4 inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium"
+              className="mt-4 inline-flex items-center gap-2 bg-[#6355E4] text-white px-4 py-2.5 rounded-lg text-sm font-medium"
             >
               <Plus size={15} />
               Erstes System anlegen

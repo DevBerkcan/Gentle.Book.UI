@@ -132,7 +132,7 @@ export default function PlanPricingPage() {
                   <button
                     onClick={() => handleSave(p.plan)}
                     disabled={saving === p.plan || !dirty}
-                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold bg-[#6355E4] text-white hover:bg-[#5646D6] disabled:opacity-40 transition-colors"
                   >
                     {saving === p.plan ? (
                       <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

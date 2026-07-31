@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
+import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 
 function useSuperAdminAuth() {
   const router = useRouter();
@@ -75,10 +76,13 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-gray-900 text-white flex flex-col z-50">
-      <div className="p-5 border-b border-gray-700">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">GentleBook</p>
-        <p className="font-semibold text-white">Super Admin</p>
+    <aside className="fixed left-0 top-0 h-full w-60 bg-[#1a1a2e] text-white flex flex-col z-50">
+      <div className="p-5 border-b border-white/10 flex items-center gap-2.5">
+        <GentleBookMark size={26} />
+        <div>
+          <p className="font-semibold text-white leading-tight">gentlebook</p>
+          <p className="text-[11px] text-gray-400 leading-tight">Super Admin</p>
+        </div>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
@@ -90,7 +94,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 active
-                  ? 'bg-white/10 text-white font-medium'
+                  ? 'bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-medium shadow-lg shadow-[#6355E4]/25'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
@@ -106,7 +110,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-white/10">
         <button
           onClick={logout}
           className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
@@ -128,7 +132,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-[#F6F5FA]">
       <SuperAdminNav logout={logout} />
       <main className="ml-60 flex-1 p-8">
         {children}

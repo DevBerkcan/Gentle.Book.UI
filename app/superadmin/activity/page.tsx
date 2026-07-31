@@ -121,7 +121,7 @@ export default function ActivityPage() {
         <button
           onClick={() => setFilter('')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-            filter === '' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+            filter === '' ? 'bg-[#6355E4] text-white border-[#6355E4]' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
           }`}
         >
           <Activity size={11} />
@@ -133,7 +133,7 @@ export default function ActivityPage() {
               key={type}
               onClick={() => setFilter(filter === type ? '' : type)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                filter === type ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                filter === type ? 'bg-[#6355E4] text-white border-[#6355E4]' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
               }`}
             >
               <span className={`w-2 h-2 rounded-full inline-block ${ACTIVITY_COLORS[type]?.split(' ')[0]}`} />

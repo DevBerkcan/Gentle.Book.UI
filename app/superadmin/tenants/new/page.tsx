@@ -98,7 +98,7 @@ export default function NewTenantWizard() {
           return (
             <div key={key} className="flex items-center gap-2">
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                done ? 'bg-green-100 text-green-700' : active ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'
+                done ? 'bg-green-100 text-green-700' : active ? 'bg-[#6355E4] text-white' : 'bg-gray-100 text-gray-400'
               }`}>
                 {done ? <Check size={12} /> : icon}
                 {label}
@@ -123,7 +123,7 @@ export default function NewTenantWizard() {
                 onChange={(e) => update('name', e.target.value)}
                 placeholder="z.B. Barber Wagner"
                 autoFocus
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6355E4]/20"
               />
             </div>
             <div>
@@ -136,7 +136,7 @@ export default function NewTenantWizard() {
                 value={form.slug}
                 onChange={(e) => update('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 placeholder="z.B. barber-wagner"
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6355E4]/20"
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -168,7 +168,7 @@ export default function NewTenantWizard() {
             <button
               onClick={() => setStep('industry')}
               disabled={!form.name || !form.slug}
-              className="w-full py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-40"
+              className="w-full py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors disabled:opacity-40"
             >
               Weiter
             </button>
@@ -185,7 +185,7 @@ export default function NewTenantWizard() {
                   key={value}
                   onClick={() => update('industryType', value)}
                   className={`flex items-center gap-3 p-3 border rounded-xl text-sm text-left transition-colors hover:border-gray-400 ${
-                    form.industryType === value ? 'border-gray-900 bg-gray-50 ring-1 ring-gray-900' : 'border-gray-200'
+                    form.industryType === value ? 'border-[#6355E4] bg-[#EEEBFC] ring-1 ring-[#6355E4]' : 'border-gray-200'
                   }`}
                 >
                   <span className="text-xl">{emoji}</span>
@@ -203,7 +203,7 @@ export default function NewTenantWizard() {
                     key={value}
                     onClick={() => update('plan', value)}
                     className={`p-3 border rounded-xl text-left transition-colors ${color} ${
-                      form.plan === value ? 'ring-2 ring-offset-1 ring-gray-900 border-gray-900 bg-gray-50' : ''
+                      form.plan === value ? 'ring-2 ring-offset-1 ring-[#6355E4] border-[#6355E4] bg-[#EEEBFC]' : ''
                     }`}
                   >
                     <p className="text-xs font-bold text-gray-900">{label}</p>
@@ -220,7 +220,7 @@ export default function NewTenantWizard() {
               <button
                 onClick={() => setStep('admin')}
                 disabled={!form.industryType}
-                className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-40"
+                className="flex-1 py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors disabled:opacity-40"
               >
                 Weiter
               </button>
@@ -266,7 +266,7 @@ export default function NewTenantWizard() {
                 onChange={(e) => update('personalNote', e.target.value)}
                 rows={3}
                 placeholder={'z.B. "Schön, dass Sie dabei sind! Bei Fragen rufen Sie mich an: 079 xxx xx xx"'}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/20 resize-none"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#6355E4]/20 resize-none"
               />
               <p className="text-xs text-amber-600 mt-1">Erscheint als gelbe Info-Box in der Willkommens-Mail.</p>
             </div>
@@ -278,7 +278,7 @@ export default function NewTenantWizard() {
               <button
                 onClick={handleSubmit}
                 disabled={loading || !form.adminEmail || !form.adminPassword}
-                className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors disabled:opacity-40"
+                className="flex-1 py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors disabled:opacity-40"
               >
                 {loading ? 'Erstellen...' : '🚀 Buchungssystem erstellen'}
               </button>
@@ -327,7 +327,7 @@ export default function NewTenantWizard() {
               </button>
               <button
                 onClick={() => { setStep('company'); setForm({ name: '', slug: '', industryType: '', currency: 'EUR', timeZone: 'Europe/Berlin', adminEmail: '', adminPassword: '', adminFirstName: '', adminLastName: '', plan: 'Trial', personalNote: '' }); setCreated(null); }}
-                className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium"
+                className="flex-1 py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors"
               >
                 Weiteres anlegen
               </button>
