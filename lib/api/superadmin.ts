@@ -202,6 +202,33 @@ export const superAdminApi = {
     return data as { message: string };
   },
 
+  // ── Plan Pricing ─────────────────────────────────────────────
+  async getPlanPricing() {
+    const { data } = await api.get('/superadmin/plan-pricing');
+    return data as PlanPriceItem[];
+  },
+
+  async updatePlanPricing(plan: string, monthlyPrice: number) {
+    const { data } = await api.put(`/superadmin/plan-pricing/${plan}`, { monthlyPrice });
+    return data as { plan: string; monthlyPrice: number };
+  },
+
+  // ── Audit Log ────────────────────────────────────────────────
+  async getAuditLog(params?: { page?: number; pageSize?: number; tenantId?: string; action?: string }) {
+    const { data } = await api.get('/superadmin/audit-log', { params });
+    return data as { items: AuditLogItem[]; totalCount: number; page: number; pageSize: number };
+  },
+
+  // ── At-risk subscriptions (cancelling / dunning) ────────────
+  async getAtRiskSubscriptions() {
+    const { data } = await api.get('/superadmin/at-risk-subscriptions');
+    return data as {
+      cancelling: AtRiskCancellingItem[];
+      dunning: AtRiskDunningItem[];
+      totalAtRisk: number;
+    };
+  },
+
   // ── Invoices ─────────────────────────────────────────────────
   async getInvoices(params?: { tenantId?: string; page?: number; pageSize?: number }) {
     const { data } = await api.get('/superadmin/invoices', { params });
@@ -232,6 +259,48 @@ export interface SubscriptionRequestItem {
   tenantId: string;
   tenantName: string;
   tenantSlug: string;
+}
+
+export interface AuditLogItem {
+  id: string;
+  tenantId?: string;
+  actorType: string;
+  actorName?: string;
+  action: string;
+  entityType?: string;
+  entityId?: string;
+  details?: string;
+  ipAddress?: string;
+  createdAt: string;
+}
+
+export interface AtRiskCancellingItem {
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  plan: string;
+  cancelRequestedAt: string;
+  cancelReason?: string;
+  currentPeriodEnd?: string;
+}
+
+export interface AtRiskDunningItem {
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  plan: string;
+  pastDueSince: string;
+  failedPaymentCount: number;
+  dunningWarningEmailSent: boolean;
+  daysUntilAutoCancel: number;
+}
+
+export interface PlanPriceItem {
+  plan: string;
+  displayName: string;
+  monthlyPrice: number;
+  maxEmployees: number;
+  maxServices: number;
 }
 
 export interface InvoiceItem {

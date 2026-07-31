@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 
@@ -45,17 +45,20 @@ function useSuperAdminAuth() {
 function SuperAdminNav({ logout }: { logout: () => void }) {
   const pathname = usePathname();
   const [pendingRequests, setPendingRequests] = useState(0);
+  const [atRiskCount, setAtRiskCount] = useState(0);
 
   useEffect(() => {
-    superAdminApi.getSubscriptionRequests('Pending')
-      .then(r => setPendingRequests(r.pendingCount))
-      .catch(() => {});
-    // Refresh every 5 minutes
-    const id = setInterval(() => {
+    const refresh = () => {
       superAdminApi.getSubscriptionRequests('Pending')
         .then(r => setPendingRequests(r.pendingCount))
         .catch(() => {});
-    }, 5 * 60 * 1000);
+      superAdminApi.getAtRiskSubscriptions()
+        .then(r => setAtRiskCount(r.totalAtRisk))
+        .catch(() => {});
+    };
+    refresh();
+    // Refresh every 5 minutes
+    const id = setInterval(refresh, 5 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -64,8 +67,11 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/tenants',    label: 'Buchungssysteme', icon: Building2 },
     { href: '/superadmin/requests',   label: 'Abo-Anfragen',    icon: Bell, badge: pendingRequests },
     { href: '/superadmin/invoices',   label: 'Rechnungen',      icon: FileText },
+    { href: '/superadmin/pricing',    label: 'Preise',          icon: Euro },
+    { href: '/superadmin/at-risk',    label: 'Gefährdete Kunden', icon: AlertTriangle, badge: atRiskCount },
     { href: '/superadmin/email-logs', label: 'E-Mail Logs',     icon: Mail },
     { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
+    { href: '/superadmin/audit-log',  label: 'Audit-Log',       icon: ScrollText },
   ];
 
   return (

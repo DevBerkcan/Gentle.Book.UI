@@ -5,9 +5,9 @@ import Link from 'next/link';
 import {
   Building2, Clock, CheckCircle, AlertCircle, Calendar, Plus,
   TrendingUp, Users, Mail, Activity, AlertTriangle, Zap, ArrowRight,
-  RefreshCw, XCircle, UserPlus, Bell,
+  RefreshCw, XCircle, UserPlus, Bell, Euro,
 } from 'lucide-react';
-import { superAdminApi, TenantListItem, ActivityItem, OverviewData, SubscriptionRequestItem } from '@/lib/api/superadmin';
+import { superAdminApi, TenantListItem, ActivityItem, OverviewData, SubscriptionRequestItem, AtRiskDunningItem } from '@/lib/api/superadmin';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { AnimatedNumber } from '@/components/ui/animated-number';
 import { HelpTip } from '@/components/ui/help-tip';
@@ -56,6 +56,7 @@ export default function SuperAdminDashboard() {
   const [activity,       setActivity]       = useState<ActivityItem[]>([]);
   const [overview,       setOverview]       = useState<OverviewData | null>(null);
   const [pendingRequests,setPendingRequests] = useState<SubscriptionRequestItem[]>([]);
+  const [dunning,        setDunning]        = useState<AtRiskDunningItem[]>([]);
   const [loading,        setLoading]        = useState(true);
   const [loadError,      setLoadError]      = useState<string | null>(null);
 
@@ -63,18 +64,20 @@ export default function SuperAdminDashboard() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [s, t, a, ov, req] = await Promise.all([
+      const [s, t, a, ov, req, risk] = await Promise.all([
         superAdminApi.getStats(),
         superAdminApi.getTenants(1, 100),
         superAdminApi.getActivity(20),
         superAdminApi.getOverview(),
         superAdminApi.getSubscriptionRequests('Pending').catch(() => ({ data: [], pendingCount: 0 })),
+        superAdminApi.getAtRiskSubscriptions().catch(() => ({ cancelling: [], dunning: [], totalAtRisk: 0 })),
       ]);
       setStats(s);
       setTenants(t.items);
       setActivity(a);
       setOverview(ov);
       setPendingRequests(req.data);
+      setDunning(risk.dunning);
     } catch (err: any) {
       setLoadError(err.response?.data?.message || err.message || 'Daten konnten nicht geladen werden');
     }
@@ -217,6 +220,41 @@ export default function SuperAdminDashboard() {
                 <AlertTriangle size={13} />
                 {t.companyName || t.name}
                 <span className="font-bold">{t.subscription?.trialDaysRemaining}d</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Mahnwesen-Alarm ────────────────────────────────────────────── */}
+      {!loading && dunning.length > 0 && (
+        <div className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+              </span>
+              <h2 className="font-semibold text-gray-800 text-sm">
+                {dunning.length} {dunning.length === 1 ? 'Kunde' : 'Kunden'} mit fehlgeschlagener Zahlung
+              </h2>
+            </div>
+            <Link href="/superadmin/at-risk" className="text-xs text-blue-500 hover:underline flex items-center gap-1">
+              Alle anzeigen <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {dunning.slice(0, 6).map(d => (
+              <Link
+                key={d.tenantId}
+                href={`/superadmin/tenants/${d.tenantId}`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-colors hover:shadow-sm ${
+                  d.daysUntilAutoCancel <= 2 ? 'border-red-200 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-700'
+                }`}
+              >
+                <AlertTriangle size={13} />
+                {d.companyName}
+                <span className="font-bold">noch {d.daysUntilAutoCancel}d</span>
               </Link>
             ))}
           </div>
@@ -519,6 +557,7 @@ export default function SuperAdminDashboard() {
         {[
           { href: '/superadmin/tenants/new', icon: <Plus size={18} />, label: 'Neues System', sub: 'In 2 Minuten anlegen', color: 'text-gray-600' },
           { href: '/superadmin/tenants',     icon: <Building2 size={18} />, label: 'Alle Systeme', sub: 'Verwalten & bearbeiten', color: 'text-blue-500' },
+          { href: '/superadmin/pricing',     icon: <Euro size={18} />, label: 'Preise', sub: 'Plan-Preise anpassen', color: 'text-amber-500' },
           { href: '/superadmin/email-logs',  icon: <Mail size={18} />, label: 'E-Mail Logs', sub: 'Versandstatus prüfen', color: 'text-purple-500' },
           { href: '/superadmin/activity',    icon: <Activity size={18} />, label: 'Aktivitäten', sub: 'Plattform-Ereignisse', color: 'text-teal-500' },
         ].map(({ href, icon, label, sub, color }) => (
