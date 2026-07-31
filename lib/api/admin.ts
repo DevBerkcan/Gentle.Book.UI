@@ -48,6 +48,11 @@ export const adminApi = {
     const { data } = await api.get('/tenant/subscription/mollie/status');
     return data as { isLiveMode: boolean; plan: string; status: string; hasMollieSubscription: boolean };
   },
+
+  async cancelSubscription(reason?: string) {
+    const { data } = await api.post('/tenant/subscription/cancel', { reason: reason ?? null });
+    return data as { cancelRequestedAt: string; currentPeriodEnd: string | null; message: string };
+  },
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────

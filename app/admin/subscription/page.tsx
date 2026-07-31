@@ -13,6 +13,7 @@ import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
 import { supportConfig } from '@/lib/config';
+import { useConfirm } from '@/components/ConfirmDialog';
 
 interface Subscription {
   plan: string;
@@ -24,6 +25,7 @@ interface Subscription {
   isAccessAllowed: boolean;
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
+  cancelRequestedAt?: string;
 }
 
 interface Usage {
@@ -138,6 +140,8 @@ export default function AdminSubscriptionPage() {
   // null while unknown — deliberately don't show the SEPA button until we know for sure,
   // so a real customer can never see a Mollie test-mode checkout by mistake.
   const [mollieLiveMode, setMollieLiveMode] = useState<boolean | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const { confirm, dialog } = useConfirm();
 
   useEffect(() => {
     Promise.all([
@@ -214,6 +218,30 @@ export default function AdminSubscriptionPage() {
     }
   };
 
+  const handleCancel = async () => {
+    if (cancelling) return;
+    const periodEndText = sub?.currentPeriodEnd
+      ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+      : 'Ende der aktuellen Abrechnungsperiode';
+    const ok = await confirm({
+      title: 'Abonnement kündigen?',
+      message: `Ihr Zugang bleibt bis zum ${periodEndText} bestehen. Danach werden keine weiteren Zahlungen eingezogen und Ihr Konto wird deaktiviert. Eine anteilige Rückerstattung erfolgt nicht.`,
+      confirmLabel: 'Ja, kündigen',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setCancelling(true);
+    setRequestError('');
+    try {
+      const res = await adminApi.cancelSubscription();
+      setSub((prev) => (prev ? { ...prev, cancelRequestedAt: res.cancelRequestedAt } : prev));
+    } catch (err: any) {
+      setRequestError(err.response?.data?.message || 'Kündigung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8 space-y-4">
@@ -279,6 +307,14 @@ export default function AdminSubscriptionPage() {
                 </p>
               </div>
             )}
+            {sub.status === 'Active' && !sub.cancelRequestedAt && sub.currentPeriodEnd && (
+              <div className="text-right">
+                <p className="text-xs text-gray-500">Nächste Abbuchung</p>
+                <p className="font-semibold text-gray-800">
+                  {new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Trial Progress Bar */}
@@ -296,8 +332,37 @@ export default function AdminSubscriptionPage() {
               </div>
             );
           })()}
+
+          {/* Cancel subscription */}
+          {sub.status === 'Active' && !sub.cancelRequestedAt && (
+            <div className="mt-4 pt-4 border-t border-black/5">
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="text-xs font-medium text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+              >
+                {cancelling ? 'Wird gekündigt…' : 'Abonnement kündigen'}
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
+
+      {/* Post-cancel banner */}
+      {sub?.cancelRequestedAt && sub.status !== 'Cancelled' && (
+        <motion.div variants={fadeUp} className="bg-gray-100 border border-gray-300 rounded-2xl p-5 flex gap-4">
+          <XCircle className="text-gray-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-gray-800">
+              Gekündigt zum {sub.currentPeriodEnd
+                ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '–'}
+            </p>
+            <p className="text-gray-600 text-sm mt-1">Ihr Zugang bleibt bis dahin bestehen. Es werden keine weiteren Zahlungen eingezogen.</p>
+          </div>
+        </motion.div>
+      )}
+      {dialog}
 
       {/* Usage Meter */}
       {usage && (
