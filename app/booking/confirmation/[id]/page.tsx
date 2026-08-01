@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle, Calendar, Sparkles, Mail, User, ArrowLeft, PartyPopper, Copy, Check as CheckIcon, Download } from "lucide-react";
@@ -190,7 +191,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
               <div className="relative mb-4 flex justify-center">
                 <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border-4 border-white/40">
                   {logoSrc
-                    ? <img src={logoSrc} alt={name ?? "Logo"} className="w-full h-full rounded-full object-cover" />
+                    ? <Image src={logoSrc} alt={name ?? "Logo"} width={80} height={80} unoptimized className="w-full h-full rounded-full object-cover" />
                     : <CheckCircle size={40} className="text-white" />
                   }
                 </div>

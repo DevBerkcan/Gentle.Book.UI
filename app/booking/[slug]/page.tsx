@@ -61,6 +61,32 @@ export default function TenantLinktreePage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  // AI Brand Import live preview: when embedded in the admin's preview iframe (/admin/links),
+  // listen for same-origin postMessage overrides so an unsaved proposal can be previewed using
+  // this exact same rendering logic — nothing here is ever persisted (spec section 17).
+  useEffect(() => {
+    function handleBrandPreviewMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data as { type?: string; payload?: Record<string, string | undefined> } | undefined;
+      if (!data || data.type !== "gentlebook-brand-preview" || !data.payload) return;
+
+      const override = data.payload;
+      if (override.primaryColor) setPrimary(override.primaryColor);
+      if (override.logoUrl) setLogoUrl(override.logoUrl);
+      setCfg((prev) => ({
+        ...prev,
+        ...(override.pageTemplate ? { pageTemplate: override.pageTemplate as LinktreeConfig["pageTemplate"] } : {}),
+        ...(override.fontFamily ? { fontFamily: override.fontFamily as LinktreeConfig["fontFamily"] } : {}),
+        ...(override.buttonStyle ? { buttonStyle: override.buttonStyle as LinktreeConfig["buttonStyle"] } : {}),
+        ...(override.cardStyle ? { cardStyle: override.cardStyle as LinktreeConfig["cardStyle"] } : {}),
+        ...(override.animationSpeed ? { animationSpeed: override.animationSpeed as LinktreeConfig["animationSpeed"] } : {}),
+      }));
+    }
+
+    window.addEventListener("message", handleBrandPreviewMessage);
+    return () => window.removeEventListener("message", handleBrandPreviewMessage);
+  }, []);
+
   // Scroll → show floating pill after 260px
   useEffect(() => {
     const handler = () => setShowFloating(window.scrollY > 260);

@@ -9,8 +9,9 @@ import { TemplatePackPicker } from "./TemplatePackPicker";
 import { PageTemplatePicker } from "./PageTemplatePicker";
 import { BrandColorsEditor } from "./BrandColorsEditor";
 import { AdvancedDesignOptions } from "./AdvancedDesignOptions";
+import { BrandImportPanel } from "./BrandImportPanel";
 import { CMS_TEMPLATE_PACKS, COLOR_PALETTES } from "./constants";
-import type { LinktreeConfig, PageTemplate, PlanTier, Theme } from "./types";
+import type { BrandPreviewOverride, LinktreeConfig, PageTemplate, PlanTier, Theme } from "./types";
 
 export function DesignAccordion({
   designOpen, onToggleDesignOpen, designSaving,
@@ -19,6 +20,7 @@ export function DesignAccordion({
   updateConfig, theme, primaryColor, industryType, updateTheme, updateColor, applyColorScheme, applyPreset, inputCls,
   showAdvanced, onToggleAdvanced,
   tenantSlug, onShowPreviewModal,
+  websiteUrl, onBrandPreviewOverrideChange, onBrandImportApplied, showToast,
 }: {
   designOpen: boolean;
   onToggleDesignOpen: () => void;
@@ -42,6 +44,10 @@ export function DesignAccordion({
   onToggleAdvanced: () => void;
   tenantSlug: string | null;
   onShowPreviewModal: () => void;
+  websiteUrl?: string | null;
+  onBrandPreviewOverrideChange: (override: BrandPreviewOverride | null) => void;
+  onBrandImportApplied: () => void;
+  showToast: (type: "success" | "error", message: string) => void;
 }) {
   return (
     <div className="mb-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
@@ -74,6 +80,13 @@ export function DesignAccordion({
             className="overflow-hidden"
           >
             <div className="border-t border-[#F3F4F6] px-5 pb-6 space-y-6 pt-5">
+              <BrandImportPanel
+                defaultWebsiteUrl={websiteUrl}
+                onPreviewOverrideChange={onBrandPreviewOverrideChange}
+                onApplied={onBrandImportApplied}
+                showToast={showToast}
+              />
+
               <TemplatePackPicker config={config} tenantPlan={tenantPlan} onSelect={onSelectPack} />
               <PageTemplatePicker config={config} tenantPlan={tenantPlan} onSelect={onSelectTemplate} />
               <BrandColorsEditor brandColors={brandColors} onApply={onApplyBrandColors} />

@@ -120,6 +120,26 @@ const [loadingEmployeeServices, setLoadingEmployeeServices] = useState(false);
     customerNotes: ''
   });
 
+  const [isServicePopoverOpen, setIsServicePopoverOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Add this function to load services by employee
+const loadServicesForEmployee = useCallback(async (employeeId: string) => {
+  if (!employeeId) return;
+  
+  setLoadingEmployeeServices(true);
+  try {
+    // You'll need to add this function to your adminApi
+    const data = await adminApi.getServicesByEmployee(employeeId);
+    setEmployeeServices(data);
+  } catch (error) {
+    void error;
+    setEmployeeServices([]);
+  } finally {
+    setLoadingEmployeeServices(false);
+  }
+}, []);
+
   // Employees may only book for themselves. Tenant admins can choose any active employee.
   useEffect(() => {
     if (authLoading) return;
@@ -152,38 +172,7 @@ const [loadingEmployeeServices, setLoadingEmployeeServices] = useState(false);
       })
       .catch(() => setEmployees([]))
       .finally(() => setLoadingEmployees(false));
-  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location]);
-
-  useEffect(() => { loadServices(); }, []);
-
-  const [isServicePopoverOpen, setIsServicePopoverOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  useEffect(() => {
-    if (bookingForm.serviceId && bookingForm.bookingDate && selectedEmployeeId) {
-      loadAvailableSlots();
-    } else {
-      setAvailableSlots([]);
-    }
-  }, [bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId]);
-
-
-  // Add this function to load services by employee
-async function loadServicesForEmployee(employeeId: string) {
-  if (!employeeId) return;
-  
-  setLoadingEmployeeServices(true);
-  try {
-    // You'll need to add this function to your adminApi
-    const data = await adminApi.getServicesByEmployee(employeeId);
-    setEmployeeServices(data);
-  } catch (error) {
-    void error;
-    setEmployeeServices([]);
-  } finally {
-    setLoadingEmployeeServices(false);
-  }
-}
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadServicesForEmployee]);
   const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -233,18 +222,18 @@ async function loadServicesForEmployee(employeeId: string) {
     }
   }, [date, isAdmin, isEmployee, user?.id]);
 
-  useEffect(() => { loadEvents(); }, [loadEvents]);
+  useEffect(() => { void loadEvents(); }, [loadEvents]);
 
-  async function loadServices() {
+  const loadServices = useCallback(async () => {
     try {
       const data = await adminApi.getServices();
       setServices(data);
     } catch (error) {
       void error;
     }
-  }
+  }, []);
 
-  async function loadAvailableSlots() {
+  const loadAvailableSlots = useCallback(async () => {
     if (!bookingForm.serviceId || !bookingForm.bookingDate || !selectedEmployeeId) {
       setAvailableSlots([]);
       setSlotsMessage(null);
@@ -269,7 +258,17 @@ async function loadServicesForEmployee(employeeId: string) {
     } finally {
       setLoadingSlots(false);
     }
-  }
+  }, [bookingForm.bookingDate, bookingForm.serviceId, bookingForm.startTime, selectedEmployeeId]);
+
+  useEffect(() => { void loadServices(); }, [loadServices]);
+
+  useEffect(() => {
+    if (bookingForm.serviceId && bookingForm.bookingDate && selectedEmployeeId) {
+      void loadAvailableSlots();
+    } else {
+      setAvailableSlots([]);
+    }
+  }, [bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId, loadAvailableSlots]);
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (!selectedEvent || selectedEvent.type !== 'booking') return;

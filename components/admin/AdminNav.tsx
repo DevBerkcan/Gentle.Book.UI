@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot,
 } from "lucide-react";
 import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
@@ -101,6 +102,7 @@ export function AdminNav() {
     label: t.admin.administration,
     items: [
       { href: "/admin/inbox",        label: t.admin.inbox,        icon: Inbox },
+        { href: "/admin/ai-service-finder", label: "KI & Service Finder", icon: Bot },
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
       { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
@@ -138,7 +140,7 @@ export function AdminNav() {
           {isCollapsed ? (
             <GentleBookMark size={28} className="mx-auto" />
           ) : logoUrl
-            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
+            ? <Image src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} width={180} height={40} unoptimized className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
               <>
                 <GentleBookMark size={28} />
@@ -271,7 +273,7 @@ export function AdminNav() {
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/8 z-40 flex items-center justify-between px-4">
         <Link href="/admin/dashboard" className="flex items-center">
           {logoUrl
-            ? <img src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} className="h-9 w-[150px] object-contain object-left" />
+            ? <Image src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} width={150} height={36} unoptimized className="h-9 w-[150px] object-contain object-left" />
             : <GentleBookMark size={24} />
           }
         </Link>

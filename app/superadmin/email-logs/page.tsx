@@ -46,7 +46,7 @@ export default function EmailLogsPage() {
   const [filterType,      setFilterType]      = useState('');
   const [search,          setSearch]          = useState('');
 
-  async function load(p = page) {
+  const load = useCallback(async (p: number) => {
     setLoading(true);
     try {
       const [res, tRes] = await Promise.all([
@@ -68,10 +68,10 @@ export default function EmailLogsPage() {
       // silent
     }
     setLoading(false);
-  }
+  }, [filterStatus, filterTenant, filterType]);
 
-  useEffect(() => { load(1); setPage(1); }, [filterTenant, filterStatus, filterType]);
-  useEffect(() => { load(page); }, [page]);
+  useEffect(() => { void load(1); setPage(1); }, [filterTenant, filterStatus, filterType, load]);
+  useEffect(() => { void load(page); }, [page, load]);
 
   const filtered = search
     ? logs.filter(l =>

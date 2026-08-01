@@ -14,7 +14,7 @@ import { LivePreviewPanel } from "@/components/admin/links/LivePreviewPanel";
 import { MobilePreviewModal } from "@/components/admin/links/MobilePreviewModal";
 import { DEFAULT_CONFIG, CMS_TEMPLATE_PACKS, INDUSTRY_PRESETS } from "@/components/admin/links/constants";
 import type {
-  LinkItem, LinktreeConfig, PageTemplate, PlanTier, PreviewDevice, SaveStatus, Theme, ToastMessage,
+  BrandPreviewOverride, LinkItem, LinktreeConfig, PageTemplate, PlanTier, PreviewDevice, SaveStatus, Theme, ToastMessage,
 } from "@/components/admin/links/types";
 
 let toastCounter = 0;
@@ -55,6 +55,8 @@ export default function AdminLinksPage() {
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("mobile");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [websiteUrl, setWebsiteUrl] = useState<string | null>(null);
+  const [brandPreviewOverride, setBrandPreviewOverride] = useState<BrandPreviewOverride | null>(null);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     const id = ++toastCounter;
@@ -153,17 +155,27 @@ export default function AdminLinksPage() {
     finally { setLoading(false); }
   }, [showToast]);
 
-  useEffect(() => {
-    void loadLinks();
+  const loadTenantSettings = useCallback(() => {
     api.get("/tenant/settings").then((res) => {
       const d = res.data?.data ?? res.data;
       if (d?.linktreeStyle) setTheme(d.linktreeStyle as Theme);
       if (d?.primaryColor) setPrimaryColor(d.primaryColor);
       setBrandColors({ primary: d?.primaryColor, secondary: d?.secondaryColor, accent: d?.accentColor });
+      setWebsiteUrl(d?.website ?? null);
       if (d?.linktreeConfig) {
         try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(d.linktreeConfig) }); } catch {}
       }
     }).catch(() => {});
+  }, []);
+
+  const handleBrandImportApplied = useCallback(() => {
+    loadTenantSettings();
+    setPreviewKey((k) => k + 1);
+  }, [loadTenantSettings]);
+
+  useEffect(() => {
+    void loadLinks();
+    loadTenantSettings();
     const slug = tenantSlug;
     if (slug) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL}/booking/${slug}/info`)
@@ -176,7 +188,7 @@ export default function AdminLinksPage() {
       else if (plan.includes("pro"))  setTenantPlan("pro");
       else                            setTenantPlan("starter");
     }).catch(() => {});
-  }, [tenantSlug, loadLinks]);
+  }, [tenantSlug, loadLinks, loadTenantSettings]);
 
   async function handleCreate() {
     if (!newTitle.trim() || !newUrl.trim()) return;
@@ -285,6 +297,10 @@ export default function AdminLinksPage() {
             onToggleAdvanced={() => setShowAdvanced((v) => !v)}
             tenantSlug={tenantSlug ?? null}
             onShowPreviewModal={() => setShowPreviewModal(true)}
+            websiteUrl={websiteUrl}
+            onBrandPreviewOverrideChange={setBrandPreviewOverride}
+            onBrandImportApplied={handleBrandImportApplied}
+            showToast={showToast}
           />
 
           <AddLinkForm
@@ -329,6 +345,7 @@ export default function AdminLinksPage() {
           previewDevice={previewDevice}
           setPreviewDevice={setPreviewDevice}
           designSaving={designSaving}
+          brandPreviewOverride={brandPreviewOverride}
         />
       )}
 
@@ -338,6 +355,7 @@ export default function AdminLinksPage() {
           onClose={() => setShowPreviewModal(false)}
           previewUrl={previewUrl}
           previewKey={previewKey}
+          brandPreviewOverride={brandPreviewOverride}
         />
       )}
     </div>

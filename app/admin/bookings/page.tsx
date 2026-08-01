@@ -99,7 +99,7 @@ export default function AdminBookingsPage() {
   const [loadingEmployeeServices, setLoadingEmployeeServices] = useState(false);
 
   // Add function to load services when employee changes
-  async function loadServicesForEmployee(employeeId: string) {
+  const loadServicesForEmployee = useCallback(async (employeeId: string) => {
     if (!employeeId) return;
 
     setLoadingEmployeeServices(true);
@@ -112,7 +112,7 @@ export default function AdminBookingsPage() {
     } finally {
       setLoadingEmployeeServices(false);
     }
-  }
+  }, []);
 
   const handleEmployeeSelect = (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
@@ -142,41 +142,6 @@ export default function AdminBookingsPage() {
 
   const { confirm, dialog: confirmDialog } = useConfirm();
 
-  // Load data on mount
-  useEffect(() => {
-    loadBookings();
-    loadServices();
-  }, []);
-
-  // Employees may only book for themselves. Tenant admins can choose any active employee.
-  useEffect(() => {
-    if (authLoading) return;
-
-    if (isEmployee) {
-      if (!user?.id) return;
-
-      const currentEmployee: Employee = {
-        id: user.id,
-        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
-        role: user.role,
-        specialty: user.specialty || null,
-        location: user.location || null,
-        isActive: true,
-      };
-      setEmployees([currentEmployee]);
-      setSelectedEmployeeId(currentEmployee.id);
-      void loadServicesForEmployee(currentEmployee.id);
-      setLoadingEmployees(false);
-      return;
-    }
-
-    void loadEmployees();
-  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location]);
-
-  useEffect(() => {
-    loadBookings();
-  }, [filter]);
-
   function openBookingDetails(booking: BookingListItem) {
     setSelectedBookingDetails(booking);
     setIsEditMode(false);
@@ -191,7 +156,7 @@ export default function AdminBookingsPage() {
     onBookingDetailsModalOpen();
   }
 
-  async function loadEmployees() {
+  const loadEmployees = useCallback(async () => {
     try {
       const data = await getEmployees();
       setEmployees(data);
@@ -204,18 +169,18 @@ export default function AdminBookingsPage() {
     } finally {
       setLoadingEmployees(false);
     }
-  }
+  }, [loadServicesForEmployee]);
 
-  async function loadServices() {
+  const loadServices = useCallback(async () => {
     try {
       const data = await getServices();
       setServices(data);
     } catch (error) {
       /* silent */
     }
-  }
+  }, []);
 
-  async function loadBookings() {
+  const loadBookings = useCallback(async () => {
     setLoading(true);
     try {
       // Employees only see their own bookings
@@ -232,9 +197,9 @@ export default function AdminBookingsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter, isEmployee, user?.id]);
 
-  async function loadAvailableSlots() {
+  const loadAvailableSlots = useCallback(async () => {
     if (!bookingForm.serviceId || !bookingForm.bookingDate || !selectedEmployeeId) {
       setAvailableSlots([]);
       setSlotsMessage(null);
@@ -259,15 +224,49 @@ export default function AdminBookingsPage() {
     } finally {
       setLoadingSlots(false);
     }
-  }
+  }, [bookingForm.bookingDate, bookingForm.serviceId, bookingForm.startTime, selectedEmployeeId]);
+
+  // Load data on mount and whenever relevant filters/user scope change.
+  useEffect(() => {
+    void loadBookings();
+  }, [loadBookings]);
+
+  useEffect(() => {
+    void loadServices();
+  }, [loadServices]);
+
+  // Employees may only book for themselves. Tenant admins can choose any active employee.
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (isEmployee) {
+      if (!user?.id) return;
+
+      const currentEmployee: Employee = {
+        id: user.id,
+        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
+        role: user.role,
+        specialty: user.specialty || null,
+        location: user.location || null,
+        isActive: true,
+      };
+      setEmployees([currentEmployee]);
+      setSelectedEmployeeId(currentEmployee.id);
+      void loadServicesForEmployee(currentEmployee.id);
+      setLoadingEmployees(false);
+      return;
+    }
+
+    void loadEmployees();
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadEmployees, loadServicesForEmployee]);
 
   useEffect(() => {
     if (bookingForm.serviceId && bookingForm.bookingDate && selectedEmployeeId) {
-      loadAvailableSlots();
+      void loadAvailableSlots();
     } else {
       setAvailableSlots([]);
     }
-  }, [bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId]);
+  }, [bookingForm.serviceId, bookingForm.bookingDate, selectedEmployeeId, loadAvailableSlots]);
 
   const commitSearch = useCallback(() => {
     setFilter(prev => ({ ...prev, searchTerm: searchInput.trim() || undefined, page: 1 }));

@@ -71,7 +71,7 @@ export function EmployeeSelector({
     }
     loadEmployees();
     return () => { isMounted = false; };
-  }, [selectedService?.id, handleSelect, hasAutoSelected, selectedEmployee]);
+  }, [selectedService?.id, handleSelect, hasAutoSelected, selectedEmployee, t.booking.errorLoadingEmployees, t.booking.noServiceSelected, tenantSlug]);
 
   useEffect(() => { setHasAutoSelected(false); }, [selectedService?.id]);
 

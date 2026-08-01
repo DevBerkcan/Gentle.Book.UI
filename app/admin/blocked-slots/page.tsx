@@ -1,7 +1,7 @@
 // app/admin/blocked-slots/page.tsx
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Card, CardBody } from "@nextui-org/card";
 import { Button } from "@nextui-org/button";
 import { Input } from "@nextui-org/input";
@@ -88,10 +88,7 @@ export default function BlockedSlotsPage() {
   const [selectedSlotForDelete, setSelectedSlotForDelete] = useState<BlockedTimeSlot | null>(null);
   const { confirm, dialog: confirmDialog } = useConfirm();
 
-  useEffect(() => { load(); }, []);
-  useEffect(() => { setPage(1); }, [selDate]);
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -108,7 +105,10 @@ export default function BlockedSlotsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [isAdmin]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setPage(1); }, [selDate]);
 
   // ── Open modals ───────────────────────────────────────────────────────────
 

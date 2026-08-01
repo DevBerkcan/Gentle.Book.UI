@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Plus, Edit, Trash2, Loader2, Search, X, Check,
@@ -173,10 +173,6 @@ export default function AdminServicesPage() {
     });
 
     useEffect(() => {
-        loadData();
-    }, [page, viewMode]);
-
-    useEffect(() => {
         getTenantDefaultCurrency()
             .then((currency) => {
                 setTenantCurrency(currency);
@@ -201,13 +197,13 @@ export default function AdminServicesPage() {
             .catch(() => setLocations([]));
     }, []);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             let servicesData: AdminService[] = [];
             let categoriesData: AdminServiceCategory[] = [];
-            let employeesData: EmployeeForAssignment[] = employees;
+            let employeesData: EmployeeForAssignment[] = [];
 
             if (viewMode === "services") {
                 [servicesData, categoriesData] = await Promise.all([
@@ -278,7 +274,11 @@ export default function AdminServicesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, pageSize, searchTerm, viewMode]);
+
+    useEffect(() => {
+        void loadData();
+    }, [loadData]);
 
     const handleSearchKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {

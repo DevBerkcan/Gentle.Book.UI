@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Save, Clock, ExternalLink, Copy, Check,
@@ -409,9 +410,12 @@ export default function TenantDetailPage() {
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {logoUrl ? (
-                  <img
+                  <Image
                     src={`${process.env.NEXT_PUBLIC_API_URL}${logoUrl}`}
                     alt="Logo"
+                    width={64}
+                    height={64}
+                    unoptimized
                     className="w-full h-full object-contain p-1"
                   />
                 ) : (

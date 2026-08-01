@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Card, CardBody } from "@nextui-org/card";
@@ -85,11 +85,7 @@ export default function CustomersPage() {
 
   const { confirm, dialog: confirmDialog } = useConfirm();
 
-  useEffect(() => {
-    loadCustomers();
-  }, [page, searchTerm]);
-
-  async function loadCustomers() {
+  const loadCustomers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -102,7 +98,11 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [page, pageSize, searchTerm]);
+
+  useEffect(() => {
+    void loadCustomers();
+  }, [loadCustomers]);
 
   async function loadCustomerDetails(id: string) {
     try {

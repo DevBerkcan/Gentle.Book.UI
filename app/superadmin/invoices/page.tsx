@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FileText, Search, RefreshCw, Download, CheckCircle, XCircle, Euro } from 'lucide-react';
 import { superAdminApi, InvoiceItem, TenantListItem } from '@/lib/api/superadmin';
 import { getSuperAdminToken } from '@/lib/auth/storage';
@@ -22,7 +22,7 @@ export default function InvoicesPage() {
   const [filterTenant, setFilterTenant] = useState('');
   const [search,       setSearch]       = useState('');
 
-  async function load(p = page) {
+  const load = useCallback(async (p: number) => {
     setLoading(true);
     try {
       const [res, tRes] = await Promise.all([
@@ -37,10 +37,10 @@ export default function InvoicesPage() {
       // silent
     }
     setLoading(false);
-  }
+  }, [filterTenant]);
 
-  useEffect(() => { load(1); setPage(1); }, [filterTenant]);
-  useEffect(() => { load(page); }, [page]);
+  useEffect(() => { void load(1); setPage(1); }, [filterTenant, load]);
+  useEffect(() => { void load(page); }, [page, load]);
 
   async function downloadPdf(inv: InvoiceItem) {
     setDownloadingId(inv.id);

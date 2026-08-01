@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ScrollText, Search, RefreshCw, User, Shield, Server } from 'lucide-react';
 import { superAdminApi, AuditLogItem, TenantListItem } from '@/lib/api/superadmin';
 
@@ -27,7 +27,7 @@ export default function AuditLogPage() {
   const [filterAction, setFilterAction] = useState('');
   const [search,       setSearch]       = useState('');
 
-  async function load(p = page) {
+  const load = useCallback(async (p: number) => {
     setLoading(true);
     try {
       const [res, tRes] = await Promise.all([
@@ -46,10 +46,10 @@ export default function AuditLogPage() {
       // silent
     }
     setLoading(false);
-  }
+  }, [filterAction, filterTenant]);
 
-  useEffect(() => { load(1); setPage(1); }, [filterTenant, filterAction]);
-  useEffect(() => { load(page); }, [page]);
+  useEffect(() => { void load(1); setPage(1); }, [filterTenant, filterAction, load]);
+  useEffect(() => { void load(page); }, [page, load]);
 
   const filtered = search
     ? logs.filter(l =>

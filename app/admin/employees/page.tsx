@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Card, CardBody } from "@nextui-org/card";
@@ -131,14 +131,14 @@ export default function EmployeesPage() {
 
   const { confirm, dialog } = useConfirm();
 
-  useEffect(() => { load(); }, [showInactive]);
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true); setError(null);
     try { setEmployees(await getEmployees(!showInactive)); }
     catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
-  }
+  }, [showInactive]);
+
+  useEffect(() => { void load(); }, [load]);
 
   function openCreate() {
     setEditing(null);

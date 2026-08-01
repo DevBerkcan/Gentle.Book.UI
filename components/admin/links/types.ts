@@ -69,3 +69,23 @@ export interface LockedHint {
 }
 
 export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+/**
+ * Sent via postMessage (same-origin only) into the public /booking/[slug] iframe so an admin can
+ * preview an AI Brand Import proposal using the exact same template rendering logic as the
+ * public page, without persisting anything to TenantSettings until they explicitly apply it.
+ */
+export interface BrandPreviewOverride {
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  pageTemplate?: string;
+  fontFamily?: string;
+  buttonStyle?: string;
+  cardStyle?: string;
+  animationSpeed?: string;
+  logoUrl?: string;
+}
+
+export const BRAND_PREVIEW_MESSAGE_TYPE = "gentlebook-brand-preview";
+

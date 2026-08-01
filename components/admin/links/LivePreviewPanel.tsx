@@ -2,8 +2,10 @@
 // Desktop-only right-hand browser-chrome mockup with device-width toggle.
 "use client";
 
+import { useEffect, useRef } from "react";
 import { ExternalLink, Loader2, Smartphone, Tablet, Monitor } from "lucide-react";
-import type { PreviewDevice } from "./types";
+import type { BrandPreviewOverride, PreviewDevice } from "./types";
+import { BRAND_PREVIEW_MESSAGE_TYPE } from "./types";
 
 const PREVIEW_DEVICE_STYLE: Record<PreviewDevice, { width: string; label: string }> = {
   mobile: { width: "390px", label: "Mobile" },
@@ -12,14 +14,31 @@ const PREVIEW_DEVICE_STYLE: Record<PreviewDevice, { width: string; label: string
 };
 
 export function LivePreviewPanel({
-  previewUrl, previewKey, previewDevice, setPreviewDevice, designSaving,
+  previewUrl, previewKey, previewDevice, setPreviewDevice, designSaving, brandPreviewOverride,
 }: {
   previewUrl: string;
   previewKey: number;
   previewDevice: PreviewDevice;
   setPreviewDevice: (d: PreviewDevice) => void;
   designSaving: boolean;
+  /** When set, posted into the preview iframe so it renders an unsaved AI Brand Import proposal (spec section 17). */
+  brandPreviewOverride?: BrandPreviewOverride | null;
 }) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const postOverride = () => {
+    if (!brandPreviewOverride) return;
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: BRAND_PREVIEW_MESSAGE_TYPE, payload: brandPreviewOverride },
+      window.location.origin
+    );
+  };
+
+  useEffect(() => {
+    postOverride();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandPreviewOverride]);
+
   return (
     <div className="hidden lg:flex flex-col flex-1 bg-[#EDEDEE] p-6 h-full overflow-hidden">
       <div className="flex items-center justify-between mb-4">
@@ -66,8 +85,9 @@ export function LivePreviewPanel({
         <div className="flex-1 overflow-hidden flex justify-center bg-[#F7F7F8] transition-all duration-300">
           <div className="h-full overflow-hidden transition-all duration-300"
             style={{ width: PREVIEW_DEVICE_STYLE[previewDevice].width, maxWidth: "100%" }}>
-            <iframe key={previewKey}
+            <iframe key={previewKey} ref={iframeRef}
               src={`${previewUrl}?v=${previewKey}`}
+              onLoad={postOverride}
               className="w-full h-full" style={{ border: "none", minHeight: "100%" }}
               title="Buchungsseite Vorschau" />
           </div>
@@ -76,3 +96,4 @@ export function LivePreviewPanel({
     </div>
   );
 }
+

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { Card, CardBody, CardHeader } from '@nextui-org/card';
@@ -13,6 +14,7 @@ import {
   MapPin, Plus, Pencil, Star,
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSection';
 import api, { apiOrigin } from '@/lib/api/client';
 import {
   createBusinessLocation,
@@ -449,9 +451,12 @@ export default function AdminSettingsPage() {
             <div className="flex items-center gap-5">
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] flex items-center justify-center overflow-hidden flex-shrink-0">
                 {settings.logoUrl ? (
-                  <img
+                  <Image
                     src={settings.logoUrl?.startsWith('http') ? settings.logoUrl : `${apiOrigin}${settings.logoUrl}`}
                     alt="Logo"
+                    width={80}
+                    height={80}
+                    unoptimized
                     className="w-full h-full object-contain p-1"
                   />
                 ) : (
@@ -573,6 +578,9 @@ export default function AdminSettingsPage() {
               </Field>
             </div>
           </SectionCard>
+
+          {/* ── Unternehmenswebsite (AI Brand Import) ── */}
+          <WebsiteBrandSection />
 
           {/* ── Standorte ── */}
           <SectionCard

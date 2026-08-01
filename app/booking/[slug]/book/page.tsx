@@ -22,6 +22,7 @@ import {
 } from "@/lib/api/booking";
 import { BookingEvents } from "@/lib/tracking";
 import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageContext";
+import { getPublicFinderBootstrap } from "@/lib/api/ai-finder";
 
 const FONT_QUERY: Record<string, string> = {
   playfair:   "Playfair+Display:wght@400;600;700",
@@ -98,6 +99,7 @@ function BookingPageInner() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [finderEnabled, setFinderEnabled] = useState(false);
 
   useEffect(() => {
     setWaitlistToken(new URLSearchParams(window.location.search).get("waitlistToken") ?? undefined);
@@ -134,6 +136,16 @@ function BookingPageInner() {
     getServices(slug)
       .then(setServices)
       .catch(() => setError(t.booking.errorLoadServices));
+  }, [slug, t.booking.errorLoadServices]);
+
+  useEffect(() => {
+    if (!slug) return;
+    // Fail closed: only show the finder promo banner once we've confirmed the tenant
+    // actually has it enabled — otherwise every tenant's booking page would advertise
+    // a feature that dead-ends for most of them.
+    getPublicFinderBootstrap(slug)
+      .then((data) => setFinderEnabled(data.enabled))
+      .catch(() => setFinderEnabled(false));
   }, [slug]);
 
   const handleLoadSlots = async (date: string, employeeId?: string) => {
@@ -284,6 +296,22 @@ function BookingPageInner() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-10">
+        {finderEnabled && (
+          <div className={`mb-5 rounded-xl border p-3 flex items-center justify-between gap-3 ${isDark ? 'border-white/15 bg-white/5' : 'border-[#DAD7F8] bg-[#F4F2FF]'}`}>
+            <div>
+              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-[#2D2568]'}`}>Neu: KI Service Finder</p>
+              <p className={`text-xs ${isDark ? 'text-white/70' : 'text-[#5E55A3]'}`}>Lass dir zuerst passende Services empfehlen und buche danach direkt.</p>
+            </div>
+            <button
+              onClick={() => router.push(`/booking/${slug}/finder`)}
+              className="rounded-lg px-3 py-2 text-xs font-bold text-white"
+              style={{ backgroundColor: primaryColor }}
+            >
+              Finder starten
+            </button>
+          </div>
+        )}
+
         {/* Step indicators */}
         {(() => {
           const stepLabels = t.booking.stepLabels;

@@ -2,12 +2,31 @@
 // Bottom-sheet live preview for small screens (desktop uses LivePreviewPanel instead).
 "use client";
 
+import { useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Eye, X } from "lucide-react";
+import type { BrandPreviewOverride } from "./types";
+import { BRAND_PREVIEW_MESSAGE_TYPE } from "./types";
 
 export function MobilePreviewModal({
-  open, onClose, previewUrl, previewKey,
-}: { open: boolean; onClose: () => void; previewUrl: string; previewKey: number }) {
+  open, onClose, previewUrl, previewKey, brandPreviewOverride,
+}: {
+  open: boolean;
+  onClose: () => void;
+  previewUrl: string;
+  previewKey: number;
+  brandPreviewOverride?: BrandPreviewOverride | null;
+}) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const postOverride = () => {
+    if (!brandPreviewOverride) return;
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: BRAND_PREVIEW_MESSAGE_TYPE, payload: brandPreviewOverride },
+      window.location.origin
+    );
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -32,8 +51,9 @@ export function MobilePreviewModal({
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <iframe key={previewKey}
+              <iframe key={previewKey} ref={iframeRef}
                 src={`${previewUrl}?v=${previewKey}`}
+                onLoad={postOverride}
                 className="w-full h-full" style={{ border: "none", height: "100%" }}
                 title="Buchungsseite Vorschau" />
             </div>
@@ -43,3 +63,4 @@ export function MobilePreviewModal({
     </AnimatePresence>
   );
 }
+
