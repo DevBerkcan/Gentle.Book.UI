@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ChevronDown, HelpCircle, Info } from 'lucide-react';
 import {
   aiFinderApi,
   type FinderGuidance,
@@ -14,6 +15,28 @@ import {
 
 function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
+}
+
+function InfoTooltip({ text }: { text: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => setOpen(false)}
+        aria-label="Erklärung anzeigen"
+        className="text-gray-400 hover:text-[#6355E4] transition-colors"
+      >
+        <Info size={15} />
+      </button>
+      {open && (
+        <div className="absolute z-20 top-6 left-0 w-80 rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-600 shadow-lg">
+          {text}
+        </div>
+      )}
+    </span>
+  );
 }
 
 export default function AiServiceFinderAdminPage() {
@@ -40,6 +63,7 @@ export default function AiServiceFinderAdminPage() {
   const [preview, setPreview] = useState<EvaluateFinderResponse | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -223,6 +247,43 @@ export default function AiServiceFinderAdminPage() {
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {message && <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{message}</div>}
 
+      <section className="rounded-xl border border-[#E5E7EB] bg-[#F7F7FE] overflow-hidden">
+        <button
+          onClick={() => setGuideOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-4 py-3 text-left"
+        >
+          <span className="flex items-center gap-2 text-sm font-semibold text-[#14162B]">
+            <HelpCircle size={16} className="text-[#6355E4]" />
+            Wie funktioniert der Service Finder? So richtest du ihn ein.
+          </span>
+          <ChevronDown size={16} className={`text-gray-400 transition-transform ${guideOpen ? 'rotate-180' : ''}`} />
+        </button>
+        {guideOpen && (
+          <div className="px-4 pb-4 text-sm text-gray-600 space-y-3">
+            <p>
+              Der Service Finder ist ein Frage-Assistent für deine Kund:innen: Sie beantworten ein paar Fragen
+              auf deiner Buchungsseite und bekommen automatisch den passenden Service vorgeschlagen. Wichtig zu wissen:
+              die Empfehlung kommt <strong>nicht von einer echten KI/Sprach-KI</strong>, sondern von Regeln, die du
+              hier selbst festlegst (&quot;wenn Antwort X, dann empfehle Service Y&quot;) — vollständig vorhersehbar
+              und ohne laufende KI-Kosten.
+            </p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li><strong>Branchenprofil</strong> unten wählen und Häkchen bei den gewünschten Fähigkeiten setzen.</li>
+              <li><strong>Finder-Fragen</strong> anlegen — das sind die Fragen, die Kund:innen im Assistenten beantworten.</li>
+              <li><strong>Service-Regeln</strong> anlegen — verknüpfen Antworten mit einem konkreten Service aus deinem Angebot.</li>
+              <li><strong>Kundenhinweise</strong> (optional) — zusätzliche Infotexte, die bei einer Empfehlung angezeigt werden.</li>
+              <li>Mit <strong>&quot;Finder testen&quot;</strong> unten Beispielantworten durchspielen, bevor etwas live geht — wirkt sich nicht auf die echte Buchungsseite aus.</li>
+              <li>Erst wenn alles passt: oben bei &quot;Branchenprofil&quot; das Häkchen <strong>&quot;Finder öffentlich anzeigen&quot;</strong> setzen und speichern — das schaltet ihn für Kund:innen live.</li>
+            </ol>
+            <p className="text-gray-500">
+              Verfügbar ab Tarif <strong>Professional</strong>. Fragen/Regeln/Hinweise werden aktuell als JSON bearbeitet —
+              klicke auf das <Info size={12} className="inline align-text-bottom text-gray-400" />-Symbol neben jedem
+              Abschnittstitel für das genaue Format und ein Beispiel.
+            </p>
+          </div>
+        )}
+      </section>
+
       <section className="grid gap-4 md:grid-cols-4">
         <StatCard label="Finder aktiv" value={overview?.finderEnabled ? 'Ja' : 'Nein'} />
         <StatCard label="Aktive Fragen" value={String(overview?.questionCount ?? 0)} />
@@ -231,7 +292,18 @@ export default function AiServiceFinderAdminPage() {
       </section>
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
-        <h2 className="text-lg font-semibold text-[#14162B]">Branchenprofil</h2>
+        <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
+          Branchenprofil
+          <InfoTooltip text={
+            <>
+              Bestimmt, welche Fähigkeiten (z.B. Terminarten) für deine Branche zur Verfügung stehen.
+              <br /><br />
+              <strong>&quot;Finder öffentlich anzeigen&quot;</strong> ist der eigentliche An/Aus-Schalter: nur wenn
+              dieses Häkchen gesetzt ist, sehen deine Kund:innen den Finder auf der Buchungsseite. Erst aktivieren,
+              wenn Fragen und Regeln fertig eingerichtet sind.
+            </>
+          } />
+        </h2>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -307,6 +379,20 @@ export default function AiServiceFinderAdminPage() {
         onChange={setQuestionsJson}
         onSave={() => void saveQuestions()}
         saving={savingQuestions}
+        tooltip={
+          <>
+            Die Fragen, die Kund:innen im Finder-Assistenten beantworten (in der Reihenfolge von <code>displayOrder</code>).
+            <br /><br />
+            <strong>answerType</strong>: funktionieren direkt: <code>SingleChoice</code>, <code>MultiChoice</code>
+            (Optionen über <code>configJson: {`{"options":["Option A","Option B"]}`}</code>), <code>YesNo</code>,
+            <code> Number</code>, <code>FreeText</code>, <code>DateRange</code>, <code>PriceRange</code>,
+            <code> DurationRange</code>. <em>Noch nicht unterstützt:</em> <code>EmployeeChoice</code>,{' '}
+            <code>ImageUpload</code> (werden im Finder als &quot;bald verfügbar&quot; angezeigt).
+            <br /><br />
+            <code>questionKey</code> muss pro Frage eindeutig sein — wird in den Regeln unten referenziert.
+            <code> isActive: false</code> blendet eine Frage aus, ohne sie zu löschen.
+          </>
+        }
       />
 
       <JsonEditorCard
@@ -315,6 +401,23 @@ export default function AiServiceFinderAdminPage() {
         onChange={setRulesJson}
         onSave={() => void saveRules()}
         saving={savingRules}
+        tooltip={
+          <>
+            Verknüpft Antworten mit einem Service — das Herzstück der Empfehlung. Keine KI, sondern feste Regeln,
+            die du selbst definierst.
+            <br /><br />
+            <strong>conditionJson</strong> (wann greift die Regel):{' '}
+            <code>{`{"questionKey":"anlass","operator":"equals","value":"hochzeit"}`}</code>. Operatoren:
+            equals, notEquals, contains, in, exists, greaterThan, lessThan. Mehrere Bedingungen kombinieren mit{' '}
+            <code>{`{"all":[...]}`}</code> (alle müssen zutreffen) oder <code>{`{"any":[...]}`}</code> (mind. eine).
+            <br /><br />
+            <strong>resultJson</strong> (was passiert bei Treffer): <code>{`{"score":10}`}</code> erhöht die
+            Trefferwertung des Service, <code>{`{"exclude":true}`}</code> schließt ihn aus. Ohne{' '}
+            <code>serviceIds</code> im Result gilt die Regel für den in <code>serviceId</code> gewählten Service.
+            <br /><br />
+            Mit &quot;Finder testen&quot; unten kannst du das Ergebnis vor der Veröffentlichung prüfen.
+          </>
+        }
       />
 
       <JsonEditorCard
@@ -323,10 +426,30 @@ export default function AiServiceFinderAdminPage() {
         onChange={setGuidanceJson}
         onSave={() => void saveGuidance()}
         saving={savingGuidance}
+        tooltip={
+          <>
+            Zusätzliche Infotexte (z.B. Vorbereitungshinweise), die Kund:innen angezeigt werden, wenn der
+            zugehörige <code>serviceId</code>-Service empfohlen wird.
+            <br /><br />
+            Wird nur angezeigt, wenn <code>isActive: true</code> und <code>approvalStatus: &quot;Approved&quot;</code>{' '}
+            gesetzt sind (optional zeitlich begrenzbar über <code>validFrom</code>/<code>validTo</code>).
+          </>
+        }
       />
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
-        <h2 className="text-lg font-semibold text-[#14162B]">Finder testen</h2>
+        <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
+          Finder testen
+          <InfoTooltip text={
+            <>
+              Simuliert einen Kunden-Durchlauf mit von dir eingegebenen Beispielantworten, ohne dass etwas live
+              auf der Buchungsseite passiert — sicher zum Ausprobieren.
+              <br /><br />
+              Format: <code>{`[{"key":"anlass","value":"hochzeit"}]`}</code> — der <code>key</code> muss einem{' '}
+              <code>questionKey</code> aus den Finder-Fragen entsprechen.
+            </>
+          } />
+        </h2>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Antworten (JSON)</label>
@@ -383,16 +506,21 @@ function JsonEditorCard({
   onChange,
   onSave,
   saving,
+  tooltip,
 }: {
   title: string;
   value: string;
   onChange: (value: string) => void;
   onSave: () => void;
   saving: boolean;
+  tooltip?: ReactNode;
 }) {
   return (
     <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
-      <h2 className="text-lg font-semibold text-[#14162B]">{title}</h2>
+      <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
+        {title}
+        {tooltip && <InfoTooltip text={tooltip} />}
+      </h2>
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
