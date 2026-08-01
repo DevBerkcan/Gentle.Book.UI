@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, ExternalLink, HeartPulse, ShieldCheck } from "lucide-react";
 import {
   lighten, withAlpha, getContrastColor, getAvatarRadius,
-  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, type TemplateProps,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle, type TemplateProps,
 } from "../_shared";
 
 export function ClinicTemplate({
@@ -17,22 +18,30 @@ export function ClinicTemplate({
   const textColor = getContrastColor(ctaColor);
   const avRadius = getAvatarRadius(cfg.avatarShape || "rounded");
   const emoji = industryType ? (INDUSTRY_EMOJI[industryType] ?? null) : null;
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-accent-soft": lighten(accent, 0.86),
+    "--tenant-cta-bg": ctaColor,
+    "--tenant-cta-text": textColor,
+    "--tenant-cta-shadow": withAlpha(accent, 0.24),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   const cta = cfg.confetti ? (
     <button onClick={handleCtaClick} className="group flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-left text-sm font-bold shadow-xl active:scale-[0.98]"
-      style={{ background: ctaColor, color: textColor, boxShadow: `0 16px 40px ${withAlpha(accent, 0.24)}` }}>
+      style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", boxShadow: `0 16px 40px var(--tenant-cta-shadow)` }}>
       <Calendar size={19} /><span className="flex-1">{ctaText}</span><ChevronRight size={18} />
     </button>
   ) : (
     <a href={`/booking/${slug}/book`} className="group flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-sm font-bold shadow-xl active:scale-[0.98]"
-      style={{ background: ctaColor, color: textColor, boxShadow: `0 16px 40px ${withAlpha(accent, 0.24)}` }}>
+      style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", boxShadow: `0 16px 40px var(--tenant-cta-shadow)` }}>
       <Calendar size={19} /><span className="flex-1">{ctaText}</span><ChevronRight size={18} />
     </a>
   );
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-950">
+      <ThemeTokenStyle tokens={tokens} />
       <div className="fixed inset-0 pointer-events-none" aria-hidden
         style={{ backgroundImage: `linear-gradient(${withAlpha(accent, 0.05)} 1px, transparent 1px), linear-gradient(90deg, ${withAlpha(accent, 0.05)} 1px, transparent 1px)`, backgroundSize: "34px 34px" }} />
 
@@ -41,14 +50,14 @@ export function ClinicTemplate({
           className="rounded-[28px] border border-white bg-white/90 p-5 shadow-sm">
           <div className="flex items-center gap-4">
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName} className="h-16 w-16 object-cover shadow-sm" style={{ borderRadius: avRadius }} />
+              <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 object-cover shadow-sm" style={{ borderRadius: avRadius }} />
             ) : (
-              <div className="flex h-16 w-16 items-center justify-center shadow-sm" style={{ background: lighten(accent, 0.86), borderRadius: avRadius }}>
-                {emoji ? <span className="text-2xl">{emoji}</span> : <HeartPulse style={{ color: accent }} />}
+              <div className="flex h-16 w-16 items-center justify-center shadow-sm" style={{ background: "var(--tenant-accent-soft)", borderRadius: avRadius }}>
+                {emoji ? <span className="text-2xl">{emoji}</span> : <HeartPulse style={{ color: "var(--tenant-accent)" }} />}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
+              <p className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em]" style={{ color: "var(--tenant-accent)" }}>
                 <ShieldCheck size={12} /> Online Buchung
               </p>
               <h1 className="truncate text-xl font-bold">{tenantName}</h1>
@@ -74,7 +83,7 @@ export function ClinicTemplate({
           {links.map((link) => (
             <motion.a key={link.id} variants={item} href={link.url} target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3.5 text-sm font-semibold shadow-sm transition-transform active:scale-[0.98]">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white" style={{ background: accent }}>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white" style={{ background: "var(--tenant-accent)" }}>
                 {ICON_MAP[link.iconType] ?? <ExternalLink size={18} />}
               </span>
               <span className="flex-1 truncate">{link.title}</span>
@@ -88,7 +97,7 @@ export function ClinicTemplate({
         {showFloating && (
           <motion.a href={`/booking/${slug}/book`} initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
             className="fixed bottom-5 left-5 right-5 z-40 mx-auto flex max-w-sm items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold shadow-2xl"
-            style={{ background: ctaColor, color: textColor }}>
+            style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)" }}>
             <Calendar size={17} /> {ctaText}
           </motion.a>
         )}

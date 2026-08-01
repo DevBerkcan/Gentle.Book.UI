@@ -1,18 +1,19 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import {
   lighten, withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
   buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
-  BgPattern, type TemplateProps,
+  BgPattern, ThemeTokenStyle, type TemplateProps,
 } from "../_shared";
 
 export function SoftTemplate({
   slug, tenantName, tagline, welcomeMsg, primaryColor, logoSrc,
   industryType, cfg, links, handleCtaClick, showFloating,
 }: TemplateProps) {
-  const btnRadius  = "9999px";  // always pill in soft
+  const btnRadius  = "9999px";  // always pill — fits Soft's rounded, gentle identity regardless of cfg.buttonStyle
   const avRadius   = getAvatarRadius(cfg.avatarShape);
   const ctaText    = cfg.ctaText?.trim() || "Termin buchen";
   const emoji      = industryType ? (INDUSTRY_EMOJI[industryType] ?? null) : null;
@@ -21,21 +22,35 @@ export function SoftTemplate({
   const ctaColor   = cfg.ctaColor ?? primaryColor;
   const ctaTextClr = getContrastColor(ctaColor);
 
-  const bgSoft   = `linear-gradient(160deg, ${lighten(primaryColor, 0.93)} 0%, ${lighten(primaryColor, 0.97)} 50%, #ffffff 100%)`;
+  const tokens = {
+    "--tenant-accent": primaryColor,
+    "--tenant-bg": `linear-gradient(160deg, ${lighten(primaryColor, 0.93)} 0%, ${lighten(primaryColor, 0.97)} 50%, #ffffff 100%)`,
+    "--tenant-blob-1": lighten(primaryColor, 0.6),
+    "--tenant-blob-2": lighten(primaryColor, 0.5),
+    "--tenant-accent-gradient": `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`,
+    "--tenant-profile-border": withAlpha(primaryColor, 0.12),
+    "--tenant-card-border": withAlpha(primaryColor, 0.1),
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.35),
+    "--tenant-cta-solid": ctaColor,
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
-    <div className="min-h-screen" style={{ background: bgSoft, fontFamily }}>
+    <div className="min-h-screen" style={{ background: "var(--tenant-bg)", fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       {fontQuery && <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>}
 
       {/* Soft blob decorations */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full opacity-30 blur-3xl"
-          style={{ background: lighten(primaryColor, 0.6) }} />
+          style={{ background: "var(--tenant-blob-1)" }} />
         <div className="absolute top-1/2 -left-20 w-60 h-60 rounded-full opacity-20 blur-3xl"
-          style={{ background: lighten(primaryColor, 0.5) }} />
+          style={{ background: "var(--tenant-blob-2)" }} />
         <div className="absolute -bottom-20 right-1/4 w-48 h-48 rounded-full opacity-25 blur-3xl"
-          style={{ background: lighten(primaryColor, 0.6) }} />
+          style={{ background: "var(--tenant-blob-1)" }} />
       </div>
 
       <BgPattern pattern={cfg.bgPattern} color={primaryColor} />
@@ -50,7 +65,7 @@ export function SoftTemplate({
           style={{
             background: "rgba(255,255,255,0.75)",
             backdropFilter: "blur(16px)",
-            borderColor: withAlpha(primaryColor, 0.12),
+            borderColor: "var(--tenant-profile-border)",
           }}
         >
           {/* Avatar */}
@@ -58,12 +73,15 @@ export function SoftTemplate({
             <div className="absolute inset-0 scale-125 blur-xl opacity-40 rounded-full"
               style={{ background: withAlpha(primaryColor, 0.6) }} />
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
+              <Image src={logoSrc} alt={tenantName}
+                width={96}
+                height={96}
+                unoptimized
                 className="relative w-24 h-24 object-cover border-4 border-white shadow-xl"
                 style={{ borderRadius: avRadius }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center border-4 border-white shadow-xl"
-                style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`, borderRadius: avRadius }}>
+                style={{ background: "var(--tenant-accent-gradient)", borderRadius: avRadius }}>
                 {emoji
                   ? <span className="text-4xl">{emoji}</span>
                   : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
@@ -93,7 +111,7 @@ export function SoftTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-xl transition-transform active:scale-[0.97] text-left"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 30px ${withAlpha(ctaColor, 0.35)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 8px 30px var(--tenant-cta-shadow)` }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={20} /></span>
                 <span className="flex-1">{ctaText}</span>
@@ -104,7 +122,7 @@ export function SoftTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-xl transition-transform active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 30px ${withAlpha(ctaColor, 0.35)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 8px 30px var(--tenant-cta-shadow)`, display: "flex" }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={20} /></span>
                 <span className="flex-1">{ctaText}</span>
@@ -129,13 +147,13 @@ export function SoftTemplate({
                   background: "rgba(255,255,255,0.8)",
                   backdropFilter: "blur(12px)",
                   borderRadius: "18px",
-                  border: `1px solid ${withAlpha(primaryColor, 0.1)}`,
+                  border: "1px solid var(--tenant-card-border)",
                   boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
                   color: "#1a1a1a",
                 }}
               >
                 <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-white shadow-sm group-hover:scale-105 transition-transform"
-                  style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})` }}>
+                  style={{ background: "var(--tenant-accent-gradient)" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={16} />}
                 </span>
                 <span className="flex-1 font-medium text-sm">{link.title}</span>
@@ -151,7 +169,7 @@ export function SoftTemplate({
           <div className="flex items-center gap-1.5">
             <Sparkles size={11} style={{ color: withAlpha(primaryColor, 0.5) }} />
             <p className="text-xs text-gray-400">
-              Powered by <span className="font-semibold" style={{ color: primaryColor }}>GentleBook</span>
+              Powered by <span className="font-semibold" style={{ color: "var(--tenant-accent)" }}>GentleBook</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -171,13 +189,13 @@ export function SoftTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-solid)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-solid)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

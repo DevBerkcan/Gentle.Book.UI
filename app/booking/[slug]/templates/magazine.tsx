@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink, ArrowUpRight } from "lucide-react";
 import {
-  withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  withAlpha, getContrastColor, getAvatarRadius,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -22,14 +23,22 @@ export function MagazineTemplate({
   const fontQuery  = "Playfair+Display:wght@700;900&family=Montserrat:wght@400;500;600";
   const ctaColor   = cfg.ctaColor ?? accent;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-divider": withAlpha(accent, 0.1),
+    "--tenant-cta-bg": ctaColor,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: sansFam }}>
+      <ThemeTokenStyle tokens={tokens} />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
 
       {/* Header strip */}
-      <div style={{ background: accent, color: "#fff" }}>
+      <div style={{ background: "var(--tenant-accent)", color: "#fff" }}>
         <div className="max-w-sm mx-auto px-5 py-2 flex items-center justify-between">
           <span className="text-[9px] uppercase tracking-[0.35em] opacity-50" style={{ fontFamily: sansFam }}>
             vol. 01 — 2024
@@ -46,7 +55,7 @@ export function MagazineTemplate({
       </div>
 
       {/* Hero section */}
-      <div className="relative overflow-hidden" style={{ background: accent, minHeight: "200px" }}>
+      <div className="relative overflow-hidden" style={{ background: "var(--tenant-accent)", minHeight: "200px" }}>
         {/* Big background letter */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
           <span className="text-[240px] font-black leading-none opacity-[0.04] text-white"
@@ -59,7 +68,10 @@ export function MagazineTemplate({
           {/* Avatar */}
           <div className="flex items-end gap-4">
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
+              <Image src={logoSrc} alt={tenantName}
+                width={80}
+                height={80}
+                unoptimized
                 className="w-20 h-20 object-cover border-2 border-white/20 flex-shrink-0"
                 style={{ borderRadius: avRadius }} />
             ) : (
@@ -96,7 +108,7 @@ export function MagazineTemplate({
 
           {/* Horizontal rule */}
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-8 h-0.5" style={{ background: accent }} />
+            <div className="w-8 h-0.5" style={{ background: "var(--tenant-accent)" }} />
             <span className="text-[9px] uppercase tracking-[0.3em] text-gray-400" style={{ fontFamily: sansFam }}>Buchung</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
@@ -108,7 +120,7 @@ export function MagazineTemplate({
               {cfg.confetti ? (
                 <button onClick={handleCtaClick}
                   className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm transition-all active:scale-[0.98]"
-                  style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, fontFamily: sansFam, letterSpacing: "0.05em" }}
+                  style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, fontFamily: sansFam, letterSpacing: "0.05em" }}
                 >
                   <Calendar size={16} className="flex-shrink-0" />
                   <span className="flex-1 text-left uppercase tracking-wider text-xs">{ctaText}</span>
@@ -117,7 +129,7 @@ export function MagazineTemplate({
               ) : (
                 <a href={`/booking/${slug}/book`}
                   className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm transition-all active:scale-[0.98]"
-                  style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, fontFamily: sansFam, letterSpacing: "0.05em", display: "flex" }}
+                  style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, fontFamily: sansFam, letterSpacing: "0.05em", display: "flex" }}
                 >
                   <Calendar size={16} className="flex-shrink-0" />
                   <span className="flex-1 text-left uppercase tracking-wider text-xs">{ctaText}</span>
@@ -140,7 +152,7 @@ export function MagazineTemplate({
                 >
                   {/* Left accent bar */}
                   <div className="w-0.5 h-full self-stretch min-h-[32px]" style={{ background: withAlpha(accent, 0.15) }} />
-                  <span className="flex-shrink-0 p-1.5" style={{ color: accent }}>
+                  <span className="flex-shrink-0 p-1.5" style={{ color: "var(--tenant-accent)" }}>
                     {ICON_MAP[link.iconType] ?? <ExternalLink size={16} />}
                   </span>
                   <span className="flex-1 font-semibold text-sm" style={{ fontFamily: sansFam }}>{link.title}</span>
@@ -154,11 +166,11 @@ export function MagazineTemplate({
         {/* Footer */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
           className="mx-4 py-4 flex items-center justify-between">
-          <div className="h-px flex-1" style={{ background: withAlpha(accent, 0.1) }} />
+          <div className="h-px flex-1" style={{ background: "var(--tenant-divider)" }} />
           <p className="text-[10px] uppercase tracking-widest mx-3 text-gray-300" style={{ fontFamily: sansFam }}>
             GentleBook
           </p>
-          <div className="h-px flex-1" style={{ background: withAlpha(accent, 0.1) }} />
+          <div className="h-px flex-1" style={{ background: "var(--tenant-divider)" }} />
         </motion.div>
         <div className="mx-4 pb-6 flex justify-center gap-4">
           <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-[10px] text-gray-300 hover:opacity-60 transition-opacity" style={{ fontFamily: sansFam }}>Datenschutz</a>
@@ -176,13 +188,13 @@ export function MagazineTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "0px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}`, fontFamily: sansFam }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "0px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)`, fontFamily: sansFam }}>
                 <Calendar size={14} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "0px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}`, fontFamily: sansFam }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "0px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)`, fontFamily: sansFam }}>
                 <Calendar size={14} />{ctaText}
               </a>
             )}

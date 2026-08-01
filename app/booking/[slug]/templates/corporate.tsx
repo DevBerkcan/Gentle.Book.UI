@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, ExternalLink, ArrowRight } from "lucide-react";
 import {
   withAlpha, getContrastColor, getAvatarRadius,
-  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -20,16 +21,25 @@ export function CorporateTemplate({
   const sansFam    = "'Inter', 'Helvetica Neue', Arial, sans-serif";
   const ctaColor   = cfg.ctaColor ?? accent;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-accent-track": withAlpha(accent, 0.12),
+    "--tenant-cta-bg": ctaColor,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.25),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.35),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: sansFam }}>
+      <ThemeTokenStyle tokens={tokens} />
 
       {/* Top accent line — draws in on load */}
-      <div className="h-1 w-full overflow-hidden" style={{ background: withAlpha(accent, 0.12) }}>
+      <div className="h-1 w-full overflow-hidden" style={{ background: "var(--tenant-accent-track)" }}>
         <motion.div
           className="h-full"
-          style={{ background: accent }}
+          style={{ background: "var(--tenant-accent)" }}
           initial={{ width: "0%" }}
           animate={{ width: "100%" }}
           transition={{ duration: 1.8, ease: "easeOut" }}
@@ -41,12 +51,15 @@ export function CorporateTemplate({
         <div className="max-w-sm mx-auto px-6 py-5 flex items-center gap-4">
           {/* Avatar — small, square */}
           {logoSrc ? (
-            <img src={logoSrc} alt={tenantName}
+            <Image src={logoSrc} alt={tenantName}
+              width={48}
+              height={48}
+              unoptimized
               className="w-12 h-12 object-cover flex-shrink-0 border border-gray-200"
               style={{ borderRadius: avRadius }} />
           ) : (
             <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center border border-gray-200"
-              style={{ background: accent, borderRadius: avRadius }}>
+              style={{ background: "var(--tenant-accent)", borderRadius: avRadius }}>
               {emoji
                 ? <span className="text-xl">{emoji}</span>
                 : <span className="text-white text-lg font-bold">{tenantName.charAt(0).toUpperCase()}</span>
@@ -57,7 +70,7 @@ export function CorporateTemplate({
           <div className="flex-1 min-w-0">
             <motion.h1
               className="text-base font-semibold uppercase tracking-widest truncate"
-              style={{ color: accent, letterSpacing: "0.12em" }}
+              style={{ color: "var(--tenant-accent)", letterSpacing: "0.12em" }}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -109,7 +122,7 @@ export function CorporateTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-5 py-4 font-semibold text-sm transition-all active:scale-[0.98] hover:opacity-90"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 2px 12px ${withAlpha(ctaColor, 0.25)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 2px 12px var(--tenant-cta-shadow)` }}
               >
                 <Calendar size={16} className="flex-shrink-0" />
                 <span className="flex-1 text-left tracking-wide">{ctaText}</span>
@@ -118,7 +131,7 @@ export function CorporateTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-5 py-4 font-semibold text-sm transition-all active:scale-[0.98] hover:opacity-90"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 2px 12px ${withAlpha(ctaColor, 0.25)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 2px 12px var(--tenant-cta-shadow)`, display: "flex" }}
               >
                 <Calendar size={16} className="flex-shrink-0" />
                 <span className="flex-1 text-left tracking-wide">{ctaText}</span>
@@ -149,7 +162,7 @@ export function CorporateTemplate({
                 }}
               >
                 <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-white"
-                  style={{ background: accent, borderRadius: "6px" }}>
+                  style={{ background: "var(--tenant-accent)", borderRadius: "6px" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={14} />}
                 </span>
                 <span className="flex-1 font-medium text-sm text-gray-700">{link.title}</span>
@@ -182,13 +195,13 @@ export function CorporateTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-semibold text-sm shadow-xl active:scale-95 transition-transform tracking-wide"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "8px", boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.35)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "8px", boxShadow: `0 6px 24px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={15} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-semibold text-sm shadow-xl active:scale-95 transition-transform tracking-wide"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "8px", boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.35)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "8px", boxShadow: `0 6px 24px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={15} />{ctaText}
               </a>
             )}

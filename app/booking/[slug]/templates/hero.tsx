@@ -1,11 +1,12 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import {
-  lighten, withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
+  withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
   buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
-  BgPattern, type TemplateProps,
+  BgPattern, ThemeTokenStyle, type TemplateProps,
 } from "../_shared";
 
 export function HeroTemplate({
@@ -21,28 +22,42 @@ export function HeroTemplate({
   const ctaColor   = cfg.ctaColor ?? primaryColor;
   const ctaTextClr = getContrastColor(ctaColor);
   const headerTextClr = getContrastColor(primaryColor);
+  const tokens = {
+    "--tenant-header-bg": `linear-gradient(160deg, ${primaryColor} 0%, ${withAlpha(primaryColor, 0.85)} 100%)`,
+    "--tenant-header-text": headerTextClr,
+    "--tenant-header-text-soft": withAlpha(headerTextClr, 0.75),
+    "--tenant-avatar-bg": `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`,
+    "--tenant-icon-bg": `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.75)})`,
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.35),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+    "--tenant-radius-button": btnRadius,
+    "--tenant-radius-avatar": avRadius,
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       {fontQuery && <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>}
 
       <BgPattern pattern={cfg.bgPattern} color={primaryColor} />
 
       {/* Hero header band */}
       <div className="relative w-full pb-16"
-        style={{ background: `linear-gradient(160deg, ${primaryColor} 0%, ${withAlpha(primaryColor, 0.85)} 100%)` }}>
+        style={{ background: "var(--tenant-header-bg)" }}>
         <div className="max-w-md mx-auto px-5 pt-10 pb-10 text-center">
           <motion.h1
             initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-3xl font-bold mb-2" style={{ color: headerTextClr }}
+            className="text-3xl font-bold mb-2" style={{ color: "var(--tenant-header-text)" }}
           >
             {tenantName}
           </motion.h1>
           {tagline && (
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}
-              className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: withAlpha(headerTextClr, 0.75) }}>
+              className="text-sm leading-relaxed max-w-xs mx-auto" style={{ color: "var(--tenant-header-text-soft)" }}>
               {tagline}
             </motion.p>
           )}
@@ -55,12 +70,15 @@ export function HeroTemplate({
           className="absolute -bottom-14 left-1/2 -translate-x-1/2"
         >
           {logoSrc ? (
-            <img src={logoSrc} alt={tenantName}
+            <Image src={logoSrc} alt={tenantName}
+              width={112}
+              height={112}
+              unoptimized
               className="w-28 h-28 object-cover border-4 border-white shadow-2xl"
-              style={{ borderRadius: avRadius }} />
+              style={{ borderRadius: "var(--tenant-radius-avatar)" }} />
           ) : (
             <div className="w-28 h-28 flex items-center justify-center border-4 border-white shadow-2xl"
-              style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.7)})`, borderRadius: avRadius }}>
+              style={{ background: "var(--tenant-avatar-bg)", borderRadius: "var(--tenant-radius-avatar)" }}>
               {emoji
                 ? <span className="text-4xl">{emoji}</span>
                 : <span className="text-white text-4xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
@@ -87,9 +105,9 @@ export function HeroTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-5 py-4 font-bold text-base shadow-lg transition-transform active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 24px ${withAlpha(ctaColor, 0.35)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "var(--tenant-radius-button)", boxShadow: `0 8px 24px var(--tenant-cta-shadow)` }}
               >
-                <span className="flex-shrink-0 bg-white/20 p-2" style={{ borderRadius: btnRadius }}><Calendar size={20} /></span>
+                <span className="flex-shrink-0 bg-white/20 p-2" style={{ borderRadius: "var(--tenant-radius-button)" }}><Calendar size={20} /></span>
                 <span className="flex-1">{ctaText}</span>
                 <motion.span animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
                   <ChevronRight size={18} className="opacity-70" />
@@ -98,9 +116,9 @@ export function HeroTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-5 py-4 font-bold text-base shadow-lg transition-transform active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 24px ${withAlpha(ctaColor, 0.35)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "var(--tenant-radius-button)", boxShadow: `0 8px 24px var(--tenant-cta-shadow)`, display: "flex" }}
               >
-                <span className="flex-shrink-0 bg-white/20 p-2" style={{ borderRadius: btnRadius }}><Calendar size={20} /></span>
+                <span className="flex-shrink-0 bg-white/20 p-2" style={{ borderRadius: "var(--tenant-radius-button)" }}><Calendar size={20} /></span>
                 <span className="flex-1">{ctaText}</span>
                 <motion.span animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}>
                   <ChevronRight size={18} className="opacity-70" />
@@ -119,10 +137,10 @@ export function HeroTemplate({
             <motion.div key={link.id} variants={item}>
               <a href={link.url} target="_blank" rel="noopener noreferrer"
                 className="group w-full flex items-center gap-3 px-5 py-4 bg-white transition-all active:scale-[0.97] hover:shadow-md"
-                style={{ borderRadius: btnRadius, border: "1px solid #f0f0f0", boxShadow: "0 1px 8px rgba(0,0,0,0.06)", color: "#1a1a1a" }}
+                style={{ borderRadius: "var(--tenant-radius-button)", border: "1px solid #f0f0f0", boxShadow: "0 1px 8px rgba(0,0,0,0.06)", color: "#1a1a1a" }}
               >
                 <span className="flex-shrink-0 p-2 text-white group-hover:scale-105 transition-transform"
-                  style={{ background: `linear-gradient(135deg, ${primaryColor}, ${withAlpha(primaryColor, 0.75)})`, borderRadius: btnRadius }}>
+                  style={{ background: "var(--tenant-icon-bg)", borderRadius: "var(--tenant-radius-button)" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={18} />}
                 </span>
                 <span className="flex-1 font-semibold text-sm">{link.title}</span>
@@ -158,13 +176,13 @@ export function HeroTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

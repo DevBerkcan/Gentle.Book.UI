@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import {
-  withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  withAlpha, getContrastColor, getAvatarRadius,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -21,10 +22,18 @@ export function TattooTemplate({
   const fontQuery  = "Josefin+Sans:wght@400;600;700";
   const ctaColor   = cfg.ctaColor ?? accent;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-divider": withAlpha(accent, 0.3),
+    "--tenant-icon-dim": withAlpha(accent, 0.4),
+    "--tenant-cta-bg": ctaColor,
+    "--tenant-cta-text": ctaTextClr,
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a", fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
 
       {/* Grain texture overlay */}
@@ -41,7 +50,7 @@ export function TattooTemplate({
         className="fixed top-0 left-0 right-0 h-1 pointer-events-none"
         animate={{ opacity: [0.7, 1, 0.7] }}
         transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-        style={{ background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`, boxShadow: `0 0 30px ${withAlpha(accent, 0.8)}` }}
+        style={{ background: `linear-gradient(90deg, transparent 0%, var(--tenant-accent) 50%, transparent 100%)`, boxShadow: `0 0 30px ${withAlpha(accent, 0.8)}` }}
       />
 
       <div className="relative max-w-sm mx-auto px-5 py-14 pb-20 flex flex-col items-center gap-6">
@@ -63,10 +72,13 @@ export function TattooTemplate({
               className="absolute -inset-0.5"
               animate={{ boxShadow: [`0 0 0px ${withAlpha(accent, 0)}`, `0 0 18px ${withAlpha(accent, 0.9)}`, `0 0 0px ${withAlpha(accent, 0)}`] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              style={{ background: accent }}
+              style={{ background: "var(--tenant-accent)" }}
             />
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
+              <Image src={logoSrc} alt={tenantName}
+                width={96}
+                height={96}
+                unoptimized
                 className="relative w-24 h-24 object-cover"
                 style={{ borderRadius: avRadius }} />
             ) : (
@@ -74,7 +86,7 @@ export function TattooTemplate({
                 style={{ borderRadius: avRadius }}>
                 {emoji
                   ? <span className="text-4xl">{emoji}</span>
-                  : <span className="font-bold text-3xl" style={{ color: accent, fontFamily }}>{tenantName.charAt(0).toUpperCase()}</span>
+                  : <span className="font-bold text-3xl" style={{ color: "var(--tenant-accent)", fontFamily }}>{tenantName.charAt(0).toUpperCase()}</span>
                 }
               </div>
             )}
@@ -102,9 +114,9 @@ export function TattooTemplate({
 
           {/* Barbed wire divider */}
           <div className="w-full flex items-center gap-2">
-            <div className="flex-1 h-px" style={{ background: withAlpha(accent, 0.3) }} />
+            <div className="flex-1 h-px" style={{ background: "var(--tenant-divider)" }} />
             <span className="text-xs tracking-[0.4em] uppercase" style={{ color: withAlpha(accent, 0.5) }}>✦</span>
-            <div className="flex-1 h-px" style={{ background: withAlpha(accent, 0.3) }} />
+            <div className="flex-1 h-px" style={{ background: "var(--tenant-divider)" }} />
           </div>
         </motion.div>
 
@@ -115,7 +127,7 @@ export function TattooTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm uppercase tracking-widest transition-all active:scale-[0.97] border"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, borderColor: ctaColor, letterSpacing: "0.15em" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, borderColor: "var(--tenant-cta-bg)", letterSpacing: "0.15em" }}
               >
                 <Calendar size={18} />
                 <span className="flex-1 text-left">{ctaText}</span>
@@ -124,7 +136,7 @@ export function TattooTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm uppercase tracking-widest transition-all active:scale-[0.97] border"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: btnRadius, borderColor: ctaColor, letterSpacing: "0.15em", display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, borderColor: "var(--tenant-cta-bg)", letterSpacing: "0.15em", display: "flex" }}
               >
                 <Calendar size={18} />
                 <span className="flex-1 text-left">{ctaText}</span>
@@ -132,7 +144,7 @@ export function TattooTemplate({
               </a>
             )}
             <div className="mt-2 text-center">
-              <a href="/my-bookings" className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: withAlpha(accent, 0.4), letterSpacing: "0.1em" }}>
+              <a href="/my-bookings" className="text-xs uppercase tracking-widest transition-opacity hover:opacity-60" style={{ color: "var(--tenant-icon-dim)", letterSpacing: "0.1em" }}>
                 Meine Buchungen →
               </a>
             </div>
@@ -153,7 +165,7 @@ export function TattooTemplate({
                   color: "#ffffff",
                 }}
               >
-                <span className="flex-shrink-0 p-1.5 text-sm" style={{ color: accent, border: `1px solid ${withAlpha(accent, 0.4)}`, borderRadius: "2px" }}>
+                <span className="flex-shrink-0 p-1.5 text-sm" style={{ color: "var(--tenant-accent)", border: `1px solid ${withAlpha(accent, 0.4)}`, borderRadius: "2px" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={16} />}
                 </span>
                 <span className="flex-1 text-sm font-semibold uppercase tracking-wider" style={{ letterSpacing: "0.08em" }}>{link.title}</span>
@@ -167,7 +179,7 @@ export function TattooTemplate({
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
           className="mt-4 flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1.5">
-            <Sparkles size={10} style={{ color: withAlpha(accent, 0.4) }} />
+            <Sparkles size={10} style={{ color: "var(--tenant-icon-dim)" }} />
             <p className="text-[10px] uppercase tracking-widest text-white/20">
               Powered by <span className="font-semibold" style={{ color: withAlpha(accent, 0.6) }}>GentleBook</span>
             </p>
@@ -189,13 +201,13 @@ export function TattooTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "4px" }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "4px" }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm uppercase tracking-widest active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "4px" }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "4px" }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

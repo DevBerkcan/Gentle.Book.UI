@@ -1,9 +1,10 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, ExternalLink, ArrowUpRight } from "lucide-react";
 import {
-  withAlpha, getContrastColor, buildAnimVariants, ICON_MAP, type TemplateProps,
+  withAlpha, getContrastColor, buildAnimVariants, ICON_MAP, ThemeTokenStyle, type TemplateProps,
 } from "../_shared";
 
 export function PortfolioTemplate({
@@ -14,13 +15,20 @@ export function PortfolioTemplate({
   const ctaText = cfg.ctaText?.trim() || "Call buchen";
   const ctaColor = cfg.ctaColor ?? accent;
   const textColor = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-cta-bg": ctaColor,
+    "--tenant-cta-text": textColor,
+    "--tenant-cta-shadow": withAlpha(accent, 0.18),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
   const BookingButton = cfg.confetti ? "button" : "a";
   const bookingProps = cfg.confetti ? { onClick: handleCtaClick } : { href: `/booking/${slug}/book` };
 
   return (
     <div className="min-h-screen bg-white text-zinc-950">
-      <div className="fixed inset-x-0 top-0 h-1" style={{ background: accent }} />
+      <ThemeTokenStyle tokens={tokens} />
+      <div className="fixed inset-x-0 top-0 h-1" style={{ background: "var(--tenant-accent)" }} />
       <div className="relative mx-auto flex min-h-screen max-w-2xl flex-col px-5 py-8 pb-24">
         <motion.header initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex items-start justify-between gap-5">
           <div className="min-w-0">
@@ -28,7 +36,7 @@ export function PortfolioTemplate({
             <h1 className="text-4xl font-black leading-none tracking-normal sm:text-5xl">{tenantName}</h1>
             {tagline && <p className="mt-4 max-w-md text-sm leading-relaxed text-zinc-500">{tagline}</p>}
           </div>
-          {logoSrc && <img src={logoSrc} alt={tenantName} className="h-16 w-16 rounded-2xl object-cover" />}
+          {logoSrc && <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 rounded-2xl object-cover" />}
         </motion.header>
 
         <motion.div className="mb-5 grid grid-cols-[1fr_auto] gap-3 rounded-[30px] border border-zinc-200 bg-zinc-50 p-4"
@@ -39,12 +47,12 @@ export function PortfolioTemplate({
             <p className="mt-2 text-2xl font-black">Book a slot</p>
             {cfg.showWelcome && welcomeMsg && <p className="mt-2 text-sm leading-relaxed text-zinc-500">{welcomeMsg}</p>}
           </div>
-          <motion.div className="h-16 w-16 rounded-2xl" style={{ background: accent }}
+          <motion.div className="h-16 w-16 rounded-2xl" style={{ background: "var(--tenant-accent)" }}
             animate={{ rotate: [0, 12, 0], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 4 }} />
         </motion.div>
 
         <BookingButton {...bookingProps as any} className="mb-5 flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-left text-sm font-black uppercase shadow-xl active:scale-[0.98]"
-          style={{ background: ctaColor, color: textColor, boxShadow: `0 18px 50px ${withAlpha(accent, 0.18)}` }}>
+          style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", boxShadow: `0 18px 50px var(--tenant-cta-shadow)` }}>
           <Calendar size={18} /><span className="flex-1">{ctaText}</span><ChevronRight size={18} />
         </BookingButton>
 
@@ -68,7 +76,7 @@ export function PortfolioTemplate({
         {showFloating && (
           <motion.a href={`/booking/${slug}/book`} initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 80, opacity: 0 }}
             className="fixed bottom-5 left-5 right-5 z-40 mx-auto flex max-w-sm items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black uppercase shadow-2xl"
-            style={{ background: ctaColor, color: textColor }}>
+            style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)" }}>
             <Calendar size={17} /> {ctaText}
           </motion.a>
         )}

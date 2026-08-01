@@ -214,6 +214,48 @@ export function resolveCardStyle(style: string | undefined, cardBg: string, card
   }
 }
 
+// ── Theme tokens (CSS custom properties) ─────────────────────────────────────
+// Same derivation as getThemeConfig/resolveCardStyle above, reshaped into a flat CSS-var map
+// so templates can consume `var(--tenant-*)` in their style objects instead of importing and
+// re-deriving the same values themselves. Namespaced `--tenant-*` to stay clear of the static
+// `--brand-*`/`--gb-*` admin tokens in app/globals.css (different scope: per-tenant vs. static).
+export function buildThemeTokens(theme: Theme, primary: string, cfg: LinktreeConfig): Record<string, string> {
+  const t = getThemeConfig(theme, primary);
+  const card = resolveCardStyle(cfg.cardStyle, t.cardBg, t.cardBorder, primary);
+  const fontFamily = FONT_FAMILY[cfg.fontFamily ?? "inter"] ?? FONT_FAMILY.inter;
+  const ctaBg = cfg.ctaColor ?? t.ctaBg;
+  const ctaTextColor = cfg.ctaColor ? getContrastColor(cfg.ctaColor) : ((t as any).ctaTextColor ?? "#ffffff");
+
+  return {
+    "--tenant-bg": t.bg,
+    "--tenant-card-bg": card.background,
+    "--tenant-card-border": card.border,
+    "--tenant-card-shadow": card.boxShadow ?? "0 2px 16px rgba(0,0,0,0.05)",
+    "--tenant-card-hover": t.cardHover,
+    "--tenant-text-primary": t.textPrimary,
+    "--tenant-text-secondary": t.textSecondary,
+    "--tenant-tagline": t.taglineCl,
+    "--tenant-footer": t.footerCl,
+    "--tenant-icon-bg": t.iconBg,
+    "--tenant-cta-bg": ctaBg,
+    "--tenant-cta-text": ctaTextColor,
+    "--tenant-cta-shadow": t.ctaShadow,
+    "--tenant-avatar-border": t.avatarBorder,
+    "--tenant-radius-button": getBorderRadius(cfg.buttonStyle),
+    "--tenant-radius-avatar": getAvatarRadius(cfg.avatarShape),
+    "--tenant-font": fontFamily,
+  };
+}
+
+/** Injects the derived theme tokens as a `:root` CSS block — same pattern each template already
+ * uses for its Google Fonts `<style>` import. */
+export function ThemeTokenStyle({ tokens }: { tokens: Record<string, string> }) {
+  const declarations = Object.entries(tokens)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(";");
+  return <style>{`:root{${declarations}}`}</style>;
+}
+
 // ── Background Pattern ────────────────────────────────────────────────────────
 
 export function BgPattern({ pattern, color }: { pattern?: string; color?: string }) {

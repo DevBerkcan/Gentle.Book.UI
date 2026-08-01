@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink, Star } from "lucide-react";
 import {
-  lighten, withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  lighten, withAlpha, getContrastColor, getBorderRadius,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -14,53 +15,41 @@ export function BeautyTemplate({
 }: TemplateProps) {
   const rose       = primaryColor || "#D4847A";
   const gold       = "#C9A84C";
-  const roseLight  = lighten(rose, 0.88);
   const roseLighter = lighten(rose, 0.94);
   const btnRadius  = getBorderRadius(cfg.buttonStyle || "pill");
-  const avRadius   = "9999px";
   const ctaText    = cfg.ctaText?.trim() || "Termin buchen";
   const emoji      = industryType ? (INDUSTRY_EMOJI[industryType] ?? null) : null;
   const fontFamily = "'Playfair Display', Georgia, serif";
   const fontQuery  = "Playfair+Display:ital,wght@0,400;0,600;0,700;1,400";
   const ctaColor   = cfg.ctaColor ?? rose;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-rose": rose,
+    "--tenant-gold": gold,
+    "--tenant-bg": roseLighter,
+    "--tenant-text": "#2d1a15",
+    "--tenant-divider": withAlpha(gold, 0.25),
+    "--tenant-card-border": withAlpha(gold, 0.2),
+    "--tenant-avatar-ring": `linear-gradient(135deg, ${gold}, ${withAlpha(rose, 0.6)})`,
+    "--tenant-icon-bg": `linear-gradient(135deg, ${rose}, ${withAlpha(rose, 0.7)})`,
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.8)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.35),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
-  const sparklePositions = [
-    { top: "6%",  left: "8%",  size: 12, delay: 0 },
-    { top: "13%", right: "7%", size: 8,  delay: 0.5 },
-    { top: "28%", left: "4%",  size: 10, delay: 1.1 },
-    { top: "38%", right: "5%", size: 7,  delay: 0.7 },
-    { top: "55%", left: "6%",  size: 9,  delay: 0.2 },
-    { top: "65%", right: "9%", size: 14, delay: 0.9 },
-    { top: "78%", left: "11%", size: 8,  delay: 0.4 },
-    { top: "90%", right: "7%", size: 11, delay: 1.3 },
-  ];
-
   return (
-    <div className="min-h-screen" style={{ background: roseLighter, fontFamily }}>
+    <div className="min-h-screen" style={{ background: "var(--tenant-bg)", fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
-
-      {/* Sparkle decorations */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
-        {sparklePositions.map((pos, i) => (
-          <motion.div key={i}
-            className="absolute"
-            style={{ ...pos }}
-            animate={{ opacity: [0.2, 0.7, 0.2], scale: [0.8, 1.2, 0.8] }}
-            transition={{ repeat: Infinity, duration: 2.5 + i * 0.4, delay: pos.delay, ease: "easeInOut" }}
-          >
-            <Star size={pos.size} fill={withAlpha(gold, 0.4)} style={{ color: withAlpha(gold, 0.4) }} />
-          </motion.div>
-        ))}
-      </div>
 
       {/* Soft gradient blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full opacity-30 blur-3xl"
           style={{ background: `linear-gradient(135deg, ${rose}, ${withAlpha(gold, 0.3)})` }} />
         <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full opacity-20 blur-3xl"
-          style={{ background: rose }} />
+          style={{ background: "var(--tenant-rose)" }} />
       </div>
 
       <div className="relative max-w-sm mx-auto px-5 py-14 pb-20 flex flex-col items-center gap-6">
@@ -73,50 +62,42 @@ export function BeautyTemplate({
           style={{
             background: "rgba(255,255,255,0.85)",
             backdropFilter: "blur(20px)",
-            border: `1px solid ${withAlpha(gold, 0.2)}`,
+            border: "1px solid var(--tenant-card-border)",
             boxShadow: `0 4px 40px ${withAlpha(rose, 0.12)}, 0 0 0 1px ${withAlpha(gold, 0.06)}`,
           }}
         >
-          {/* Avatar with gold ring + shimmer */}
+          {/* Avatar with a soft rose/gold ring — a single static accent instead of a
+              continuously spinning conic-gradient ring layered under a shimmer sweep */}
           <div className="relative mb-1">
-            <motion.div
-              className="absolute -inset-2 rounded-full opacity-80"
-              style={{ background: `conic-gradient(${gold}, ${withAlpha(gold, 0.4)}, ${rose}, ${gold})` }}
-              animate={{ rotate: [0, 360] }}
-              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-            />
+            <div className="absolute -inset-2 rounded-full opacity-80" style={{ background: "var(--tenant-avatar-ring)" }} />
             <div className="absolute -inset-1 rounded-full bg-white" />
             <div className="relative overflow-hidden rounded-full">
               {logoSrc ? (
-                <img src={logoSrc} alt={tenantName}
+                <Image src={logoSrc} alt={tenantName}
+                  width={96}
+                  height={96}
+                  unoptimized
                   className="w-24 h-24 object-cover rounded-full border-2 border-white" />
               ) : (
                 <div className="w-24 h-24 rounded-full flex items-center justify-center border-2 border-white"
-                  style={{ background: `linear-gradient(135deg, ${rose}, ${withAlpha(rose, 0.6)})` }}>
+                  style={{ background: "var(--tenant-icon-bg)" }}>
                   {emoji
                     ? <span className="text-4xl">{emoji}</span>
                     : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
                   }
                 </div>
               )}
-              {/* Shimmer wave */}
-              <motion.div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ background: "linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%)", backgroundSize: "200% 100%" }}
-                animate={{ backgroundPosition: ["-100% 0%", "200% 0%"] }}
-                transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", repeatDelay: 1 }}
-              />
             </div>
           </div>
 
           {/* Name */}
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: "#2d1a15", fontFamily }}>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--tenant-text)", fontFamily }}>
               {tenantName}
             </h1>
             <div className="flex items-center justify-center gap-2 mt-1">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} size={9} fill={gold} style={{ color: gold }} />
+                <Star key={i} size={9} fill={gold} style={{ color: "var(--tenant-gold)" }} />
               ))}
             </div>
           </div>
@@ -132,9 +113,9 @@ export function BeautyTemplate({
 
           {/* Rose petal divider */}
           <div className="flex items-center gap-1.5 mt-1">
-            <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.25) }} />
+            <div className="h-px flex-1" style={{ background: "var(--tenant-divider)" }} />
             <span className="text-sm" style={{ color: withAlpha(rose, 0.5) }}>✿</span>
-            <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.25) }} />
+            <div className="h-px flex-1" style={{ background: "var(--tenant-divider)" }} />
           </div>
         </motion.div>
 
@@ -145,7 +126,7 @@ export function BeautyTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-lg transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.8)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.35)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 8px 28px var(--tenant-cta-shadow)` }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={18} /></span>
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
@@ -156,7 +137,7 @@ export function BeautyTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-lg transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.8)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.35)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 8px 28px var(--tenant-cta-shadow)`, display: "flex" }}
               >
                 <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={18} /></span>
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
@@ -181,13 +162,13 @@ export function BeautyTemplate({
                   background: "rgba(255,255,255,0.75)",
                   backdropFilter: "blur(10px)",
                   borderRadius: btnRadius,
-                  border: `1px solid ${withAlpha(gold, 0.2)}`,
+                  border: "1px solid var(--tenant-card-border)",
                   boxShadow: `0 2px 12px ${withAlpha(rose, 0.06)}`,
-                  color: "#2d1a15",
+                  color: "var(--tenant-text)",
                 }}
               >
                 <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-white shadow-sm"
-                  style={{ background: `linear-gradient(135deg, ${rose}, ${withAlpha(rose, 0.7)})` }}>
+                  style={{ background: "var(--tenant-icon-bg)" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={15} />}
                 </span>
                 <span className="flex-1 font-semibold text-sm" style={{ fontFamily }}>{link.title}</span>
@@ -203,7 +184,7 @@ export function BeautyTemplate({
           <div className="flex items-center gap-1.5">
             <Star size={9} fill={withAlpha(gold, 0.5)} style={{ color: withAlpha(gold, 0.5) }} />
             <p className="text-xs italic" style={{ color: withAlpha("#2d1a15", 0.35) }}>
-              Powered by <span className="font-semibold not-italic" style={{ color: rose }}>GentleBook</span>
+              Powered by <span className="font-semibold not-italic" style={{ color: "var(--tenant-rose)" }}>GentleBook</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -223,13 +204,13 @@ export function BeautyTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 30px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 30px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 30px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 30px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

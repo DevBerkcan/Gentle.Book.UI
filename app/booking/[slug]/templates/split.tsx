@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink } from "lucide-react";
 import {
   lighten, withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -21,12 +22,25 @@ export function SplitTemplate({
   const fontQuery  = cfg.fontFamily && cfg.fontFamily !== "inter" ? FONT_QUERY[cfg.fontFamily] : null;
   const ctaColor   = cfg.ctaColor ?? accent;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-panel-bg": lighten(accent, 0.92),
+    "--tenant-avatar-ring": `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.3)})`,
+    "--tenant-accent-gradient": `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.7)})`,
+    "--tenant-border": withAlpha(accent, 0.1),
+    "--tenant-divider": withAlpha(accent, 0.12),
+    "--tenant-divider-soft": withAlpha(accent, 0.08),
+    "--tenant-link-bg": withAlpha(accent, 0.04),
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.3),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
-
-  const leftBg = lighten(accent, 0.92);
 
   return (
     <div className="min-h-screen" style={{ fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       {fontQuery && <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>}
 
       {/* Desktop: flex-row / Mobile: flex-col */}
@@ -34,7 +48,7 @@ export function SplitTemplate({
 
         {/* Left panel — fixed info */}
         <div className="md:w-[280px] md:min-h-screen flex-shrink-0 flex flex-col items-center justify-center p-8 md:p-10 gap-5 text-center md:sticky md:top-0 md:h-screen"
-          style={{ background: leftBg, borderRight: `1px solid ${withAlpha(accent, 0.1)}` }}>
+          style={{ background: "var(--tenant-panel-bg)", borderRight: "1px solid var(--tenant-border)" }}>
 
           {/* Avatar */}
           <motion.div
@@ -43,14 +57,17 @@ export function SplitTemplate({
           >
             <div className="relative inline-block">
               <div className="absolute -inset-1.5 rounded-full opacity-50"
-                style={{ background: `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.3)})` }} />
+                style={{ background: "var(--tenant-avatar-ring)" }} />
               {logoSrc ? (
-                <img src={logoSrc} alt={tenantName}
+                <Image src={logoSrc} alt={tenantName}
+                  width={96}
+                  height={96}
+                  unoptimized
                   className="relative w-24 h-24 object-cover border-2 border-white shadow-lg"
                   style={{ borderRadius: avRadius }} />
               ) : (
                 <div className="relative w-24 h-24 flex items-center justify-center border-2 border-white shadow-lg"
-                  style={{ background: `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.7)})`, borderRadius: avRadius }}>
+                  style={{ background: "var(--tenant-accent-gradient)", borderRadius: avRadius }}>
                   {emoji
                     ? <span className="text-4xl">{emoji}</span>
                     : <span className="text-white text-3xl font-bold">{tenantName.charAt(0).toUpperCase()}</span>
@@ -81,7 +98,7 @@ export function SplitTemplate({
           </motion.div>
 
           {/* Vertical divider on desktop only */}
-          <div className="hidden md:block absolute right-0 top-1/4 bottom-1/4 w-px" style={{ background: withAlpha(accent, 0.12) }} />
+          <div className="hidden md:block absolute right-0 top-1/4 bottom-1/4 w-px" style={{ background: "var(--tenant-divider)" }} />
         </div>
 
         {/* Right panel — scrollable links */}
@@ -99,7 +116,7 @@ export function SplitTemplate({
               {cfg.confetti ? (
                 <button onClick={handleCtaClick}
                   className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm shadow-md transition-all active:scale-[0.97]"
-                  style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 4px 20px ${withAlpha(ctaColor, 0.3)}` }}
+                  style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 4px 20px var(--tenant-cta-shadow)` }}
                 >
                   <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={18} /></span>
                   <span className="flex-1 text-left">{ctaText}</span>
@@ -110,7 +127,7 @@ export function SplitTemplate({
               ) : (
                 <a href={`/booking/${slug}/book`}
                   className="w-full flex items-center gap-3 px-5 py-4 font-bold text-sm shadow-md transition-all active:scale-[0.97]"
-                  style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 4px 20px ${withAlpha(ctaColor, 0.3)}`, display: "flex" }}
+                  style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 4px 20px var(--tenant-cta-shadow)`, display: "flex" }}
                 >
                   <span className="flex-shrink-0 bg-white/20 p-2 rounded-full"><Calendar size={18} /></span>
                   <span className="flex-1 text-left">{ctaText}</span>
@@ -126,7 +143,7 @@ export function SplitTemplate({
 
             {links.length > 0 && (
               <motion.div variants={item}>
-                <div className="h-px my-2" style={{ background: withAlpha(accent, 0.08) }} />
+                <div className="h-px my-2" style={{ background: "var(--tenant-divider-soft)" }} />
               </motion.div>
             )}
 
@@ -136,14 +153,14 @@ export function SplitTemplate({
                 <a href={link.url} target="_blank" rel="noopener noreferrer"
                   className="group w-full flex items-center gap-4 px-5 py-3.5 transition-all active:scale-[0.97]"
                   style={{
-                    background: withAlpha(accent, 0.04),
+                    background: "var(--tenant-link-bg)",
                     borderRadius: btnRadius,
-                    border: `1px solid ${withAlpha(accent, 0.1)}`,
+                    border: "1px solid var(--tenant-border)",
                     color: "#1a1a1a",
                   }}
                 >
                   <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-white shadow-sm group-hover:scale-105 transition-transform"
-                    style={{ background: `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.7)})` }}>
+                    style={{ background: "var(--tenant-accent-gradient)" }}>
                     {ICON_MAP[link.iconType] ?? <ExternalLink size={16} />}
                   </span>
                   <span className="flex-1 font-medium text-sm">{link.title}</span>
@@ -159,7 +176,7 @@ export function SplitTemplate({
             <div className="flex items-center gap-1.5">
               <Sparkles size={10} style={{ color: withAlpha(accent, 0.4) }} />
               <p className="text-[10px] text-gray-300">
-                Powered by <span className="font-semibold" style={{ color: accent }}>GentleBook</span>
+                Powered by <span className="font-semibold" style={{ color: "var(--tenant-accent)" }}>GentleBook</span>
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -180,13 +197,13 @@ export function SplitTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 32px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 32px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink, Leaf } from "lucide-react";
 import {
   lighten, withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -23,36 +24,48 @@ export function OrganicTemplate({
   const fontQuery  = "DM+Serif+Display:ital@0;1";
   const ctaColor   = cfg.ctaColor ?? green;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": green,
+    "--tenant-bg": beige,
+    "--tenant-text": darkGreen,
+    "--tenant-divider": withAlpha(green, 0.2),
+    "--tenant-footer-link": withAlpha(darkGreen, 0.25),
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.3),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
-    <div className="min-h-screen" style={{ background: beige, fontFamily }}>
+    <div className="min-h-screen" style={{ background: "var(--tenant-bg)", fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
 
       {/* Organic blob shapes — breathing animation */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <motion.div
           className="absolute -top-20 -right-20 w-72 h-72 opacity-20 blur-2xl"
-          style={{ background: green }}
+          style={{ background: "var(--tenant-accent)" }}
           animate={{ borderRadius: ["60% 40% 70% 30% / 50% 60% 40% 50%", "40% 60% 30% 70% / 60% 40% 60% 40%", "60% 40% 70% 30% / 50% 60% 40% 50%"] }}
           transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute top-1/3 -left-16 w-56 h-56 opacity-15 blur-2xl"
-          style={{ background: green }}
+          style={{ background: "var(--tenant-accent)" }}
           animate={{ borderRadius: ["40% 60% 30% 70% / 60% 40% 60% 40%", "70% 30% 60% 40% / 40% 60% 40% 60%", "40% 60% 30% 70% / 60% 40% 60% 40%"] }}
           transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
         />
         <motion.div
           className="absolute -bottom-12 right-1/4 w-48 h-48 opacity-10 blur-2xl"
-          style={{ background: green }}
+          style={{ background: "var(--tenant-accent)" }}
           animate={{ borderRadius: ["70% 30% 50% 50% / 30% 70% 50% 50%", "50% 50% 30% 70% / 70% 30% 70% 30%", "70% 30% 50% 50% / 30% 70% 50% 50%"] }}
           transition={{ repeat: Infinity, duration: 8, ease: "easeInOut", delay: 2 }}
         />
       </div>
 
       {/* Wave header */}
-      <div className="relative overflow-hidden" style={{ background: green, paddingBottom: "48px" }}>
+      <div className="relative overflow-hidden" style={{ background: "var(--tenant-accent)", paddingBottom: "48px" }}>
         <div className="absolute inset-x-0 bottom-0" style={{ height: "56px" }}>
           <svg viewBox="0 0 375 56" preserveAspectRatio="none" className="w-full h-full">
             <path d="M0,56 C120,0 255,56 375,14 L375,56 Z" fill={beige} />
@@ -77,24 +90,27 @@ export function OrganicTemplate({
           <div className="relative">
             <div className="absolute -inset-1.5 rounded-full opacity-60"
               style={{ background: `linear-gradient(135deg, ${green}, ${withAlpha(green, 0.4)})` }} />
-            <div className="absolute -inset-0.5 rounded-full" style={{ background: beige }} />
+            <div className="absolute -inset-0.5 rounded-full" style={{ background: "var(--tenant-bg)" }} />
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
+              <Image src={logoSrc} alt={tenantName}
+                width={96}
+                height={96}
+                unoptimized
                 className="relative w-24 h-24 object-cover"
-                style={{ borderRadius: avRadius, border: `3px solid ${beige}` }} />
+                style={{ borderRadius: avRadius, border: "3px solid var(--tenant-bg)" }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center"
-                style={{ background: lighten(green, 0.6), borderRadius: avRadius, border: `3px solid ${beige}` }}>
+                style={{ background: lighten(green, 0.6), borderRadius: avRadius, border: "3px solid var(--tenant-bg)" }}>
                 {emoji
                   ? <span className="text-4xl">{emoji}</span>
-                  : <Leaf size={32} style={{ color: green }} />
+                  : <Leaf size={32} style={{ color: "var(--tenant-accent)" }} />
                 }
               </div>
             )}
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: darkGreen, fontFamily }}>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--tenant-text)", fontFamily }}>
               {tenantName}
             </h1>
             {tagline && (
@@ -109,9 +125,9 @@ export function OrganicTemplate({
 
           {/* Leaf divider */}
           <div className="flex items-center gap-2 w-full">
-            <div className="flex-1 h-px" style={{ background: withAlpha(green, 0.2) }} />
+            <div className="flex-1 h-px" style={{ background: "var(--tenant-divider)" }} />
             <Leaf size={12} style={{ color: withAlpha(green, 0.4) }} />
-            <div className="flex-1 h-px" style={{ background: withAlpha(green, 0.2) }} />
+            <div className="flex-1 h-px" style={{ background: "var(--tenant-divider)" }} />
           </div>
         </motion.div>
 
@@ -122,7 +138,7 @@ export function OrganicTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-md transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.3)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 6px 24px var(--tenant-cta-shadow)` }}
               >
                 <motion.span animate={{ rotate: [0, 8, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
                   <Leaf size={18} />
@@ -135,7 +151,7 @@ export function OrganicTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-md transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 24px ${withAlpha(ctaColor, 0.3)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 6px 24px var(--tenant-cta-shadow)`, display: "flex" }}
               >
                 <motion.span animate={{ rotate: [0, 8, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}>
                   <Leaf size={18} />
@@ -164,7 +180,7 @@ export function OrganicTemplate({
                   borderRadius: btnRadius,
                   border: `1px solid ${withAlpha(green, 0.18)}`,
                   boxShadow: `0 2px 10px ${withAlpha(green, 0.05)}`,
-                  color: darkGreen,
+                  color: "var(--tenant-text)",
                 }}
               >
                 <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-white shadow-sm"
@@ -184,13 +200,13 @@ export function OrganicTemplate({
           <div className="flex items-center gap-1.5">
             <Leaf size={10} style={{ color: withAlpha(green, 0.4) }} />
             <p className="text-xs italic" style={{ color: withAlpha(darkGreen, 0.35) }}>
-              Powered by <span className="font-semibold not-italic" style={{ color: green }}>GentleBook</span>
+              Powered by <span className="font-semibold not-italic" style={{ color: "var(--tenant-accent)" }}>GentleBook</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-60 transition-opacity" style={{ color: withAlpha(darkGreen, 0.25) }}>Datenschutz</a>
+            <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-60 transition-opacity" style={{ color: "var(--tenant-footer-link)" }}>Datenschutz</a>
             <span className="text-[10px]" style={{ color: withAlpha(darkGreen, 0.15) }}>·</span>
-            <a href="/impressum" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-60 transition-opacity" style={{ color: withAlpha(darkGreen, 0.25) }}>Impressum</a>
+            <a href="/impressum" target="_blank" rel="noopener noreferrer" className="text-[10px] hover:opacity-60 transition-opacity" style={{ color: "var(--tenant-footer-link)" }}>Impressum</a>
           </div>
         </motion.div>
       </div>
@@ -204,13 +220,13 @@ export function OrganicTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 28px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 28px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}

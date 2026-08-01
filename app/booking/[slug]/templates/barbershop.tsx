@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, ChevronRight, Sparkles, ExternalLink, Scissors } from "lucide-react";
 import {
-  withAlpha, getContrastColor, getBorderRadius, getAvatarRadius,
-  buildAnimVariants, FONT_FAMILY, FONT_QUERY, INDUSTRY_EMOJI, ICON_MAP,
+  withAlpha, getContrastColor, getBorderRadius,
+  buildAnimVariants, INDUSTRY_EMOJI, ICON_MAP, ThemeTokenStyle,
   type TemplateProps,
 } from "../_shared";
 
@@ -17,20 +18,36 @@ export function BarbershopTemplate({
   const cream      = "#FAF7F2";
   const darkBrown  = "#2C1A0E";
   const btnRadius  = getBorderRadius(cfg.buttonStyle || "rounded");
-  const avRadius   = "9999px";
   const ctaText    = cfg.ctaText?.trim() || "Termin buchen";
   const emoji      = industryType ? (INDUSTRY_EMOJI[industryType] ?? null) : null;
   const fontFamily = "'Playfair Display', Georgia, serif";
   const fontQuery  = "Playfair+Display:wght@400;600;700;900";
   const ctaColor   = cfg.ctaColor ?? accent;
   const ctaTextClr = getContrastColor(ctaColor);
+  const tokens = {
+    "--tenant-accent": accent,
+    "--tenant-gold": gold,
+    "--tenant-cream": cream,
+    "--tenant-dark": darkBrown,
+    "--tenant-gold-line": withAlpha(gold, 0.4),
+    "--tenant-gold-line-strong": withAlpha(gold, 0.5),
+    "--tenant-card-border": withAlpha(gold, 0.3),
+    "--tenant-avatar-ring": `linear-gradient(135deg, ${gold}, #e8c97a, ${gold})`,
+    "--tenant-icon-bg": `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.8)})`,
+    "--tenant-cta-bg": `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`,
+    "--tenant-cta-text": ctaTextClr,
+    "--tenant-cta-shadow": withAlpha(ctaColor, 0.3),
+    "--tenant-cta-shadow-floating": withAlpha(ctaColor, 0.4),
+  };
   const { container, item } = buildAnimVariants(cfg.animationSpeed);
 
   return (
-    <div className="min-h-screen" style={{ background: cream, fontFamily }}>
+    <div className="min-h-screen" style={{ background: "var(--tenant-cream)", fontFamily }}>
+      <ThemeTokenStyle tokens={tokens} />
       <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
 
-      {/* Barber stripe background pattern — subtle diagonal */}
+      {/* Barber stripe background pattern — subtle diagonal, tied to the template's own accent/
+          dark tones instead of a hardcoded, unrelated navy */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.025]" aria-hidden
         style={{
           backgroundImage: `repeating-linear-gradient(
@@ -39,8 +56,8 @@ export function BarbershopTemplate({
             ${accent} 8px,
             ${cream} 8px,
             ${cream} 24px,
-            #1a3a6b 24px,
-            #1a3a6b 32px,
+            ${darkBrown} 24px,
+            ${darkBrown} 32px,
             ${cream} 32px,
             ${cream} 48px
           )`,
@@ -48,36 +65,25 @@ export function BarbershopTemplate({
       />
 
       {/* Top header strip */}
-      <div className="relative" style={{ background: darkBrown }}>
+      <div className="relative" style={{ background: "var(--tenant-dark)" }}>
         <div className="max-w-sm mx-auto px-5 py-3 flex items-center justify-center gap-2">
-          <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.4) }} />
-          {/* Animated barber pole */}
-          <div className="relative w-5 h-5 rounded-sm overflow-hidden flex-shrink-0" style={{ border: `1px solid ${withAlpha(gold, 0.5)}` }}>
+          <div className="h-px flex-1" style={{ background: "var(--tenant-gold-line)" }} />
+          {/* Barber pole — one accent icon instead of a mirrored pair either side of the label */}
+          <div className="relative w-5 h-5 rounded-sm overflow-hidden flex-shrink-0" style={{ border: "1px solid var(--tenant-gold-line-strong)" }}>
             <motion.div
               className="absolute inset-0"
               style={{
-                backgroundImage: `repeating-linear-gradient(45deg, ${accent} 0px, ${accent} 4px, white 4px, white 8px, #1a3a6b 8px, #1a3a6b 12px, white 12px, white 16px)`,
+                backgroundImage: `repeating-linear-gradient(45deg, ${accent} 0px, ${accent} 4px, white 4px, white 8px, ${darkBrown} 8px, ${darkBrown} 12px, white 12px, white 16px)`,
                 backgroundSize: "24px 24px",
               }}
               animate={{ backgroundPosition: ["0% 0%", "0% 100%"] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
             />
           </div>
-          <span className="text-[10px] uppercase tracking-[0.3em] font-semibold" style={{ color: gold }}>
+          <span className="text-[10px] uppercase tracking-[0.3em] font-semibold" style={{ color: "var(--tenant-gold)" }}>
             Est. 2024
           </span>
-          <div className="relative w-5 h-5 rounded-sm overflow-hidden flex-shrink-0" style={{ border: `1px solid ${withAlpha(gold, 0.5)}` }}>
-            <motion.div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `repeating-linear-gradient(45deg, ${accent} 0px, ${accent} 4px, white 4px, white 8px, #1a3a6b 8px, #1a3a6b 12px, white 12px, white 16px)`,
-                backgroundSize: "24px 24px",
-              }}
-              animate={{ backgroundPosition: ["0% 0%", "0% 100%"] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            />
-          </div>
-          <div className="h-px flex-1" style={{ background: withAlpha(gold, 0.4) }} />
+          <div className="h-px flex-1" style={{ background: "var(--tenant-gold-line)" }} />
         </div>
       </div>
 
@@ -91,10 +97,13 @@ export function BarbershopTemplate({
         >
           {/* Avatar with gold ring */}
           <div className="relative">
-            <div className="absolute -inset-1.5 rounded-full" style={{ background: `linear-gradient(135deg, ${gold}, #e8c97a, ${gold})` }} />
+            <div className="absolute -inset-1.5 rounded-full" style={{ background: "var(--tenant-avatar-ring)" }} />
             <div className="absolute -inset-0.5 rounded-full bg-white" />
             {logoSrc ? (
-              <img src={logoSrc} alt={tenantName}
+              <Image src={logoSrc} alt={tenantName}
+                width={112}
+                height={112}
+                unoptimized
                 className="relative w-28 h-28 object-cover rounded-full border-4 border-white" />
             ) : (
               <div className="relative w-28 h-28 rounded-full flex items-center justify-center border-4 border-white"
@@ -110,13 +119,13 @@ export function BarbershopTemplate({
           {/* Name with ornament — stamp entrance */}
           <div>
             <div className="flex items-center justify-center gap-2 mb-1">
-              <div className="h-px w-8" style={{ background: withAlpha(gold, 0.5) }} />
+              <div className="h-px w-8" style={{ background: "var(--tenant-gold-line-strong)" }} />
               <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: withAlpha(accent, 0.5) }}>The</span>
-              <div className="h-px w-8" style={{ background: withAlpha(gold, 0.5) }} />
+              <div className="h-px w-8" style={{ background: "var(--tenant-gold-line-strong)" }} />
             </div>
             <motion.h1
               className="text-3xl font-black text-center"
-              style={{ color: darkBrown, fontFamily, lineHeight: 1.1 }}
+              style={{ color: "var(--tenant-dark)", fontFamily, lineHeight: 1.1 }}
               initial={{ scale: 1.3, rotate: 2, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
@@ -124,9 +133,9 @@ export function BarbershopTemplate({
               {tenantName}
             </motion.h1>
             <div className="flex items-center justify-center gap-2 mt-1">
-              <div className="h-px w-12" style={{ background: withAlpha(gold, 0.5) }} />
-              <Sparkles size={10} style={{ color: gold }} />
-              <div className="h-px w-12" style={{ background: withAlpha(gold, 0.5) }} />
+              <div className="h-px w-12" style={{ background: "var(--tenant-gold-line-strong)" }} />
+              <Sparkles size={10} style={{ color: "var(--tenant-gold)" }} />
+              <div className="h-px w-12" style={{ background: "var(--tenant-gold-line-strong)" }} />
             </div>
           </div>
 
@@ -147,7 +156,7 @@ export function BarbershopTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-lg transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 20px ${withAlpha(ctaColor, 0.3)}` }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 6px 20px var(--tenant-cta-shadow)` }}
               >
                 <Scissors size={18} className="flex-shrink-0" />
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
@@ -158,7 +167,7 @@ export function BarbershopTemplate({
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="w-full flex items-center gap-3 px-6 py-4 font-bold text-base shadow-lg transition-all active:scale-[0.97]"
-                style={{ background: `linear-gradient(135deg, ${ctaColor}, ${withAlpha(ctaColor, 0.85)})`, color: ctaTextClr, borderRadius: btnRadius, boxShadow: `0 6px 20px ${withAlpha(ctaColor, 0.3)}`, display: "flex" }}
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: btnRadius, boxShadow: `0 6px 20px var(--tenant-cta-shadow)`, display: "flex" }}
               >
                 <Scissors size={18} className="flex-shrink-0" />
                 <span className="flex-1 text-left" style={{ fontFamily }}>{ctaText}</span>
@@ -182,13 +191,13 @@ export function BarbershopTemplate({
                 style={{
                   background: "rgba(255,255,255,0.75)",
                   borderRadius: btnRadius,
-                  border: `1px solid ${withAlpha(gold, 0.3)}`,
+                  border: "1px solid var(--tenant-card-border)",
                   boxShadow: "0 2px 8px rgba(44,26,14,0.06)",
-                  color: darkBrown,
+                  color: "var(--tenant-dark)",
                 }}
               >
                 <span className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-white shadow-sm"
-                  style={{ background: `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.8)})` }}>
+                  style={{ background: "var(--tenant-icon-bg)" }}>
                   {ICON_MAP[link.iconType] ?? <ExternalLink size={16} />}
                 </span>
                 <span className="flex-1 font-semibold text-sm" style={{ fontFamily }}>{link.title}</span>
@@ -202,9 +211,9 @@ export function BarbershopTemplate({
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
           className="mt-4 flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1.5">
-            <Sparkles size={10} style={{ color: gold }} />
+            <Sparkles size={10} style={{ color: "var(--tenant-gold)" }} />
             <p className="text-xs italic" style={{ color: withAlpha(darkBrown, 0.35) }}>
-              Powered by <span className="font-semibold not-italic" style={{ color: accent }}>GentleBook</span>
+              Powered by <span className="font-semibold not-italic" style={{ color: "var(--tenant-accent)" }}>GentleBook</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -224,13 +233,13 @@ export function BarbershopTemplate({
             {cfg.confetti ? (
               <button onClick={handleCtaClick}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 28px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </button>
             ) : (
               <a href={`/booking/${slug}/book`}
                 className="pointer-events-auto flex items-center gap-2.5 px-7 py-3.5 font-bold text-sm shadow-2xl active:scale-95 transition-transform"
-                style={{ background: ctaColor, color: ctaTextClr, borderRadius: "9999px", boxShadow: `0 8px 28px ${withAlpha(ctaColor, 0.4)}` }}>
+                style={{ background: "var(--tenant-cta-bg)", color: "var(--tenant-cta-text)", borderRadius: "9999px", boxShadow: `0 8px 28px var(--tenant-cta-shadow-floating)` }}>
                 <Calendar size={16} />{ctaText}
               </a>
             )}
