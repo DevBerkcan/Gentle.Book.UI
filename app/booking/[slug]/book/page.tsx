@@ -299,7 +299,7 @@ function BookingPageInner() {
         {finderEnabled && (
           <div className={`mb-5 rounded-xl border p-3 flex items-center justify-between gap-3 ${isDark ? 'border-white/15 bg-white/5' : 'border-[#DAD7F8] bg-[#F4F2FF]'}`}>
             <div>
-              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-[#2D2568]'}`}>Neu: KI Service Finder</p>
+              <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-[#2D2568]'}`}>Neu: Automatisierter Service-Finder</p>
               <p className={`text-xs ${isDark ? 'text-white/70' : 'text-[#5E55A3]'}`}>Lass dir zuerst passende Services empfehlen und buche danach direkt.</p>
             </div>
             <button

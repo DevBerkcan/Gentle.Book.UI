@@ -124,7 +124,7 @@ const PLAN_STYLES: Record<string, { cls: string; label: string }> = {
   Trial:        { cls: 'bg-gray-100 text-gray-600 border border-gray-200',           label: 'Trial' },
   Starter:      { cls: 'bg-blue-50 text-blue-700 border border-blue-200',            label: 'Starter' },
   Professional: { cls: 'bg-purple-50 text-purple-700 border border-purple-200',      label: 'Pro' },
-  Agency:       { cls: 'bg-amber-50 text-amber-700 border border-amber-200',         label: 'Business' },
+  Agency:       { cls: 'bg-amber-50 text-amber-700 border border-amber-200',         label: 'Agency' },
 };
 
 function PlanQuickChange({
@@ -155,7 +155,7 @@ function PlanQuickChange({
           <option value="Trial">Trial</option>
           <option value="Starter">Starter (€29)</option>
           <option value="Professional">Pro (€59)</option>
-          <option value="Agency">Business (€99)</option>
+          <option value="Agency">Agency (€99)</option>
         </select>
       )}
     </div>

@@ -20,8 +20,8 @@ export const adminApi = {
   trackLinkClick,
   getServicesByEmployee,
 
-  async requestPlan(plan: string, contactEmail?: string, note?: string) {
-    const { data } = await api.post('/tenant/subscription-request', { plan, contactEmail: contactEmail ?? '', note });
+  async requestPlan(plan: string, contactEmail?: string, note?: string, interval: 'Monthly' | 'Yearly' = 'Monthly') {
+    const { data } = await api.post('/tenant/subscription-request', { plan, contactEmail: contactEmail ?? '', note, interval });
     return data as { message: string; requestId: string };
   },
 
@@ -39,8 +39,8 @@ export const adminApi = {
     };
   },
 
-  async startMollieMandateFlow(plan: string) {
-    const { data } = await api.post('/tenant/subscription/mollie/start', { plan });
+  async startMollieMandateFlow(plan: string, interval: 'Monthly' | 'Yearly' = 'Monthly') {
+    const { data } = await api.post('/tenant/subscription/mollie/start', { plan, interval });
     return data as { checkoutUrl: string };
   },
 
@@ -51,7 +51,7 @@ export const adminApi = {
 
   async getPlanPricing() {
     const { data } = await api.get('/tenant/plan-pricing');
-    return data as { plan: string; displayName: string; monthlyPrice: number; maxEmployees: number; maxServices: number }[];
+    return data as { plan: string; displayName: string; monthlyPrice: number; annualPrice: number; maxEmployees: number; maxServices: number }[];
   },
 
   async cancelSubscription(reason?: string) {

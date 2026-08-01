@@ -773,7 +773,7 @@ export default function TenantDetailPage() {
                       },
                       {
                         value: 'Agency',
-                        label: 'Business',
+                        label: 'Agency',
                         price: '€99/Monat',
                         employees: 'Unbegrenzt',
                         color: '#f59e0b',

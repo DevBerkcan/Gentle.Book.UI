@@ -91,7 +91,7 @@ export const PAGE_TEMPLATES: {
 export const PLAN_ORDER: Record<PlanTier, number> = { starter: 0, pro: 1, business: 2 };
 
 /** Human-readable German label for a plan tier, used in upgrade hints. */
-export const PLAN_LABEL: Record<PlanTier, string> = { starter: "Starter", pro: "Pro", business: "Business" };
+export const PLAN_LABEL: Record<PlanTier, string> = { starter: "Starter", pro: "Pro", business: "Agency" };
 
 export const TPL_VISUAL: Record<PageTemplate, { bg: string; accent: string }> = {
   classic:    { bg: "linear-gradient(145deg,#FDF6F5,#F6F5FA)", accent: "#E8C7C3" },

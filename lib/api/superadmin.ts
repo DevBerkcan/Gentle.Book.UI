@@ -208,9 +208,9 @@ export const superAdminApi = {
     return data as PlanPriceItem[];
   },
 
-  async updatePlanPricing(plan: string, monthlyPrice: number) {
-    const { data } = await api.put(`/superadmin/plan-pricing/${plan}`, { monthlyPrice });
-    return data as { plan: string; monthlyPrice: number };
+  async updatePlanPricing(plan: string, monthlyPrice: number, annualPrice: number) {
+    const { data } = await api.put(`/superadmin/plan-pricing/${plan}`, { monthlyPrice, annualPrice });
+    return data as { plan: string; monthlyPrice: number; annualPrice: number };
   },
 
   // ── Audit Log ────────────────────────────────────────────────
@@ -299,6 +299,7 @@ export interface PlanPriceItem {
   plan: string;
   displayName: string;
   monthlyPrice: number;
+  annualPrice: number;
   maxEmployees: number;
   maxServices: number;
 }

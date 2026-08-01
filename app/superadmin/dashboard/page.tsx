@@ -105,7 +105,7 @@ export default function SuperAdminDashboard() {
     { label: 'Systeme gesamt',    value: stats.totalTenants,       icon: <Building2 size={18} />, accent: '#3b82f6', bg: '#eff6ff', help: 'Alle registrierten Buchungssysteme auf der Plattform (aktiv + inaktiv)' },
     { label: 'Aktiv',             value: stats.activeTenants,      icon: <CheckCircle size={18} />, accent: '#22c55e', bg: '#f0fdf4', help: 'Systeme die aktuell aktiv sind und von Kunden genutzt werden können' },
     { label: 'Im Trial',          value: stats.trialTenants,       icon: <Clock size={18} />, accent: '#eab308', bg: '#fefce8', help: 'Systeme die sich noch in der kostenlosen 14-Tage-Testphase befinden' },
-    { label: 'Aktive Abos',       value: stats.activeSubscriptions,icon: <TrendingUp size={18} />, accent: '#8b5cf6', bg: '#f5f3ff', help: 'Systeme mit einem bezahlten und aktiven Abonnement (Starter, Pro oder Business)' },
+    { label: 'Aktive Abos',       value: stats.activeSubscriptions,icon: <TrendingUp size={18} />, accent: '#8b5cf6', bg: '#f5f3ff', help: 'Systeme mit einem bezahlten und aktiven Abonnement (Starter, Pro oder Agency)' },
     { label: 'Abgelaufen',        value: stats.expiredTenants,     icon: <AlertCircle size={18} />, accent: '#ef4444', bg: '#fef2f2', help: 'Systeme deren Trial oder Abo abgelaufen ist — kein Kundenzugang mehr möglich' },
     { label: 'Buchungen gesamt',  value: stats.totalBookings,      icon: <Calendar size={18} />, accent: '#06b6d4', bg: '#ecfeff', help: 'Gesamtzahl aller Buchungen über alle Systeme und alle Zeiten hinweg' },
   ] : [];
@@ -268,7 +268,7 @@ export default function SuperAdminDashboard() {
             { plan: 'Trial',        count: planCounts.Trial,        color: '#6b7280', bg: '#f3f4f6', label: 'Im Trial' },
             { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: 'Starter (€29)' },
             { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: 'Pro (€59)' },
-            { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Business (€99)' },
+            { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Agency (€99)' },
           ].map(({ plan, count, color, bg, label }) => (
             <div
               key={plan}

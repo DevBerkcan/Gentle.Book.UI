@@ -7,6 +7,18 @@ export const siteConfig = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://app.gentlebook.app",
 };
 
+const legalSiteUrl = (process.env.NEXT_PUBLIC_LEGAL_SITE_URL || "https://gentlebook.app").replace(/\/$/, "");
+
+export const legalConfig = {
+  baseUrl: legalSiteUrl,
+  imprint: `${legalSiteUrl}/impressum`,
+  privacy: `${legalSiteUrl}/datenschutz`,
+  terms: `${legalSiteUrl}/agb`,
+  b2b: `${legalSiteUrl}/b2b`,
+  processing: `${legalSiteUrl}/auftragsverarbeitung`,
+  subprocessors: `${legalSiteUrl}/unterauftragsverarbeiter`,
+};
+
 // Zentraler Betreiber-Support-Kontakt — bitte NUR hier pflegen,
 // alle Seiten/Komponenten importieren diese Werte.
 export const supportConfig = {
@@ -48,12 +60,12 @@ export const socialLinks = [
 export const footerLinks = [
   {
     label: "Impressum",
-    href: "/impressum",
+    href: legalConfig.imprint,
     category: "footer"
   },
   {
     label: "Datenschutz",
-    href: "/datenschutz",
+    href: legalConfig.privacy,
     category: "footer"
   },
   {

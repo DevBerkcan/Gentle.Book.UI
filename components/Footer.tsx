@@ -3,6 +3,7 @@
 
 import { motion } from "framer-motion";
 import { KlaroCookieSettingsButton } from "./KlaroCookieConsent";
+import { legalConfig } from "@/lib/config";
 
 export const Footer = () => {
   return (
@@ -14,31 +15,31 @@ export const Footer = () => {
     >
       <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-xs text-[#8A8A8A]">
         <a
-          href="/impressum"
+          href={legalConfig.imprint}
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           Impressum
         </a>
         <span className="text-[#ECEBF2]">•</span>
         <a
-          href="/datenschutz"
+          href={legalConfig.privacy}
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           Datenschutz
         </a>
         <span className="text-[#ECEBF2]">•</span>
         <a
-          href="/agb"
+          href={legalConfig.terms}
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           AGB
         </a>
         <span className="text-[#ECEBF2]">•</span>
         <a
-          href="/widerruf"
+          href={legalConfig.b2b}
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
-          Widerruf
+          B2B-Hinweis
         </a>
         <span className="text-[#ECEBF2]">•</span>
         <KlaroCookieSettingsButton />

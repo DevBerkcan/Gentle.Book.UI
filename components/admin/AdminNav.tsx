@@ -13,6 +13,7 @@ import { NotificationBell } from "@/components/admin/NotificationBell";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { legalConfig } from "@/lib/config";
 import api, { apiOrigin } from "@/lib/api/client";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -244,6 +245,11 @@ export function AdminNav() {
               >
                 <LogOut size={15} />
               </button>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 px-2 pt-1 text-[10px] text-white/35">
+              <a href={legalConfig.imprint} target="_blank" rel="noopener noreferrer" className="hover:text-white">Impressum</a>
+              <a href={legalConfig.privacy} target="_blank" rel="noopener noreferrer" className="hover:text-white">Datenschutz</a>
+              <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="hover:text-white">AGB</a>
             </div>
           </div>
         )}

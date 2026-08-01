@@ -214,8 +214,13 @@ export default function PublicFinderPage() {
     <div className="min-h-screen bg-[#F7F8FC] p-4 md:p-8">
       <div className="mx-auto max-w-4xl space-y-6">
         <header className="rounded-2xl bg-white border border-gray-200 p-5">
-          <p className="text-xs uppercase tracking-wide text-[#6355E4] font-semibold">KI Service Finder</p>
+          <p className="text-xs uppercase tracking-wide text-[#6355E4] font-semibold">Automatisierter Service-Finder</p>
           <h1 className="text-2xl font-bold text-[#14162B] mt-1">Finde den passenden Termin in wenigen Schritten</h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Die Ergebnisse sind automatisierte Vorschläge auf Grundlage der vom Unternehmen hinterlegten Leistungen
+            und Regeln. Der Finder ersetzt keine persönliche, medizinische oder fachliche Beratung. Verbindlich sind
+            die Angaben des Unternehmens und die abschließende Buchungsbestätigung.
+          </p>
           {aiDisclosure && <p className="mt-2 text-sm text-gray-600">{aiDisclosure}</p>}
           {medicalDisclaimer && <p className="mt-1 text-sm text-amber-700">{medicalDisclaimer}</p>}
         </header>

@@ -18,7 +18,7 @@ import { isSafeAdminRedirectPath } from '@/lib/auth/redirect';
 const MODAL_PLANS = [
   { key: 'Starter',      name: 'Starter',      price: 29,  employees: '2 Mitarbeiter' },
   { key: 'Professional', name: 'Professional',  price: 59,  employees: '10 Mitarbeiter', highlight: true },
-  { key: 'Agency',       name: 'Business',      price: 99,  employees: 'Unlimited' },
+  { key: 'Agency',       name: 'Agency',        price: 99,  employees: 'Unlimited' },
 ];
 
 function TrialExpiredModal() {

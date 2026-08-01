@@ -12,12 +12,13 @@ import {
 import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
-import { supportConfig } from '@/lib/config';
+import { legalConfig, supportConfig } from '@/lib/config';
 import { useConfirm } from '@/components/ConfirmDialog';
 
 interface Subscription {
   plan: string;
   status: string;
+  interval?: string;
   trialStartedAt: string;
   trialEndsAt: string;
   trialDaysRemaining: number;
@@ -81,7 +82,7 @@ const PLANS = [
     ],
   },
   {
-    name: 'Business',
+    name: 'Agency',
     price: 99,
     key: 'Agency',
     color: 'border-gray-200',
@@ -141,10 +142,12 @@ export default function AdminSubscriptionPage() {
   // so a real customer can never see a Mollie test-mode checkout by mistake.
   const [mollieLiveMode, setMollieLiveMode] = useState<boolean | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const { confirm, dialog } = useConfirm();
   // Live prices from the backend (SuperAdmin-editable) — overrides the hardcoded PLANS
   // defaults below so this page never shows a stale price after a SuperAdmin price change.
-  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
+  const [livePrices, setLivePrices] = useState<Record<string, { monthly: number; annual: number }>>({});
+  const [billingInterval, setBillingInterval] = useState<'Monthly' | 'Yearly'>('Monthly');
 
   useEffect(() => {
     Promise.all([
@@ -160,7 +163,7 @@ export default function AdminSubscriptionPage() {
         setRequestedPlan(requestStatus.request.requestedPlan);
       }
       setMollieLiveMode(mollieStatus?.isLiveMode ?? false);
-      setLivePrices(Object.fromEntries((pricing ?? []).map(p => [p.plan, p.monthlyPrice])));
+      setLivePrices(Object.fromEntries((pricing ?? []).map(p => [p.plan, { monthly: p.monthlyPrice, annual: p.annualPrice }])));
     }).finally(() => setLoading(false));
   }, []);
 
@@ -196,7 +199,7 @@ export default function AdminSubscriptionPage() {
     setMollieLoadingPlan(planKey);
     setRequestError('');
     try {
-      const { checkoutUrl } = await adminApi.startMollieMandateFlow(planKey);
+      const { checkoutUrl } = await adminApi.startMollieMandateFlow(planKey, billingInterval);
       window.location.href = checkoutUrl;
     } catch (err: any) {
       setRequestError(err.response?.data?.message || 'SEPA-Zahlung konnte nicht gestartet werden.');
@@ -213,7 +216,7 @@ export default function AdminSubscriptionPage() {
     setRequesting(true);
     setRequestError('');
     try {
-      await adminApi.requestPlan(planKey);
+      await adminApi.requestPlan(planKey, undefined, undefined, billingInterval);
       setRequestedPlan(planKey);
       setRequestSuccess(true);
     } catch (err: any) {
@@ -261,6 +264,24 @@ export default function AdminSubscriptionPage() {
   const StatusIcon = statusCfg?.icon ?? Clock;
   const currentPlanKey = sub?.plan ?? 'Trial';
   const isExpired = sub?.status === 'Expired';
+
+  // Live monthly/annual prices per plan, falling back to the hardcoded PLANS defaults
+  // (with the same 20%-off formula the marketing website advertises) until the backend
+  // price list has loaded.
+  const getPrices = (plan: typeof PLANS[number]) => {
+    const live = livePrices[plan.key];
+    const monthly = live?.monthly ?? plan.price;
+    const annual = live?.annual ?? Math.round(monthly * 0.8) * 12;
+    return { monthly, annual };
+  };
+  const maxSavingsPercent = Math.max(
+    0,
+    ...PLANS.map((plan) => {
+      const { monthly, annual } = getPrices(plan);
+      const monthlyTotal = monthly * 12;
+      return monthlyTotal > 0 ? Math.round((1 - annual / monthlyTotal) * 100) : 0;
+    })
+  );
 
   return (
     <motion.div
@@ -314,7 +335,7 @@ export default function AdminSubscriptionPage() {
             )}
             {sub.status === 'Active' && !sub.cancelRequestedAt && sub.currentPeriodEnd && (
               <div className="text-right">
-                <p className="text-xs text-gray-500">Nächste Abbuchung</p>
+                <p className="text-xs text-gray-500">Nächste Abbuchung {sub.interval === 'Yearly' ? '(jährlich)' : '(monatlich)'}</p>
                 <p className="font-semibold text-gray-800">
                   {new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>
@@ -455,11 +476,62 @@ export default function AdminSubscriptionPage() {
           <h2 className="text-xl font-bold text-gray-900">Pläne & Preise</h2>
           <HelpTip text="Alle Pläne beinhalten das Online-Buchungssystem. Der Plan bestimmt wie viele Mitarbeiter & Services du anlegen kannst. Upgrade jederzeit per WhatsApp oder E-Mail möglich." />
         </div>
-        <p className="text-gray-500 text-sm mb-6">Monatlich kündbar · Keine versteckten Kosten · Sofort aktivierbar</p>
+        <p className="text-gray-500 text-sm mb-4">Alle angegebenen Preise sind die {billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'} zu zahlenden Gesamtpreise. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet oder ausgewiesen. {billingInterval === 'Yearly' ? 'Jährlich' : 'Monatlich'} im Voraus · Keine Einrichtungsgebühr · Keine Provision pro Buchung · Jederzeit zum Periodenende kündbar</p>
+
+        {/* Monthly / Yearly toggle */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="inline-flex rounded-xl border border-gray-200 bg-gray-50 p-1">
+            <button
+              type="button"
+              onClick={() => setBillingInterval('Monthly')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                billingInterval === 'Monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Monatlich
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingInterval('Yearly')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                billingInterval === 'Yearly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Jährlich
+            </button>
+          </div>
+          {maxSavingsPercent > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5">
+              Bis zu {maxSavingsPercent}% sparen bei jährlicher Zahlung
+            </span>
+          )}
+        </div>
+
+        <label className="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={legalAccepted}
+            onChange={(event) => setLegalAccepted(event.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-[#6355E4]"
+          />
+          <span>
+            Ich handle als Unternehmer im Sinne des § 14 BGB, akzeptiere die{' '}
+            <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">AGB</a>
+            {' '}und habe die{' '}
+            <a href={legalConfig.privacy} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">Datenschutzerklärung</a>
+            {' '}sowie die Hinweise zur{' '}
+            <a href={legalConfig.processing} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">Auftragsverarbeitung</a>
+            {' '}zur Kenntnis genommen.
+          </span>
+        </label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {
             const isCurrent = currentPlanKey === plan.key;
-            const price = livePrices[plan.key] ?? plan.price;
+            const { monthly, annual } = getPrices(plan);
+            const monthlyTotal = monthly * 12;
+            const savingsAmount = Math.max(0, monthlyTotal - annual);
+            const savingsPercent = monthlyTotal > 0 ? Math.round((savingsAmount / monthlyTotal) * 100) : 0;
+            const displayPrice = billingInterval === 'Yearly' ? Math.round(annual / 12) : monthly;
             return (
               <div
                 key={plan.key}
@@ -485,9 +557,19 @@ export default function AdminSubscriptionPage() {
                 <div className="mb-4">
                   <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
                   <div className="flex items-end gap-1 mt-2">
-                    <span className="text-3xl font-bold text-gray-900">€{price}</span>
+                    <span className="text-3xl font-bold text-gray-900">€{displayPrice}</span>
                     <span className="text-gray-500 mb-1">/Monat</span>
                   </div>
+                  {billingInterval === 'Yearly' && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs text-gray-500">bei jährlicher Zahlung · €{annual}/Jahr</span>
+                      {savingsPercent > 0 && (
+                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5">
+                          Spare {savingsPercent}% (€{savingsAmount}/Jahr)
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 mt-1">
                     {plan.employees ? `${plan.employees} Mitarbeiter · ${plan.services} Services` : 'Unbegrenzte Mitarbeiter & Services'}
                   </p>
@@ -506,7 +588,7 @@ export default function AdminSubscriptionPage() {
                   {!isCurrent && mollieLiveMode === true && (
                     <button
                       onClick={() => handleMollieStart(plan.key)}
-                      disabled={!!mollieLoadingPlan || requestedPlan === plan.key}
+                      disabled={!legalAccepted || !!mollieLoadingPlan || requestedPlan === plan.key}
                       className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
                         ${plan.highlight
                           ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
@@ -537,7 +619,7 @@ export default function AdminSubscriptionPage() {
                   {!isCurrent && (
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
-                      disabled={requesting || !!requestedPlan}
+                      disabled={!legalAccepted || requesting || !!requestedPlan}
                       title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
                       className="w-full text-center text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors py-1 disabled:opacity-50"
                     >
