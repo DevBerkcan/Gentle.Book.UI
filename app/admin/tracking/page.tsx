@@ -125,6 +125,7 @@ export default function TrackingPage() {
   const [loading,        setLoading]        = useState(true);
   const [error,          setError]          = useState<string | null>(null);
   const [needsUpgrade,   setNeedsUpgrade]   = useState(false);
+  const [upgradeInfo,    setUpgradeInfo]    = useState<{ message?: string; currentPlan?: string; requiredPlan?: string }>({});
 
   useEffect(() => { loadStatistics(); }, []);
 
@@ -136,9 +137,15 @@ export default function TrackingPage() {
       ]);
       setStats(statsData); setRevenue(revenueData); setDashboardStats(dashboardData);
     } catch (err: any) {
-      // 402 mit feature-Flag = Analytics ist im aktuellen Plan nicht enthalten
+      // 402 mit feature-Flag = Analytics ist im aktuellen Plan nicht enthalten.
+      // Tarifname und benötigter Tarif kommen direkt vom Server (PlanLimits) — nie hartcodiert.
       if (err.response?.status === 402 && err.response?.data?.feature) {
         setNeedsUpgrade(true);
+        setUpgradeInfo({
+          message: err.response.data.message,
+          currentPlan: err.response.data.currentPlan,
+          requiredPlan: err.response.data.requiredPlan,
+        });
       } else {
         setError(err.response?.data?.message || err.message || "Fehler beim Laden der Statistiken");
       }
@@ -155,7 +162,8 @@ export default function TrackingPage() {
     );
   }
 
-  // ── Upsell: Analytics ist ab Professional-Plan verfügbar ─────────────────
+  // ── Upsell: Analytics ist im aktuellen Tarif nicht enthalten ──────────────
+  // Tarifname kommt vom Server (PlanLimits) — nie hartcodiert, siehe TrackingController.RequireAnalyticsPlanAsync.
 
   if (needsUpgrade) {
     return (
@@ -165,10 +173,21 @@ export default function TrackingPage() {
             <BarChart3 size={20} className="text-[#6355E4]" />
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">Statistiken & Analytics</h2>
+          {upgradeInfo.currentPlan && (
+            <p className="text-xs text-[#9CA3AF] mb-3">
+              Dein aktueller Tarif: <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
+            </p>
+          )}
           <p className="text-sm text-[#6B7280] mb-6">
-            Detaillierte Auswertungen zu Klicks, Seitenaufrufen und Umsatz sind ab dem{" "}
-            <strong>Professional-Plan</strong> verfügbar. Upgraden Sie, um zu sehen, wie Ihre
-            Buchungsseite performt.
+            {upgradeInfo.message ?? (
+              <>
+                Detaillierte Auswertungen zu Klicks, Seitenaufrufen und Umsatz sind in deinem
+                aktuellen Tarif nicht enthalten.
+                {upgradeInfo.requiredPlan && (
+                  <> Mit dem Tarif „{upgradeInfo.requiredPlan}" kannst du sehen, wie deine Buchungsseite performt.</>
+                )}
+              </>
+            )}
           </p>
           <a
             href="/admin/subscription"

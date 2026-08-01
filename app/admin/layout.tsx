@@ -13,6 +13,7 @@ import api from '@/lib/api/client';
 import { adminApi } from '@/lib/api/admin';
 import { LanguageProvider, useTranslation } from '@/lib/i18n/LanguageContext';
 import { supportConfig } from '@/lib/config';
+import { isSafeAdminRedirectPath } from '@/lib/auth/redirect';
 
 const MODAL_PLANS = [
   { key: 'Starter',      name: 'Starter',      price: 29,  employees: '2 Mitarbeiter' },
@@ -178,7 +179,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (pathname === '/admin/reset-password') return;
     if (pathname === '/admin/forgot-password') return;
     if (!loading && !isAuthenticated) {
-      router.push('/admin/login');
+      // Preserve where the user was trying to go so they land back there after login,
+      // instead of always dropping them on the dashboard regardless of intent.
+      const next = isSafeAdminRedirectPath(pathname) ? `?next=${encodeURIComponent(pathname)}` : '';
+      router.push(`/admin/login${next}`);
     }
   }, [isAuthenticated, loading, pathname, router]);
 

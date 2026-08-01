@@ -1,18 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, User, Eye, EyeOff, Mail, Building2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
+import { resolvePostLoginRedirect } from '@/lib/auth/redirect';
 
 type LoginMode = 'employee' | 'admin';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next');
   const { login, tenantAdminLogin } = useAuth();
 
   const [mode, setMode] = useState<LoginMode>('admin');
@@ -43,11 +46,11 @@ export default function AdminLoginPage() {
           password,
         });
         if (result.success) {
-          if (result.mustChangePassword) {
-            router.push('/admin/settings?mustChangePassword=1');
-          } else {
-            router.push('/admin/dashboard');
-          }
+          router.push(resolvePostLoginRedirect({
+            kind: 'admin',
+            mustChangePassword: result.mustChangePassword,
+            next,
+          }));
         } else {
           setError(result.message || 'Ungültige Anmeldedaten');
         }
@@ -57,7 +60,7 @@ export default function AdminLoginPage() {
           password,
         });
         if (result.success) {
-          router.push('/admin/employee-dashboard');
+          router.push(resolvePostLoginRedirect({ kind: 'employee' }));
         } else {
           setError(result.message || 'Ungültige Anmeldedaten');
         }
