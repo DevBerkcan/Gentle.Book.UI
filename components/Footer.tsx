@@ -12,7 +12,7 @@ export const Footer = () => {
       transition={{ delay: 0.8 }}
       className="mt-12 pb-8 text-center"
     >
-      <div className="mb-4 flex items-center justify-center gap-4 text-xs text-[#8A8A8A]">
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-xs text-[#8A8A8A]">
         <a
           href="/impressum"
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
@@ -25,6 +25,20 @@ export const Footer = () => {
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
         >
           Datenschutz
+        </a>
+        <span className="text-[#ECEBF2]">•</span>
+        <a
+          href="/agb"
+          className="transition-colors hover:text-[#ECEBF2] hover:underline"
+        >
+          AGB
+        </a>
+        <span className="text-[#ECEBF2]">•</span>
+        <a
+          href="/widerruf"
+          className="transition-colors hover:text-[#ECEBF2] hover:underline"
+        >
+          Widerruf
         </a>
         <span className="text-[#ECEBF2]">•</span>
         <KlaroCookieSettingsButton />

@@ -6,6 +6,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { Toaster } from "sonner";
 import { KlaroCookieConsent } from "@/components/KlaroCookieConsent";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { MicrosoftClarity } from "@/components/analytics/MicrosoftClarity";
 import { TrackingProvider } from "@/components/analytics/TrackingProvider";
 import { siteConfig } from "@/lib/config";
 import "./globals.css";
@@ -54,6 +55,7 @@ export default function RootLayout({
     <html lang="de">
       <body className={`${jakartaSans.variable} ${GeistSans.variable} font-ui`}>
         <GoogleAnalytics />
+        <MicrosoftClarity />
         <NextUIProvider>
           <Toaster position="top-right" richColors closeButton />
           <Suspense fallback={null}>

@@ -115,12 +115,12 @@ export const BookingEvents = {
   },
 
   // Buchung erfolgreich abgeschlossen
-  bookingCompleted: (bookingNumber: string, serviceName: string, price: number, trackingData?: TrackingData) => {
+  bookingCompleted: (bookingNumber: string, serviceName: string, price: number, trackingData?: TrackingData, currency: string = "EUR") => {
     trackEvent("booking_completed", {
       booking_number: bookingNumber,
       service_name: serviceName,
       price: price,
-      currency: "CHF",
+      currency,
       // Tracking-Quelle
       utm_source: trackingData?.utmSource,
       utm_medium: trackingData?.utmMedium,
@@ -131,7 +131,7 @@ export const BookingEvents = {
     trackEvent("purchase", {
       transaction_id: bookingNumber,
       value: price,
-      currency: "CHF",
+      currency,
       items: [
         {
           item_name: serviceName,

@@ -204,7 +204,7 @@ function BookingPageInner() {
         employeeId: selectedEmployee?.id ?? null,
         waitlistToken,
       }, slug);
-      BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {});
+      BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {}, selectedService.currency);
       router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
     } catch (err: any) {
       setError(err.message || t.booking.errorBooking);

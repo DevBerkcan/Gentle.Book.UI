@@ -119,7 +119,8 @@ export default function BookingPage() {
         booking.bookingNumber,
         selectedService.name,
         selectedService.price,
-        {}
+        {},
+        selectedService.currency
       );
       router.push(`/booking/confirmation/${booking.id}`);
     } catch (err: any) {
