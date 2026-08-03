@@ -99,6 +99,7 @@ function BookingPageInner() {
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [finderEnabled, setFinderEnabled] = useState(false);
 
   useEffect(() => {
@@ -113,6 +114,8 @@ function BookingPageInner() {
     fetch(`${apiBase}/booking/${slug}/info`)
       .then((r) => {
         if (r.status === 404) { setNotFound(true); return null; }
+        if (r.status === 423) { setUnavailable(true); return null; }
+        if (!r.ok) throw new Error("Booking page could not be loaded");
         return r.json();
       })
       .then((info) => {
@@ -234,6 +237,17 @@ function BookingPageInner() {
         <div className="text-center p-8">
           <p className="text-2xl font-bold text-gray-800 mb-2">{t.booking.bookingSystemNotFound}</p>
           <p className="text-gray-500">{t.booking.bookingSystemNotFoundDesc} <span className="font-mono">/booking/{slug}</span> {t.booking.bookingSystemNotFoundDesc2}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (unavailable) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md text-center p-8">
+          <p className="text-2xl font-bold text-gray-800 mb-2">Derzeit nicht verfügbar</p>
+          <p className="text-gray-500">Über diese Seite können momentan keine Termine gebucht werden. Bitte wenden Sie sich direkt an das Unternehmen.</p>
         </div>
       </div>
     );

@@ -53,6 +53,7 @@ const PLANS = [
     highlight: false,
     employees: 2,
     services: 15,
+    hasAnalytics: false,
     features: [
       '2 Mitarbeiter-Konten',
       'Bis zu 15 Services',
@@ -70,6 +71,7 @@ const PLANS = [
     highlight: true,
     employees: 10,
     services: 50,
+    hasAnalytics: true,
     features: [
       '10 Mitarbeiter-Konten',
       'Bis zu 50 Services',
@@ -89,6 +91,7 @@ const PLANS = [
     highlight: false,
     employees: null,
     services: null,
+    hasAnalytics: true,
     features: [
       'Unbegrenzte Mitarbeiter',
       'Unbegrenzte Services',
@@ -142,12 +145,20 @@ export default function AdminSubscriptionPage() {
   // so a real customer can never see a Mollie test-mode checkout by mistake.
   const [mollieLiveMode, setMollieLiveMode] = useState<boolean | null>(null);
   const [cancelling, setCancelling] = useState(false);
-  const [legalAccepted, setLegalAccepted] = useState(false);
+  const [businessConfirmed, setBusinessConfirmed] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [billingConfirmed, setBillingConfirmed] = useState(false);
   const { confirm, dialog } = useConfirm();
   // Live prices from the backend (SuperAdmin-editable) — overrides the hardcoded PLANS
   // defaults below so this page never shows a stale price after a SuperAdmin price change.
   const [livePrices, setLivePrices] = useState<Record<string, { monthly: number; annual: number }>>({});
   const [billingInterval, setBillingInterval] = useState<'Monthly' | 'Yearly'>('Monthly');
+  // Whether the tenant already has an active Mollie subscription — if so, clicking another
+  // plan must go through handleChangePlan (in-place PATCH), not handleMollieStart (which
+  // the backend rejects once a subscription already exists).
+  const [hasMollieSubscription, setHasMollieSubscription] = useState(false);
+  const [changingPlan, setChangingPlan] = useState<string | null>(null);
+  const [planChangeSuccess, setPlanChangeSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -163,6 +174,7 @@ export default function AdminSubscriptionPage() {
         setRequestedPlan(requestStatus.request.requestedPlan);
       }
       setMollieLiveMode(mollieStatus?.isLiveMode ?? false);
+      setHasMollieSubscription(mollieStatus?.hasMollieSubscription ?? false);
       setLivePrices(Object.fromEntries((pricing ?? []).map(p => [p.plan, { monthly: p.monthlyPrice, annual: p.annualPrice }])));
     }).finally(() => setLoading(false));
   }, []);
@@ -204,6 +216,37 @@ export default function AdminSubscriptionPage() {
     } catch (err: any) {
       setRequestError(err.response?.data?.message || 'SEPA-Zahlung konnte nicht gestartet werden.');
       setMollieLoadingPlan(null);
+    }
+  };
+
+  const handleChangePlan = async (planKey: string, planName: string) => {
+    if (changingPlan) return;
+    const periodEndText = sub?.currentPeriodEnd
+      ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
+      : 'der nächsten Abbuchung';
+    const currentPlanMeta = PLANS.find((p) => p.key === currentPlanKey);
+    const targetPlanMeta = PLANS.find((p) => p.key === planKey);
+    const losesAnalytics = !!currentPlanMeta?.hasAnalytics && !targetPlanMeta?.hasAnalytics;
+    const analyticsWarning = losesAnalytics
+      ? ' Achtung: Mit diesem Wechsel verlieren Sie den Zugriff auf Analytics & Umsatzberichte.'
+      : '';
+    const ok = await confirm({
+      title: `Zu ${planName} wechseln?`,
+      message: `Sie wechseln zu ${planName} (${billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'}). Der neue Preis gilt ab ${periodEndText}, Ihre neuen Plan-Limits (Mitarbeiter/Services) sind sofort verfügbar.${analyticsWarning}`,
+      confirmLabel: 'Ja, Plan wechseln',
+    });
+    if (!ok) return;
+    setChangingPlan(planKey);
+    setRequestError('');
+    try {
+      await adminApi.changeSubscriptionPlan(planKey, billingInterval);
+      const subData = await api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null);
+      setSub(subData);
+      setPlanChangeSuccess(planName);
+    } catch (err: any) {
+      setRequestError(err.response?.data?.message || 'Plan konnte nicht gewechselt werden. Bitte versuchen Sie es erneut.');
+    } finally {
+      setChangingPlan(null);
     }
   };
 
@@ -282,6 +325,7 @@ export default function AdminSubscriptionPage() {
       return monthlyTotal > 0 ? Math.round((1 - annual / monthlyTotal) * 100) : 0;
     })
   );
+  const contractConfirmed = businessConfirmed && termsAccepted && billingConfirmed;
 
   return (
     <motion.div
@@ -422,6 +466,19 @@ export default function AdminSubscriptionPage() {
         </motion.div>
       )}
 
+      {/* Plan Change Success Banner */}
+      {planChangeSuccess && (
+        <motion.div variants={fadeUp} className="bg-green-50 border border-green-200 rounded-2xl p-5 flex gap-4">
+          <CheckCircle className="text-green-500 shrink-0 mt-0.5" size={22} />
+          <div>
+            <p className="font-semibold text-green-800">Plan gewechselt!</p>
+            <p className="text-green-700 text-sm mt-1">
+              Sie sind jetzt auf dem <strong>{planChangeSuccess}-Plan</strong>. Die neuen Limits gelten sofort, der neue Preis ab der nächsten Abbuchung.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Request Success Banner */}
       {requestSuccess && (
         <motion.div variants={fadeUp} className="bg-green-50 border border-green-200 rounded-2xl p-5 flex gap-4">
@@ -507,23 +564,23 @@ export default function AdminSubscriptionPage() {
           )}
         </div>
 
-        <label className="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          <input
-            type="checkbox"
-            checked={legalAccepted}
-            onChange={(event) => setLegalAccepted(event.target.checked)}
-            className="mt-0.5 h-4 w-4 accent-[#6355E4]"
-          />
-          <span>
-            Ich handle als Unternehmer im Sinne des § 14 BGB, akzeptiere die{' '}
-            <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">AGB</a>
-            {' '}und habe die{' '}
-            <a href={legalConfig.privacy} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">Datenschutzerklärung</a>
-            {' '}sowie die Hinweise zur{' '}
-            <a href={legalConfig.processing} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">Auftragsverarbeitung</a>
-            {' '}zur Kenntnis genommen.
-          </span>
-        </label>
+        {!hasMollieSubscription && (
+          <fieldset className="mb-6 space-y-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
+            <legend className="px-1 font-semibold text-gray-900">Verbindliche Bestätigungen vor dem Abschluss</legend>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" checked={businessConfirmed} onChange={(event) => setBusinessConfirmed(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
+              <span>Ich schließe das Abonnement als Unternehmer im Sinne des § 14 BGB ab.</span>
+            </label>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
+              <span>Ich akzeptiere die geltenden <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">GentleBook-AGB</a>.</span>
+            </label>
+            <label className="flex items-start gap-3">
+              <input type="checkbox" checked={billingConfirmed} onChange={(event) => setBillingConfirmed(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
+              <span>Mir ist bekannt, dass das Abonnement {billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'} im Voraus abgerechnet wird und sich jeweils um einen gleich langen Zeitraum verlängert, bis es gekündigt wird.</span>
+            </label>
+          </fieldset>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {PLANS.map((plan) => {
             const isCurrent = currentPlanKey === plan.key;
@@ -583,12 +640,30 @@ export default function AdminSubscriptionPage() {
                   ))}
                 </ul>
                 <div className="space-y-2">
+                  {/* Already a Mollie subscriber: switch in place (PATCH), no new checkout. */}
+                  {!isCurrent && hasMollieSubscription && sub?.status === 'Active' && (
+                    <button
+                      onClick={() => handleChangePlan(plan.key, plan.name)}
+                      disabled={!!changingPlan}
+                      className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
+                        ${plan.highlight
+                          ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
+                          : 'bg-gray-900 hover:bg-gray-700 text-white'}
+                        ${changingPlan && changingPlan !== plan.key ? 'opacity-50' : ''}`}
+                    >
+                      {changingPlan === plan.key ? (
+                        <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>Zu {plan.name} wechseln <ArrowRight size={14} /></>
+                      )}
+                    </button>
+                  )}
                   {/* Primary: Mollie SEPA checkout — only ever shown once we've confirmed
                       live mode server-side, so no real customer can hit a test-mode checkout. */}
-                  {!isCurrent && mollieLiveMode === true && (
+                  {!isCurrent && !hasMollieSubscription && mollieLiveMode === true && (
                     <button
                       onClick={() => handleMollieStart(plan.key)}
-                      disabled={!legalAccepted || !!mollieLoadingPlan || requestedPlan === plan.key}
+                      disabled={!contractConfirmed || !!mollieLoadingPlan || requestedPlan === plan.key}
                       className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors
                         ${plan.highlight
                           ? 'bg-[#6355E4] hover:bg-[#015f5f] text-white'
@@ -598,11 +673,11 @@ export default function AdminSubscriptionPage() {
                       {mollieLoadingPlan === plan.key ? (
                         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>{plan.name} per SEPA abonnieren <ArrowRight size={14} /></>
+                        <>{plan.name} kostenpflichtig abonnieren <ArrowRight size={14} /></>
                       )}
                     </button>
                   )}
-                  {!isCurrent && mollieLiveMode === false && (
+                  {!isCurrent && !hasMollieSubscription && mollieLiveMode === false && (
                     <div
                       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
                       title="SEPA-Zahlung ist bald verfügbar"
@@ -615,11 +690,12 @@ export default function AdminSubscriptionPage() {
                       <Check size={15} /> Aktueller Plan
                     </div>
                   )}
-                  {/* Fallback: manual request (no SEPA) */}
-                  {!isCurrent && (
+                  {/* Fallback: manual request (no SEPA) — only meaningful before any Mollie
+                      subscription exists; the manual path is blocked server-side afterward. */}
+                  {!isCurrent && !hasMollieSubscription && (
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
-                      disabled={!legalAccepted || requesting || !!requestedPlan}
+                      disabled={!contractConfirmed || requesting || !!requestedPlan}
                       title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
                       className="w-full text-center text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors py-1 disabled:opacity-50"
                     >

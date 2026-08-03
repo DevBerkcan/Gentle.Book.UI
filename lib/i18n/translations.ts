@@ -133,7 +133,7 @@ export const translations = {
       noDataFound: "Keine Daten gefunden",
       // Subscription
       trialExpired: "Testzeitraum abgelaufen",
-      trialExpiredDesc: "Wählen Sie einen Plan und wir aktivieren ihn innerhalb von 24 Stunden.",
+      trialExpiredDesc: "Es gibt keine automatische Abbuchung. Wählen Sie aktiv einen Monats- oder Jahrestarif, um GentleBook weiter zu nutzen.",
       requestSent: "Anfrage gesendet!",
       planActivatedIn24h: "Ihr Plan wird innerhalb von 24h aktiviert. Sie erhalten eine Bestätigungs-E-Mail.",
       subscriptionDetails: "Abonnement-Details",
@@ -305,7 +305,7 @@ export const translations = {
       noDataFound: "No data found",
       // Subscription
       trialExpired: "Trial period expired",
-      trialExpiredDesc: "Choose a plan and we'll activate it within 24 hours.",
+      trialExpiredDesc: "There is no automatic charge. Actively choose a monthly or annual plan to continue using GentleBook.",
       requestSent: "Request sent!",
       planActivatedIn24h: "Your plan will be activated within 24h. You'll receive a confirmation email.",
       subscriptionDetails: "Subscription details",

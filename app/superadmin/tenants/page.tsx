@@ -47,8 +47,6 @@ const DEFAULT_NEW = {
   adminFirstName: '',
   adminLastName: '',
   adminEmail: '',
-  adminPassword: '',
-  sendWelcomeEmail: true,
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -185,6 +183,8 @@ function SubscriptionCell({ sub }: { sub: TenantListItem['subscription'] }) {
 
   const cfg: Record<string, { label: string; cls: string; icon: React.ReactNode }> = {
     Active: { label: 'Aktiv', cls: 'bg-green-50 text-green-700 border border-green-200', icon: <CheckCircle size={11} /> },
+    PendingAcceptance: { label: 'Bestätigung ausstehend', cls: 'bg-blue-50 text-blue-700 border border-blue-200', icon: <Clock size={11} /> },
+    PendingActivation: { label: 'Bereit zur Freigabe', cls: 'bg-violet-50 text-violet-700 border border-violet-200', icon: <CheckCircle size={11} /> },
     Expired: { label: 'Abgelaufen', cls: 'bg-red-50 text-red-700 border border-red-200', icon: <XCircle size={11} /> },
     PastDue: { label: 'Überfällig', cls: 'bg-orange-50 text-orange-700 border border-orange-200', icon: <AlertCircle size={11} /> },
     Cancelled: { label: 'Gekündigt', cls: 'bg-gray-100 text-gray-500', icon: null },
@@ -241,10 +241,8 @@ export default function TenantsPage() {
         currency: newTenant.currency,
         timeZone: newTenant.timeZone,
         adminEmail: newTenant.adminEmail,
-        adminPassword: newTenant.adminPassword || undefined,
         adminFirstName: newTenant.adminFirstName || newTenant.name,
         adminLastName: newTenant.adminLastName || 'Admin',
-        sendWelcomeEmail: newTenant.sendWelcomeEmail,
       });
       setShowAddForm(false);
       setNewTenant(DEFAULT_NEW);
@@ -520,31 +518,12 @@ export default function TenantsPage() {
                 onChange={e => setNewTenant(p => ({ ...p, adminEmail: e.target.value }))}
               />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Admin Passwort <span className="text-gray-400">(optional)</span>
-              </label>
-              <input
-                type="password"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gray-400"
-                placeholder="Leer lassen = automatisch generiert"
-                value={newTenant.adminPassword}
-                onChange={e => setNewTenant(p => ({ ...p, adminPassword: e.target.value }))}
-              />
-            </div>
           </div>
 
-          <div className="mt-3 flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
-            <input
-              type="checkbox"
-              id="sendWelcomeEmail"
-              checked={newTenant.sendWelcomeEmail}
-              onChange={e => setNewTenant(p => ({ ...p, sendWelcomeEmail: e.target.checked }))}
-              className="w-4 h-4 accent-blue-600"
-            />
-            <label htmlFor="sendWelcomeEmail" className="text-sm text-blue-800 cursor-pointer">
-              Zugangsdaten per E-Mail an <strong>{newTenant.adminEmail || 'Admin'}</strong> senden
-            </label>
+          <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5">
+            <p className="text-sm text-blue-800">
+              Der Mandant bleibt zunächst inaktiv. <strong>{newTenant.adminEmail || 'Der Admin'}</strong> bestätigt B2B-Nutzung, AGB, Datenschutz und AVV per E-Mail. Danach geben Sie den Test manuell frei; erst dann beginnen die 14 Tage und die Passwortvergabe.
+            </p>
           </div>
 
           {error && (
@@ -734,9 +713,9 @@ export default function TenantsPage() {
                       </a>
                       <button
                         onClick={() => toggleActive(t)}
-                        disabled={toggling === t.id}
+                        disabled={toggling === t.id || t.subscription?.status === 'PendingAcceptance' || t.subscription?.status === 'PendingActivation'}
                         className={`p-1.5 rounded-lg transition-colors ${t.isActive ? 'text-orange-500 hover:bg-orange-50' : 'text-green-500 hover:bg-green-50'}`}
-                        title={t.isActive ? 'Deaktivieren' : 'Aktivieren'}
+                        title={t.subscription?.status === 'PendingActivation' ? 'Test in den Mandantendetails freigeben' : t.subscription?.status === 'PendingAcceptance' ? 'Rechtliche Bestätigung ausstehend' : t.isActive ? 'Deaktivieren' : 'Aktivieren'}
                       >
                         {toggling === t.id ? <Loader2 size={15} className="animate-spin" /> : <Power size={15} />}
                       </button>

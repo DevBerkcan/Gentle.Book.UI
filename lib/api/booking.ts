@@ -172,10 +172,12 @@ export async function getServices(tenantSlug?: string): Promise<Service[]> {
 }
 
 export async function getTenantInfo(tenantSlug: string): Promise<{
-  name: string; companyName?: string; primaryColor?: string; tagline?: string; welcomeMessage?: string; logoUrl?: string; linktreeStyle?: string; industryType?: string; linktreeConfig?: string;
+  name?: string; companyName?: string; primaryColor?: string; tagline?: string; welcomeMessage?: string; logoUrl?: string; linktreeStyle?: string; industryType?: string; linktreeConfig?: string; unavailable?: boolean; notFound?: boolean;
 }> {
   const res = await fetch(`${API_BASE_URL}/booking/${tenantSlug}/info`, { cache: 'no-store' });
-  if (!res.ok) return { name: tenantSlug };
+  if (res.status === 423) return { name: tenantSlug, unavailable: true };
+  if (res.status === 404) return { notFound: true };
+  if (!res.ok) throw new Error("Buchungsseite konnte nicht geladen werden");
   return res.json();
 }
 

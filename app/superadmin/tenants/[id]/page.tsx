@@ -27,6 +27,8 @@ export default function TenantDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>('link');
   const [copied, setCopied] = useState(false);
   const [extendingTrial, setExtendingTrial] = useState(false);
+  const [activatingTrial, setActivatingTrial] = useState(false);
+  const [trialActivationError, setTrialActivationError] = useState('');
   const [changingPlan, setChangingPlan] = useState(false);
   const [planChanged, setPlanChanged] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('');
@@ -139,6 +141,25 @@ export default function TenantDetailPage() {
       setTimeout(() => setPlanChanged(false), 3000);
     } catch { /* silent fail */ } finally {
       setChangingPlan(false);
+    }
+  };
+
+  const handleActivatePreparedTrial = async () => {
+    const approved = await confirm({
+      title: '14-tägigen Test jetzt freigeben?',
+      message: 'Mit der Freigabe beginnen die 14 Tage sofort. Der Mandant, die Buchungsseite und der Administrator werden aktiviert und die Zugangsdaten werden per E-Mail versendet.',
+      confirmLabel: 'Test verbindlich freigeben',
+    });
+    if (!approved) return;
+    setActivatingTrial(true);
+    setTrialActivationError('');
+    try {
+      await superAdminApi.activatePreparedTrial(id);
+      setTenant(await superAdminApi.getTenant(id));
+    } catch (err: any) {
+      setTrialActivationError(err?.response?.data?.message ?? 'Testfreigabe fehlgeschlagen');
+    } finally {
+      setActivatingTrial(false);
     }
   };
 
@@ -645,17 +666,23 @@ export default function TenantDetailPage() {
                 <div className={`flex items-start gap-4 p-4 rounded-xl border ${
                   sub.isInTrial
                     ? 'bg-yellow-50 border-yellow-200'
+                    : sub.status === 'PendingAcceptance' || sub.status === 'PendingActivation'
+                    ? 'bg-violet-50 border-violet-200'
                     : sub.status === 'Active'
                     ? 'bg-green-50 border-green-200'
                     : 'bg-red-50 border-red-200'
                 }`}>
                   <Clock size={20} className={
-                    sub.isInTrial ? 'text-yellow-600 mt-0.5' : sub.status === 'Active' ? 'text-green-600 mt-0.5' : 'text-red-600 mt-0.5'
+                    sub.isInTrial ? 'text-yellow-600 mt-0.5' : sub.status === 'PendingAcceptance' || sub.status === 'PendingActivation' ? 'text-violet-600 mt-0.5' : sub.status === 'Active' ? 'text-green-600 mt-0.5' : 'text-red-600 mt-0.5'
                   } />
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900 text-sm">
                       {sub.isInTrial
                         ? `Trial — ${sub.trialDaysRemaining} Tage verbleibend`
+                        : sub.status === 'PendingAcceptance'
+                        ? 'Bestätigung ausstehend — Testphase noch nicht gestartet'
+                        : sub.status === 'PendingActivation'
+                        ? 'Rechtlich bestätigt — manuelle Freigabe ausstehend'
                         : sub.status === 'Active'
                         ? 'Aktives Abonnement'
                         : 'Abgelaufen / Inaktiv'}
@@ -668,6 +695,23 @@ export default function TenantDetailPage() {
                     <p className="text-xs text-gray-400 mt-0.5">Plan: <strong>{sub.plan}</strong> · Status: {sub.status}</p>
                   </div>
                 </div>
+
+                {sub.status === 'PendingActivation' && (
+                  <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+                    <p className="text-sm font-semibold text-violet-900">Alle erforderlichen Bestätigungen liegen vor.</p>
+                    <p className="mt-1 text-xs leading-5 text-violet-700">Prüfen Sie die vorbereiteten Unternehmensangaben, Leistungen, Preise, Mitarbeiter, Arbeitszeiten, Buchungs- und Stornierungsbedingungen. Erst der folgende Schritt startet den Testzeitraum.</p>
+                    {trialActivationError && <p className="mt-3 text-xs text-red-600">{trialActivationError}</p>}
+                    <button
+                      type="button"
+                      onClick={handleActivatePreparedTrial}
+                      disabled={activatingTrial}
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
+                    >
+                      <Check size={15} />
+                      {activatingTrial ? 'Wird freigegeben…' : '14-tägigen Test jetzt freigeben'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Mollie / Zahlungsdetails */}
                 {(sub.mollieCustomerId || sub.mollieSubscriptionId) && (
@@ -865,7 +909,11 @@ export default function TenantDetailPage() {
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-3">
             <h2 className="font-semibold text-gray-900">📧 Onboarding-Mail</h2>
             <p className="text-sm text-gray-500">
-              Sendet die vollständige Willkommens-Mail mit einem frischen Passwort-Link (72h gültig) erneut an den Admin-User.
+              {sub?.status === 'PendingAcceptance'
+                ? 'Sendet einen neuen Link zur Bestätigung von B2B-Eigenschaft, AGB, Datenschutz und AVV.'
+                : sub?.status === 'PendingActivation'
+                ? 'Die Bestätigungen liegen vor. Geben Sie den Test zuerst über die gesonderte Testfreigabe frei.'
+                : 'Sendet die vollständige Willkommens-Mail mit einem frischen Passwort-Link (72h gültig) erneut an den Admin-User.'}
             </p>
             {welcomeResent && (
               <p className="text-sm text-green-700 bg-green-50 border border-green-100 rounded-lg px-4 py-2.5">
@@ -877,11 +925,19 @@ export default function TenantDetailPage() {
             )}
             <button
               onClick={handleResendWelcome}
-              disabled={resendingWelcome || welcomeResent}
+              disabled={resendingWelcome || welcomeResent || sub?.status === 'PendingActivation'}
               className="flex items-center gap-2 bg-[#6355E4] hover:bg-[#5646D6] text-white px-5 py-2.5 rounded-lg text-sm font-medium disabled:opacity-40 transition-colors"
             >
               <Mail size={15} />
-              {resendingWelcome ? 'Senden...' : welcomeResent ? '✓ Gesendet' : 'Willkommens-Mail erneut senden'}
+              {resendingWelcome
+                ? 'Senden...'
+                : welcomeResent
+                ? '✓ Gesendet'
+                : sub?.status === 'PendingAcceptance'
+                ? 'Bestätigungslink erneut senden'
+                : sub?.status === 'PendingActivation'
+                ? 'Manuelle Testfreigabe erforderlich'
+                : 'Willkommens-Mail erneut senden'}
             </button>
           </div>
         </div>

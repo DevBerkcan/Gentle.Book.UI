@@ -38,13 +38,15 @@ export default function TenantLinktreePage() {
   const [links,      setLinks]         = useState<TenantLink[]>([]);
   const [loading,    setLoading]       = useState(true);
   const [notFound,   setNotFound]      = useState(false);
+  const [unavailable, setUnavailable]  = useState(false);
   const [showFloating, setShowFloating] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
     Promise.all([getTenantInfo(slug), getTenantLinks(slug)])
       .then(([info, tenantLinks]) => {
-        if (!info?.name) { setNotFound(true); return; }
+        if (info.unavailable) { setUnavailable(true); return; }
+        if (info.notFound || !info.name) { setNotFound(true); return; }
         setTenantName(info.companyName ?? info.name ?? slug);
         setTagline(info.tagline ?? null);
         if (info.welcomeMessage) setWelcomeMsg(info.welcomeMessage);
@@ -119,6 +121,17 @@ export default function TenantLinktreePage() {
         <div className="text-center p-8">
           <p className="text-2xl font-bold text-gray-800 mb-2">Profil nicht gefunden</p>
           <p className="text-gray-500">Der Link <span className="font-mono">/booking/{slug}</span> existiert nicht.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (unavailable) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md text-center p-8">
+          <p className="text-2xl font-bold text-gray-800 mb-2">Derzeit nicht verfügbar</p>
+          <p className="text-gray-500">Über diese Seite können momentan keine Termine gebucht werden. Bitte wenden Sie sich direkt an das Unternehmen.</p>
         </div>
       </div>
     );

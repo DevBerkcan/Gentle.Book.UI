@@ -21,7 +21,10 @@ export const adminApi = {
   getServicesByEmployee,
 
   async requestPlan(plan: string, contactEmail?: string, note?: string, interval: 'Monthly' | 'Yearly' = 'Monthly') {
-    const { data } = await api.post('/tenant/subscription-request', { plan, contactEmail: contactEmail ?? '', note, interval });
+    const { data } = await api.post('/tenant/subscription-request', {
+      plan, contactEmail: contactEmail ?? '', note, interval,
+      businessConfirmed: true, termsAccepted: true, billingTermsAccepted: true,
+    });
     return data as { message: string; requestId: string };
   },
 
@@ -40,13 +43,20 @@ export const adminApi = {
   },
 
   async startMollieMandateFlow(plan: string, interval: 'Monthly' | 'Yearly' = 'Monthly') {
-    const { data } = await api.post('/tenant/subscription/mollie/start', { plan, interval });
+    const { data } = await api.post('/tenant/subscription/mollie/start', {
+      plan, interval, businessConfirmed: true, termsAccepted: true, billingTermsAccepted: true,
+    });
     return data as { checkoutUrl: string };
   },
 
   async getMollieStatus() {
     const { data } = await api.get('/tenant/subscription/mollie/status');
     return data as { isLiveMode: boolean; plan: string; status: string; hasMollieSubscription: boolean };
+  },
+
+  async changeSubscriptionPlan(plan: string, interval: 'Monthly' | 'Yearly') {
+    const { data } = await api.post('/tenant/subscription/change-plan', { plan, interval });
+    return data as { message: string; plan?: string; interval?: string };
   },
 
   async getPlanPricing() {

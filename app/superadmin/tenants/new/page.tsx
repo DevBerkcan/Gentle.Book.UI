@@ -9,13 +9,6 @@ import { superAdminApi, CreateTenantPayload } from '@/lib/api/superadmin';
 
 type Step = 'company' | 'industry' | 'admin' | 'confirm';
 
-const PLANS = [
-  { value: 'Trial',        label: 'Trial',        price: 'Kostenlos', duration: '14 Tage', color: 'border-gray-200 hover:border-gray-400' },
-  { value: 'Starter',      label: 'Starter',      price: '€29',       duration: '/Monat',  color: 'border-blue-200 hover:border-blue-400' },
-  { value: 'Professional', label: 'Professional', price: '€59',       duration: '/Monat',  color: 'border-purple-200 hover:border-purple-400' },
-  { value: 'Agency',       label: 'Agency',       price: '€99',       duration: '/Monat',  color: 'border-amber-200 hover:border-amber-400' },
-];
-
 const STEPS: { key: Step; label: string; icon: React.ReactNode }[] = [
   { key: 'company', label: 'Firma', icon: <Building2 size={16} /> },
   { key: 'industry', label: 'Branche', icon: <Palette size={16} /> },
@@ -43,7 +36,7 @@ export default function NewTenantWizard() {
   const [step, setStep] = useState<Step>('company');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [created, setCreated] = useState<{ id: string; slug: string; trialEndsAt: string } | null>(null);
+  const [created, setCreated] = useState<{ id: string; slug: string; status: string; activationExpiresAt: string } | null>(null);
 
   const [form, setForm] = useState<CreateTenantPayload>({
     name: '',
@@ -52,7 +45,6 @@ export default function NewTenantWizard() {
     currency: 'EUR',
     timeZone: 'Europe/Berlin',
     adminEmail: '',
-    adminPassword: '',
     adminFirstName: '',
     adminLastName: '',
     plan: 'Trial',
@@ -194,23 +186,9 @@ export default function NewTenantWizard() {
               ))}
             </div>
 
-            <div className="border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Gebuchtes Paket</h3>
-              <p className="text-xs text-gray-400 mb-3">Das Paket wurde bereits über das CRM verkauft.</p>
-              <div className="grid grid-cols-2 gap-2">
-                {PLANS.map(({ value, label, price, duration, color }) => (
-                  <button
-                    key={value}
-                    onClick={() => update('plan', value)}
-                    className={`p-3 border rounded-xl text-left transition-colors ${color} ${
-                      form.plan === value ? 'ring-2 ring-offset-1 ring-[#6355E4] border-[#6355E4] bg-[#EEEBFC]' : ''
-                    }`}
-                  >
-                    <p className="text-xs font-bold text-gray-900">{label}</p>
-                    <p className="text-sm font-semibold text-gray-700">{price}<span className="text-xs font-normal text-gray-400"> {duration}</span></p>
-                  </button>
-                ))}
-              </div>
+            <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+              <h3 className="text-sm font-semibold text-gray-900">Ablauf der Testfreischaltung</h3>
+              <p className="mt-1 text-xs leading-5 text-gray-600">Der Mandant wird vorbereitet und bleibt inaktiv. Nach der Bestätigung von B2B-Eigenschaft, AGB, Datenschutz und AVV geben Sie den Test manuell frei. Erst mit dieser Freigabe beginnen die 14 Tage.</p>
             </div>
 
             <div className="flex gap-3">
@@ -231,8 +209,8 @@ export default function NewTenantWizard() {
         {/* Step 3: Admin User */}
         {step === 'admin' && (
           <>
-            <h2 className="font-semibold text-gray-900">Zugangsdaten für den Kunden</h2>
-            <p className="text-xs text-gray-400">Der Kunde logt sich damit in seinen Admin-Bereich ein.</p>
+            <h2 className="font-semibold text-gray-900">Ansprechpartner für die Freischaltung</h2>
+            <p className="text-xs text-gray-400">An diese Person wird zunächst nur der rechtliche Bestätigungslink gesendet. Zugangsdaten folgen erst nach Ihrer anschließenden manuellen Testfreigabe.</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Vorname</label>
@@ -248,12 +226,6 @@ export default function NewTenantWizard() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">E-Mail *</label>
               <input type="email" value={form.adminEmail} onChange={(e) => update('adminEmail', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Passwort *</label>
-              <input type="password" value={form.adminPassword} onChange={(e) => update('adminPassword', e.target.value)}
-                placeholder="Mindestens 8 Zeichen"
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none" />
             </div>
             <div>
@@ -277,7 +249,7 @@ export default function NewTenantWizard() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={loading || !form.adminEmail || !form.adminPassword}
+                disabled={loading || !form.adminEmail}
                 className="flex-1 py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors disabled:opacity-40"
               >
                 {loading ? 'Erstellen...' : '🚀 Buchungssystem erstellen'}
@@ -304,17 +276,17 @@ export default function NewTenantWizard() {
                 <span className="font-medium text-gray-900">/booking/{created.slug}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Paket</span>
-                <span className="font-medium text-gray-900">{form.plan ?? 'Trial'}</span>
+                 <span className="text-gray-500">Status</span>
+                 <span className="font-medium text-amber-700">Bestätigung ausstehend</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Admin-Login</span>
-                <span className="font-medium text-gray-900">/admin/login</span>
+                 <span className="text-gray-500">Nächster Schritt</span>
+                 <span className="font-medium text-gray-900">Kunde bestätigt; danach Test manuell freigeben</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Trial läuft bis</span>
+                <span className="text-gray-500">Freischaltungslink gültig bis</span>
                 <span className="font-medium text-gray-900">
-                  {new Date(created.trialEndsAt).toLocaleDateString('de-DE')}
+                  {new Date(created.activationExpiresAt).toLocaleDateString('de-DE')}
                 </span>
               </div>
             </div>
@@ -326,7 +298,7 @@ export default function NewTenantWizard() {
                 Branding einrichten
               </button>
               <button
-                onClick={() => { setStep('company'); setForm({ name: '', slug: '', industryType: '', currency: 'EUR', timeZone: 'Europe/Berlin', adminEmail: '', adminPassword: '', adminFirstName: '', adminLastName: '', plan: 'Trial', personalNote: '' }); setCreated(null); }}
+                onClick={() => { setStep('company'); setForm({ name: '', slug: '', industryType: '', currency: 'EUR', timeZone: 'Europe/Berlin', adminEmail: '', adminFirstName: '', adminLastName: '', plan: 'Trial', personalNote: '' }); setCreated(null); }}
                 className="flex-1 py-2.5 bg-[#6355E4] text-white rounded-lg text-sm font-medium hover:bg-[#5646D6] transition-colors"
               >
                 Weiteres anlegen

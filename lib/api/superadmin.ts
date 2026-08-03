@@ -31,7 +31,6 @@ export interface CreateTenantPayload {
   currency?: string;
   timeZone?: string;
   adminEmail?: string;
-  adminPassword?: string;
   adminFirstName?: string;
   adminLastName?: string;
   sendWelcomeEmail?: boolean;
@@ -71,7 +70,7 @@ export const superAdminApi = {
 
   async createTenant(payload: CreateTenantPayload) {
     const { data } = await api.post('/superadmin/tenants', payload);
-    return data as { id: string; name: string; slug: string; trialEndsAt: string };
+    return data as { id: string; name: string; slug: string; status: string; activationExpiresAt: string };
   },
 
   async updateTenant(id: string, payload: { name?: string; industryType?: string }) {
@@ -116,6 +115,11 @@ export const superAdminApi = {
   async extendTrial(tenantId: string, days: number) {
     const { data } = await api.post(`/superadmin/tenants/${tenantId}/trial/extend`, { days });
     return data as { trialEndsAt: string; trialDaysRemaining: number };
+  },
+
+  async activatePreparedTrial(tenantId: string) {
+    const { data } = await api.post(`/superadmin/tenants/${tenantId}/trial/activate`);
+    return data as { status: string; trialStartedAt: string; trialEndsAt: string; activatedByUserId?: string; sentTo: string };
   },
 
   async changePlan(tenantId: string, plan: string) {
