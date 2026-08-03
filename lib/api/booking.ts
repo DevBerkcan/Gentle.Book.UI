@@ -16,6 +16,7 @@ if (!API_BASE_URL) {
   getServiceCategories,
   getServicesByCategory,
   getServices,
+  getLocations,
   getAvailability,
   createBooking,
   requestMyBookingsLink,
@@ -75,6 +76,16 @@ export interface Employee {
   specialty: string | null;
   isActive: boolean;
   location?: string | null;
+  photoUrl?: string | null;
+  tagline?: string | null;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  street: string | null;
+  postalCode: string | null;
+  city: string;
 }
 
 export interface CreateBookingRequest {
@@ -140,10 +151,16 @@ export async function getEmployees(tenantSlug?: string): Promise<Employee[]> {
 
 // ── Services ──────────────────────────────────────────────────────────────────
 
-export async function getServiceCategories(tenantSlug?: string): Promise<ServiceCategory[]> {
-  const url = tenantSlug
-    ? `${API_BASE_URL}/services/categories?tenantSlug=${tenantSlug}`
-    : `${API_BASE_URL}/services/categories`;
+function withTenantParams(base: string, tenantSlug?: string, locationId?: string): string {
+  const params = new URLSearchParams();
+  if (tenantSlug) params.set('tenantSlug', tenantSlug);
+  if (locationId) params.set('locationId', locationId);
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
+export async function getServiceCategories(tenantSlug?: string, locationId?: string): Promise<ServiceCategory[]> {
+  const url = withTenantParams(`${API_BASE_URL}/services/categories`, tenantSlug, locationId);
   const res = await fetch(url);
   if (!res.ok) throw new Error("Fehler beim Laden der Kategorien");
   return res.json();
@@ -151,23 +168,31 @@ export async function getServiceCategories(tenantSlug?: string): Promise<Service
 
 export async function getServicesByCategory(
   categoryId: string,
-  tenantSlug?: string
+  tenantSlug?: string,
+  locationId?: string
 ): Promise<Service[]> {
-  const url = tenantSlug
-    ? `${API_BASE_URL}/services/categories/${categoryId}/services?tenantSlug=${tenantSlug}`
-    : `${API_BASE_URL}/services/categories/${categoryId}/services`;
+  const url = withTenantParams(`${API_BASE_URL}/services/categories/${categoryId}/services`, tenantSlug, locationId);
   const res = await fetch(url);
   if (!res.ok)
     throw new Error("Fehler beim Laden der Services für diese Kategorie");
   return res.json();
 }
 
-export async function getServices(tenantSlug?: string): Promise<Service[]> {
-  const url = tenantSlug
-    ? `${API_BASE_URL}/services?tenantSlug=${tenantSlug}`
-    : `${API_BASE_URL}/services`;
+export async function getServices(tenantSlug?: string, locationId?: string): Promise<Service[]> {
+  const url = withTenantParams(`${API_BASE_URL}/services`, tenantSlug, locationId);
   const res = await fetch(url);
   if (!res.ok) throw new Error("Fehler beim Laden der Services");
+  return res.json();
+}
+
+/**
+ * Active locations for a tenant — only meaningful when a tenant has more than one.
+ * Callers should skip rendering a location-picker step when this returns ≤1 item.
+ */
+export async function getLocations(tenantSlug?: string): Promise<Location[]> {
+  const url = withTenantParams(`${API_BASE_URL}/services/locations`, tenantSlug);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Fehler beim Laden der Standorte");
   return res.json();
 }
 

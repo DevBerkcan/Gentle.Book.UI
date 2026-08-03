@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { FileText, Search, RefreshCw, Download, CheckCircle, XCircle, Euro } from 'lucide-react';
+import { FileText, Search, RefreshCw, Download, CheckCircle, XCircle, Euro, Send } from 'lucide-react';
 import { superAdminApi, InvoiceItem, TenantListItem } from '@/lib/api/superadmin';
 import { getSuperAdminToken } from '@/lib/auth/storage';
 
@@ -17,6 +17,7 @@ export default function InvoicesPage() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [page,     setPage]     = useState(1);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const PAGE_SIZE = 50;
 
   const [filterTenant, setFilterTenant] = useState('');
@@ -62,6 +63,16 @@ export default function InvoicesPage() {
       // silent
     }
     setDownloadingId(null);
+  }
+
+  async function resendInvoice(inv: InvoiceItem) {
+    setResendingId(inv.id);
+    try {
+      await superAdminApi.resendInvoice(inv.id);
+    } catch {
+      // silent
+    }
+    setResendingId(null);
   }
 
   const filtered = search
@@ -203,9 +214,19 @@ export default function InvoicesPage() {
                         <CheckCircle size={11} /> Versendet
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium w-fit bg-red-50 text-red-700 border border-red-200">
-                        <XCircle size={11} /> Nicht versendet
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium w-fit bg-red-50 text-red-700 border border-red-200">
+                          <XCircle size={11} /> Nicht versendet
+                        </span>
+                        <button
+                          onClick={() => resendInvoice(inv)}
+                          disabled={resendingId === inv.id}
+                          className="p-1 text-gray-400 hover:text-[#6355E4] hover:bg-[#EEEBFC] rounded-md transition-colors disabled:opacity-40"
+                          title="Erneut versenden"
+                        >
+                          <Send size={13} />
+                        </button>
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">

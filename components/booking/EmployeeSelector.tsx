@@ -2,9 +2,11 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Card, CardBody } from "@nextui-org/card";
 import { User, Star, Loader2, MapPin, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import { getEmployeesByService, type Employee, type Service } from "@/lib/api/booking";
+import { apiOrigin } from "@/lib/api/client";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 interface EmployeeSelectorProps {
@@ -130,18 +132,32 @@ export function EmployeeSelector({
               >
                 <CardBody className="p-3 sm:p-4 w-full">
                   <div className="flex items-start gap-3 sm:gap-4 w-full">
-                    <div
-                      className="flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors"
-                      style={{ backgroundColor: isSelected ? primaryColor : `${primaryColor}1A` }}
-                    >
-                      <User className={isSelected ? "text-white" : ""} size={20} style={!isSelected ? { color: primaryColor } : {}} />
-                    </div>
+                    {emp.photoUrl ? (
+                      <Image
+                        src={emp.photoUrl.startsWith('http') ? emp.photoUrl : `${apiOrigin}${emp.photoUrl}`}
+                        alt={emp.name}
+                        width={48}
+                        height={48}
+                        className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover"
+                        style={isSelected ? { boxShadow: `0 0 0 2px ${primaryColor}` } : undefined}
+                      />
+                    ) : (
+                      <div
+                        className="flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors"
+                        style={{ backgroundColor: isSelected ? primaryColor : `${primaryColor}1A` }}
+                      >
+                        <User className={isSelected ? "text-white" : ""} size={20} style={!isSelected ? { color: primaryColor } : {}} />
+                      </div>
+                    )}
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words pr-1">{emp.name}</h4>
                           <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 break-words">{emp.role}</p>
+                          {emp.tagline && (
+                            <p className="text-xs italic mt-0.5 break-words" style={{ color: primaryColor }}>"{emp.tagline}"</p>
+                          )}
 
                           {emp.location ? (
                             <div className="mt-3 mb-2">

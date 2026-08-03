@@ -7,13 +7,14 @@ import { motion } from 'framer-motion';
 import {
   Clock, CheckCircle, XCircle, AlertTriangle,
   Check, MessageCircle, Mail, Zap, Users, Star, Shield,
-  BarChart2, Globe, ArrowRight,
+  BarChart2, Globe, ArrowRight, FileText, Download,
 } from 'lucide-react';
 import api from '@/lib/api/client';
-import { adminApi } from '@/lib/api/admin';
+import { adminApi, TenantInvoiceItem } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
 import { legalConfig, supportConfig } from '@/lib/config';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { getAccessToken } from '@/lib/auth/storage';
 
 interface Subscription {
   plan: string;
@@ -48,6 +49,7 @@ const PLANS = [
   {
     name: 'Starter',
     price: 29,
+    priceOnRequest: false,
     key: 'Starter',
     color: 'border-gray-200',
     highlight: false,
@@ -66,6 +68,7 @@ const PLANS = [
   {
     name: 'Pro',
     price: 59,
+    priceOnRequest: false,
     key: 'Professional',
     color: 'border-[#6355E4]',
     highlight: true,
@@ -85,7 +88,8 @@ const PLANS = [
   },
   {
     name: 'Agency',
-    price: 99,
+    price: 0,
+    priceOnRequest: true,
     key: 'Agency',
     color: 'border-gray-200',
     highlight: false,
@@ -159,6 +163,38 @@ export default function AdminSubscriptionPage() {
   const [hasMollieSubscription, setHasMollieSubscription] = useState(false);
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
   const [planChangeSuccess, setPlanChangeSuccess] = useState<string | null>(null);
+  const [invoices, setInvoices] = useState<TenantInvoiceItem[]>([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(true);
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
+
+  useEffect(() => {
+    adminApi.getInvoices()
+      .then(res => setInvoices(res.items))
+      .catch(() => setInvoices([]))
+      .finally(() => setInvoicesLoading(false));
+  }, []);
+
+  async function downloadInvoicePdf(inv: TenantInvoiceItem) {
+    setDownloadingInvoiceId(inv.id);
+    try {
+      const token = getAccessToken();
+      const res = await fetch(adminApi.invoicePdfUrl(inv.id), {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Download fehlgeschlagen');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Rechnung-${inv.invoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch {
+      // silent
+    }
+    setDownloadingInvoiceId(null);
+  }
 
   useEffect(() => {
     Promise.all([
@@ -319,7 +355,7 @@ export default function AdminSubscriptionPage() {
   };
   const maxSavingsPercent = Math.max(
     0,
-    ...PLANS.map((plan) => {
+    ...PLANS.filter((plan) => !plan.priceOnRequest).map((plan) => {
       const { monthly, annual } = getPrices(plan);
       const monthlyTotal = monthly * 12;
       return monthlyTotal > 0 ? Math.round((1 - annual / monthlyTotal) * 100) : 0;
@@ -433,6 +469,40 @@ export default function AdminSubscriptionPage() {
         </motion.div>
       )}
       {dialog}
+
+      {/* Invoices */}
+      {!invoicesLoading && invoices.length > 0 && (
+        <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText size={18} className="text-[#6355E4]" />
+            Rechnungen
+          </h2>
+          <div className="divide-y divide-gray-100">
+            {invoices.map(inv => (
+              <div key={inv.id} className="py-3 flex items-center justify-between gap-4 flex-wrap">
+                <div className="min-w-0">
+                  <p className="font-medium text-gray-900 text-sm">{inv.invoiceNumber}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {new Date(inv.issueDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {' · '}{inv.planName}
+                    {' · '}{inv.amount.toLocaleString('de-DE', { minimumFractionDigits: 2 })} {inv.currency}
+                  </p>
+                </div>
+                <button
+                  onClick={() => downloadInvoicePdf(inv)}
+                  disabled={downloadingInvoiceId === inv.id}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:border-[#6355E4] hover:text-[#6355E4] text-xs font-medium disabled:opacity-40 transition-colors shrink-0"
+                >
+                  {downloadingInvoiceId === inv.id
+                    ? <span className="w-3 h-3 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                    : <Download size={13} />}
+                  PDF
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Usage Meter */}
       {usage && (
@@ -613,19 +683,27 @@ export default function AdminSubscriptionPage() {
                 )}
                 <div className="mb-4">
                   <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
-                  <div className="flex items-end gap-1 mt-2">
-                    <span className="text-3xl font-bold text-gray-900">€{displayPrice}</span>
-                    <span className="text-gray-500 mb-1">/Monat</span>
-                  </div>
-                  {billingInterval === 'Yearly' && (
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="text-xs text-gray-500">bei jährlicher Zahlung · €{annual}/Jahr</span>
-                      {savingsPercent > 0 && (
-                        <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5">
-                          Spare {savingsPercent}% (€{savingsAmount}/Jahr)
-                        </span>
-                      )}
+                  {plan.priceOnRequest ? (
+                    <div className="flex items-end gap-1 mt-2">
+                      <span className="text-2xl font-bold text-gray-900">Preis auf Anfrage</span>
                     </div>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-1 mt-2">
+                        <span className="text-3xl font-bold text-gray-900">€{displayPrice}</span>
+                        <span className="text-gray-500 mb-1">/Monat</span>
+                      </div>
+                      {billingInterval === 'Yearly' && (
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <span className="text-xs text-gray-500">bei jährlicher Zahlung · €{annual}/Jahr</span>
+                          {savingsPercent > 0 && (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5">
+                              Spare {savingsPercent}% (€{savingsAmount}/Jahr)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
                     {plan.employees ? `${plan.employees} Mitarbeiter · ${plan.services} Services` : 'Unbegrenzte Mitarbeiter & Services'}
@@ -640,8 +718,21 @@ export default function AdminSubscriptionPage() {
                   ))}
                 </ul>
                 <div className="space-y-2">
+                  {/* Agency has no fixed price ("Preis auf Anfrage") — self-service checkout
+                      and in-place plan changes are blocked server-side, always route through
+                      the manual contact/request flow instead. */}
+                  {!isCurrent && plan.priceOnRequest && (
+                    <button
+                      onClick={() => handlePlanRequest(plan.key)}
+                      disabled={requesting || !!requestedPlan}
+                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors bg-gray-900 hover:bg-gray-700 text-white disabled:opacity-50"
+                    >
+                      {requestedPlan === plan.key ? 'Anfrage gesendet ✓' : <>Angebot anfragen <ArrowRight size={14} /></>}
+                    </button>
+                  )}
                   {/* Already a Mollie subscriber: switch in place (PATCH), no new checkout. */}
-                  {!isCurrent && hasMollieSubscription && sub?.status === 'Active' && (
+                  {!isCurrent && !plan.priceOnRequest && hasMollieSubscription && sub?.status === 'Active' && (
                     <button
                       onClick={() => handleChangePlan(plan.key, plan.name)}
                       disabled={!!changingPlan}
@@ -660,7 +751,7 @@ export default function AdminSubscriptionPage() {
                   )}
                   {/* Primary: Mollie SEPA checkout — only ever shown once we've confirmed
                       live mode server-side, so no real customer can hit a test-mode checkout. */}
-                  {!isCurrent && !hasMollieSubscription && mollieLiveMode === true && (
+                  {!isCurrent && !plan.priceOnRequest && !hasMollieSubscription && mollieLiveMode === true && (
                     <button
                       onClick={() => handleMollieStart(plan.key)}
                       disabled={!contractConfirmed || !!mollieLoadingPlan || requestedPlan === plan.key}
@@ -677,7 +768,7 @@ export default function AdminSubscriptionPage() {
                       )}
                     </button>
                   )}
-                  {!isCurrent && !hasMollieSubscription && mollieLiveMode === false && (
+                  {!isCurrent && !plan.priceOnRequest && !hasMollieSubscription && mollieLiveMode === false && (
                     <div
                       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
                       title="SEPA-Zahlung ist bald verfügbar"
@@ -692,7 +783,7 @@ export default function AdminSubscriptionPage() {
                   )}
                   {/* Fallback: manual request (no SEPA) — only meaningful before any Mollie
                       subscription exists; the manual path is blocked server-side afterward. */}
-                  {!isCurrent && !hasMollieSubscription && (
+                  {!isCurrent && !plan.priceOnRequest && !hasMollieSubscription && (
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
                       disabled={!contractConfirmed || requesting || !!requestedPlan}

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot, KeyRound,
 } from "lucide-react";
 import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
@@ -106,6 +106,7 @@ export function AdminNav() {
         { href: "/admin/ai-service-finder", label: "KI & Service Finder", icon: Bot },
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
+      { href: "/admin/api-keys",     label: "API-Zugang",         icon: KeyRound },
       { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
     ],
   };
@@ -117,6 +118,7 @@ export function AdminNav() {
     || employee?.name || "?";
   const ROLE_LABELS: Record<string, string> = {
     TenantAdmin: "Inhaber",
+    LocationAdmin: "Standort-Admin",
     Employee: "Mitarbeiter",
     SuperAdmin: "Betreiber",
   };

@@ -122,8 +122,17 @@ export const superAdminApi = {
     return data as { status: string; trialStartedAt: string; trialEndsAt: string; activatedByUserId?: string; sentTo: string };
   },
 
-  async changePlan(tenantId: string, plan: string) {
-    const { data } = await api.patch(`/superadmin/tenants/${tenantId}/plan`, { plan });
+  async changePlan(tenantId: string, plan: string, options?: {
+    interval?: string;
+    negotiatedMonthlyPrice?: number;
+    negotiatedAnnualPrice?: number;
+  }) {
+    const { data } = await api.patch(`/superadmin/tenants/${tenantId}/plan`, {
+      plan,
+      interval: options?.interval,
+      negotiatedMonthlyPrice: options?.negotiatedMonthlyPrice,
+      negotiatedAnnualPrice: options?.negotiatedAnnualPrice,
+    });
     return data as { plan: string; status: string; displayName: string; maxEmployees: number; maxServices: number };
   },
 
@@ -190,14 +199,39 @@ export const superAdminApi = {
     return data as OverviewData;
   },
 
+  // ── AI usage/cost (last 30 days, per tenant) ──────────────────
+  async getAiUsage() {
+    const { data } = await api.get('/superadmin/ai-usage');
+    return data as {
+      since: string;
+      totalCostLast30Days: number;
+      tenants: {
+        tenantId: string;
+        tenantName: string;
+        totalCost: number;
+        totalCalls: number;
+        inputTokens: number;
+        outputTokens: number;
+      }[];
+    };
+  },
+
   // ── Subscription Requests ────────────────────────────────────
   async getSubscriptionRequests(status?: string) {
     const { data } = await api.get('/superadmin/subscription-requests', { params: status ? { status } : {} });
     return data as { data: SubscriptionRequestItem[]; pendingCount: number };
   },
 
-  async activateSubscriptionRequest(id: string) {
-    const { data } = await api.post(`/superadmin/subscription-requests/${id}/activate`);
+  async activateSubscriptionRequest(id: string, options?: {
+    confirmOverrideMollie?: boolean;
+    negotiatedMonthlyPrice?: number;
+    negotiatedAnnualPrice?: number;
+  }) {
+    const { data } = await api.post(`/superadmin/subscription-requests/${id}/activate`, {
+      confirmOverrideMollie: options?.confirmOverrideMollie ?? false,
+      negotiatedMonthlyPrice: options?.negotiatedMonthlyPrice,
+      negotiatedAnnualPrice: options?.negotiatedAnnualPrice,
+    });
     return data as { message: string };
   },
 
@@ -247,6 +281,11 @@ export const superAdminApi = {
 
   invoicePdfUrl(id: string) {
     return `${process.env.NEXT_PUBLIC_API_URL}/superadmin/invoices/${id}/pdf`;
+  },
+
+  async resendInvoice(id: string) {
+    const { data } = await api.post(`/superadmin/invoices/${id}/resend`);
+    return data as { message: string };
   },
 };
 

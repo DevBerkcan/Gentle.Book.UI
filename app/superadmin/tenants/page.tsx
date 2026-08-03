@@ -153,7 +153,7 @@ function PlanQuickChange({
           <option value="Trial">Trial</option>
           <option value="Starter">Starter (€29)</option>
           <option value="Professional">Pro (€59)</option>
-          <option value="Agency">Agency (€99)</option>
+          <option value="Agency">Agency (auf Anfrage)</option>
         </select>
       )}
     </div>
@@ -282,9 +282,22 @@ export default function TenantsPage() {
   }
 
   async function handleChangePlan(t: TenantListItem, plan: string) {
+    // Agency has no fixed price ("Preis auf Anfrage") — ask for the individually negotiated
+    // monthly price before switching a tenant onto it.
+    let negotiatedMonthlyPrice: number | undefined;
+    if (plan === 'Agency') {
+      const raw = window.prompt(`Individuellen Monatspreis für ${t.name} (Agency) festlegen (€):`);
+      if (raw === null) return;
+      const parsed = Number(raw.replace(',', '.'));
+      if (!raw.trim() || Number.isNaN(parsed) || parsed <= 0) {
+        alert('Bitte einen gültigen Preis eingeben.');
+        return;
+      }
+      negotiatedMonthlyPrice = parsed;
+    }
     setChangingPlan(t.id);
     try {
-      const result = await superAdminApi.changePlan(t.id, plan);
+      const result = await superAdminApi.changePlan(t.id, plan, { negotiatedMonthlyPrice });
       setTenants(prev => prev.map(x => x.id === t.id
         ? { ...x, subscription: { ...x.subscription!, plan: result.plan, status: result.status } }
         : x));

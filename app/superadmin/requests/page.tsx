@@ -18,7 +18,7 @@ const PLAN_COLORS: Record<string, string> = {
 const PLAN_PRICES: Record<string, string> = {
   Starter: '€29',
   Professional: '€59',
-  Agency: '€99',
+  Agency: 'Preis auf Anfrage',
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: any }> = {
@@ -57,10 +57,23 @@ export default function SubscriptionRequestsPage() {
   useEffect(() => { load(); }, [load]);
 
   const handleActivate = async (item: SubscriptionRequestItem) => {
-    if (!confirm(`Plan "${item.requestedPlan}" für ${item.tenantName} aktivieren?`)) return;
+    // Agency has no fixed price ("Preis auf Anfrage") — the backend requires an individually
+    // negotiated amount at activation time, so ask for it here before confirming.
+    let negotiatedMonthlyPrice: number | undefined;
+    if (item.requestedPlan === 'Agency') {
+      const raw = window.prompt(`Individuellen Monatspreis für ${item.tenantName} (Agency) festlegen (€, ohne Komma für Cent-Beträge nutze einen Punkt):`);
+      if (raw === null) return;
+      const parsed = Number(raw.replace(',', '.'));
+      if (!raw.trim() || Number.isNaN(parsed) || parsed <= 0) {
+        alert('Bitte einen gültigen Preis eingeben.');
+        return;
+      }
+      negotiatedMonthlyPrice = parsed;
+    }
+    if (!confirm(`Plan "${item.requestedPlan}" für ${item.tenantName} aktivieren?${negotiatedMonthlyPrice ? ` (${negotiatedMonthlyPrice}€/Monat)` : ''}`)) return;
     setActionLoading(item.id);
     try {
-      await superAdminApi.activateSubscriptionRequest(item.id);
+      await superAdminApi.activateSubscriptionRequest(item.id, { negotiatedMonthlyPrice });
       await load();
     } catch (e: any) {
       alert(e.response?.data?.message ?? 'Fehler beim Aktivieren');
@@ -179,7 +192,7 @@ export default function SubscriptionRequestsPage() {
 
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${PLAN_COLORS[item.requestedPlan] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                      {item.requestedPlan} — {PLAN_PRICES[item.requestedPlan] ?? ''}/Mo
+                      {item.requestedPlan} — {PLAN_PRICES[item.requestedPlan] ?? ''}{item.requestedPlan === 'Agency' ? '' : '/Mo'}
                     </span>
                     <a
                       href={`mailto:${item.contactEmail}`}

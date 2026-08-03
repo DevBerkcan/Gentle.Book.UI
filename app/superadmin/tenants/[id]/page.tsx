@@ -132,9 +132,22 @@ export default function TenantDetailPage() {
 
   const handleChangePlan = async () => {
     if (!selectedPlan) return;
+    // Agency has no fixed price ("Preis auf Anfrage") — ask for the individually negotiated
+    // monthly price before switching this tenant onto it.
+    let negotiatedMonthlyPrice: number | undefined;
+    if (selectedPlan === 'Agency') {
+      const raw = window.prompt(`Individuellen Monatspreis für "${tenant?.companyName || tenant?.name}" (Agency) festlegen (€):`);
+      if (raw === null) return;
+      const parsed = Number(raw.replace(',', '.'));
+      if (!raw.trim() || Number.isNaN(parsed) || parsed <= 0) {
+        alert('Bitte einen gültigen Preis eingeben.');
+        return;
+      }
+      negotiatedMonthlyPrice = parsed;
+    }
     setChangingPlan(true);
     try {
-      await superAdminApi.changePlan(id, selectedPlan);
+      await superAdminApi.changePlan(id, selectedPlan, { negotiatedMonthlyPrice });
       const data = await superAdminApi.getTenant(id);
       setTenant(data);
       setPlanChanged(true);
@@ -818,7 +831,7 @@ export default function TenantDetailPage() {
                       {
                         value: 'Agency',
                         label: 'Agency',
-                        price: '€99/Monat',
+                        price: 'Preis auf Anfrage',
                         employees: 'Unbegrenzt',
                         color: '#f59e0b',
                         bg: '#fffbeb',

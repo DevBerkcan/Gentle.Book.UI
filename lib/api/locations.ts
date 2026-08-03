@@ -32,3 +32,29 @@ export async function updateBusinessLocation(id: string, data: BusinessLocationI
 export async function deleteBusinessLocation(id: string): Promise<void> {
   await api.delete(`/tenant/locations/${id}`);
 }
+
+// ── Standort-Admins (Agency-exklusiv) ─────────────────────────────────────
+
+export interface LocationAdmin {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  locationId: string;
+  locationName: string | null;
+  isActive: boolean;
+  lastLoginAt: string | null;
+}
+
+export async function getLocationAdmins(): Promise<LocationAdmin[]> {
+  const response = await api.get("/tenant/location-admins");
+  return response.data ?? [];
+}
+
+export async function inviteLocationAdmin(locationId: string, email: string, firstName: string, lastName?: string): Promise<void> {
+  await api.post(`/tenant/locations/${locationId}/admin`, { email, firstName, lastName });
+}
+
+export async function removeLocationAdmin(id: string): Promise<void> {
+  await api.delete(`/tenant/location-admins/${id}`);
+}

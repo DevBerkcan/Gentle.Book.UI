@@ -24,10 +24,11 @@ export interface AuthUser {
   firstName?: string;
   lastName?: string;
   name?: string;           // legacy Employee field
-  role: string;            // SuperAdmin | TenantAdmin | Employee | Admin | Mitarbeiterin
+  role: string;            // SuperAdmin | TenantAdmin | LocationAdmin | Employee | Admin | Mitarbeiterin
   tenantId?: string;
   tenantSlug?: string;
   tenantName?: string;
+  locationId?: string;     // only set for LocationAdmin (Agency-exclusive, scoped to one BusinessLocation)
   // Legacy Employee fields
   username?: string;
   specialty?: string;
@@ -47,6 +48,7 @@ interface AuthContextType {
   hasRole: (roles: string | string[]) => boolean;
   isSuperAdmin: boolean;
   isTenantAdmin: boolean;
+  isLocationAdmin: boolean;
   isEmployee: boolean;
 }
 
@@ -76,6 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           tenantSlug: parsed.tenantSlug,
           tenantName: parsed.tenantName,
           username: parsed.username,
+          locationId: parsed.locationId,
         };
         setUser(normalized);
       } catch {
@@ -131,6 +134,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         tenantId: u.tenantId,
         tenantSlug: u.tenantSlug,
         tenantName: u.tenantName,
+        locationId: u.locationId ?? undefined,
       };
 
       setAccessToken(result.token);
@@ -177,8 +181,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       refreshEmployee,
       hasRole,
       isSuperAdmin: user?.role === 'SuperAdmin',
-      isTenantAdmin: user?.role === 'TenantAdmin',
-      isEmployee: !!user && user.role !== 'SuperAdmin' && user.role !== 'TenantAdmin',
+      // LocationAdmin (Agency-exclusive) counts as a tenant admin for UI-routing purposes —
+      // the backend already scopes what data they actually see/manage to their one location.
+      isTenantAdmin: user?.role === 'TenantAdmin' || user?.role === 'LocationAdmin',
+      isLocationAdmin: user?.role === 'LocationAdmin',
+      isEmployee: !!user && user.role !== 'SuperAdmin' && user.role !== 'TenantAdmin' && user.role !== 'LocationAdmin',
     }}>
       {children}
     </AuthContext.Provider>

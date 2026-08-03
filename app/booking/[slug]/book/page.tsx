@@ -7,18 +7,21 @@ import { useRouter, useParams } from "next/navigation";
 
 import { ServiceSelector } from "@/components/booking/ServiceSelector";
 import { EmployeeSelector } from "@/components/booking/EmployeeSelector";
+import { LocationSelector } from "@/components/booking/LocationSelector";
 import { DateTimePicker } from "@/components/booking/DateTimePicker";
 import { ContactForm } from "@/components/booking/ContactForm";
 import { WaitlistPanel } from "@/components/booking/WaitlistPanel";
 
 import {
   getServices,
+  getLocations,
   getAvailability,
   createBooking,
   type Service,
   type TimeSlot,
   type CustomerInfo,
   type Employee,
+  type Location,
 } from "@/lib/api/booking";
 import { BookingEvents } from "@/lib/tracking";
 import { LanguageProvider, useTranslation } from "@/lib/i18n/LanguageContext";
@@ -58,8 +61,6 @@ function getBorderRadius(style?: string) {
   return "16px";
 }
 
-const TOTAL_STEPS = 4;
-
 export default function TenantBookingPage() {
   return (
     <LanguageProvider>
@@ -84,6 +85,9 @@ function BookingPageInner() {
   const [showPrices, setShowPrices] = useState<boolean>(true);
 
   const [services, setServices] = useState<Service[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [locationsLoaded, setLocationsLoaded] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -136,10 +140,39 @@ function BookingPageInner() {
       })
       .catch(() => setTenantName(slug));
 
-    getServices(slug)
+    getLocations(slug)
+      .then((locs) => {
+        setLocations(locs);
+        // Only fetch services immediately when there's ≤1 location — a multi-location
+        // tenant's customer must pick a location first, which then filters the service list.
+        if (locs.length <= 1) {
+          getServices(slug)
+            .then(setServices)
+            .catch(() => setError(t.booking.errorLoadServices));
+        }
+      })
+      .catch(() => {
+        // Locations endpoint failing must never block booking — fall back to the
+        // unfiltered, pre-multi-location behavior.
+        getServices(slug)
+          .then(setServices)
+          .catch(() => setError(t.booking.errorLoadServices));
+      })
+      .finally(() => setLocationsLoaded(true));
+  }, [slug, t.booking.errorLoadServices]);
+
+  const hasMultipleLocations = locations.length > 1;
+  const stepOffset = hasMultipleLocations ? 1 : 0;
+  const TOTAL_STEPS = 4 + stepOffset;
+
+  const handleLocationSelect = (location: Location) => {
+    setSelectedLocation(location);
+    setServices([]);
+    setSelectedService(null);
+    getServices(slug, location.id)
       .then(setServices)
       .catch(() => setError(t.booking.errorLoadServices));
-  }, [slug, t.booking.errorLoadServices]);
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -328,7 +361,9 @@ function BookingPageInner() {
 
         {/* Step indicators */}
         {(() => {
-          const stepLabels = t.booking.stepLabels;
+          const stepLabels = hasMultipleLocations
+            ? [lang === 'de' ? 'Standort' : 'Location', ...t.booking.stepLabels]
+            : t.booking.stepLabels;
           return (
             <div className="mb-8 flex justify-center items-start gap-2 sm:gap-3">
               {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((step) => (
@@ -389,8 +424,29 @@ function BookingPageInner() {
             ...(isDark ? {} : { '--tw-ring-color': `${primaryColor}33` } as any),
           }}
         >
+          {!locationsLoaded ? (
+            <div className="flex justify-center py-16">
+              <span
+                className="w-8 h-8 border-2 rounded-full animate-spin"
+                style={{ borderColor: lighten(primaryColor, 0.82), borderTopColor: primaryColor }}
+              />
+            </div>
+          ) : (
           <AnimatePresence mode="wait">
-            {currentStep === 1 && (
+            {currentStep === 1 && hasMultipleLocations && (
+              <motion.div key="step-location" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <LocationSelector
+                  locations={locations}
+                  selectedLocation={selectedLocation}
+                  onSelect={handleLocationSelect}
+                  onNext={next}
+                  primaryColor={primaryColor}
+                  title={lang === 'de' ? 'Standort wählen' : 'Choose a location'}
+                  subtitle={lang === 'de' ? `Schritt 1 von ${TOTAL_STEPS}` : `Step 1 of ${TOTAL_STEPS}`}
+                />
+              </motion.div>
+            )}
+            {currentStep === 1 + stepOffset && (
               <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <ServiceSelector
                   services={services}
@@ -402,7 +458,7 @@ function BookingPageInner() {
                 />
               </motion.div>
             )}
-            {currentStep === 2 && (
+            {currentStep === 2 + stepOffset && (
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <EmployeeSelector
                   selectedEmployee={selectedEmployee}
@@ -415,7 +471,7 @@ function BookingPageInner() {
                 />
               </motion.div>
             )}
-            {currentStep === 3 && selectedService && (
+            {currentStep === 3 + stepOffset && selectedService && (
               <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <DateTimePicker
                   service={selectedService}
@@ -434,7 +490,7 @@ function BookingPageInner() {
                 />
               </motion.div>
             )}
-            {currentStep === 4 && selectedService && selectedDate && selectedTime && (
+            {currentStep === 4 + stepOffset && selectedService && selectedDate && selectedTime && (
               <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                 <ContactForm
                   service={selectedService}
@@ -456,9 +512,10 @@ function BookingPageInner() {
               </motion.div>
             )}
           </AnimatePresence>
+          )}
         </div>
 
-        {currentStep === 3 &&
+        {currentStep === 3 + stepOffset &&
           selectedDate &&
           selectedService &&
           selectedEmployee &&

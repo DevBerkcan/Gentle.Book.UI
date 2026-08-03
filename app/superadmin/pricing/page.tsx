@@ -113,6 +113,13 @@ export default function PlanPricingPage() {
                   </div>
                 </div>
 
+                {p.plan === 'Agency' && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 mb-3 text-xs text-amber-700">
+                    Agency wird Kunden nie mit diesem Preis angezeigt ("Preis auf Anfrage"). Dieser Wert dient nur als interner
+                    Fallback, falls für einen Kunden noch kein individuell verhandelter Preis hinterlegt ist.
+                  </div>
+                )}
+
                 <div className="space-y-1.5 mb-4 text-xs text-gray-500">
                   <div className="flex items-center gap-1.5">
                     <Users size={12} /> {p.maxEmployees >= 2147483647 ? 'Unbegrenzt' : p.maxEmployees} Mitarbeiter

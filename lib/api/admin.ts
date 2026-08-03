@@ -68,7 +68,52 @@ export const adminApi = {
     const { data } = await api.post('/tenant/subscription/cancel', { reason: reason ?? null });
     return data as { cancelRequestedAt: string; currentPeriodEnd: string | null; message: string };
   },
+
+  async getApiKeys() {
+    const { data } = await api.get('/tenant/api-keys');
+    return data as ApiKeySummary[];
+  },
+
+  async createApiKey(name: string) {
+    const { data } = await api.post('/tenant/api-keys', { name });
+    return data as { id: string; name: string; rawKey: string; keyPrefix: string; createdAt: string };
+  },
+
+  async revokeApiKey(id: string) {
+    const { data } = await api.delete(`/tenant/api-keys/${id}`);
+    return data as { message: string };
+  },
+
+  async getInvoices(page = 1, pageSize = 50) {
+    const { data } = await api.get('/tenant/invoices', { params: { page, pageSize } });
+    return data as { items: TenantInvoiceItem[]; totalCount: number; page: number; pageSize: number };
+  },
+
+  invoicePdfUrl(id: string) {
+    return `${process.env.NEXT_PUBLIC_API_URL}/tenant/invoices/${id}/pdf`;
+  },
 };
+
+export interface ApiKeySummary {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  revokedAt: string | null;
+}
+
+export interface TenantInvoiceItem {
+  id: string;
+  invoiceNumber: string;
+  issueDate: string;
+  periodStart: string;
+  periodEnd: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  emailSent: boolean;
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

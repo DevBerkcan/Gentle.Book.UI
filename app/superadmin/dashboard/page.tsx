@@ -57,6 +57,7 @@ export default function SuperAdminDashboard() {
   const [overview,       setOverview]       = useState<OverviewData | null>(null);
   const [pendingRequests,setPendingRequests] = useState<SubscriptionRequestItem[]>([]);
   const [dunning,        setDunning]        = useState<AtRiskDunningItem[]>([]);
+  const [aiUsage,        setAiUsage]        = useState<Awaited<ReturnType<typeof superAdminApi.getAiUsage>> | null>(null);
   const [loading,        setLoading]        = useState(true);
   const [loadError,      setLoadError]      = useState<string | null>(null);
 
@@ -64,13 +65,14 @@ export default function SuperAdminDashboard() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [s, t, a, ov, req, risk] = await Promise.all([
+      const [s, t, a, ov, req, risk, ai] = await Promise.all([
         superAdminApi.getStats(),
         superAdminApi.getTenants(1, 100),
         superAdminApi.getActivity(20),
         superAdminApi.getOverview(),
         superAdminApi.getSubscriptionRequests('Pending').catch(() => ({ data: [], pendingCount: 0 })),
         superAdminApi.getAtRiskSubscriptions().catch(() => ({ cancelling: [], dunning: [], totalAtRisk: 0 })),
+        superAdminApi.getAiUsage().catch(() => null),
       ]);
       setStats(s);
       setTenants(t.items);
@@ -78,6 +80,7 @@ export default function SuperAdminDashboard() {
       setOverview(ov);
       setPendingRequests(req.data);
       setDunning(risk.dunning);
+      setAiUsage(ai);
     } catch (err: any) {
       setLoadError(err.response?.data?.message || err.message || 'Daten konnten nicht geladen werden');
     }
@@ -268,7 +271,7 @@ export default function SuperAdminDashboard() {
             { plan: 'Trial',        count: planCounts.Trial,        color: '#6b7280', bg: '#f3f4f6', label: 'Im Trial' },
             { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: 'Starter (€29)' },
             { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: 'Pro (€59)' },
-            { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Agency (€99)' },
+            { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Agency (auf Anfrage)' },
           ].map(({ plan, count, color, bg, label }) => (
             <div
               key={plan}
@@ -286,6 +289,26 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* ── KI-Nutzungskosten (30 Tage) — Grundlage für Agency-Preisverhandlung ──── */}
+      {!loading && aiUsage && aiUsage.tenants.length > 0 && (
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-gray-800 text-sm">KI-Kosten (letzte 30 Tage)</h2>
+            <span className="text-sm font-bold text-gray-900">
+              ${aiUsage.totalCostLast30Days.toFixed(2)}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {aiUsage.tenants.slice(0, 8).map((t) => (
+              <div key={t.tenantId} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 last:border-0">
+                <span className="text-gray-700 font-medium truncate">{t.tenantName}</span>
+                <span className="text-gray-400 flex-shrink-0 ml-2">{t.totalCalls} Anfragen · ${t.totalCost.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

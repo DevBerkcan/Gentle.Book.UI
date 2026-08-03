@@ -44,6 +44,7 @@ export interface TenantAdminLoginResponse {
     tenantId: string;
     tenantSlug: string;
     tenantName?: string;
+    locationId?: string | null;
   } | null;
   message?: string;
 }

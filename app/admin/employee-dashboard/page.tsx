@@ -1,18 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import {
   Calendar, Clock, User, Phone, Mail, Scissors,
   CheckCircle, XCircle, AlertCircle, ChevronRight,
   Plus, Ban, MessageSquare, ArrowRight, Hash,
-  CalendarDays, Sparkles, TrendingUp,
+  CalendarDays, Sparkles, TrendingUp, Upload, Trash2, Save,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { adminApi, BookingListItem } from '@/lib/api/admin';
 import { formatPrice } from '@/lib/utils/currency';
+import { suggestEmployeeTagline } from '@/lib/api/employees';
+import api, { apiOrigin } from '@/lib/api/client';
 
 const STATUS_MAP: Record<string, { label: string; bg: string; text: string; dot: string }> = {
   Confirmed: { label: 'Bestätigt',        bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-400' },
@@ -52,6 +55,18 @@ export default function EmployeeDashboardPage() {
   const [loadingData,      setLoadingData]      = useState(true);
   const [currency,         setCurrency]         = useState('EUR');
 
+  // ── Mein Profil: Foto + 3-Wörter-Beschreibung (im Booking-Flow sichtbar) ──
+  const [photoUrl,      setPhotoUrl]      = useState('');
+  const [tagline,       setTagline]       = useState('');
+  const [taglineDraft,  setTaglineDraft]  = useState('');
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoDeleting,  setPhotoDeleting]  = useState(false);
+  const [taglineSaving,  setTaglineSaving]  = useState(false);
+  const [profileError,   setProfileError]   = useState('');
+  const [profileSaved,   setProfileSaved]   = useState(false);
+  const [suggesting,     setSuggesting]     = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Admins go to the full admin dashboard
   useEffect(() => {
     if (!authLoading && isTenantAdmin) router.replace('/admin/dashboard');
@@ -83,6 +98,75 @@ export default function EmployeeDashboardPage() {
       .catch(() => {})
       .finally(() => setLoadingData(false));
   }, [authLoading, isEmployee, user?.id]);
+
+  useEffect(() => {
+    if (authLoading || !isEmployee || !user?.id) return;
+    api.get(`/employees/${user.id}`).then((res) => {
+      const data = res.data?.data ?? res.data;
+      setPhotoUrl(data?.photoUrl ?? '');
+      setTagline(data?.tagline ?? '');
+      setTaglineDraft(data?.tagline ?? '');
+    }).catch(() => {});
+  }, [authLoading, isEmployee, user?.id]);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+    setPhotoUploading(true); setProfileError('');
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      const res = await api.post(`/employees/${user.id}/photo`, formData);
+      setPhotoUrl(res.data.photoUrl);
+    } catch (err: any) {
+      setProfileError(err.response?.data?.message || 'Fehler beim Hochladen.');
+    } finally {
+      setPhotoUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function handlePhotoDelete() {
+    if (!photoUrl || !user?.id) return;
+    setPhotoDeleting(true); setProfileError('');
+    try {
+      await api.delete(`/employees/${user.id}/photo`);
+      setPhotoUrl('');
+    } catch (err: any) {
+      setProfileError(err.response?.data?.message || 'Fehler beim Löschen.');
+    } finally {
+      setPhotoDeleting(false);
+    }
+  }
+
+  async function handleTaglineSave() {
+    if (!user?.id) return;
+    setTaglineSaving(true); setProfileError(''); setProfileSaved(false);
+    try {
+      const res = await api.patch(`/employees/${user.id}/tagline`, { tagline: taglineDraft });
+      setTagline(res.data.tagline ?? '');
+      setTaglineDraft(res.data.tagline ?? '');
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    } catch (err: any) {
+      setProfileError(err.response?.data?.message || 'Fehler beim Speichern.');
+    } finally {
+      setTaglineSaving(false);
+    }
+  }
+
+  async function handleSuggestTagline() {
+    if (!user?.id) return;
+    setSuggesting(true); setProfileError('');
+    try {
+      const res = await suggestEmployeeTagline(user.id);
+      setTaglineDraft(res.suggestion);
+    } catch (err: any) {
+      setProfileError(err.response?.data?.message || 'KI-Vorschlag nicht verfügbar.');
+    } finally {
+      setSuggesting(false);
+    }
+  }
 
   const displayName = user?.firstName
     ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}`
@@ -145,6 +229,104 @@ export default function EmployeeDashboardPage() {
             <Calendar size={15} /> Kalender
           </Link>
         </div>
+      </motion.div>
+
+      {/* Mein Profil: Foto + 3-Wörter-Beschreibung — sichtbar für Kunden beim Buchen */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.03 }}
+        className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5"
+      >
+        <h2 className="font-semibold text-[#111318] text-sm mb-4">Mein Profil</h2>
+        <div className="flex flex-col sm:flex-row gap-5">
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] flex items-center justify-center overflow-hidden flex-shrink-0">
+              {photoUrl ? (
+                <Image
+                  src={photoUrl.startsWith('http') ? photoUrl : `${apiOrigin}${photoUrl}`}
+                  alt="Profilfoto"
+                  width={80}
+                  height={80}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <User size={28} className="text-[#D1D5DB]" />
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={handlePhotoUpload}
+              />
+              <button
+                type="button"
+                disabled={photoUploading || photoDeleting}
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#6355E4] disabled:opacity-50 transition-all"
+              >
+                {photoUploading
+                  ? <><span className="w-3 h-3 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />Wird hochgeladen…</>
+                  : <><Upload size={12} />Foto hochladen</>}
+              </button>
+              {photoUrl && (
+                <button
+                  type="button"
+                  disabled={photoDeleting || photoUploading}
+                  onClick={handlePhotoDelete}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border border-[#FECACA] bg-[#FEF2F2] text-[#991B1B] hover:border-[#FCA5A5] hover:bg-[#FEE2E2] disabled:opacity-50 transition-all"
+                >
+                  {photoDeleting
+                    ? <><span className="w-3 h-3 border-2 border-[#FECACA] border-t-[#991B1B] rounded-full animate-spin" />Wird gelöscht…</>
+                    : <><Trash2 size={12} />Löschen</>}
+                </button>
+              )}
+              <p className="text-[10px] text-[#9CA3AF]">JPG, PNG, WebP · max. 5 MB</p>
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-[#374151]">Beschreib dich in 3 Wörtern</label>
+              <button
+                type="button"
+                onClick={handleSuggestTagline}
+                disabled={suggesting}
+                className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#6355E4] hover:text-[#5646D6] disabled:opacity-50"
+                title="KI-Vorschlag (Agency-Feature)"
+              >
+                {suggesting
+                  ? <span className="w-2.5 h-2.5 border-2 border-[#C7D2FE] border-t-[#6355E4] rounded-full animate-spin" />
+                  : <Sparkles size={11} />}
+                KI-Vorschlag
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={taglineDraft}
+                onChange={(e) => setTaglineDraft(e.target.value)}
+                maxLength={60}
+                placeholder="z. B. Kreativ, präzise, freundlich"
+                className="flex-1 border border-[#E5E7EB] rounded-xl px-3 py-2 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all"
+              />
+              <button
+                type="button"
+                onClick={handleTaglineSave}
+                disabled={taglineSaving || taglineDraft === tagline}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-[#6355E4] text-white hover:bg-[#5646D6] disabled:opacity-40 transition-colors"
+              >
+                {taglineSaving
+                  ? <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : profileSaved ? <CheckCircle size={14} /> : <Save size={14} />}
+              </button>
+            </div>
+            <p className="text-[10px] text-[#9CA3AF]">Wird Kunden während des Buchens neben deinem Namen angezeigt.</p>
+          </div>
+        </div>
+        {profileError && <p className="text-xs text-red-600 mt-3">{profileError}</p>}
       </motion.div>
 
       {/* Stats row */}

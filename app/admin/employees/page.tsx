@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { Card, CardBody } from "@nextui-org/card";
 import { Button } from "@nextui-org/button";
@@ -11,11 +12,15 @@ import { Chip } from "@nextui-org/chip";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/modal";
 import {
   Plus, Edit, Trash2, Users, AlertCircle, X, Save, UserCheck, UserX,
-  Lock, Eye, EyeOff, Key, MapPin, Clock, CalendarDays, Plane,
+  Lock, Eye, EyeOff, Key, MapPin, Clock, CalendarDays, Plane, Upload, Sparkles,
 } from "lucide-react";
-import { getEmployees, createEmployee, updateEmployee, deleteEmployee, type Employee, type CreateEmployeeDto } from "@/lib/api/employees";
+import {
+  getEmployees, createEmployee, updateEmployee, deleteEmployee,
+  uploadEmployeePhoto, deleteEmployeePhoto, updateEmployeeTagline, suggestEmployeeTagline,
+  type Employee, type CreateEmployeeDto,
+} from "@/lib/api/employees";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
-import api from "@/lib/api/client";
+import api, { apiOrigin } from "@/lib/api/client";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 
@@ -102,6 +107,15 @@ export default function EmployeesPage() {
   const [formActive, setFormActive] = useState<boolean>(true);
   const [modalErr, setModalErr] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState<boolean>(false);
+
+  // Photo + Tagline (nur beim Bearbeiten eines bestehenden Mitarbeiters editierbar)
+  const [editPhotoUrl, setEditPhotoUrl] = useState<string | null>(null);
+  const [editTagline, setEditTagline] = useState("");
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoDeleting, setPhotoDeleting] = useState(false);
+  const [taglineSaving, setTaglineSaving] = useState(false);
+  const [suggestingTagline, setSuggestingTagline] = useState(false);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
   const [deleteReason, setDeleteReason] = useState("");
   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
@@ -147,6 +161,8 @@ export default function EmployeesPage() {
     setModalErr(null);
     setResetPassword(false);
     setShowPassword(false);
+    setEditPhotoUrl(null);
+    setEditTagline("");
     onOpen();
   }
 
@@ -163,7 +179,66 @@ export default function EmployeesPage() {
     setModalErr(null);
     setResetPassword(false);
     setShowNewPassword(false);
+    setEditPhotoUrl(emp.photoUrl ?? null);
+    setEditTagline(emp.tagline ?? "");
     onOpen();
+  }
+
+  async function handleEditPhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !editing) return;
+    setPhotoUploading(true); setModalErr(null);
+    try {
+      const res = await uploadEmployeePhoto(editing.id, file);
+      setEditPhotoUrl(res.photoUrl);
+      await load();
+    } catch (err: any) {
+      setModalErr(err.response?.data?.message || "Fehler beim Hochladen.");
+    } finally {
+      setPhotoUploading(false);
+      if (editFileInputRef.current) editFileInputRef.current.value = "";
+    }
+  }
+
+  async function handleEditPhotoDelete() {
+    if (!editing || !editPhotoUrl) return;
+    setPhotoDeleting(true); setModalErr(null);
+    try {
+      await deleteEmployeePhoto(editing.id);
+      setEditPhotoUrl(null);
+      await load();
+    } catch (err: any) {
+      setModalErr(err.response?.data?.message || "Fehler beim Löschen.");
+    } finally {
+      setPhotoDeleting(false);
+    }
+  }
+
+  async function handleEditTaglineSave() {
+    if (!editing) return;
+    setTaglineSaving(true); setModalErr(null);
+    try {
+      const res = await updateEmployeeTagline(editing.id, editTagline);
+      setEditTagline(res.tagline ?? "");
+      await load();
+    } catch (err: any) {
+      setModalErr(err.response?.data?.message || "Fehler beim Speichern.");
+    } finally {
+      setTaglineSaving(false);
+    }
+  }
+
+  async function handleSuggestTagline() {
+    if (!editing) return;
+    setSuggestingTagline(true); setModalErr(null);
+    try {
+      const res = await suggestEmployeeTagline(editing.id);
+      setEditTagline(res.suggestion);
+    } catch (err: any) {
+      setModalErr(err.response?.data?.message || "KI-Vorschlag nicht verfügbar.");
+    } finally {
+      setSuggestingTagline(false);
+    }
   }
 
   async function handleSubmit() {
@@ -691,9 +766,19 @@ export default function EmployeesPage() {
                   <CardBody className="p-5">
                   <div className="flex items-start gap-4">
                     {/* Avatar */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(emp.name)}`}>
-                      {initials(emp.name)}
-                    </div>
+                    {emp.photoUrl ? (
+                      <Image
+                        src={emp.photoUrl.startsWith('http') ? emp.photoUrl : `${apiOrigin}${emp.photoUrl}`}
+                        alt={emp.name}
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-xl object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(emp.name)}`}>
+                        {initials(emp.name)}
+                      </div>
+                    )}
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -710,6 +795,7 @@ export default function EmployeesPage() {
                         </p>
                       )}
                       {emp.specialty && <p className="text-xs text-[#8A8A8A] mt-1 italic">{emp.specialty}</p>}
+                      {emp.tagline && <p className="text-xs text-[#6355E4] mt-1">"{emp.tagline}"</p>}
                       {emp.username && (
                         <p className="text-xs text-[#8A8A8A] mt-1 flex items-center gap-1">
                           <Key size={10} /> {emp.username}
@@ -797,6 +883,92 @@ export default function EmployeesPage() {
                   {modalErr && (
                     <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl border border-red-200 text-red-600 text-sm">
                       <AlertCircle size={14} />{modalErr}
+                    </div>
+                  )}
+
+                  {editing && (
+                    <div className="p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30 space-y-3">
+                      <div className="flex items-center gap-4">
+                        {editPhotoUrl ? (
+                          <Image
+                            src={editPhotoUrl.startsWith('http') ? editPhotoUrl : `${apiOrigin}${editPhotoUrl}`}
+                            alt={editing.name}
+                            width={56}
+                            height={56}
+                            className="w-14 h-14 rounded-xl object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(editing.name)}`}>
+                            {initials(editing.name)}
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-1.5">
+                          <input
+                            ref={editFileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            className="hidden"
+                            onChange={handleEditPhotoUpload}
+                          />
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-medium"
+                            isDisabled={photoUploading || photoDeleting}
+                            isLoading={photoUploading}
+                            startContent={!photoUploading && <Upload size={13} />}
+                            onPress={() => editFileInputRef.current?.click()}
+                          >
+                            Foto hochladen
+                          </Button>
+                          {editPhotoUrl && (
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              className="bg-red-50 text-red-500 font-medium"
+                              isDisabled={photoUploading || photoDeleting}
+                              isLoading={photoDeleting}
+                              startContent={!photoDeleting && <Trash2 size={13} />}
+                              onPress={handleEditPhotoDelete}
+                            >
+                              Löschen
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-end">
+                        <Input
+                          label="Beschreibung in 3 Wörtern"
+                          placeholder="z.B. Kreativ, präzise, freundlich"
+                          value={editTagline}
+                          maxLength={60}
+                          onChange={(e) => setEditTagline(e.target.value)}
+                          classNames={INPUT_CLS}
+                        />
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          className="bg-[#EEEBFC] text-[#6355E4] font-medium shrink-0"
+                          isDisabled={suggestingTagline}
+                          isLoading={suggestingTagline}
+                          startContent={!suggestingTagline && <Sparkles size={13} />}
+                          onPress={handleSuggestTagline}
+                          title="KI-Vorschlag (Agency-Feature)"
+                        >
+                          KI
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-[#6355E4] text-white font-medium shrink-0"
+                          isDisabled={taglineSaving || editTagline === (editing.tagline ?? "")}
+                          isLoading={taglineSaving}
+                          startContent={!taglineSaving && <Save size={13} />}
+                          onPress={handleEditTaglineSave}
+                        >
+                          Speichern
+                        </Button>
+                      </div>
+                      <p className="text-[10px] text-[#8A8A8A]">Foto &amp; Beschreibung werden Kunden während des Buchens angezeigt.</p>
                     </div>
                   )}
 

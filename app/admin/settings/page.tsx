@@ -11,7 +11,7 @@ import { Button } from '@nextui-org/button';
 import {
   Settings, Save, Building2, Phone, Globe, Palette, Lock,
   ImageIcon, Upload, Clock, AlertTriangle, Sliders, Trash2, CreditCard,
-  MapPin, Plus, Pencil, Star,
+  MapPin, Plus, Pencil, Star, X, ShieldCheck, UserPlus,
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSection';
@@ -21,8 +21,12 @@ import {
   deleteBusinessLocation,
   getBusinessLocations,
   updateBusinessLocation,
+  getLocationAdmins,
+  inviteLocationAdmin,
+  removeLocationAdmin,
   type BusinessLocation,
   type BusinessLocationInput,
+  type LocationAdmin,
 } from '@/lib/api/locations';
 
 // ── Design Tokens (matching AdminLinksPage) ───────────────────────────────────
@@ -192,6 +196,8 @@ export default function AdminSettingsPage() {
   const [showLocationForm, setShowLocationForm] = useState(false);
   const [locationSaving, setLocationSaving] = useState(false);
   const [locationError, setLocationError] = useState('');
+  const [locationAdmins, setLocationAdmins] = useState<LocationAdmin[]>([]);
+  const [invitingLocationId, setInvitingLocationId] = useState<string | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -223,6 +229,7 @@ export default function AdminSettingsPage() {
     loadSettings();
     loadBusinessHours();
     loadLocations();
+    loadLocationAdmins();
   }, []);
 
   useEffect(() => {
@@ -264,6 +271,46 @@ export default function AdminSettingsPage() {
       setLocations(await getBusinessLocations());
     } catch {
       setLocationError('Standorte konnten nicht geladen werden.');
+    }
+  }
+
+  async function loadLocationAdmins() {
+    try {
+      setLocationAdmins(await getLocationAdmins());
+    } catch {
+      // Not Agency plan (402) or not a tenant admin — silently show no location admins,
+      // the invite button itself is Agency-gated separately.
+      setLocationAdmins([]);
+    }
+  }
+
+  async function handleInviteLocationAdmin(location: BusinessLocation) {
+    const email = window.prompt(`E-Mail-Adresse des Standort-Admins für "${location.name}":`);
+    if (!email || !email.trim()) return;
+    const firstName = window.prompt('Vorname:');
+    if (!firstName || !firstName.trim()) return;
+    const lastName = window.prompt('Nachname (optional):') ?? '';
+
+    setInvitingLocationId(location.id);
+    setLocationError('');
+    try {
+      await inviteLocationAdmin(location.id, email.trim(), firstName.trim(), lastName.trim() || undefined);
+      await loadLocationAdmins();
+    } catch (err: any) {
+      setLocationError(err.response?.data?.message || 'Einladung fehlgeschlagen.');
+    } finally {
+      setInvitingLocationId(null);
+    }
+  }
+
+  async function handleRemoveLocationAdmin(admin: LocationAdmin) {
+    if (!window.confirm(`Zugang von "${admin.firstName} ${admin.lastName}" entfernen?`)) return;
+    setLocationError('');
+    try {
+      await removeLocationAdmin(admin.id);
+      await loadLocationAdmins();
+    } catch (err: any) {
+      setLocationError(err.response?.data?.message || 'Entfernen fehlgeschlagen.');
     }
   }
 
@@ -639,6 +686,27 @@ export default function AdminSettingsPage() {
                           {location.serviceCount} Service{location.serviceCount === 1 ? '' : 's'}
                         </span>
                       </div>
+                      {/* Standort-Admins (Agency-exklusiv) */}
+                      {locationAdmins.filter((a) => a.locationId === location.id).length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {locationAdmins.filter((a) => a.locationId === location.id).map((admin) => (
+                            <span key={admin.id} className="inline-flex items-center gap-1.5 rounded-full bg-[#EEF2FF] px-2 py-1 text-[10px] font-medium text-[#4338CA]">
+                              <ShieldCheck size={10} /> {admin.firstName} {admin.lastName}
+                              <button type="button" onClick={() => handleRemoveLocationAdmin(admin)} className="text-[#4338CA]/60 hover:text-red-600" aria-label="Zugang entfernen">
+                                <X size={10} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleInviteLocationAdmin(location)}
+                        disabled={invitingLocationId === location.id}
+                        className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-[#6355E4] hover:text-[#4338CA] disabled:opacity-50"
+                      >
+                        <UserPlus size={11} /> {invitingLocationId === location.id ? 'Wird eingeladen…' : 'Standort-Admin einladen'}
+                      </button>
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => openEditLocation(location)}
