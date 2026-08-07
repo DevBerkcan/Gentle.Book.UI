@@ -292,6 +292,15 @@ export async function getMyBookings(token: string): Promise<BookingResponse[]> {
   return res.json();
 }
 
+/** Loyalty point balance(s) behind a valid magic-link token — one entry per tenant (Agency only). */
+export async function getMyLoyaltyPoints(token: string): Promise<{ tenantName: string; points: number }[]> {
+  const res = await fetch(
+    `${API_BASE_URL}/bookings/my/loyalty?token=${encodeURIComponent(token)}`
+  );
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export async function cancelBooking(
   bookingId: string,
   reason?: string

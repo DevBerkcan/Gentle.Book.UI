@@ -10,9 +10,9 @@ import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Chip } from "@nextui-org/chip";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@nextui-org/modal";
-import { Calendar, Mail, AlertCircle, X, CheckCircle } from "lucide-react";
+import { Calendar, Mail, AlertCircle, X, CheckCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
-import { requestMyBookingsLink, getMyBookings, cancelBooking, type BookingResponse } from "@/lib/api/booking";
+import { requestMyBookingsLink, getMyBookings, getMyLoyaltyPoints, cancelBooking, type BookingResponse } from "@/lib/api/booking";
 
 function MyBookingsContent() {
   const searchParams = useSearchParams();
@@ -21,6 +21,7 @@ function MyBookingsContent() {
   const [email, setEmail] = useState("");
   const [linkSent, setLinkSent] = useState(false);
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
+  const [loyaltyBalances, setLoyaltyBalances] = useState<{ tenantName: string; points: number }[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,7 @@ function MyBookingsContent() {
       .then((data) => { if (active) setBookings(data); })
       .catch((err: any) => { if (active) setError(err.message); })
       .finally(() => { if (active) setLoading(false); });
+    getMyLoyaltyPoints(token).then((data) => { if (active) setLoyaltyBalances(data); });
     return () => { active = false; };
   }, [token]);
 
@@ -186,6 +188,22 @@ function MyBookingsContent() {
               </div>
             </CardBody>
           </Card>
+        )}
+
+        {searched && !loading && loyaltyBalances.length > 0 && (
+          <div className="mb-6 space-y-2">
+            {loyaltyBalances.map((b) => (
+              <Card key={b.tenantName} className="border-2 border-[#ECEBF2]/20 shadow-sm">
+                <CardBody className="p-4 flex-row items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Gift size={18} className="text-[#6355E4]" />
+                    <span className="font-semibold text-[#14162B]">{b.tenantName}</span>
+                  </div>
+                  <span className="font-bold text-[#6355E4]">{b.points} Treuepunkte</span>
+                </CardBody>
+              </Card>
+            ))}
+          </div>
         )}
 
         {searched && !loading && (

@@ -5,10 +5,46 @@ import type { NextRequest } from "next/server";
  * Next.js Middleware für Cache-Optimierung
  * Setzt optimale Cache-Control Headers für Varnish
  */
-export function middleware(request: NextRequest) {
-  const response = NextResponse.next();
 
+// ── Eigene Domain (Agency) ────────────────────────────────────────────────
+// Maps a verified custom domain's Host header to the tenant's booking slug and rewrites
+// internally to /booking/{slug} — the visitor never sees the gentlebook.de path. Module-scope
+// cache (per Edge instance, short TTL) so this doesn't add a backend round-trip to every request;
+// worst case a stale/negative entry self-corrects within CACHE_TTL_MS.
+const domainCache = new Map<string, { slug: string | null; expiresAt: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const KNOWN_HOSTS = ["gentlebook.de", "www.gentlebook.de", "localhost", "gentle-book-ui.vercel.app"];
+
+async function resolveCustomDomainSlug(host: string): Promise<string | null> {
+  const cached = domainCache.get(host);
+  if (cached && cached.expiresAt > Date.now()) return cached.slug;
+
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiUrl) return null;
+    const res = await fetch(`${apiUrl}/tenant/domain/resolve?host=${encodeURIComponent(host)}`);
+    const slug = res.ok ? (await res.json())?.slug ?? null : null;
+    domainCache.set(host, { slug, expiresAt: Date.now() + CACHE_TTL_MS });
+    return slug;
+  } catch {
+    return null;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
+
+  if (host && !KNOWN_HOSTS.includes(host) && !pathname.startsWith("/booking/") && !pathname.startsWith("/api/") && !pathname.startsWith("/_next/")) {
+    const slug = await resolveCustomDomainSlug(host);
+    if (slug) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/booking/${slug}${pathname === "/" ? "" : pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
+
+  const response = NextResponse.next();
 
   // Static Assets: Lange cachen (1 Jahr)
   if (

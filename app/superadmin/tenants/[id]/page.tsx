@@ -15,7 +15,7 @@ import { useConfirm } from '@/components/ConfirmDialog';
 import { setAccessToken } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
 
-type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats';
+type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats' | 'domain';
 
 export default function TenantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -42,6 +42,9 @@ export default function TenantDetailPage() {
 
   const [tenantStats, setTenantStats] = useState<TenantStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
+  const [domainInfo, setDomainInfo] = useState<{ domain: string | null; status: string; requestedAt: string | null } | null>(null);
+  const [domainLoading, setDomainLoading] = useState(false);
+  const [domainUpdating, setDomainUpdating] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { confirm, dialog } = useConfirm();
@@ -286,12 +289,32 @@ export default function TenantDetailPage() {
     setStatsLoading(false);
   }
 
+  async function loadDomain() {
+    if (domainInfo) return;
+    setDomainLoading(true);
+    try {
+      const data = await superAdminApi.getTenantDomain(id);
+      setDomainInfo(data);
+    } catch { /* silent fail */ }
+    setDomainLoading(false);
+  }
+
+  async function handleSetDomainStatus(status: 'PendingVerification' | 'Verified' | 'Failed') {
+    setDomainUpdating(true);
+    try {
+      const data = await superAdminApi.setTenantDomainStatus(id, status);
+      setDomainInfo((prev) => prev ? { ...prev, status: data.status } : prev);
+    } catch { /* silent fail */ }
+    setDomainUpdating(false);
+  }
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'link', label: 'Buchungslink', icon: <Link2 size={15} /> },
     { key: 'branding', label: 'Branding', icon: <Palette size={15} /> },
     { key: 'users', label: 'Admin-User', icon: <Users size={15} /> },
     { key: 'subscription', label: 'Abo', icon: <CreditCard size={15} /> },
     { key: 'stats', label: 'Statistiken', icon: <BarChart2 size={15} /> },
+    { key: 'domain', label: 'Domain', icon: <Globe size={15} /> },
   ];
 
   return (
@@ -329,7 +352,7 @@ export default function TenantDetailPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); }}
+            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); if (tab.key === 'domain') loadDomain(); }}
             className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
                 ? 'bg-white text-gray-900 shadow-sm'
@@ -1028,6 +1051,66 @@ export default function TenantDetailPage() {
               <BarChart2 size={32} className="mx-auto text-gray-200 mb-2" />
               <p className="text-sm text-gray-400">Fehler beim Laden der Statistiken</p>
               <button onClick={loadStats} className="mt-3 text-xs text-blue-500 hover:underline">Erneut versuchen</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Domain ────────────────────────────────────────────────── */}
+      {activeTab === 'domain' && (
+        <div className="space-y-4">
+          {domainLoading ? (
+            <div className="h-32 bg-white rounded-xl animate-pulse border border-gray-100" />
+          ) : !domainInfo?.domain ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <Globe size={32} className="mx-auto text-gray-200 mb-2" />
+              <p className="text-sm text-gray-400">Für diesen Tenant wurde noch keine eigene Domain beantragt.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+              <div>
+                <p className="text-xs text-gray-400 mb-1">Beantragte Domain</p>
+                <p className="text-lg font-bold text-gray-900 font-mono">{domainInfo.domain}</p>
+                {domainInfo.requestedAt && (
+                  <p className="text-xs text-gray-400 mt-1">Beantragt am {new Date(domainInfo.requestedAt).toLocaleDateString('de-DE')}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">Status:</span>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                  domainInfo.status === 'Verified' ? 'bg-green-50 text-green-700' :
+                  domainInfo.status === 'Failed' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'
+                }`}>
+                  {domainInfo.status === 'Verified' ? 'Aktiv' : domainInfo.status === 'Failed' ? 'Fehlgeschlagen' : 'Wird geprüft'}
+                </span>
+              </div>
+
+              <div className="rounded-lg bg-gray-50 border border-gray-100 p-3.5 text-xs text-gray-600 leading-relaxed">
+                <p className="font-semibold text-gray-700 mb-1">Manueller Einrichtungsschritt (noch keine automatische Vercel-Anbindung):</p>
+                <ol className="list-decimal list-inside space-y-0.5">
+                  <li>Domain im Vercel-Projekt unter „Domains" hinzufügen.</li>
+                  <li>DNS-Eintrag beim Kunden gemäß Vercel-Anleitung setzen lassen.</li>
+                  <li>Sobald Vercel die Domain als aktiv anzeigt: unten auf „Als aktiv markieren" klicken.</li>
+                </ol>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleSetDomainStatus('Verified')}
+                  disabled={domainUpdating || domainInfo.status === 'Verified'}
+                  className="px-3 py-2 text-xs font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-40"
+                >
+                  Als aktiv markieren
+                </button>
+                <button
+                  onClick={() => handleSetDomainStatus('Failed')}
+                  disabled={domainUpdating || domainInfo.status === 'Failed'}
+                  className="px-3 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-40"
+                >
+                  Als fehlgeschlagen markieren
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
-  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot, KeyRound,
+  BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot, KeyRound, Star, FileText as IntakeIcon, Ticket,
 } from "lucide-react";
 import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
@@ -23,7 +23,7 @@ export function AdminNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const { user, employee, logout, isAuthenticated, isTenantAdmin, isEmployee } = useAuth();
+  const { user, employee, logout, isAuthenticated, isTenantAdmin, isLocationAdmin, isEmployee } = useAuth();
   const { t, lang, setLang } = useTranslation();
   const [logoUrl, setLogoUrl]         = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
@@ -95,6 +95,7 @@ export function AdminNav() {
       label: t.admin.analytics,
       items: [
         { href: "/admin/tracking", label: t.admin.tracking, icon: BarChart3 },
+        { href: "/admin/reviews",  label: "Bewertungen",    icon: Star },
       ],
     },
   ];
@@ -105,9 +106,13 @@ export function AdminNav() {
       { href: "/admin/inbox",        label: t.admin.inbox,        icon: Inbox },
         { href: "/admin/ai-service-finder", label: "KI & Service Finder", icon: Bot },
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
+      { href: "/admin/intake-form",  label: "Anamneseformular",   icon: IntakeIcon },
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
       { href: "/admin/api-keys",     label: "API-Zugang",         icon: KeyRound },
       { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
+      // Gutscheine sind tenant-weites Guthaben, bewusst TenantAdmin/SuperAdmin only — nicht für
+      // LocationAdmin (siehe AdminVoucherController). Nur anzeigen wenn nicht LocationAdmin.
+      ...(!isLocationAdmin ? [{ href: "/admin/vouchers", label: "Gutscheine", icon: Ticket }] : []),
     ],
   };
 

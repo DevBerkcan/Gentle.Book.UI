@@ -28,6 +28,7 @@ import {
   getServicesByEmployee,
   checkEmailConflict
 } from "@/lib/api/admin";
+import { IntakeFormAnswersPanel } from "@/components/admin/bookings/IntakeFormAnswersPanel";
 import { getAvailability, getEmployees, type TimeSlot, type Employee } from "@/lib/api/booking";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getAccessToken } from "@/lib/auth/storage";
@@ -129,6 +130,7 @@ export default function AdminBookingsPage() {
     email: string;
     phone: string;
     customerNotes: string;
+    voucherCode: string;
   }>({
     serviceId: '',
     bookingDate: moment().format('YYYY-MM-DD'),
@@ -137,7 +139,8 @@ export default function AdminBookingsPage() {
     lastName: '',
     email: '',
     phone: '',
-    customerNotes: ''
+    customerNotes: '',
+    voucherCode: '',
   });
 
   const { confirm, dialog: confirmDialog } = useConfirm();
@@ -316,7 +319,8 @@ export default function AdminBookingsPage() {
       lastName: '',
       email: '',
       phone: '',
-      customerNotes: ''
+      customerNotes: '',
+      voucherCode: '',
     });
     setAvailableSlots([]);
 
@@ -396,6 +400,7 @@ export default function AdminBookingsPage() {
         phone: bookingForm.phone?.trim() || null,
         customerNotes: bookingForm.customerNotes?.trim() || null,
         employeeId: selectedEmployeeId || null,
+        voucherCode: bookingForm.voucherCode?.trim() || null,
       };
 
       // THIS IS THE KEY PART - ACTUALLY CALL checkEmailConflict
@@ -808,6 +813,9 @@ export default function AdminBookingsPage() {
                           {getStatusLabel(selectedBookingDetails.status)}
                         </Chip>
                       </div>
+
+                      {/* Intake form answers (Agency) */}
+                      <IntakeFormAnswersPanel bookingId={selectedBookingDetails.id} />
 
                       {/* Notes */}
                       {selectedBookingDetails.customerNotes && (
@@ -1591,6 +1599,15 @@ export default function AdminBookingsPage() {
                           label="Notizen (optional)"
                           value={bookingForm.customerNotes}
                           onChange={(e) => setBookingForm({ ...bookingForm, customerNotes: e.target.value })}
+                          isDisabled={submitting}
+                          classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
+                        />
+                      </div>
+                      <div className="mt-3">
+                        <Input
+                          label="Gutschein-Code (optional)"
+                          value={bookingForm.voucherCode}
+                          onChange={(e) => setBookingForm({ ...bookingForm, voucherCode: e.target.value.toUpperCase() })}
                           isDisabled={submitting}
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />

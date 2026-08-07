@@ -35,6 +35,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { customersApi, CustomerListItem, CustomerDetail } from "@/lib/api/customers";
+import { CustomerLoyaltyPanel } from "@/components/admin/customers/CustomerLoyaltyPanel";
 import { useConfirm } from "@/components/ConfirmDialog";
 import moment from "moment";
 import { formatPrice } from "@/lib/utils/currency";
@@ -737,6 +738,9 @@ export default function CustomersPage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Loyalty Points (Agency) */}
+                    <CustomerLoyaltyPanel customerId={selectedCustomer.id} />
 
                     {/* Notes */}
                     {selectedCustomer.notes && (

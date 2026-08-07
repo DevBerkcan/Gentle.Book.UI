@@ -15,6 +15,9 @@ import {
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSection';
+import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
+import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
+import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
 import api, { apiOrigin } from '@/lib/api/client';
 import {
   createBusinessLocation,
@@ -628,6 +631,15 @@ export default function AdminSettingsPage() {
 
           {/* ── Unternehmenswebsite (AI Brand Import) ── */}
           <WebsiteBrandSection />
+
+          {/* ── Eigene Domain (Agency) ── */}
+          <CustomDomainSection />
+
+          {/* ── Team-Reports (Agency) ── */}
+          <TeamReportsSection />
+
+          {/* ── Treuepunkte (Agency) ── */}
+          <LoyaltySection />
 
           {/* ── Standorte ── */}
           <SectionCard

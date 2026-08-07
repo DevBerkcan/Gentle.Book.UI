@@ -175,6 +175,17 @@ export const superAdminApi = {
     return data as TenantStats;
   },
 
+  // ── Eigene Domain ────────────────────────────────────────────
+  async getTenantDomain(id: string) {
+    const { data } = await api.get(`/superadmin/tenants/${id}/domain`);
+    return data as { domain: string | null; status: string; requestedAt: string | null };
+  },
+
+  async setTenantDomainStatus(id: string, status: 'PendingVerification' | 'Verified' | 'Failed') {
+    const { data } = await api.post(`/superadmin/tenants/${id}/domain/status`, { status });
+    return data as { domain: string | null; status: string };
+  },
+
   // ── Impersonate ──────────────────────────────────────────────
   async impersonate(tenantId: string): Promise<{
     access_token: string;

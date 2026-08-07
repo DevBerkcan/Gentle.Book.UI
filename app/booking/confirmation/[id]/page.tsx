@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle, Calendar, Sparkles, Mail, User, ArrowLeft, PartyPopper, Copy, Check as CheckIcon, Download } from "lucide-react";
+import { CheckCircle, Calendar, Sparkles, Mail, User, ArrowLeft, PartyPopper, Copy, Check as CheckIcon, Download, ClipboardList } from "lucide-react";
 import Link from "next/link";
 
 interface BookingDetails {
@@ -60,6 +60,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(null);
   const [loading,    setLoading]    = useState(true);
   const [copied,     setCopied]     = useState(false);
+  const [intakeFormToken, setIntakeFormToken] = useState<string | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -76,6 +77,11 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
       finally { setLoading(false); }
     }
     load();
+
+    fetch(`${API_URL}/public/intake-form/for-booking/${params.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.available) setIntakeFormToken(data.token); })
+      .catch(() => {});
   }, [params.id, slug, API_URL]);
 
   const primary   = tenantInfo?.primaryColor ?? "#6355E4";
@@ -273,6 +279,25 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
                   Eine Bestätigung wurde an <strong className="text-gray-800">{booking.customer.email}</strong> gesendet.
                 </p>
               </motion.div>
+
+              {/* Intake form (Agency) */}
+              {intakeFormToken && (
+                <motion.div variants={slideUp}>
+                  <Link
+                    href={`/intake-form/${intakeFormToken}`}
+                    className="flex items-center gap-3 p-4 rounded-2xl border-2 transition-all hover:opacity-90"
+                    style={{ borderColor: withAlpha(primary, 0.3), background: withAlpha(primary, 0.04) }}
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: withAlpha(primary, 0.15) }}>
+                      <ClipboardList size={18} style={{ color: primary }} />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm">Anamnesebogen ausfüllen</p>
+                      <p className="text-xs text-gray-500">Hilf uns, dich optimal vorzubereiten</p>
+                    </div>
+                  </Link>
+                </motion.div>
+              )}
 
               {/* Add to calendar */}
               <motion.div variants={slideUp} className="flex gap-2 pt-1">

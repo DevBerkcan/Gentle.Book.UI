@@ -45,6 +45,15 @@ export interface BrandTheme {
   templateId: string;
 }
 
+/** One bookable service/treatment as read off the analyzed website. Price/duration are null
+ * whenever the source page didn't state them — never invented. */
+export interface DetectedService {
+  name: string;
+  priceAmount: number | null;
+  currency: string | null;
+  durationMinutes: number | null;
+}
+
 export interface BrandContent {
   description: string | null;
   heading: string | null;
@@ -54,7 +63,7 @@ export interface BrandContent {
   address: string | null;
   openingHours: string | null;
   socialLinks: string[];
-  services: string[];
+  services: DetectedService[];
 }
 
 export interface BrandThemeProposal {
@@ -150,10 +159,20 @@ export interface ApplyBrandProposalOptions {
   applyDescription: boolean;
   applySocialLinks: boolean;
   selectedLogoAssetId?: string | null;
+  applyServices?: boolean;
+  /** null/omitted = import every detected service; otherwise only these names. */
+  selectedServiceNames?: string[] | null;
 }
 
-export async function applyBrandProposal(resultId: string, options: ApplyBrandProposalOptions): Promise<void> {
-  await api.post(`/admin/brand-import/results/${resultId}/apply`, options);
+export interface ApplyBrandProposalResponse {
+  message: string;
+  importedServicesCount: number;
+  skippedServicesCount: number;
+}
+
+export async function applyBrandProposal(resultId: string, options: ApplyBrandProposalOptions): Promise<ApplyBrandProposalResponse> {
+  const res = await api.post(`/admin/brand-import/results/${resultId}/apply`, options);
+  return res.data as ApplyBrandProposalResponse;
 }
 
 export async function selectBrandAsset(assetId: string, isSelected: boolean): Promise<void> {

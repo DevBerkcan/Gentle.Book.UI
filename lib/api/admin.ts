@@ -92,7 +92,153 @@ export const adminApi = {
   invoicePdfUrl(id: string) {
     return `${process.env.NEXT_PUBLIC_API_URL}/tenant/invoices/${id}/pdf`;
   },
+
+  async getDomain() {
+    const { data } = await api.get('/tenant/domain');
+    return data as TenantDomainInfo;
+  },
+
+  async updateDomain(domain: string) {
+    const { data } = await api.put('/tenant/domain', { domain });
+    return data as TenantDomainInfo;
+  },
+
+  async removeDomain() {
+    const { data } = await api.delete('/tenant/domain');
+    return data as { message: string };
+  },
+
+  async getDigestFrequency() {
+    const { data } = await api.get('/tenant/digest');
+    return data as { frequency: 'None' | 'Daily' | 'Weekly' };
+  },
+
+  async updateDigestFrequency(frequency: 'None' | 'Daily' | 'Weekly') {
+    const { data } = await api.put('/tenant/digest', { frequency });
+    return data as { frequency: 'None' | 'Daily' | 'Weekly' };
+  },
+
+  async getLoyaltySettings() {
+    const { data } = await api.get('/tenant/loyalty');
+    return data as { pointsPerBooking: number };
+  },
+
+  async updateLoyaltySettings(pointsPerBooking: number) {
+    const { data } = await api.put('/tenant/loyalty', { pointsPerBooking });
+    return data as { pointsPerBooking: number };
+  },
+
+  async getCustomerLoyalty(customerId: string) {
+    const { data } = await api.get(`/customers/${customerId}/loyalty`);
+    return data as { points: number; history: LoyaltyTransaction[] };
+  },
+
+  async adjustCustomerLoyalty(customerId: string, points: number, reason?: string) {
+    const { data } = await api.post(`/customers/${customerId}/loyalty/adjust`, { points, reason });
+    return data as { points: number };
+  },
+
+  async getVouchers(search?: string) {
+    const { data } = await api.get('/admin/vouchers', { params: search ? { search } : undefined });
+    return data as AdminVoucher[];
+  },
+
+  async issueVoucher(dto: { type: 'MonetaryValue' | 'SessionPackage'; customerId?: string | null; amount?: number | null; sessions?: number | null; expiresAt?: string | null; note?: string | null }) {
+    const { data } = await api.post('/admin/vouchers', dto);
+    return data as AdminVoucher;
+  },
+
+  async cancelVoucher(id: string) {
+    const { data } = await api.post(`/admin/vouchers/${id}/cancel`);
+    return data as { message: string };
+  },
+
+  async getIntakeFormFields() {
+    const { data } = await api.get('/admin/intake-form/fields');
+    return data as IntakeFormField[];
+  },
+
+  async createIntakeFormField(field: { label: string; fieldType: string; optionsJson?: string | null; isRequired: boolean }) {
+    const { data } = await api.post('/admin/intake-form/fields', field);
+    return data as IntakeFormField;
+  },
+
+  async updateIntakeFormField(id: string, field: { label: string; fieldType: string; optionsJson?: string | null; isRequired: boolean; isActive?: boolean }) {
+    const { data } = await api.put(`/admin/intake-form/fields/${id}`, field);
+    return data as IntakeFormField;
+  },
+
+  async deleteIntakeFormField(id: string) {
+    await api.delete(`/admin/intake-form/fields/${id}`);
+  },
+
+  async reorderIntakeFormFields(orderedIds: string[]) {
+    await api.patch('/admin/intake-form/fields/reorder', orderedIds);
+  },
+
+  async getIntakeFormResponseForBooking(bookingId: string) {
+    const { data } = await api.get(`/admin/intake-form/responses/by-booking/${bookingId}`);
+    return data as { hasResponse: boolean; submittedAt?: string; answers?: { label: string; value: string }[] };
+  },
+
+  async getReviews() {
+    const { data } = await api.get('/admin/reviews');
+    return data as AdminReview[];
+  },
+
+  async setReviewPublished(id: string, isPublished: boolean) {
+    const { data } = await api.put(`/admin/reviews/${id}/publish`, { isPublished });
+    return data as { id: string; isPublished: boolean };
+  },
 };
+
+export interface TenantDomainInfo {
+  domain: string | null;
+  status: 'None' | 'PendingVerification' | 'Verified' | 'Failed';
+  requestedAt: string | null;
+}
+
+export interface AdminVoucher {
+  id: string;
+  code: string;
+  type: 'MonetaryValue' | 'SessionPackage';
+  status: 'Active' | 'Redeemed' | 'Expired' | 'Cancelled';
+  initialAmount: number | null;
+  remainingAmount: number | null;
+  initialSessions: number | null;
+  remainingSessions: number | null;
+  expiresAt: string | null;
+  issuedAt: string;
+  note: string | null;
+  customerName: string | null;
+}
+
+export interface IntakeFormField {
+  id: string;
+  label: string;
+  fieldType: 'Text' | 'Textarea' | 'YesNo' | 'MultipleChoice';
+  optionsJson: string | null;
+  isRequired: boolean;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export interface LoyaltyTransaction {
+  id: string;
+  points: number;
+  reason: string;
+  createdAt: string;
+}
+
+export interface AdminReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  isPublished: boolean;
+  createdAt: string;
+  serviceName: string;
+  customerName: string;
+}
 
 export interface ApiKeySummary {
   id: string;
@@ -259,6 +405,7 @@ export interface CreateManualBookingDto {
   phone: string | null;
   employeeId?: string | null;
   customerNotes: string | null;
+  voucherCode?: string | null;
 }
 
 export interface ManualBookingResponse {
@@ -431,6 +578,7 @@ export async function createManualBooking(
     phone: data.phone?.trim() || null,
     customerNotes: data.customerNotes?.trim() || null,
     employeeId: data.employeeId || null,
+    voucherCode: data.voucherCode?.trim() || null,
   });
   return response.data;
 }
