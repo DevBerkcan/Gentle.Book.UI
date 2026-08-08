@@ -96,7 +96,7 @@ export function OrganicTemplate({
                 width={96}
                 height={96}
                 unoptimized
-                className="relative w-24 h-24 object-cover"
+                className="relative w-24 h-24 object-contain bg-white"
                 style={{ borderRadius: avRadius, border: "3px solid var(--tenant-bg)" }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center"

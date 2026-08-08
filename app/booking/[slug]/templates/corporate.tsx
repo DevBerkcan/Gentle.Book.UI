@@ -55,7 +55,7 @@ export function CorporateTemplate({
               width={48}
               height={48}
               unoptimized
-              className="w-12 h-12 object-cover flex-shrink-0 border border-gray-200"
+              className="w-12 h-12 object-contain flex-shrink-0 border border-gray-200 bg-white"
               style={{ borderRadius: avRadius }} />
           ) : (
             <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center border border-gray-200"

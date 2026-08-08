@@ -104,7 +104,7 @@ export function BarbershopTemplate({
                 width={112}
                 height={112}
                 unoptimized
-                className="relative w-28 h-28 object-cover rounded-full border-4 border-white" />
+                className="relative w-28 h-28 object-contain rounded-full border-4 border-white bg-white" />
             ) : (
               <div className="relative w-28 h-28 rounded-full flex items-center justify-center border-4 border-white"
                 style={{ background: `linear-gradient(135deg, ${accent}, ${withAlpha(accent, 0.7)})` }}>

@@ -1,15 +1,11 @@
 import { ImageResponse } from 'next/og'
 import { getTenantInfo } from '@/lib/api/booking'
+import { resolveLogoUrl } from '@/lib/utils/logo'
 
 export const size = { width: 64, height: 64 }
 export const contentType = 'image/png'
 
 const GB_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="19" r="11.5" stroke="#6355E4" stroke-width="5"/><path d="M35.5 19 V29.5 a11.5 11.5 0 0 1 -19 8.6" stroke="#6355E4" stroke-width="5" stroke-linecap="round"/><circle cx="34.6" cy="10.4" r="3.1" fill="#17A398"/></svg>`
-
-// Logo files are at /uploads/logos/... — strip /api from the API URL
-const API_ORIGIN = process.env.NEXT_PUBLIC_API_URL
-  ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
-  : ''
 
 export default async function Icon({ params }: { params: { slug: string } }) {
   let logoUrl: string | null = null
@@ -21,12 +17,7 @@ export default async function Icon({ params }: { params: { slug: string } }) {
     primaryColor = info.primaryColor ?? '#6355E4'
     const name = info.companyName ?? info.name ?? ''
     initial = name.trim()[0]?.toUpperCase() ?? 'G'
-
-    if (info.logoUrl) {
-      logoUrl = info.logoUrl.startsWith('http')
-        ? info.logoUrl
-        : `${API_ORIGIN}${info.logoUrl}`
-    }
+    logoUrl = resolveLogoUrl(info.logoUrl)
   } catch {
     // Fall back to GentleBook defaults
   }

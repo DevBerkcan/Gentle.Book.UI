@@ -72,7 +72,7 @@ export function MagazineTemplate({
                 width={80}
                 height={80}
                 unoptimized
-                className="w-20 h-20 object-cover border-2 border-white/20 flex-shrink-0"
+                className="w-20 h-20 object-contain bg-white border-2 border-white/20 flex-shrink-0"
                 style={{ borderRadius: avRadius }} />
             ) : (
               <div className="w-20 h-20 flex items-center justify-center border-2 border-white/20 flex-shrink-0"

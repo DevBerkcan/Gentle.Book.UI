@@ -54,7 +54,7 @@ export function FitnessTemplate({
             <motion.div className="absolute right-4 top-4 h-16 w-16 rounded-2xl" style={{ background: "var(--tenant-accent)", transform: "translateZ(40px)" }}
               animate={{ rotate: [0, 18, 0] }} transition={{ repeat: Infinity, duration: 4 }} />
             <div className="relative flex items-end gap-4">
-              {logoSrc ? <Image src={logoSrc} alt={tenantName} width={96} height={96} unoptimized className="h-24 w-24 rounded-3xl object-cover" /> : (
+              {logoSrc ? <Image src={logoSrc} alt={tenantName} width={96} height={96} unoptimized className="h-24 w-24 rounded-3xl object-contain bg-white" /> : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-white/10 text-4xl">{emoji ?? <Flame style={{ color: "var(--tenant-accent)" }} />}</div>
               )}
               <div className="min-w-0 flex-1">

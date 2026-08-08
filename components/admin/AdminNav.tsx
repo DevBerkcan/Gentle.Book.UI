@@ -14,7 +14,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { legalConfig } from "@/lib/config";
-import api, { apiOrigin } from "@/lib/api/client";
+import api from "@/lib/api/client";
+import { resolveLogoUrl } from "@/lib/utils/logo";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const COLLAPSE_KEY = "admin-sidebar-collapsed";
@@ -148,7 +149,7 @@ export function AdminNav() {
           {isCollapsed ? (
             <GentleBookMark size={28} className="mx-auto" />
           ) : logoUrl
-            ? <Image src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} width={180} height={40} unoptimized className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
+            ? <Image src={resolveLogoUrl(logoUrl)!} alt={companyName ?? "Logo"} width={180} height={40} unoptimized className="w-full max-w-[180px] h-10 object-contain object-left flex-shrink-0" />
             : (
               <>
                 <GentleBookMark size={28} />
@@ -286,7 +287,7 @@ export function AdminNav() {
       <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/8 z-40 flex items-center justify-between px-4">
         <Link href="/admin/dashboard" className="flex items-center">
           {logoUrl
-            ? <Image src={logoUrl?.startsWith('http') ? logoUrl : `${apiOrigin}${logoUrl}`} alt={companyName ?? "Logo"} width={150} height={36} unoptimized className="h-9 w-[150px] object-contain object-left" />
+            ? <Image src={resolveLogoUrl(logoUrl)!} alt={companyName ?? "Logo"} width={150} height={36} unoptimized className="h-9 w-[150px] object-contain object-left" />
             : <GentleBookMark size={24} />
           }
         </Link>

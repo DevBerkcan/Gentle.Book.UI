@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { getTenantInfo, getTenantLinks, type TenantLink } from "@/lib/api/booking";
-import { apiOrigin } from "@/lib/api/client";
+import { resolveLogoUrl } from "@/lib/utils/logo";
 import type { Theme, LinktreeConfig } from "./_shared";
 import { ClassicTemplate }   from "./templates/classic";
 import { SoftTemplate }      from "./templates/soft";
@@ -137,7 +137,7 @@ export default function TenantLinktreePage() {
     );
   }
 
-  const logoSrc = logoUrl ? (logoUrl.startsWith("http") ? logoUrl : `${apiOrigin}${logoUrl}`) : null;
+  const logoSrc = resolveLogoUrl(logoUrl);
 
   // ── Template dispatch ──────────────────────────────────────────────────────
   const templateProps = {

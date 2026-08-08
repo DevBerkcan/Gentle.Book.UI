@@ -77,7 +77,7 @@ export function SoftTemplate({
                 width={96}
                 height={96}
                 unoptimized
-                className="relative w-24 h-24 object-cover border-4 border-white shadow-xl"
+                className="relative w-24 h-24 object-contain bg-white border-4 border-white shadow-xl"
                 style={{ borderRadius: avRadius }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center border-4 border-white shadow-xl"

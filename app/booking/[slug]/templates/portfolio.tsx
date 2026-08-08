@@ -36,7 +36,7 @@ export function PortfolioTemplate({
             <h1 className="text-4xl font-black leading-none tracking-normal sm:text-5xl">{tenantName}</h1>
             {tagline && <p className="mt-4 max-w-md text-sm leading-relaxed text-zinc-500">{tagline}</p>}
           </div>
-          {logoSrc && <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 rounded-2xl object-cover" />}
+          {logoSrc && <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 rounded-2xl object-contain bg-white" />}
         </motion.header>
 
         <motion.div className="mb-5 grid grid-cols-[1fr_auto] gap-3 rounded-[30px] border border-zinc-200 bg-zinc-50 p-4"

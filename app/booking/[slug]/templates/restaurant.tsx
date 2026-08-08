@@ -38,7 +38,7 @@ export function RestaurantTemplate({
       <div className="relative mx-auto max-w-md px-5 py-8 pb-24">
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full border bg-white shadow-sm" style={{ borderColor: withAlpha(accent, 0.24) }}>
-            {logoSrc ? <Image src={logoSrc} alt={tenantName} width={80} height={80} unoptimized className="h-full w-full rounded-full object-cover" /> : <span className="text-3xl">{emoji ?? <Utensils style={{ color: accent }} />}</span>}
+            {logoSrc ? <Image src={logoSrc} alt={tenantName} width={80} height={80} unoptimized className="h-full w-full rounded-full object-contain bg-white" /> : <span className="text-3xl">{emoji ?? <Utensils style={{ color: accent }} />}</span>}
           </div>
           <p className="text-[10px] font-bold uppercase tracking-[0.34em]" style={{ color: "var(--tenant-accent)", fontFamily: "Montserrat, sans-serif" }}>Reservation</p>
           <h1 className="mt-2 text-4xl leading-none">{tenantName}</h1>

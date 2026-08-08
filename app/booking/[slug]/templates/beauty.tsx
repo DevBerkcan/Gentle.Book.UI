@@ -77,7 +77,7 @@ export function BeautyTemplate({
                   width={96}
                   height={96}
                   unoptimized
-                  className="w-24 h-24 object-cover rounded-full border-2 border-white" />
+                  className="w-24 h-24 object-contain bg-white rounded-full border-2 border-white" />
               ) : (
                 <div className="w-24 h-24 rounded-full flex items-center justify-center border-2 border-white"
                   style={{ background: "var(--tenant-icon-bg)" }}>

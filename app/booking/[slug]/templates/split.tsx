@@ -63,7 +63,7 @@ export function SplitTemplate({
                   width={96}
                   height={96}
                   unoptimized
-                  className="relative w-24 h-24 object-cover border-2 border-white shadow-lg"
+                  className="relative w-24 h-24 object-contain bg-white border-2 border-white shadow-lg"
                   style={{ borderRadius: avRadius }} />
               ) : (
                 <div className="relative w-24 h-24 flex items-center justify-center border-2 border-white shadow-lg"

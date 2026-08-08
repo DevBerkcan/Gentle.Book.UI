@@ -79,7 +79,7 @@ export function NeonTemplate({
                 width={96}
                 height={96}
                 unoptimized
-                className="relative w-24 h-24 object-cover border-2"
+                className="relative w-24 h-24 object-contain bg-white border-2"
                 style={{ borderRadius: avRadius, borderColor: "var(--tenant-glow-border)" }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center border-2"

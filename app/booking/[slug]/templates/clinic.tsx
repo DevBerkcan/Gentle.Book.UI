@@ -50,7 +50,7 @@ export function ClinicTemplate({
           className="rounded-[28px] border border-white bg-white/90 p-5 shadow-sm">
           <div className="flex items-center gap-4">
             {logoSrc ? (
-              <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 object-cover shadow-sm" style={{ borderRadius: avRadius }} />
+              <Image src={logoSrc} alt={tenantName} width={64} height={64} unoptimized className="h-16 w-16 object-contain bg-white shadow-sm" style={{ borderRadius: avRadius }} />
             ) : (
               <div className="flex h-16 w-16 items-center justify-center shadow-sm" style={{ background: "var(--tenant-accent-soft)", borderRadius: avRadius }}>
                 {emoji ? <span className="text-2xl">{emoji}</span> : <HeartPulse style={{ color: "var(--tenant-accent)" }} />}

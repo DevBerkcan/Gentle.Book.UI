@@ -79,7 +79,7 @@ export function TattooTemplate({
                 width={96}
                 height={96}
                 unoptimized
-                className="relative w-24 h-24 object-cover"
+                className="relative w-24 h-24 object-contain bg-white"
                 style={{ borderRadius: avRadius }} />
             ) : (
               <div className="relative w-24 h-24 flex items-center justify-center bg-[#1a1a1a]"

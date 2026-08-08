@@ -74,7 +74,7 @@ export function HeroTemplate({
               width={112}
               height={112}
               unoptimized
-              className="w-28 h-28 object-cover border-4 border-white shadow-2xl"
+              className="w-28 h-28 object-contain border-4 border-white shadow-2xl bg-white"
               style={{ borderRadius: "var(--tenant-radius-avatar)" }} />
           ) : (
             <div className="w-28 h-28 flex items-center justify-center border-4 border-white shadow-2xl"

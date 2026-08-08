@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import { superAdminApi, UpdateTenantSettingsPayload, TenantStats } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { resolveLogoUrl } from '@/lib/utils/logo';
 import { setAccessToken } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
 
@@ -468,7 +469,7 @@ export default function TenantDetailPage() {
               <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0">
                 {logoUrl ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_URL}${logoUrl}`}
+                    src={resolveLogoUrl(logoUrl)!}
                     alt="Logo"
                     width={64}
                     height={64}

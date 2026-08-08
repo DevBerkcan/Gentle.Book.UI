@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle, Calendar, Sparkles, Mail, User, ArrowLeft, PartyPopper, Copy, Check as CheckIcon, Download, ClipboardList } from "lucide-react";
+import { resolveLogoUrl } from "@/lib/utils/logo";
 import Link from "next/link";
 
 interface BookingDetails {
@@ -126,9 +127,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
     a.href = url; a.download = `termin-${booking.bookingNumber}.ics`;
     a.click(); URL.revokeObjectURL(url);
   }
-  const logoSrc   = tenantInfo?.logoUrl
-    ? (tenantInfo.logoUrl.startsWith("http") ? tenantInfo.logoUrl : `${API_URL}${tenantInfo.logoUrl}`)
-    : null;
+  const logoSrc   = resolveLogoUrl(tenantInfo?.logoUrl);
 
   const formatDate = (dateStr: string) =>
     new Date(dateStr + "T00:00:00").toLocaleDateString("de-DE", {
@@ -197,7 +196,7 @@ export default function ConfirmationPage({ params }: { params: { id: string } })
               <div className="relative mb-4 flex justify-center">
                 <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm border-4 border-white/40">
                   {logoSrc
-                    ? <Image src={logoSrc} alt={name ?? "Logo"} width={80} height={80} unoptimized className="w-full h-full rounded-full object-cover" />
+                    ? <Image src={logoSrc} alt={name ?? "Logo"} width={80} height={80} unoptimized className="w-full h-full rounded-full object-contain bg-white p-1" />
                     : <CheckCircle size={40} className="text-white" />
                   }
                 </div>

@@ -18,7 +18,8 @@ import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSec
 import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
 import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
-import api, { apiOrigin } from '@/lib/api/client';
+import api from '@/lib/api/client';
+import { resolveLogoUrl } from '@/lib/utils/logo';
 import {
   createBusinessLocation,
   deleteBusinessLocation,
@@ -502,7 +503,7 @@ export default function AdminSettingsPage() {
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] flex items-center justify-center overflow-hidden flex-shrink-0">
                 {settings.logoUrl ? (
                   <Image
-                    src={settings.logoUrl?.startsWith('http') ? settings.logoUrl : `${apiOrigin}${settings.logoUrl}`}
+                    src={resolveLogoUrl(settings.logoUrl)!}
                     alt="Logo"
                     width={80}
                     height={80}
