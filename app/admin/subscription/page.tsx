@@ -295,8 +295,12 @@ export default function AdminSubscriptionPage() {
     setRequestError('');
     try {
       await adminApi.changeSubscriptionPlan(planKey, billingInterval);
-      const subData = await api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null);
+      const [subData, usageData] = await Promise.all([
+        api.get('/tenant/subscription').then(r => r.data?.data ?? r.data).catch(() => null),
+        api.get('/tenant/usage').then(r => r.data).catch(() => null),
+      ]);
       setSub(subData);
+      setUsage(usageData);
       setPlanChangeSuccess(planName);
     } catch (err: any) {
       setRequestError(err.response?.data?.message || 'Plan konnte nicht gewechselt werden. Bitte versuchen Sie es erneut.');

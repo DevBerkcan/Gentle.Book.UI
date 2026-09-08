@@ -183,8 +183,8 @@ export default function AdminLinksPage() {
         .catch(() => {});
     }
     api.get("/tenant/subscription").then((res) => {
-      const plan = res.data?.plan?.toLowerCase() ?? "starter";
-      if (plan.includes("business")) setTenantPlan("business");
+      const plan = res.data?.data?.plan?.toLowerCase() ?? "starter";
+      if (plan.includes("agency")) setTenantPlan("business");
       else if (plan.includes("pro"))  setTenantPlan("pro");
       else                            setTenantPlan("starter");
     }).catch(() => {});
