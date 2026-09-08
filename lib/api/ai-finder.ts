@@ -85,6 +85,17 @@ export interface FinderOverview {
     outputTokens: number;
     cost: number;
   };
+  budget: {
+    monthlyBudgetUsd: number;
+    currentPeriodCostUsd: number;
+    percentUsed: number;
+    isHardCapped: boolean;
+  };
+  pendingBudgetRequest: {
+    id: string;
+    createdOn: string;
+    requestedBudgetUsd: number | null;
+  } | null;
 }
 
 export interface ServiceRecommendation {
@@ -215,6 +226,11 @@ export const aiFinderApi = {
 
   async preview(payload: { answers: Array<{ key: string; value: unknown }>; freeText?: string | null }): Promise<EvaluateFinderResponse> {
     const { data } = await api.post('/admin/ai-finder/preview', payload);
+    return data;
+  },
+
+  async requestBudgetIncrease(requestedBudgetUsd: number, note?: string): Promise<{ message: string }> {
+    const { data } = await api.post('/admin/ai-finder/budget-increase-request', { requestedBudgetUsd, note });
     return data;
   },
 };

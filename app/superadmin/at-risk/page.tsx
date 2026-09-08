@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, XCircle, RefreshCw, Clock, ArrowRight, Mail } from 'lucide-react';
-import { superAdminApi, AtRiskCancellingItem, AtRiskDunningItem } from '@/lib/api/superadmin';
+import { AlertTriangle, XCircle, RefreshCw, Clock, ArrowRight, Mail, Sparkles } from 'lucide-react';
+import { superAdminApi, AtRiskCancellingItem, AtRiskDunningItem, AtRiskAiCostItem } from '@/lib/api/superadmin';
 
 function formatDate(s?: string) {
   if (!s) return '–';
@@ -13,6 +13,7 @@ function formatDate(s?: string) {
 export default function AtRiskPage() {
   const [cancelling, setCancelling] = useState<AtRiskCancellingItem[]>([]);
   const [dunning,     setDunning]   = useState<AtRiskDunningItem[]>([]);
+  const [aiCostRisk,  setAiCostRisk] = useState<AtRiskAiCostItem[]>([]);
   const [loading,     setLoading]   = useState(true);
 
   async function load() {
@@ -21,6 +22,7 @@ export default function AtRiskPage() {
       const res = await superAdminApi.getAtRiskSubscriptions();
       setCancelling(res.cancelling);
       setDunning(res.dunning);
+      setAiCostRisk(res.aiCostRisk);
     } catch {
       // silent
     }
@@ -137,6 +139,53 @@ export default function AtRiskPage() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-200 text-gray-700">
                         bis {formatDate(c.currentPeriodEnd)}
+                      </span>
+                      <ArrowRight size={13} className="text-gray-300 group-hover:text-gray-500" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── AI cost risk ────────────────────────────────────────── */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+                <Sparkles size={15} className="text-[#6355E4]" />
+              </div>
+              <div>
+                <h2 className="font-semibold text-gray-900 text-sm">KI-Budget fast erreicht</h2>
+                <p className="text-xs text-gray-400">Kein Abbruch für den Kunden — Features laufen im Fallback weiter, nur zur Beobachtung</p>
+              </div>
+            </div>
+            {aiCostRisk.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-6">Kein Tenant nahe am KI-Budget</p>
+            ) : (
+              <div className="space-y-2">
+                {aiCostRisk.map(a => (
+                  <Link
+                    key={a.tenantId}
+                    href={`/superadmin/tenants/${a.tenantId}`}
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl border border-violet-100 bg-violet-50/40 hover:bg-violet-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-lg bg-violet-100 flex items-center justify-center flex-shrink-0">
+                        <Sparkles size={14} className="text-[#6355E4]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{a.companyName}</p>
+                        <p className="text-xs text-gray-400">
+                          {a.currentPeriodCostUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $ von {a.monthlyBudgetUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $
+                          {a.isHardCapped && <span className="inline-flex items-center gap-1 ml-1 text-red-600 font-medium">· pausiert</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                        a.isHardCapped ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {a.percentUsed}%
                       </span>
                       <ArrowRight size={13} className="text-gray-300 group-hover:text-gray-500" />
                     </div>

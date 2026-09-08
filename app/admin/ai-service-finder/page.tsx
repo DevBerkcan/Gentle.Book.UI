@@ -64,6 +64,11 @@ export default function AiServiceFinderAdminPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(true);
+  const [budgetRequestOpen, setBudgetRequestOpen] = useState(false);
+  const [budgetRequestAmount, setBudgetRequestAmount] = useState('');
+  const [budgetRequestNote, setBudgetRequestNote] = useState('');
+  const [submittingBudgetRequest, setSubmittingBudgetRequest] = useState(false);
+  const [budgetRequestError, setBudgetRequestError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -110,6 +115,28 @@ export default function AiServiceFinderAdminPage() {
     () => profiles.find((profile) => profile.id === settings?.primaryIndustryProfileId) ?? null,
     [profiles, settings?.primaryIndustryProfileId],
   );
+
+  async function handleSubmitBudgetRequest() {
+    const amount = parseFloat(budgetRequestAmount.replace(',', '.'));
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setBudgetRequestError('Bitte einen gültigen Betrag angeben.');
+      return;
+    }
+    setSubmittingBudgetRequest(true);
+    setBudgetRequestError(null);
+    try {
+      await aiFinderApi.requestBudgetIncrease(amount, budgetRequestNote.trim() || undefined);
+      setBudgetRequestOpen(false);
+      setBudgetRequestAmount('');
+      setBudgetRequestNote('');
+      const fresh = await aiFinderApi.getOverview();
+      setOverview(fresh);
+    } catch (e: any) {
+      setBudgetRequestError(e.response?.data?.message || 'Anfrage konnte nicht gesendet werden.');
+    } finally {
+      setSubmittingBudgetRequest(false);
+    }
+  }
 
   async function saveSettings() {
     if (!settings?.primaryIndustryProfileId) {
@@ -290,6 +317,82 @@ export default function AiServiceFinderAdminPage() {
         <StatCard label="Aktive Regeln" value={String(overview?.ruleCount ?? 0)} />
         <StatCard label="Freigegebene Hinweise" value={String(overview?.guidanceCount ?? 0)} />
       </section>
+
+      {overview?.budget && (
+        <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-[#14162B] flex items-center gap-1.5">
+                KI-Budget diesen Monat
+                <InfoTooltip text="Deckt die tatsächlichen KI-Kosten (Service-Finder-Erklärung, KI-Tagline-Vorschläge). Ist das Budget aufgebraucht, laufen diese Features automatisch ohne KI weiter — keine Unterbrechung, nur weniger personalisierte Antworten, bis zur nächsten Periode." />
+              </h2>
+              <p className="text-xs text-gray-500 mt-1">
+                {overview.usage.cost.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $ von {overview.budget.monthlyBudgetUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $
+                {' · '}{overview.usage.requests} Anfragen
+              </p>
+            </div>
+            {!overview.pendingBudgetRequest ? (
+              <button
+                type="button"
+                onClick={() => { setBudgetRequestOpen(true); setBudgetRequestError(null); }}
+                className="rounded-lg border border-[#6355E4] px-3 py-1.5 text-xs font-semibold text-[#6355E4] hover:bg-[#6355E4]/5"
+              >
+                Mehr KI-Kapazität anfragen
+              </button>
+            ) : (
+              <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+                Anfrage über {overview.pendingBudgetRequest.requestedBudgetUsd?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) ?? '–'} $ liegt vor
+              </span>
+            )}
+          </div>
+          <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className={`h-full rounded-full ${overview.budget.isHardCapped ? 'bg-red-500' : overview.budget.percentUsed >= 80 ? 'bg-amber-500' : 'bg-[#6355E4]'}`}
+              style={{ width: `${Math.min(100, overview.budget.percentUsed)}%` }}
+            />
+          </div>
+          {overview.budget.isHardCapped && (
+            <p className="text-xs text-red-600">Budget aufgebraucht — die KI-Features laufen bis zur nächsten Periode automatisch ohne KI weiter.</p>
+          )}
+        </section>
+      )}
+
+      {budgetRequestOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !submittingBudgetRequest && setBudgetRequestOpen(false)}>
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-[#14162B]">Mehr KI-Kapazität anfragen</h3>
+            <p className="text-xs text-gray-500">Wir melden uns mit einer Rückmeldung. Der monatliche Preis kann sich dabei anpassen.</p>
+            <label className="block text-sm font-medium text-gray-700">
+              Gewünschtes Monatsbudget ($)
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={budgetRequestAmount}
+                onChange={(e) => setBudgetRequestAmount(e.target.value)}
+                placeholder="z.B. 50.00"
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </label>
+            <label className="block text-sm font-medium text-gray-700">
+              Nachricht (optional)
+              <textarea
+                value={budgetRequestNote}
+                onChange={(e) => setBudgetRequestNote(e.target.value)}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+              />
+            </label>
+            {budgetRequestError && <p className="text-sm text-red-600">{budgetRequestError}</p>}
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => setBudgetRequestOpen(false)} disabled={submittingBudgetRequest} className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">Abbrechen</button>
+              <button type="button" onClick={handleSubmitBudgetRequest} disabled={submittingBudgetRequest} className="rounded-lg bg-[#6355E4] px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                {submittingBudgetRequest ? 'Wird gesendet…' : 'Anfrage senden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
         <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">

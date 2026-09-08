@@ -52,6 +52,8 @@ export default function AdminLinksPage() {
   const [tenantPlan, setTenantPlan] = useState<PlanTier>("starter");
   const [showQR, setShowQR] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [chatbotEnabled, setChatbotEnabled] = useState(false);
+  const [chatbotSaving, setChatbotSaving] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("mobile");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -165,8 +167,22 @@ export default function AdminLinksPage() {
       if (d?.linktreeConfig) {
         try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(d.linktreeConfig) }); } catch {}
       }
+      setChatbotEnabled(!!d?.isChatbotEnabled);
     }).catch(() => {});
   }, []);
+
+  async function toggleChatbot(next: boolean) {
+    setChatbotSaving(true);
+    try {
+      await api.put("/tenant/settings", { isChatbotEnabled: next });
+      setChatbotEnabled(next);
+      showToast("success", next ? "Chat-Assistent aktiviert" : "Chat-Assistent deaktiviert");
+    } catch (err: any) {
+      showToast("error", err.response?.data?.message || "Chat-Assistent konnte nicht umgeschaltet werden");
+    } finally {
+      setChatbotSaving(false);
+    }
+  }
 
   const handleBrandImportApplied = useCallback(() => {
     loadTenantSettings();
@@ -302,6 +318,34 @@ export default function AdminLinksPage() {
             onBrandImportApplied={handleBrandImportApplied}
             showToast={showToast}
           />
+
+          <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[#111318] flex items-center gap-1.5">
+                Chat-Assistent auf Buchungsseite
+                {tenantPlan !== "business" && (
+                  <span className="text-[10px] font-bold uppercase tracking-wide text-white bg-[#6355E4] px-1.5 py-0.5 rounded">Agency</span>
+                )}
+              </p>
+              <p className="text-xs text-[#6B7280] mt-0.5">
+                {tenantPlan === "business"
+                  ? "Zeigt unten rechts auf deiner Buchungsseite einen Chat, in dem Kund:innen ihr Anliegen beschreiben und eine Serviceempfehlung erhalten — zusätzlich zum bestehenden Buchungsablauf, nicht als Ersatz."
+                  : "Ab dem Agency-Tarif verfügbar: ein Chat unten rechts auf deiner Buchungsseite empfiehlt Kund:innen anhand ihrer Beschreibung den passenden Service."}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={chatbotEnabled}
+              disabled={tenantPlan !== "business" || chatbotSaving}
+              onClick={() => toggleChatbot(!chatbotEnabled)}
+              className={`shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                chatbotEnabled ? "bg-[#6355E4]" : "bg-gray-300"
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${chatbotEnabled ? "translate-x-6" : "translate-x-1"}`} />
+            </button>
+          </div>
 
           <AddLinkForm
             open={showAddForm}

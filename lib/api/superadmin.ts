@@ -241,6 +241,33 @@ export const superAdminApi = {
     };
   },
 
+  // ── Per-tenant AI usage/budget ────────────────────────────────
+  async getTenantAiUsage(id: string) {
+    const { data } = await api.get(`/superadmin/tenants/${id}/ai-usage`);
+    return data as TenantAiUsageDetail;
+  },
+
+  async setTenantAiBudget(id: string, monthlyBudgetUsd: number | null) {
+    const { data } = await api.patch(`/superadmin/tenants/${id}/ai-budget`, { monthlyBudgetUsd });
+    return data as { tenantId: string; monthlyBudgetUsd: number | null };
+  },
+
+  // ── AI budget increase requests ("customer wants more capacity") ─
+  async getAiBudgetRequests(status: string = 'Pending') {
+    const { data } = await api.get('/superadmin/ai-budget-requests', { params: { status } });
+    return data as { items: AiBudgetRequestItem[]; pendingCount: number };
+  },
+
+  async approveAiBudgetRequest(id: string, approvedBudgetUsd?: number) {
+    const { data } = await api.post(`/superadmin/ai-budget-requests/${id}/approve`, { approvedBudgetUsd });
+    return data as { tenantId: string; monthlyBudgetUsd: number };
+  },
+
+  async declineAiBudgetRequest(id: string) {
+    const { data } = await api.post(`/superadmin/ai-budget-requests/${id}/decline`);
+    return data as { message: string };
+  },
+
   // ── Subscription Requests ────────────────────────────────────
   async getSubscriptionRequests(status?: string) {
     const { data } = await api.get('/superadmin/subscription-requests', { params: status ? { status } : {} });
@@ -295,6 +322,7 @@ export const superAdminApi = {
     return data as {
       cancelling: AtRiskCancellingItem[];
       dunning: AtRiskDunningItem[];
+      aiCostRisk: AtRiskAiCostItem[];
       totalAtRisk: number;
     };
   },
@@ -377,6 +405,47 @@ export interface AtRiskDunningItem {
   failedPaymentCount: number;
   dunningWarningEmailSent: boolean;
   daysUntilAutoCancel: number;
+}
+
+export interface AtRiskAiCostItem {
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  currentPeriodCostUsd: number;
+  monthlyBudgetUsd: number;
+  percentUsed: number;
+  isHardCapped: boolean;
+}
+
+export interface AiBudgetRequestItem {
+  id: string;
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  status: string;
+  createdOn: string;
+  confirmedOn?: string;
+  requestedBudgetUsd: number | null;
+  note: string | null;
+  currentBudgetUsd: number;
+}
+
+export interface TenantAiUsageDetail {
+  tenantId: string;
+  monthToDate: { cost: number; requests: number; inputTokens: number; outputTokens: number };
+  budget: {
+    monthlyBudgetUsd: number;
+    isCustomOverride: boolean;
+    currentPeriodCostUsd: number;
+    percentUsed: number;
+    isHardCapped: boolean;
+  };
+  pendingBudgetRequest: {
+    id: string;
+    createdOn: string;
+    requested: { requestedBudgetUsd: number | null; note: string | null };
+  } | null;
+  last6Months: { year: number; month: number; label: string; cost: number; requests: number }[];
 }
 
 export interface PlanPriceItem {

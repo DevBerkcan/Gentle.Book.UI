@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { legalConfig } from "@/lib/config";
 import { resolveLogoUrl } from "@/lib/utils/logo";
+import { ChatbotWidget } from "@/components/booking/ChatbotWidget";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -42,10 +43,11 @@ export async function generateMetadata(
   }
 }
 
-export default function SlugLayout({ children }: { children: React.ReactNode }) {
+export default function SlugLayout({ children, params }: { children: React.ReactNode; params: { slug: string } }) {
   return (
     <>
       {children}
+      <ChatbotWidget slug={params.slug} />
       <aside className="border-t border-gray-200 bg-white px-4 py-6 text-center text-xs leading-relaxed text-gray-500">
         <p className="mx-auto max-w-3xl">
           Die angebotenen Leistungen werden vom jeweils genannten Unternehmen erbracht. Vertragspartner für die

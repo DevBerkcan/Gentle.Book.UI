@@ -207,6 +207,20 @@ function BookingPageInner() {
     BookingEvents.serviceSelected(service.name, service.price);
   };
 
+  // Handoff from the chat assistant widget (components/booking/ChatbotWidget.tsx), which links
+  // here as /book?serviceId=... after recommending a service — auto-selects it and skips
+  // straight to the next step instead of making the customer pick it again from the list.
+  useEffect(() => {
+    if (services.length === 0 || selectedService) return;
+    const preselectServiceId = new URLSearchParams(window.location.search).get("serviceId");
+    if (!preselectServiceId) return;
+    const match = services.find((s) => s.id === preselectServiceId);
+    if (match) {
+      handleServiceSelect(match);
+      setCurrentStep(2 + stepOffset);
+    }
+  }, [services, stepOffset]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleEmployeeSelect = (employee: Employee) => {
     if (selectedEmployee?.id !== employee.id) {
       setAvailableSlots([]);

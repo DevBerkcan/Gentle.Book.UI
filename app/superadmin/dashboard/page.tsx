@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Building2, Clock, CheckCircle, AlertCircle, Calendar, Plus,
   TrendingUp, Users, Mail, Activity, AlertTriangle, Zap, ArrowRight,
-  RefreshCw, XCircle, UserPlus, Bell, Euro,
+  RefreshCw, XCircle, UserPlus, Bell, Euro, Sparkles,
 } from 'lucide-react';
 import { superAdminApi, TenantListItem, ActivityItem, OverviewData, SubscriptionRequestItem, AtRiskDunningItem } from '@/lib/api/superadmin';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
@@ -58,6 +58,7 @@ export default function SuperAdminDashboard() {
   const [pendingRequests,setPendingRequests] = useState<SubscriptionRequestItem[]>([]);
   const [dunning,        setDunning]        = useState<AtRiskDunningItem[]>([]);
   const [aiUsage,        setAiUsage]        = useState<Awaited<ReturnType<typeof superAdminApi.getAiUsage>> | null>(null);
+  const [pendingAiBudgetRequests, setPendingAiBudgetRequests] = useState<Awaited<ReturnType<typeof superAdminApi.getAiBudgetRequests>>['items']>([]);
   const [loading,        setLoading]        = useState(true);
   const [loadError,      setLoadError]      = useState<string | null>(null);
 
@@ -65,14 +66,15 @@ export default function SuperAdminDashboard() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [s, t, a, ov, req, risk, ai] = await Promise.all([
+      const [s, t, a, ov, req, risk, ai, aiBudgetReq] = await Promise.all([
         superAdminApi.getStats(),
         superAdminApi.getTenants(1, 100),
         superAdminApi.getActivity(20),
         superAdminApi.getOverview(),
         superAdminApi.getSubscriptionRequests('Pending').catch(() => ({ data: [], pendingCount: 0 })),
-        superAdminApi.getAtRiskSubscriptions().catch(() => ({ cancelling: [], dunning: [], totalAtRisk: 0 })),
+        superAdminApi.getAtRiskSubscriptions().catch(() => ({ cancelling: [], dunning: [], aiCostRisk: [], totalAtRisk: 0 })),
         superAdminApi.getAiUsage().catch(() => null),
+        superAdminApi.getAiBudgetRequests('Pending').catch(() => ({ items: [], pendingCount: 0 })),
       ]);
       setStats(s);
       setTenants(t.items);
@@ -81,6 +83,7 @@ export default function SuperAdminDashboard() {
       setPendingRequests(req.data);
       setDunning(risk.dunning);
       setAiUsage(ai);
+      setPendingAiBudgetRequests(aiBudgetReq.items);
     } catch (err: any) {
       setLoadError(err.response?.data?.message || err.message || 'Daten konnten nicht geladen werden');
     }
@@ -351,6 +354,44 @@ export default function SuperAdminDashboard() {
               <Link href="/superadmin/requests" className="flex items-center gap-1 px-3 py-2 text-sm text-gray-500 hover:text-gray-700">
                 +{pendingRequests.length - 5} weitere
               </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── KI-Budget-Anfragen ─────────────────────────────────────────── */}
+      {!loading && pendingAiBudgetRequests.length > 0 && (
+        <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6355E4] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#6355E4]" />
+              </span>
+              <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
+                <Sparkles size={15} className="text-[#6355E4]" />
+                {pendingAiBudgetRequests.length} offene {pendingAiBudgetRequests.length === 1 ? 'KI-Budget-Anfrage' : 'KI-Budget-Anfragen'}
+              </h2>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {pendingAiBudgetRequests.slice(0, 5).map(r => (
+              <Link
+                key={r.id}
+                href={`/superadmin/tenants/${r.tenantId}`}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-violet-200 bg-violet-50 text-violet-800 text-sm font-medium transition-colors hover:shadow-sm"
+              >
+                <Sparkles size={13} />
+                {r.companyName}
+                <span className="text-xs bg-[#6355E4] text-white px-1.5 py-0.5 rounded-md font-semibold">
+                  {r.requestedBudgetUsd?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) ?? '–'} $
+                </span>
+              </Link>
+            ))}
+            {pendingAiBudgetRequests.length > 5 && (
+              <span className="flex items-center gap-1 px-3 py-2 text-sm text-gray-500">
+                +{pendingAiBudgetRequests.length - 5} weitere
+              </span>
             )}
           </div>
         </div>

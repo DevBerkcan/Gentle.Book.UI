@@ -11,11 +11,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
-import { superAdminApi, UpdateTenantSettingsPayload, TenantStats, TenantBillingStatus, InvoiceItem } from '@/lib/api/superadmin';
+import { superAdminApi, UpdateTenantSettingsPayload, TenantStats, TenantBillingStatus, InvoiceItem, TenantAiUsageDetail } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { resolveLogoUrl } from '@/lib/utils/logo';
 import { setAccessToken } from '@/lib/auth/storage';
-import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC } from 'lucide-react';
+import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC, Sparkles } from 'lucide-react';
 
 type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats' | 'domain';
 
@@ -48,6 +48,11 @@ export default function TenantDetailPage() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [tenantInvoices, setTenantInvoices] = useState<InvoiceItem[] | null>(null);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [aiUsage, setAiUsage] = useState<TenantAiUsageDetail | null>(null);
+  const [aiUsageLoading, setAiUsageLoading] = useState(false);
+  const [aiBudgetInput, setAiBudgetInput] = useState('');
+  const [savingAiBudget, setSavingAiBudget] = useState(false);
+  const [decidingBudgetRequest, setDecidingBudgetRequest] = useState(false);
   const [domainInfo, setDomainInfo] = useState<{ domain: string | null; status: string; requestedAt: string | null } | null>(null);
   const [domainLoading, setDomainLoading] = useState(false);
   const [domainUpdating, setDomainUpdating] = useState(false);
@@ -315,6 +320,48 @@ export default function TenantDetailPage() {
     setInvoicesLoading(false);
   }
 
+  async function loadAiUsage() {
+    if (aiUsage) return;
+    setAiUsageLoading(true);
+    try {
+      const data = await superAdminApi.getTenantAiUsage(id);
+      setAiUsage(data);
+      setAiBudgetInput(data.budget.isCustomOverride ? data.budget.monthlyBudgetUsd.toString() : '');
+    } catch { /* silent fail */ }
+    setAiUsageLoading(false);
+  }
+
+  async function handleSaveAiBudget() {
+    setSavingAiBudget(true);
+    try {
+      const value = aiBudgetInput.trim() === '' ? null : parseFloat(aiBudgetInput);
+      await superAdminApi.setTenantAiBudget(id, value !== null && !isNaN(value) ? value : null);
+      setAiUsage(null);
+      await loadAiUsage();
+    } catch { /* silent fail */ }
+    setSavingAiBudget(false);
+  }
+
+  async function handleApproveBudgetRequest(requestId: string, approvedAmount: number | null) {
+    setDecidingBudgetRequest(true);
+    try {
+      await superAdminApi.approveAiBudgetRequest(requestId, approvedAmount ?? undefined);
+      setAiUsage(null);
+      await loadAiUsage();
+    } catch { /* silent fail */ }
+    setDecidingBudgetRequest(false);
+  }
+
+  async function handleDeclineBudgetRequest(requestId: string) {
+    setDecidingBudgetRequest(true);
+    try {
+      await superAdminApi.declineAiBudgetRequest(requestId);
+      setAiUsage(null);
+      await loadAiUsage();
+    } catch { /* silent fail */ }
+    setDecidingBudgetRequest(false);
+  }
+
   async function loadDomain() {
     if (domainInfo) return;
     setDomainLoading(true);
@@ -378,7 +425,7 @@ export default function TenantDetailPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); if (tab.key === 'subscription') { loadBilling(); loadInvoices(); } if (tab.key === 'domain') loadDomain(); }}
+            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); if (tab.key === 'subscription') { loadBilling(); loadInvoices(); loadAiUsage(); } if (tab.key === 'domain') loadDomain(); }}
             className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.key
                 ? 'bg-white text-gray-900 shadow-sm'
@@ -922,6 +969,101 @@ export default function TenantDetailPage() {
                     </div>
                   ) : (
                     <p className="text-xs text-gray-400">Noch keine Rechnungen für diesen Kunden.</p>
+                  )}
+                </div>
+
+                {/* KI-Nutzung */}
+                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 space-y-3">
+                  <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                    <Sparkles size={14} className="text-[#6355E4]" /> KI-Nutzung
+                  </p>
+                  {aiUsageLoading && !aiUsage ? (
+                    <div className="animate-pulse h-16 bg-gray-100 rounded-lg" />
+                  ) : aiUsage ? (
+                    <>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900">{aiUsage.monthToDate.cost.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $</p>
+                          <p className="text-xs text-gray-400">Diesen Monat</p>
+                        </div>
+                        <div className="text-center border-x border-gray-200">
+                          <p className="text-lg font-bold text-gray-900">{aiUsage.monthToDate.requests}</p>
+                          <p className="text-xs text-gray-400">Anfragen</p>
+                        </div>
+                        <div className="text-center">
+                          <p className={`text-lg font-bold ${aiUsage.budget.isHardCapped ? 'text-red-600' : aiUsage.budget.percentUsed >= 80 ? 'text-amber-600' : 'text-gray-900'}`}>
+                            {aiUsage.budget.percentUsed}%
+                          </p>
+                          <p className="text-xs text-gray-400">von {aiUsage.budget.monthlyBudgetUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $ Budget</p>
+                        </div>
+                      </div>
+                      {aiUsage.budget.isHardCapped && (
+                        <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                          <ShieldAlert size={12} /> Budget aufgebraucht — KI-Aufrufe pausiert bis zur nächsten Periode, Features laufen im Fallback-Modus weiter.
+                        </div>
+                      )}
+                      {aiUsage.pendingBudgetRequest && (
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
+                          <p className="text-xs font-semibold text-amber-800">
+                            Anfrage auf {aiUsage.pendingBudgetRequest.requested.requestedBudgetUsd?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) ?? '–'} $/Monat
+                            {' · '}{new Date(aiUsage.pendingBudgetRequest.createdOn).toLocaleDateString('de-DE')}
+                          </p>
+                          {aiUsage.pendingBudgetRequest.requested.note && (
+                            <p className="text-xs text-amber-700 italic">„{aiUsage.pendingBudgetRequest.requested.note}"</p>
+                          )}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleApproveBudgetRequest(aiUsage.pendingBudgetRequest!.id, aiUsage.pendingBudgetRequest!.requested.requestedBudgetUsd)}
+                              disabled={decidingBudgetRequest}
+                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                              Genehmigen
+                            </button>
+                            <button
+                              onClick={() => handleDeclineBudgetRequest(aiUsage.pendingBudgetRequest!.id)}
+                              disabled={decidingBudgetRequest}
+                              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                            >
+                              Ablehnen
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-end gap-2 pt-1">
+                        <div className="flex-1">
+                          <label className="text-xs text-gray-500 mb-1 block">Individuelles Monatsbudget ($, leer = Plattform-Standard {aiUsage.budget.isCustomOverride ? '' : `von ${aiUsage.budget.monthlyBudgetUsd}$ aktiv`})</label>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.01}
+                            value={aiBudgetInput}
+                            onChange={(e) => setAiBudgetInput(e.target.value)}
+                            placeholder="z.B. 20.00"
+                            className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:border-[#6355E4]"
+                          />
+                        </div>
+                        <button
+                          onClick={handleSaveAiBudget}
+                          disabled={savingAiBudget}
+                          className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#6355E4] text-white hover:bg-[#5646D6] disabled:opacity-50"
+                        >
+                          {savingAiBudget ? '…' : 'Speichern'}
+                        </button>
+                      </div>
+                      <div className="flex items-end gap-1 h-16 pt-2">
+                        {aiUsage.last6Months.map((m) => {
+                          const max = Math.max(...aiUsage.last6Months.map((x) => x.cost), 0.01);
+                          return (
+                            <div key={`${m.year}-${m.month}`} className="flex-1 flex flex-col items-center gap-1">
+                              <div className="w-full bg-[#6355E4]/20 rounded-t" style={{ height: `${Math.max(4, (m.cost / max) * 48)}px` }} />
+                              <span className="text-[9px] text-gray-400">{m.label.slice(0, 3)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-400">Keine KI-Nutzungsdaten für diesen Tenant.</p>
                   )}
                 </div>
 

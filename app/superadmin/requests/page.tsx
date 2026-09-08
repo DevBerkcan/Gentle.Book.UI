@@ -49,6 +49,8 @@ export default function SubscriptionRequestsPage() {
   const [monthlyPrice, setMonthlyPrice] = useState('');
   const [annualPrice, setAnnualPrice] = useState('');
   const [offerError, setOfferError] = useState('');
+  const [offerAiCost, setOfferAiCost] = useState<{ cost: number; requests: number } | null>(null);
+  const [avgAgencyAiCost, setAvgAgencyAiCost] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +73,17 @@ export default function SubscriptionRequestsPage() {
       setMonthlyPrice(item.offeredMonthlyPrice?.toString() ?? '');
       setAnnualPrice(item.offeredAnnualPrice?.toString() ?? '');
       setOfferError('');
+      setOfferAiCost(null);
+      setAvgAgencyAiCost(null);
+      // Reference data only — the human still types the price by hand. A brand-new prospect
+      // upgrading from a lower plan will usually show 0 here; the platform average (last 30
+      // days, across all tenants) is shown alongside as a fallback reference point.
+      superAdminApi.getTenantAiUsage(item.tenantId)
+        .then((d) => setOfferAiCost({ cost: d.monthToDate.cost, requests: d.monthToDate.requests }))
+        .catch(() => {});
+      superAdminApi.getAiUsage()
+        .then((d) => setAvgAgencyAiCost(d.tenants.length > 0 ? d.totalCostLast30Days / d.tenants.length : 0))
+        .catch(() => {});
       return;
     }
     if (!confirm(`Plan "${item.requestedPlan}" für ${item.tenantName} aktivieren?`)) return;
@@ -303,6 +316,17 @@ export default function SubscriptionRequestsPage() {
             </ModalHeader>
             <ModalBody className="py-5 space-y-4">
               <p className="text-sm text-gray-600">Der Kunde erhält beide Preise per E-Mail und wählt anschließend selbst die Abrechnung. Das Angebot ist 14 Tage gültig.</p>
+              {(offerAiCost !== null || avgAgencyAiCost !== null) && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600 space-y-1">
+                  <p className="font-medium text-gray-700">KI-Kosten zur Orientierung (nicht in den Preis eingerechnet):</p>
+                  {offerAiCost !== null && (
+                    <p>Dieser Kunde: <span className="font-semibold text-gray-900">{offerAiCost.cost.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $</span> / 30 Tage ({offerAiCost.requests} Anfragen)</p>
+                  )}
+                  {avgAgencyAiCost !== null && (
+                    <p>Ø alle Tenants: <span className="font-semibold text-gray-900">{avgAgencyAiCost.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $</span> / 30 Tage</p>
+                  )}
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1.5 text-sm font-medium text-gray-700">
                   Monatspreis
