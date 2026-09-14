@@ -241,6 +241,12 @@ export const superAdminApi = {
     };
   },
 
+  // ── Platform-wide Agency AI cost overview ──────────────────────
+  async getAgencyAiOverview() {
+    const { data } = await api.get('/superadmin/agency-ai-overview');
+    return data as AgencyAiOverview;
+  },
+
   // ── Per-tenant AI usage/budget ────────────────────────────────
   async getTenantAiUsage(id: string) {
     const { data } = await api.get(`/superadmin/tenants/${id}/ai-usage`);
@@ -428,6 +434,24 @@ export interface AiBudgetRequestItem {
   requestedBudgetUsd: number | null;
   note: string | null;
   currentBudgetUsd: number;
+}
+
+export interface AgencyAiOverviewTenant {
+  tenantId: string;
+  companyName: string;
+  tenantSlug: string;
+  negotiatedMonthlyPriceEur: number | null;
+  currentPeriodCostUsd: number;
+  monthlyBudgetUsd: number;
+  percentUsed: number;
+}
+
+export interface AgencyAiOverview {
+  agencyTenantCount: number;
+  totalSpendThisMonth: number;
+  worstCaseIfAllCapped: number;
+  trend: { year: number; month: number; label: string; cost: number }[];
+  tenants: AgencyAiOverviewTenant[];
 }
 
 export interface TenantAiUsageDetail {
