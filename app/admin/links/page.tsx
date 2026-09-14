@@ -54,6 +54,10 @@ export default function AdminLinksPage() {
   const [previewKey, setPreviewKey] = useState(0);
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const [chatbotSaving, setChatbotSaving] = useState(false);
+  const [chatbotMaxMessages, setChatbotMaxMessages] = useState(20);
+  const [chatbotLimitSaving, setChatbotLimitSaving] = useState(false);
+  const [chatbotMaxPerVisitorDay, setChatbotMaxPerVisitorDay] = useState(30);
+  const [chatbotVisitorLimitSaving, setChatbotVisitorLimitSaving] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>("mobile");
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -168,6 +172,8 @@ export default function AdminLinksPage() {
         try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(d.linktreeConfig) }); } catch {}
       }
       setChatbotEnabled(!!d?.isChatbotEnabled);
+      setChatbotMaxMessages(d?.chatbotMaxMessagesPerConversation ?? 20);
+      setChatbotMaxPerVisitorDay(d?.chatbotMaxMessagesPerVisitorPerDay ?? 30);
     }).catch(() => {});
   }, []);
 
@@ -181,6 +187,34 @@ export default function AdminLinksPage() {
       showToast("error", err.response?.data?.message || "Chat-Assistent konnte nicht umgeschaltet werden");
     } finally {
       setChatbotSaving(false);
+    }
+  }
+
+  async function saveChatbotLimit(next: number) {
+    const clamped = Math.min(200, Math.max(1, next));
+    setChatbotMaxMessages(clamped);
+    setChatbotLimitSaving(true);
+    try {
+      await api.put("/tenant/settings", { chatbotMaxMessagesPerConversation: clamped });
+      showToast("success", "Nachrichtenlimit gespeichert");
+    } catch (err: any) {
+      showToast("error", err.response?.data?.message || "Nachrichtenlimit konnte nicht gespeichert werden");
+    } finally {
+      setChatbotLimitSaving(false);
+    }
+  }
+
+  async function saveChatbotVisitorLimit(next: number) {
+    const clamped = Math.min(500, Math.max(1, next));
+    setChatbotMaxPerVisitorDay(clamped);
+    setChatbotVisitorLimitSaving(true);
+    try {
+      await api.put("/tenant/settings", { chatbotMaxMessagesPerVisitorPerDay: clamped });
+      showToast("success", "Tageslimit pro Besucher gespeichert");
+    } catch (err: any) {
+      showToast("error", err.response?.data?.message || "Tageslimit konnte nicht gespeichert werden");
+    } finally {
+      setChatbotVisitorLimitSaving(false);
     }
   }
 
@@ -346,6 +380,49 @@ export default function AdminLinksPage() {
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${chatbotEnabled ? "translate-x-6" : "translate-x-1"}`} />
             </button>
           </div>
+
+          {chatbotEnabled && (
+            <div className="mt-3 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#111318]">Nachrichtenlimit pro Gespräch</p>
+                <p className="text-xs text-[#6B7280] mt-0.5">
+                  Wie oft darf eine Kundschaft in einem Chat eine Frage an die KI stellen, bevor der Chat auf direkten Kontakt verweist? (1–200)
+                </p>
+              </div>
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={chatbotMaxMessages}
+                disabled={chatbotLimitSaving}
+                onChange={(e) => setChatbotMaxMessages(parseInt(e.target.value) || 1)}
+                onBlur={(e) => saveChatbotLimit(parseInt(e.target.value) || 1)}
+                className="w-20 shrink-0 rounded-lg border border-[#E5E7EB] px-2 py-1.5 text-sm text-center disabled:opacity-40"
+              />
+            </div>
+          )}
+
+          {chatbotEnabled && (
+            <div className="mt-3 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#111318]">Fragen-Limit pro Besucher und Tag</p>
+                <p className="text-xs text-[#6B7280] mt-0.5">
+                  Verhindert, dass eine einzelne Person durch mehrfaches Neuladen der Seite (neues Gespräch, Zähler oben zählt neu von vorn)
+                  allein euer gesamtes Chat-Budget für den Tag verbraucht — gilt über alle Gespräche derselben Person hinweg. (1–500)
+                </p>
+              </div>
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={chatbotMaxPerVisitorDay}
+                disabled={chatbotVisitorLimitSaving}
+                onChange={(e) => setChatbotMaxPerVisitorDay(parseInt(e.target.value) || 1)}
+                onBlur={(e) => saveChatbotVisitorLimit(parseInt(e.target.value) || 1)}
+                className="w-20 shrink-0 rounded-lg border border-[#E5E7EB] px-2 py-1.5 text-sm text-center disabled:opacity-40"
+              />
+            </div>
+          )}
 
           <AddLinkForm
             open={showAddForm}
