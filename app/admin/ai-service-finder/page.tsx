@@ -12,6 +12,7 @@ import {
   type TenantIndustrySettings,
   type EvaluateFinderResponse,
 } from '@/lib/api/ai-finder';
+import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
 
 function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
@@ -264,6 +265,16 @@ export default function AiServiceFinderAdminPage() {
     );
   }
 
+  const navItems: SettingsNavItem[] = [
+    { id: 'section-guide', label: 'Anleitung' },
+    ...(overview?.budget ? [{ id: 'section-budget', label: 'KI-Budget' }] : []),
+    { id: 'section-profile', label: 'Branchenprofil' },
+    { id: 'section-questions', label: 'Finder-Fragen' },
+    { id: 'section-rules', label: 'Service-Regeln' },
+    { id: 'section-guidance', label: 'Kundenhinweise' },
+    { id: 'section-test', label: 'Finder testen' },
+  ];
+
   return (
     <div className="p-6 space-y-6">
       <div>
@@ -274,7 +285,12 @@ export default function AiServiceFinderAdminPage() {
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {message && <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">{message}</div>}
 
-      <section className="rounded-xl border border-[#E5E7EB] bg-[#F7F7FE] overflow-hidden">
+      <div className="lg:flex lg:items-start lg:gap-10">
+        <SettingsNav items={navItems} />
+
+        <div className="flex-1 min-w-0 max-w-4xl space-y-6">
+
+      <section id="section-guide" className="rounded-xl border border-[#E5E7EB] bg-[#F7F7FE] overflow-hidden scroll-mt-6">
         <button
           onClick={() => setGuideOpen((v) => !v)}
           className="w-full flex items-center justify-between px-4 py-3 text-left"
@@ -319,7 +335,7 @@ export default function AiServiceFinderAdminPage() {
       </section>
 
       {overview?.budget && (
-        <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+        <section id="section-budget" className="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-6">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-semibold text-[#14162B] flex items-center gap-1.5">
@@ -394,7 +410,7 @@ export default function AiServiceFinderAdminPage() {
         </div>
       )}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
+      <section id="section-profile" className="rounded-xl border border-gray-200 bg-white p-4 space-y-4 scroll-mt-6">
         <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
           Branchenprofil
           <InfoTooltip text={
@@ -477,6 +493,7 @@ export default function AiServiceFinderAdminPage() {
       </section>
 
       <JsonEditorCard
+        id="section-questions"
         title="Finder-Fragen"
         value={questionsJson}
         onChange={setQuestionsJson}
@@ -499,6 +516,7 @@ export default function AiServiceFinderAdminPage() {
       />
 
       <JsonEditorCard
+        id="section-rules"
         title="Service-Regeln"
         value={rulesJson}
         onChange={setRulesJson}
@@ -524,6 +542,7 @@ export default function AiServiceFinderAdminPage() {
       />
 
       <JsonEditorCard
+        id="section-guidance"
         title="Kundenhinweise"
         value={guidanceJson}
         onChange={setGuidanceJson}
@@ -540,7 +559,7 @@ export default function AiServiceFinderAdminPage() {
         }
       />
 
-      <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+      <section id="section-test" className="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-6">
         <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
           Finder testen
           <InfoTooltip text={
@@ -590,6 +609,9 @@ export default function AiServiceFinderAdminPage() {
           </div>
         )}
       </section>
+
+        </div>
+      </div>
     </div>
   );
 }
@@ -604,6 +626,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
 }
 
 function JsonEditorCard({
+  id,
   title,
   value,
   onChange,
@@ -611,6 +634,7 @@ function JsonEditorCard({
   saving,
   tooltip,
 }: {
+  id?: string;
   title: string;
   value: string;
   onChange: (value: string) => void;
@@ -619,7 +643,7 @@ function JsonEditorCard({
   tooltip?: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+    <section id={id} className="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-6">
       <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
         {title}
         {tooltip && <InfoTooltip text={tooltip} />}

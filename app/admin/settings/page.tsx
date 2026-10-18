@@ -18,6 +18,7 @@ import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSec
 import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
 import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
+import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
 import api from '@/lib/api/client';
 import { resolveLogoUrl } from '@/lib/utils/logo';
 import {
@@ -43,6 +44,22 @@ import {
 // error:      #991B1B on #FEE2E2 / border #FECACA
 // warning:    #92400E on #FFFBEB / border #FDE68A
 // ─────────────────────────────────────────────────────────────────────────────
+
+const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
+  { id: 'section-logo', label: 'Logo' },
+  { id: 'section-company', label: 'Firmeninformationen' },
+  { id: 'section-contact', label: 'Kontakt' },
+  { id: 'section-website', label: 'Unternehmenswebsite' },
+  { id: 'section-domain', label: 'Eigene Domain' },
+  { id: 'section-reports', label: 'Team-Reports' },
+  { id: 'section-loyalty', label: 'Treuepunkte' },
+  { id: 'section-locations', label: 'Standorte' },
+  { id: 'section-billing', label: 'Rechnungsadresse' },
+  { id: 'section-colors', label: 'Farben' },
+  { id: 'section-booking', label: 'Buchungseinstellungen' },
+  { id: 'section-hours', label: 'Öffnungszeiten' },
+  { id: 'section-password', label: 'Passwort ändern' },
+];
 
 const DAYS = [
   { value: 1, label: 'Montag' },
@@ -95,12 +112,14 @@ interface TenantSettings {
 
 /** Section card with a left-accent icon header */
 function SectionCard({
+  id,
   icon,
   title,
   subtitle,
   accentClass = 'bg-[#6355E4]',
   children,
 }: {
+  id?: string;
   icon: React.ReactNode;
   title: string;
   subtitle: string;
@@ -108,7 +127,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden">
+    <div id={id} className="bg-white rounded-2xl overflow-hidden scroll-mt-6">
       <div className="flex items-center gap-3 px-1 pb-4">
         <div className={`w-8 h-8 ${accentClass} rounded-xl flex items-center justify-center shrink-0`}>
           {icon}
@@ -478,7 +497,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F7F8] p-5 sm:p-6">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-5xl mx-auto">
 
         {/* ── Page header ── */}
         <div className="flex items-center gap-3 mb-7">
@@ -491,10 +510,16 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        <div className="lg:flex lg:items-start lg:gap-10">
+          <SettingsNav items={SETTINGS_NAV_ITEMS} />
+
+          <div className="flex-1 min-w-0 max-w-3xl">
+
         <form onSubmit={saveSettings} className="space-y-8">
 
           {/* ── Logo ── */}
           <SectionCard
+            id="section-logo"
             icon={<ImageIcon size={15} className="text-white" />}
             title="Logo"
             subtitle="Firmenlogo hochladen"
@@ -552,6 +577,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Firmeninformationen ── */}
           <SectionCard
+            id="section-company"
             icon={<Building2 size={15} className="text-white" />}
             title="Firmeninformationen"
             subtitle="Name, Slogan und Texte"
@@ -600,6 +626,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Kontakt ── */}
           <SectionCard
+            id="section-contact"
             icon={<Phone size={15} className="text-white" />}
             title="Kontakt"
             subtitle="Telefon, E-Mail und Adresse"
@@ -631,19 +658,28 @@ export default function AdminSettingsPage() {
           </SectionCard>
 
           {/* ── Unternehmenswebsite (AI Brand Import) ── */}
-          <WebsiteBrandSection />
+          <div id="section-website" className="scroll-mt-6">
+            <WebsiteBrandSection />
+          </div>
 
           {/* ── Eigene Domain (Agency) ── */}
-          <CustomDomainSection />
+          <div id="section-domain" className="scroll-mt-6">
+            <CustomDomainSection />
+          </div>
 
           {/* ── Team-Reports (Agency) ── */}
-          <TeamReportsSection />
+          <div id="section-reports" className="scroll-mt-6">
+            <TeamReportsSection />
+          </div>
 
           {/* ── Treuepunkte (Agency) ── */}
-          <LoyaltySection />
+          <div id="section-loyalty" className="scroll-mt-6">
+            <LoyaltySection />
+          </div>
 
           {/* ── Standorte ── */}
           <SectionCard
+            id="section-locations"
             icon={<MapPin size={15} className="text-white" />}
             title="Standorte"
             subtitle="Adressen, Zeitzonen und Währungen je Filiale"
@@ -839,6 +875,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Rechnungsadresse ── */}
           <SectionCard
+            id="section-billing"
             icon={<CreditCard size={15} className="text-white" />}
             title="Rechnungsadresse"
             subtitle="Wird für Abo-Zahlungen und Rechnungen benötigt"
@@ -882,6 +919,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Farben ── */}
           <SectionCard
+            id="section-colors"
             icon={<Palette size={15} className="text-white" />}
             title="Farben"
             subtitle="Primär-, Sekundär- und Akzentfarbe der Buchungsseite"
@@ -919,6 +957,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Buchungseinstellungen ── */}
           <SectionCard
+            id="section-booking"
             icon={<Sliders size={15} className="text-white" />}
             title="Buchungseinstellungen"
             subtitle="Intervalle, Vorlauf und Stornierung"
@@ -990,6 +1029,7 @@ export default function AdminSettingsPage() {
 
           {/* ── Öffnungszeiten ── */}
           <SectionCard
+            id="section-hours"
             icon={<Clock size={15} className="text-white" />}
             title="Öffnungszeiten"
             subtitle="Wochentage und Geschäftszeiten"
@@ -1116,6 +1156,7 @@ export default function AdminSettingsPage() {
 
           <form onSubmit={handleChangePassword}>
             <SectionCard
+              id="section-password"
               icon={<Lock size={15} className="text-white" />}
               title="Passwort ändern"
               subtitle="Sicherheit und Zugangsdaten"
@@ -1173,6 +1214,9 @@ export default function AdminSettingsPage() {
               </button>
             </SectionCard>
           </form>
+        </div>
+
+          </div>
         </div>
       </div>
     </div>
