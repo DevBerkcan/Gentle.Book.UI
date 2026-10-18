@@ -1,100 +1,225 @@
-import Link from "next/link";
-import { Calendar, Users, Zap, ArrowRight, Sparkles } from "lucide-react";
-import { supportConfig } from "@/lib/config";
+'use client';
+
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Building2, Users, ArrowRight, Calendar, UserCog, ShieldCheck } from 'lucide-react';
+import { supportConfig } from '@/lib/config';
+import { GentleBookMark } from '@/components/admin/GentleBookLogo';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-white to-[#F6F5FA] flex flex-col">
-
-      {/* Nav */}
-      <nav className="w-full px-6 py-5 flex items-center justify-between max-w-5xl mx-auto">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-[#6355E4] to-[#17A398] rounded-xl flex items-center justify-center shadow-sm">
-            <Sparkles size={18} className="text-white" />
-          </div>
-          <span className="font-bold text-[#14162B] text-lg tracking-tight">GentleBook</span>
-        </div>
-        <Link
-          href="/admin/login"
-          className="text-sm font-semibold text-[#14162B] px-4 py-2 rounded-xl border border-[#ECEBF2]/50 hover:bg-[#ECEBF2]/10 transition-colors"
-        >
-          Admin Login
-        </Link>
-      </nav>
-
-      {/* Hero */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
-        <div className="inline-flex items-center gap-2 bg-[#ECEBF2]/20 border border-[#ECEBF2]/40 rounded-full px-4 py-1.5 text-sm font-medium text-[#5646D6] mb-8">
-          <span className="w-1.5 h-1.5 bg-[#5646D6] rounded-full animate-pulse" />
-          Das moderne Buchungssystem
-        </div>
-
-        <h1 className="text-5xl sm:text-6xl font-bold text-[#14162B] mb-5 leading-tight max-w-2xl">
-          Buchungen,{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6355E4] to-[#17A398]">
-            einfach gemacht
-          </span>
-        </h1>
-
-        <p className="text-lg text-[#8A8A8A] max-w-md mb-10 leading-relaxed">
-          GentleBook gibt deinem Unternehmen eine eigene Buchungsseite — professionell, schnell, schön.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <Link
-            href="/admin/login"
-            className="flex items-center gap-2 bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold px-7 py-3.5 rounded-2xl shadow-lg hover:shadow-xl hover:opacity-95 transition-all active:scale-[0.98]"
-          >
-            Jetzt anmelden <ArrowRight size={16} />
-          </Link>
-          <Link
-            href="/booking/demo"
-            className="flex items-center gap-2 bg-white text-[#14162B] font-semibold px-7 py-3.5 rounded-2xl border border-[#ECEBF2]/30 hover:border-[#ECEBF2] hover:bg-[#F6F5FA]/50 transition-all active:scale-[0.98]"
-          >
-            Demo ansehen
-          </Link>
-        </div>
-      </main>
-
-      {/* Features */}
-      <section className="max-w-4xl mx-auto w-full px-6 pb-16 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          {
-            icon: Calendar,
-            title: "Online-Buchungen",
-            desc: "Kunden buchen rund um die Uhr — ohne Anruf, ohne Wartezeit.",
-          },
-          {
-            icon: Users,
-            title: "Team-Management",
-            desc: "Mitarbeiter, Arbeitszeiten und Verfügbarkeiten zentral verwalten.",
-          },
-          {
-            icon: Zap,
-            title: "Sofort startklar",
-            desc: "In Minuten eingerichtet. Eigene URL, eigenes Design.",
-          },
-        ].map(({ icon: Icon, title, desc }) => (
+    <div className="min-h-screen bg-[#0f0f1a] text-white">
+      {/* ── Hero ───────────────────────────────────────────────── */}
+      <section className="relative flex min-h-screen flex-col overflow-hidden">
+        {/* Animated background blobs — same language as /admin/login */}
+        <div className="pointer-events-none fixed inset-0">
+          <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#6355E4]/10 blur-3xl animate-pulse" />
           <div
-            key={title}
-            className="bg-white/70 backdrop-blur-sm border border-[#ECEBF2]/20 rounded-2xl p-6 hover:shadow-md transition-shadow"
-          >
-            <div className="w-10 h-10 bg-gradient-to-br from-[#6355E4]/10 to-[#17A398]/10 rounded-xl flex items-center justify-center mb-4">
-              <Icon size={20} className="text-[#5646D6]" />
-            </div>
-            <h3 className="font-bold text-[#14162B] mb-1.5">{title}</h3>
-            <p className="text-sm text-[#8A8A8A] leading-relaxed">{desc}</p>
+            className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-[#17A398]/10 blur-3xl animate-pulse"
+            style={{ animationDelay: '1.5s' }}
+          />
+          <div
+            className="absolute top-2/3 left-1/2 h-56 w-56 rounded-full bg-[#6355E4]/5 blur-3xl animate-pulse"
+            style={{ animationDelay: '3s' }}
+          />
+        </div>
+
+        {/* Nav */}
+        <nav className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-7">
+          <div className="flex items-center gap-2.5">
+            <GentleBookMark size={30} />
+            <span className="text-lg font-bold tracking-tight">gentlebook</span>
           </div>
-        ))}
+          <span className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-white/50">
+            Interner Bereich
+          </span>
+        </nav>
+
+        {/* Hero content */}
+        <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-white/60"
+          >
+            <ShieldCheck size={14} className="text-[#17A398]" />
+            Nur für Admins &amp; Mitarbeiter
+          </motion.div>
+
+          <motion.h1
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+            className="mt-6 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl"
+          >
+            Euer Zugang zu{' '}
+            <span className="bg-gradient-to-r from-[#6355E4] to-[#17A398] bg-clip-text text-transparent">
+              gentlebook
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+            className="mt-5 max-w-md text-base leading-relaxed text-white/45"
+          >
+            Meldet euch an, um Buchungen, Kunden und euer Team zu verwalten — je nachdem, ob ihr Admin oder Mitarbeiter seid.
+          </motion.p>
+
+          {/* Two entry points */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.3 }}
+            className="mt-12 grid w-full max-w-xl grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <LoginCard
+              href="/admin/login"
+              icon={<Building2 size={22} />}
+              title="Admin-Login"
+              description="Buchungssystem, Team & Einstellungen verwalten"
+              accent="from-[#6355E4] to-[#5448C1]"
+            />
+            <LoginCard
+              href="/admin/login?mode=employee"
+              icon={<Users size={22} />}
+              title="Mitarbeiter-Login"
+              description="Eigener Kalender & eigene Termine"
+              accent="from-[#17A398] to-[#0f8a7d]"
+            />
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUp}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.4 }}
+          >
+            <Link
+              href="/admin/forgot-password"
+              className="mt-7 inline-block text-sm text-white/35 transition-colors hover:text-white/60"
+            >
+              Passwort vergessen?
+            </Link>
+          </motion.div>
+        </main>
+
+        {/* Scroll cue */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+          className="relative z-10 flex justify-center pb-10"
+        >
+          <div className="flex flex-col items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/30">
+            Mehr
+            <span className="block h-9 w-px animate-pulse bg-gradient-to-b from-[#6355E4] to-transparent" />
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ── Orientation strip (scroll-reveal, no sales pitch) ──── */}
+      <section className="relative border-t border-white/5 bg-[#12121f] px-6 py-20">
+        <div className="mx-auto max-w-4xl">
+          <RevealItem>
+            <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/30">
+              Was ihr hier macht
+            </p>
+          </RevealItem>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-3">
+            {[
+              {
+                icon: Calendar,
+                title: 'Buchungen im Blick',
+                desc: 'Alle Termine, Kundendaten und Stornierungen an einem Ort.',
+              },
+              {
+                icon: UserCog,
+                title: 'Team organisieren',
+                desc: 'Arbeitszeiten, Abwesenheiten und Zuständigkeiten verwalten.',
+              },
+              {
+                icon: ShieldCheck,
+                title: 'Sicher getrennt',
+                desc: 'Admin- und Mitarbeiter-Zugänge mit jeweils passenden Rechten.',
+              },
+            ].map(({ icon: Icon, title, desc }, i) => (
+              <RevealItem key={title} delay={i * 0.1}>
+                <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition-colors hover:border-white/20 hover:bg-white/[0.05]">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#6355E4]/20 to-[#17A398]/20">
+                    <Icon size={18} className="text-[#8c82ef]" />
+                  </div>
+                  <h3 className="mb-1.5 font-semibold text-white">{title}</h3>
+                  <p className="text-sm leading-relaxed text-white/40">{desc}</p>
+                </div>
+              </RevealItem>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-xs text-[#B0A0A0]">
-        Made with ♥ by{" "}
-        <a href={supportConfig.mailto()} className="hover:text-[#5646D6] transition-colors">
-          GentleGroup
+      <footer className="border-t border-white/5 bg-[#0f0f1a] py-8 text-center text-xs text-white/25">
+        <a href={supportConfig.mailto()} className="transition-colors hover:text-white/50">
+          Fragen? {supportConfig.email}
         </a>
       </footer>
     </div>
+  );
+}
+
+function LoginCard({
+  href,
+  icon,
+  title,
+  description,
+  accent,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  accent: string;
+}) {
+  return (
+    <Link href={href} className="group relative block">
+      <div className="relative h-full rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-left backdrop-blur-sm transition-all duration-300 group-hover:border-white/20 group-hover:bg-white/[0.07] group-hover:-translate-y-0.5">
+        <div
+          className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${accent} text-white shadow-lg`}
+        >
+          {icon}
+        </div>
+        <h2 className="flex items-center gap-1.5 text-base font-bold text-white">
+          {title}
+          <ArrowRight size={14} className="text-white/30 transition-transform group-hover:translate-x-1 group-hover:text-white/60" />
+        </h2>
+        <p className="mt-1.5 text-sm leading-relaxed text-white/40">{description}</p>
+      </div>
+    </Link>
+  );
+}
+
+function RevealItem({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.55, ease: 'easeOut', delay }}
+    >
+      {children}
+    </motion.div>
   );
 }

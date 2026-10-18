@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, User, Eye, EyeOff, Mail, Building2, ArrowRight } from 'lucide-react';
@@ -18,10 +18,17 @@ export default function AdminLoginPage() {
   const next = searchParams.get('next');
   const { login, tenantAdminLogin } = useAuth();
 
-  const [mode, setMode] = useState<LoginMode>('admin');
+  const [mode, setMode] = useState<LoginMode>(() => (searchParams.get('mode') === 'employee' ? 'employee' : 'admin'));
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Next.js reuses this component instance across client-side navigations to the same route
+  // (e.g. the homepage's two login cards both point here, only the mode query differs) — without
+  // this, only a full page reload would pick up a new ?mode= value.
+  useEffect(() => {
+    setMode(searchParams.get('mode') === 'employee' ? 'employee' : 'admin');
+  }, [searchParams]);
 
   const [username, setUsername] = useState('');
   const [tenantSlug, setTenantSlug] = useState('');
