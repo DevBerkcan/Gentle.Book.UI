@@ -12,10 +12,11 @@ import { AddLinkForm } from "@/components/admin/links/AddLinkForm";
 import { LinksList } from "@/components/admin/links/LinksList";
 import { LivePreviewPanel } from "@/components/admin/links/LivePreviewPanel";
 import { MobilePreviewModal } from "@/components/admin/links/MobilePreviewModal";
-import { DEFAULT_CONFIG, CMS_TEMPLATE_PACKS, INDUSTRY_PRESETS } from "@/components/admin/links/constants";
+import { DEFAULT_CONFIG, CMS_TEMPLATE_PACKS, COLOR_PALETTES, INDUSTRY_PRESETS } from "@/components/admin/links/constants";
 import type {
   BrandPreviewOverride, LinkItem, LinktreeConfig, PageTemplate, PlanTier, PreviewDevice, SaveStatus, Theme, ToastMessage,
 } from "@/components/admin/links/types";
+import type { DesignSuggestion } from "@/lib/api/designAssistant";
 
 let toastCounter = 0;
 
@@ -141,6 +142,22 @@ export default function AdminLinksPage() {
     const next = { ...config, colorScheme: palette.key };
     setConfig(next); setPrimaryColor(palette.primary); setTheme(palette.theme);
     saveDesign(palette.theme, palette.primary, next, true);
+  }
+
+  function applyDesignSuggestion(suggestion: DesignSuggestion) {
+    const palette = suggestion.colorPaletteKey ? COLOR_PALETTES.find((p) => p.key === suggestion.colorPaletteKey) : null;
+    const next: LinktreeConfig = {
+      ...config,
+      ...(suggestion.pageTemplate ? { pageTemplate: suggestion.pageTemplate as PageTemplate } : {}),
+      ...(palette ? { colorScheme: palette.key } : {}),
+      ...(suggestion.ctaText ? { ctaText: suggestion.ctaText } : {}),
+      ...(suggestion.ctaBadge ? { ctaBadge: suggestion.ctaBadge } : {}),
+    };
+    const nextTheme = palette ? palette.theme : theme;
+    const nextColor = palette ? palette.primary : primaryColor;
+    setConfig(next);
+    if (palette) { setPrimaryColor(palette.primary); setTheme(palette.theme); }
+    saveDesign(nextTheme, nextColor, next, false);
   }
 
   function updateConfig(field: keyof LinktreeConfig, value: string | boolean | undefined) {
@@ -351,6 +368,7 @@ export default function AdminLinksPage() {
             onBrandPreviewOverrideChange={setBrandPreviewOverride}
             onBrandImportApplied={handleBrandImportApplied}
             showToast={showToast}
+            onApplyDesignSuggestion={applyDesignSuggestion}
           />
 
           <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">

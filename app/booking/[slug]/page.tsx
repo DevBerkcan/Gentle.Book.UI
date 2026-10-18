@@ -22,6 +22,7 @@ import { ClinicTemplate }    from "./templates/clinic";
 import { FitnessTemplate }   from "./templates/fitness";
 import { RestaurantTemplate } from "./templates/restaurant";
 import { PortfolioTemplate } from "./templates/portfolio";
+import { HairsalonTemplate } from "./templates/hairsalon";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function TenantLinktreePage() {
@@ -160,6 +161,7 @@ export default function TenantLinktreePage() {
   if (cfg.pageTemplate === "fitness")    return <FitnessTemplate   {...templateProps} />;
   if (cfg.pageTemplate === "restaurant") return <RestaurantTemplate {...templateProps} />;
   if (cfg.pageTemplate === "portfolio")  return <PortfolioTemplate {...templateProps} />;
+  if (cfg.pageTemplate === "hairsalon")  return <HairsalonTemplate {...templateProps} />;
 
   return <ClassicTemplate {...templateProps} />;
 }

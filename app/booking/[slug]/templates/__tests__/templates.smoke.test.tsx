@@ -21,6 +21,7 @@ import { ClinicTemplate } from "../clinic";
 import { FitnessTemplate } from "../fitness";
 import { RestaurantTemplate } from "../restaurant";
 import { PortfolioTemplate } from "../portfolio";
+import { HairsalonTemplate } from "../hairsalon";
 import { buildTestTemplateProps, DEFAULT_CONFIG, DARK_CONFIG, FULL_CONFIG } from "./fixtures";
 
 afterEach(() => cleanup());
@@ -41,6 +42,7 @@ const TEMPLATES: { name: string; Component: ComponentType<TemplateProps> }[] = [
   { name: "fitness", Component: FitnessTemplate },
   { name: "restaurant", Component: RestaurantTemplate },
   { name: "portfolio", Component: PortfolioTemplate },
+  { name: "hairsalon", Component: HairsalonTemplate },
 ];
 
 const CONFIGS: [string, typeof DEFAULT_CONFIG][] = [

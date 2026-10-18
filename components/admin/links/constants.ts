@@ -86,6 +86,7 @@ export const PAGE_TEMPLATES: {
   { key: "fitness",    name: "Fitness",    desc: "3D Energy Cards",         plan: "pro",      emoji: "🔥", industry: "Fitness"  },
   { key: "restaurant", name: "Restaurant", desc: "Reservierung & Genuss",   plan: "pro",      emoji: "🍽️", industry: "Food"     },
   { key: "portfolio",  name: "Portfolio",  desc: "Creator & Coach",         plan: "business", emoji: "◼", industry: "Creator"  },
+  { key: "hairsalon",  name: "Haarsalon",  desc: "Vanity-Light & Messing",  plan: "starter",  emoji: "🪞", industry: "Haarsalon" },
 ];
 
 export const PLAN_ORDER: Record<PlanTier, number> = { starter: 0, pro: 1, business: 2 };
@@ -109,6 +110,7 @@ export const TPL_VISUAL: Record<PageTemplate, { bg: string; accent: string }> = 
   fitness:    { bg: "linear-gradient(145deg,#150505,#2D1515)", accent: "#EF4444" },
   restaurant: { bg: "linear-gradient(145deg,#FFFBEB,#FEF3C7)", accent: "#B45309" },
   portfolio:  { bg: "linear-gradient(145deg,#FAFAFA,#F0F0F0)", accent: "#18181B" },
+  hairsalon:  { bg: "linear-gradient(145deg,#F7F1E8,#ECE4DC)", accent: "#B08D57" },
 };
 
 export const CMS_TEMPLATE_PACKS: {
@@ -134,6 +136,16 @@ export const CMS_TEMPLATE_PACKS: {
     config: { pageTemplate: "portfolio", fontFamily: "josefin", buttonStyle: "square", cardStyle: "ghost", bgPattern: "none", layoutMode: "grid", animationSpeed: "normal", ctaText: "Call buchen", ctaBadge: "Limited", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "sm", buttonSpacing: "tight", cardDensity: "tight", motionIntensity: "subtle", startFocus: "links" } },
   { key: "night-studio", name: "Night Studio", desc: "Tattoo, Barber, Events", icon: "⚡", primaryColor: "#A855F7", theme: "dark", plan: "pro",
     config: { pageTemplate: "neon", fontFamily: "josefin", buttonStyle: "square", cardStyle: "outlined", bgPattern: "grid", layoutMode: "grid", animationSpeed: "fast", ctaText: "Slot sichern", ctaBadge: "Live", bookingTheme: "dark", serviceLayout: "cards", showPrices: true, showWelcome: false, confetti: true, heroStyle: "immersive", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "strong", startFocus: "cta" } },
+  { key: "nails-studio", name: "Nails Studio", desc: "Nageldesign, Maniküre, Pediküre", icon: "💅", primaryColor: "#EC4899", theme: "glass", plan: "starter",
+    config: { pageTemplate: "beauty", fontFamily: "josefin", buttonStyle: "pill", cardStyle: "gradient", bgPattern: "circles", layoutMode: "grid", animationSpeed: "normal", ctaText: "Nageltermin buchen", ctaBadge: "Neu", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "md", buttonSpacing: "normal", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" } },
+  { key: "spa-wellness", name: "Spa & Wellness", desc: "Massage, Spa, Entspannung", icon: "💆", primaryColor: "#6B8E7F", theme: "minimal", plan: "starter",
+    config: { pageTemplate: "organic", fontFamily: "dm-serif", buttonStyle: "rounded", cardStyle: "ghost", bgPattern: "waves", layoutMode: "list", animationSpeed: "slow", ctaText: "Wellness-Termin buchen", ctaBadge: "Entspannung", bookingTheme: "light", serviceLayout: "list", showPrices: true, showWelcome: true, heroStyle: "compact", mediaScale: "md", buttonSpacing: "airy", cardDensity: "airy", motionIntensity: "subtle", startFocus: "logo" } },
+  { key: "yoga-flow", name: "Yoga Flow", desc: "Yoga, Meditation, Atemarbeit", icon: "🧘", primaryColor: "#9CAF88", theme: "glass", plan: "starter",
+    config: { pageTemplate: "soft", fontFamily: "inter", buttonStyle: "pill", cardStyle: "ghost", bgPattern: "circles", layoutMode: "list", animationSpeed: "slow", ctaText: "Session buchen", ctaBadge: "Mind & Body", bookingTheme: "light", serviceLayout: "list", showPrices: false, showWelcome: true, heroStyle: "compact", mediaScale: "sm", buttonSpacing: "airy", cardDensity: "airy", motionIntensity: "off", startFocus: "logo" } },
+  { key: "beauty-fresh", name: "Beauty Fresh", desc: "Kosmetik, Hautpflege, Glow", icon: "✨", primaryColor: "#5EEAD4", theme: "minimal", plan: "starter",
+    config: { pageTemplate: "beauty", fontFamily: "inter", buttonStyle: "rounded", cardStyle: "outlined", bgPattern: "none", layoutMode: "list", animationSpeed: "normal", ctaText: "Beauty-Termin buchen", ctaBadge: "Fresh", bookingTheme: "light", serviceLayout: "list", showPrices: true, showWelcome: true, heroStyle: "compact", mediaScale: "md", buttonSpacing: "normal", cardDensity: "normal", motionIntensity: "subtle", startFocus: "cta" } },
+  { key: "hairsalon-boutique", name: "Haarsalon Boutique", desc: "Vanity-Mirror Glanz fürs Haarsalon", icon: "🪞", primaryColor: "#B08D57", theme: "gradient", plan: "starter",
+    config: { pageTemplate: "hairsalon", fontFamily: "josefin", buttonStyle: "pill", cardStyle: "gradient", bgPattern: "none", layoutMode: "list", animationSpeed: "normal", ctaText: "Styling-Termin buchen", ctaBadge: "Neu", bookingTheme: "branded", serviceLayout: "cards", showPrices: true, showWelcome: true, heroStyle: "editorial", mediaScale: "lg", buttonSpacing: "airy", cardDensity: "normal", motionIntensity: "subtle", startFocus: "logo" } },
 ];
 
 export const THEMES: { value: Theme; label: string; desc: string }[] = [

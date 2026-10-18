@@ -10,7 +10,9 @@ import { PageTemplatePicker } from "./PageTemplatePicker";
 import { BrandColorsEditor } from "./BrandColorsEditor";
 import { AdvancedDesignOptions } from "./AdvancedDesignOptions";
 import { BrandImportPanel } from "./BrandImportPanel";
+import { DesignAssistantChat } from "./DesignAssistantChat";
 import { CMS_TEMPLATE_PACKS, COLOR_PALETTES } from "./constants";
+import type { DesignSuggestion } from "@/lib/api/designAssistant";
 import type { BrandPreviewOverride, LinktreeConfig, PageTemplate, PlanTier, Theme } from "./types";
 
 export function DesignAccordion({
@@ -21,6 +23,7 @@ export function DesignAccordion({
   showAdvanced, onToggleAdvanced,
   tenantSlug, onShowPreviewModal,
   websiteUrl, onBrandPreviewOverrideChange, onBrandImportApplied, showToast,
+  onApplyDesignSuggestion,
 }: {
   designOpen: boolean;
   onToggleDesignOpen: () => void;
@@ -48,6 +51,7 @@ export function DesignAccordion({
   onBrandPreviewOverrideChange: (override: BrandPreviewOverride | null) => void;
   onBrandImportApplied: () => void;
   showToast: (type: "success" | "error", message: string) => void;
+  onApplyDesignSuggestion: (suggestion: DesignSuggestion) => void;
 }) {
   return (
     <div className="mb-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
@@ -86,6 +90,8 @@ export function DesignAccordion({
                 onApplied={onBrandImportApplied}
                 showToast={showToast}
               />
+
+              <DesignAssistantChat tenantPlan={tenantPlan} onApplySuggestion={onApplyDesignSuggestion} showToast={showToast} />
 
               <TemplatePackPicker config={config} tenantPlan={tenantPlan} onSelect={onSelectPack} />
               <PageTemplatePicker config={config} tenantPlan={tenantPlan} onSelect={onSelectTemplate} />

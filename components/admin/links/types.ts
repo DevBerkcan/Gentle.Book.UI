@@ -18,7 +18,7 @@ export type PlanTier = "starter" | "pro" | "business";
 export type PageTemplate =
   | "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate"
   | "organic" | "tattoo" | "barbershop" | "beauty" | "clinic" | "fitness"
-  | "restaurant" | "portfolio";
+  | "restaurant" | "portfolio" | "hairsalon";
 
 export interface LinktreeConfig {
   ctaText: string;
