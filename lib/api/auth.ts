@@ -67,14 +67,17 @@ export const authApi = {
 
       return {
         success: false,
-        message: responseData.message || 'Ungültige Anmeldedaten',
+        // No hardcoded fallback text here on purpose: the caller (app/admin/login/page.tsx)
+        // supplies its own localized (DE/EN) fallback when message is undefined. A fallback
+        // string here would always win over that one and never respect the UI language.
+        message: responseData.message,
         token: '',
         employee: null,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Fehler bei der Anmeldung',
+        message: error.response?.data?.message,
         token: '',
         employee: null,
       };
@@ -99,14 +102,16 @@ export const authApi = {
 
       return {
         success: false,
-        message: data.message || 'Ungültige Anmeldedaten',
+        // See the employee-login branch above: no hardcoded fallback here, so the caller's own
+        // localized (DE/EN) fallback text is the one that actually renders.
+        message: data.message,
         token: '',
         user: null,
       };
     } catch (error: any) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Fehler bei der Anmeldung',
+        message: error.response?.data?.message,
         token: '',
         user: null,
       };
