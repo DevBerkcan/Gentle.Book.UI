@@ -5,28 +5,40 @@ import { useEffect, useState } from "react";
 import { ClipboardList, TrendingUp, AlertTriangle, Plus, Trash2, ArrowUp, ArrowDown, Loader2, Sparkles, Ban } from "lucide-react";
 import { adminApi, type IntakeFormField, type IntakeFormFieldType, type IntakeFormType } from "@/lib/api/admin";
 import { getAdminCategories, type AdminServiceCategory } from "@/lib/api/admin-services";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
-const FIELD_TYPE_LABEL: Record<IntakeFormFieldType, string> = {
-  Text: "Kurztext",
-  Textarea: "Langtext",
-  YesNo: "Ja/Nein",
-  MultipleChoice: "Einfachauswahl",
-  Checkboxes: "Mehrfachauswahl",
-  Date: "Datum",
-};
+function getFieldTypeLabel(t: Translations): Record<IntakeFormFieldType, string> {
+  const s = t.admin.intakeFormPage;
+  return {
+    Text: s.fieldTypeText,
+    Textarea: s.fieldTypeTextarea,
+    YesNo: s.fieldTypeYesNo,
+    MultipleChoice: s.fieldTypeMultipleChoice,
+    Checkboxes: s.fieldTypeCheckboxes,
+    Date: s.fieldTypeDate,
+  };
+}
 
-const FORM_TYPE_LABEL: Record<IntakeFormType, string> = {
-  Anamnese: "Anamnese",
-  Einverstaendnis: "Einverständnis",
-  Fragebogen: "Kundenfragebogen",
-  Nachsorge: "Nachsorge",
-};
+function getFormTypeLabel(t: Translations): Record<IntakeFormType, string> {
+  const s = t.admin.intakeFormPage;
+  return {
+    Anamnese: s.formTypeAnamnese,
+    Einverstaendnis: s.formTypeEinverstaendnis,
+    Fragebogen: s.formTypeFragebogen,
+    Nachsorge: s.formTypeNachsorge,
+  };
+}
 const FORM_TYPE_ORDER: IntakeFormType[] = ["Anamnese", "Einverstaendnis", "Fragebogen", "Nachsorge"];
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 export default function AdminIntakeFormPage() {
+  const { t } = useTranslation();
+  const s = t.admin.intakeFormPage;
+  const FIELD_TYPE_LABEL = getFieldTypeLabel(t);
+  const FORM_TYPE_LABEL = getFormTypeLabel(t);
   const [fields, setFields] = useState<IntakeFormField[] | null>(null);
   const [categories, setCategories] = useState<AdminServiceCategory[]>([]);
   const [templates, setTemplates] = useState<{ key: string; label: string; fieldCount: number }[]>([]);
@@ -73,7 +85,7 @@ export default function AdminIntakeFormPage() {
       } else if (err.response?.status === 403 && err.response?.data?.feature === "intake_form_industry") {
         setIndustryBlocked(err.response.data.message);
       } else {
-        setError(err.response?.data?.message || err.message || "Fehler beim Laden der Formulare");
+        setError(err.response?.data?.message || err.message || s.loadErrorFallback);
       }
     } finally { setLoading(false); }
   }
@@ -123,7 +135,7 @@ export default function AdminIntakeFormPage() {
   }
 
   async function handleDelete(field: IntakeFormField) {
-    if (!confirm(`Feld „${field.label}“ wirklich löschen?`)) return;
+    if (!confirm(fillTemplate(s.deleteConfirmTemplate, { label: field.label }))) return;
     setBusyId(field.id);
     try {
       await adminApi.deleteIntakeFormField(field.id);
@@ -175,18 +187,18 @@ export default function AdminIntakeFormPage() {
           <div className="w-12 h-12 bg-[#EEEBFC] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <ClipboardList size={20} className="text-[#6355E4]" />
           </div>
-          <h2 className="text-lg font-bold text-[#111318] mb-2">Formulare</h2>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">{s.title}</h2>
           {upgradeInfo.currentPlan && (
             <p className="text-xs text-[#9CA3AF] mb-3">
-              Dein aktueller Tarif: <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
+              {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
           <p className="text-sm text-[#6B7280] mb-6">
-            {upgradeInfo.message ?? "Formulare sind in deinem aktuellen Tarif nicht enthalten."}
+            {upgradeInfo.message ?? s.upgradeDefaultMessage}
           </p>
           <a href="/admin/subscription"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors">
-            <TrendingUp size={15} /> Jetzt upgraden
+            <TrendingUp size={15} /> {s.upgradeNowBtn}
           </a>
         </div>
       </div>
@@ -200,7 +212,7 @@ export default function AdminIntakeFormPage() {
           <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Ban size={20} className="text-[#9CA3AF]" />
           </div>
-          <h2 className="text-lg font-bold text-[#111318] mb-2">Formulare</h2>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">{s.title}</h2>
           <p className="text-sm text-[#6B7280]">{industryBlocked}</p>
         </div>
       </div>
@@ -214,8 +226,8 @@ export default function AdminIntakeFormPage() {
           <div className="w-11 h-11 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={18} className="text-[#991B1B]" />
           </div>
-          <p className="font-semibold text-[#111318] mb-1">Fehler beim Laden</p>
-          <p className="text-sm text-[#6B7280]">{error || "Unbekannter Fehler"}</p>
+          <p className="font-semibold text-[#111318] mb-1">{s.loadErrorTitle}</p>
+          <p className="text-sm text-[#6B7280]">{error || s.unknownError}</p>
         </div>
       </div>
     );
@@ -233,9 +245,9 @@ export default function AdminIntakeFormPage() {
 
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">Formulare</h1>
+            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">{s.title}</h1>
             <p className="text-sm text-[#6B7280] mt-0.5">
-              Erstelle individuelle Fragebögen und Anamneseformulare, die deine Kund:innen vor ihrem Termin ausfüllen können. Felder ohne Kategorie gelten für alle Leistungen.
+              {s.subtitle}
             </p>
           </div>
           {templates.length > 0 && (
@@ -243,31 +255,31 @@ export default function AdminIntakeFormPage() {
               onClick={() => setShowTemplates((v) => !v)}
               className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-[#C7D2FE] bg-[#F8F7FF] px-3.5 py-2 text-xs font-semibold text-[#6355E4] hover:bg-[#EEEBFC]"
             >
-              <Sparkles size={13} /> Vorlage verwenden
+              <Sparkles size={13} /> {s.useTemplateBtn}
             </button>
           )}
         </div>
 
         {showTemplates && (
           <div className="bg-white rounded-2xl border border-[#C7D2FE] shadow-sm p-5 space-y-3">
-            <p className="text-sm font-semibold text-[#111318]">Vorlage anwenden</p>
-            <p className="text-xs text-[#9CA3AF]">Die Felder werden übernommen und können danach frei bearbeitet oder gelöscht werden.</p>
+            <p className="text-sm font-semibold text-[#111318]">{s.applyTemplateTitle}</p>
+            <p className="text-xs text-[#9CA3AF]">{s.applyTemplateDesc}</p>
             {categories.length > 0 && (
               <select value={templateCategoryId} onChange={(e) => setTemplateCategoryId(e.target.value)} className={inputCls}>
-                <option value="">Für alle Kategorien</option>
-                {categories.map((c) => <option key={c.id} value={c.id}>Nur für: {c.name}</option>)}
+                <option value="">{s.allCategoriesOption}</option>
+                {categories.map((c) => <option key={c.id} value={c.id}>{fillTemplate(s.onlyForCategoryTemplate, { name: c.name })}</option>)}
               </select>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {templates.map((t) => (
+              {templates.map((tpl) => (
                 <button
-                  key={t.key}
-                  onClick={() => handleApplyTemplate(t.key)}
+                  key={tpl.key}
+                  onClick={() => handleApplyTemplate(tpl.key)}
                   disabled={applyingTemplate !== null}
                   className="text-left rounded-xl border border-[#E5E7EB] p-3 hover:border-[#A5B4FC] hover:bg-[#F8F7FF] disabled:opacity-50 transition-colors"
                 >
-                  <p className="text-sm font-semibold text-[#111318]">{t.label}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">{t.fieldCount} Felder</p>
+                  <p className="text-sm font-semibold text-[#111318]">{tpl.label}</p>
+                  <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(s.fieldCountTemplate, { count: tpl.fieldCount })}</p>
                 </button>
               ))}
             </div>
@@ -280,8 +292,8 @@ export default function AdminIntakeFormPage() {
               <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <ClipboardList size={20} className="text-[#D1D5DB]" />
               </div>
-              <p className="text-sm font-medium text-[#374151]">Noch keine Felder</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">Füge unten dein erstes Feld hinzu, oder starte mit einer Vorlage.</p>
+              <p className="text-sm font-medium text-[#374151]">{s.noFieldsYetTitle}</p>
+              <p className="text-xs text-[#9CA3AF] mt-1">{s.noFieldsYetDesc}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
@@ -309,10 +321,10 @@ export default function AdminIntakeFormPage() {
                           <p className="text-[11px] text-[#9CA3AF]">
                             {FIELD_TYPE_LABEL[field.fieldType]}
                             {field.categoryId && (
-                              <> · nur {categories.find((c) => c.id === field.categoryId)?.name ?? "Kategorie"}</>
+                              <>{fillTemplate(s.onlyCategoryTemplate, { name: categories.find((c) => c.id === field.categoryId)?.name ?? s.categoryFallback })}</>
                             )}
                             {field.conditionalOnFieldId && (
-                              <> · nur wenn „{fields?.find((f) => f.id === field.conditionalOnFieldId)?.label}“ = „{field.conditionalOnValue}“</>
+                              <>{fillTemplate(s.conditionalTemplate, { field: fields?.find((f) => f.id === field.conditionalOnFieldId)?.label ?? '', value: field.conditionalOnValue ?? '' })}</>
                             )}
                             {(field.fieldType === "MultipleChoice" || field.fieldType === "Checkboxes") && field.optionsJson && (
                               <> · {(JSON.parse(field.optionsJson) as string[]).join(", ")}</>
@@ -326,7 +338,7 @@ export default function AdminIntakeFormPage() {
                             field.isActive ? "bg-[#ECFDF5] text-[#059669]" : "bg-[#F3F4F6] text-[#6B7280]"
                           }`}
                         >
-                          {field.isActive ? "Aktiv" : "Inaktiv"}
+                          {field.isActive ? s.activeLabel : s.inactiveLabel}
                         </button>
                         <button
                           onClick={() => handleDelete(field)}
@@ -345,10 +357,10 @@ export default function AdminIntakeFormPage() {
         </div>
 
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 space-y-3">
-          <p className="text-sm font-semibold text-[#111318]">Neues Feld</p>
+          <p className="text-sm font-semibold text-[#111318]">{s.newFieldTitle}</p>
           <input
             type="text" value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
-            placeholder="z. B. Bekannte Allergien" className={inputCls}
+            placeholder={s.newFieldLabelPlaceholder} className={inputCls}
           />
           <div className="grid grid-cols-2 gap-2">
             <select value={newType} onChange={(e) => setNewType(e.target.value as IntakeFormFieldType)} className={inputCls}>
@@ -362,27 +374,27 @@ export default function AdminIntakeFormPage() {
           {(newType === "MultipleChoice" || newType === "Checkboxes") && (
             <input
               type="text" value={newOptions} onChange={(e) => setNewOptions(e.target.value)}
-              placeholder="Optionen, mit Komma getrennt" className={inputCls}
+              placeholder={s.optionsPlaceholder} className={inputCls}
             />
           )}
 
           {categories.length > 0 && (
             <select value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)} className={inputCls}>
-              <option value="">Gilt für alle Kategorien</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>Nur für: {c.name}</option>)}
+              <option value="">{s.appliesAllCategoriesOption}</option>
+              {categories.map((c) => <option key={c.id} value={c.id}>{fillTemplate(s.onlyForCategoryTemplate, { name: c.name })}</option>)}
             </select>
           )}
 
           {sortedFields.length > 0 && (
             <div className="flex gap-2">
               <select value={newConditionalOnFieldId} onChange={(e) => setNewConditionalOnFieldId(e.target.value)} className={inputCls}>
-                <option value="">Immer anzeigen</option>
-                {sortedFields.map((f) => <option key={f.id} value={f.id}>Nur wenn „{f.label}“ =</option>)}
+                <option value="">{s.alwaysShowOption}</option>
+                {sortedFields.map((f) => <option key={f.id} value={f.id}>{fillTemplate(s.onlyWhenFieldOptionTemplate, { label: f.label })}</option>)}
               </select>
               {newConditionalOnFieldId && (
                 <input
                   type="text" value={newConditionalOnValue} onChange={(e) => setNewConditionalOnValue(e.target.value)}
-                  placeholder="Wert, z. B. Ja" className={inputCls}
+                  placeholder={s.conditionalValuePlaceholder} className={inputCls}
                 />
               )}
             </div>
@@ -390,7 +402,7 @@ export default function AdminIntakeFormPage() {
 
           <label className="flex items-center gap-1.5 text-xs text-[#6B7280]">
             <input type="checkbox" checked={newRequired} onChange={(e) => setNewRequired(e.target.checked)} />
-            Pflichtfeld
+            {s.requiredFieldLabel}
           </label>
 
           <button
@@ -398,7 +410,7 @@ export default function AdminIntakeFormPage() {
             disabled={adding || !newLabel.trim()}
             className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
           >
-            {adding ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} Feld hinzufügen
+            {adding ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} {s.addFieldBtn}
           </button>
         </div>
       </div>

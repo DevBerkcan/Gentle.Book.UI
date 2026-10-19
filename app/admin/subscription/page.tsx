@@ -15,6 +15,8 @@ import { HelpTip } from '@/components/ui/help-tip';
 import { legalConfig, supportConfig } from '@/lib/config';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { getAccessToken } from '@/lib/auth/storage';
+import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
+import type { Translations } from '@/lib/i18n/translations';
 
 interface Subscription {
   plan: string;
@@ -47,13 +49,16 @@ interface AgencyOffer {
   acceptedInterval?: 'Monthly' | 'Yearly';
 }
 
-const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; icon: any }> = {
-  Trial:     { label: 'Testphase',      bg: 'bg-amber-50',  text: 'text-amber-700',  icon: Clock },
-  Active:    { label: 'Aktiv',          bg: 'bg-green-50',  text: 'text-green-700',  icon: CheckCircle },
-  PastDue:   { label: 'Zahlung offen',  bg: 'bg-red-50',    text: 'text-red-700',    icon: AlertTriangle },
-  Cancelled: { label: 'Gekündigt',      bg: 'bg-gray-100',  text: 'text-gray-600',   icon: XCircle },
-  Expired:   { label: 'Abgelaufen',     bg: 'bg-red-50',    text: 'text-red-700',    icon: XCircle },
-};
+function getStatusConfig(t: Translations): Record<string, { label: string; bg: string; text: string; icon: any }> {
+  const s = t.admin.subscriptionPage;
+  return {
+    Trial:     { label: s.statusTrial,     bg: 'bg-amber-50',  text: 'text-amber-700',  icon: Clock },
+    Active:    { label: s.statusActive,    bg: 'bg-green-50',  text: 'text-green-700',  icon: CheckCircle },
+    PastDue:   { label: s.statusPastDue,   bg: 'bg-red-50',    text: 'text-red-700',    icon: AlertTriangle },
+    Cancelled: { label: s.statusCancelled, bg: 'bg-gray-100',  text: 'text-gray-600',   icon: XCircle },
+    Expired:   { label: s.statusExpired,   bg: 'bg-red-50',    text: 'text-red-700',    icon: XCircle },
+  };
+}
 
 const PLANS = [
   {
@@ -66,14 +71,6 @@ const PLANS = [
     employees: 2,
     services: 15,
     hasAnalytics: false,
-    features: [
-      '2 Mitarbeiter-Konten',
-      'Bis zu 15 Services',
-      'Automatische Buchungsbestätigungen',
-      'Professionelle Buchungsseite',
-      'E-Mail-Erinnerungen',
-      'Standard Support',
-    ],
   },
   {
     name: 'Pro',
@@ -85,16 +82,6 @@ const PLANS = [
     employees: 10,
     services: 50,
     hasAnalytics: true,
-    features: [
-      '10 Mitarbeiter-Konten',
-      'Bis zu 50 Services',
-      'Automatische Buchungsbestätigungen',
-      'Professionelle Buchungsseite',
-      'Analytics & Umsatzberichte',
-      'E-Mail-Erinnerungen',
-      'Priority Support',
-      'Alle zukünftigen Updates',
-    ],
   },
   {
     name: 'Agency',
@@ -106,17 +93,41 @@ const PLANS = [
     employees: null,
     services: null,
     hasAnalytics: true,
-    features: [
-      'Unbegrenzte Mitarbeiter',
-      'Unbegrenzte Services',
-      'Alles aus Pro',
-      'Dedizierter Account Manager',
-      'API-Zugang',
-      'White-Label Option',
-      'SLA Garantie',
-    ],
   },
 ];
+
+function getPlanFeatures(t: Translations): Record<string, string[]> {
+  const s = t.admin.subscriptionPage;
+  return {
+    Starter: [
+      s.featStarterEmployees,
+      s.featStarterServices,
+      s.featBookingConfirmations,
+      s.featBookingPage,
+      s.featEmailReminders,
+      s.featStarterSupport,
+    ],
+    Professional: [
+      s.featProEmployees,
+      s.featProServices,
+      s.featBookingConfirmations,
+      s.featBookingPage,
+      s.featAnalytics,
+      s.featEmailReminders,
+      s.featProSupport,
+      s.featProUpdates,
+    ],
+    Agency: [
+      s.featAgencyEmployees,
+      s.featAgencyServices,
+      s.featAgencyEverythingPro,
+      s.featAgencyManager,
+      s.featAgencyApi,
+      s.featAgencyWhiteLabel,
+      s.featAgencySla,
+    ],
+  };
+}
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } } };
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
@@ -142,6 +153,9 @@ function UsageBar({ label, current, limit, isUnlimited, percentage }: { label: s
 }
 
 export default function AdminSubscriptionPage() {
+  const { t, lang } = useTranslation();
+  const s = t.admin.subscriptionPage;
+  const locale = lang === 'de' ? 'de-DE' : 'en-US';
   const { isEmployee } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -277,18 +291,20 @@ export default function AdminSubscriptionPage() {
   const handleChangePlan = async (planKey: string, planName: string) => {
     if (changingPlan) return;
     const periodEndText = sub?.currentPeriodEnd
-      ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
-      : 'der nächsten Abbuchung';
+      ? new Date(sub.currentPeriodEnd).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })
+      : s.changePlanFallbackDate;
     const currentPlanMeta = PLANS.find((p) => p.key === currentPlanKey);
     const targetPlanMeta = PLANS.find((p) => p.key === planKey);
     const losesAnalytics = !!currentPlanMeta?.hasAnalytics && !targetPlanMeta?.hasAnalytics;
-    const analyticsWarning = losesAnalytics
-      ? ' Achtung: Mit diesem Wechsel verlieren Sie den Zugriff auf Analytics & Umsatzberichte.'
-      : '';
+    const analyticsWarning = losesAnalytics ? s.changePlanAnalyticsWarning : '';
     const ok = await confirm({
-      title: `Zu ${planName} wechseln?`,
-      message: `Sie wechseln zu ${planName} (${billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'}). Der neue Preis gilt ab ${periodEndText}, Ihre neuen Plan-Limits (Mitarbeiter/Services) sind sofort verfügbar.${analyticsWarning}`,
-      confirmLabel: 'Ja, Plan wechseln',
+      title: fillTemplate(s.changePlanConfirmTitleTemplate, { plan: planName }),
+      message: fillTemplate(s.changePlanConfirmMessagePre, {
+        plan: planName,
+        interval: billingInterval === 'Yearly' ? s.intervalYearlyWord : s.intervalMonthlyWord,
+        date: periodEndText,
+      }) + analyticsWarning,
+      confirmLabel: s.changePlanConfirmLabel,
     });
     if (!ok) return;
     setChangingPlan(planKey);
@@ -303,7 +319,7 @@ export default function AdminSubscriptionPage() {
       setUsage(usageData);
       setPlanChangeSuccess(planName);
     } catch (err: any) {
-      setRequestError(err.response?.data?.message || 'Plan konnte nicht gewechselt werden. Bitte versuchen Sie es erneut.');
+      setRequestError(err.response?.data?.message || s.errPlanChangeFailed);
     } finally {
       setChangingPlan(null);
     }
@@ -312,7 +328,7 @@ export default function AdminSubscriptionPage() {
   const handlePlanRequest = async (planKey: string) => {
     if (requesting) return;
     if (requestedPlan) {
-      setRequestError(`Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan. Bitte warte, bis diese bearbeitet wurde, bevor du einen anderen Plan anfragst.`);
+      setRequestError(fillTemplate(s.alreadyRequestedTemplate, { plan: requestedPlan }));
       return;
     }
     setRequesting(true);
@@ -322,7 +338,7 @@ export default function AdminSubscriptionPage() {
       setRequestedPlan(planKey);
       setRequestSuccess(true);
     } catch (err: any) {
-      setRequestError(err.response?.data?.message || 'Anfrage konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere den Support.');
+      setRequestError(err.response?.data?.message || s.errRequestSendFailed);
     } finally {
       setRequesting(false);
     }
@@ -331,7 +347,7 @@ export default function AdminSubscriptionPage() {
   const handleAcceptAgencyOffer = async () => {
     if (!agencyOffer || acceptingOffer) return;
     if (!contractConfirmed) {
-      setRequestError('Bitte bestätigen Sie Preis, AGB, Unternehmereigenschaft und Abrechnungsbedingungen.');
+      setRequestError(s.errAgencyConfirmRequired);
       return;
     }
     setAcceptingOffer(true);
@@ -351,7 +367,7 @@ export default function AdminSubscriptionPage() {
         setPlanChangeSuccess('Agency');
       }
     } catch (err: any) {
-      setRequestError(err.response?.data?.message || 'Das Agency-Angebot konnte nicht angenommen werden.');
+      setRequestError(err.response?.data?.message || s.errAgencyAcceptFailed);
     } finally {
       setAcceptingOffer(false);
     }
@@ -360,12 +376,12 @@ export default function AdminSubscriptionPage() {
   const handleCancel = async () => {
     if (cancelling) return;
     const periodEndText = sub?.currentPeriodEnd
-      ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
-      : 'Ende der aktuellen Abrechnungsperiode';
+      ? new Date(sub.currentPeriodEnd).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })
+      : s.cancelConfirmFallbackDate;
     const ok = await confirm({
-      title: 'Abonnement kündigen?',
-      message: `Ihr Zugang bleibt bis zum ${periodEndText} bestehen. Danach werden keine weiteren Zahlungen eingezogen und Ihr Konto wird deaktiviert. Eine anteilige Rückerstattung erfolgt nicht.`,
-      confirmLabel: 'Ja, kündigen',
+      title: s.cancelConfirmTitle,
+      message: fillTemplate(s.cancelConfirmMessageTemplate, { date: periodEndText }),
+      confirmLabel: s.cancelConfirmLabel,
       variant: 'danger',
     });
     if (!ok) return;
@@ -375,7 +391,7 @@ export default function AdminSubscriptionPage() {
       const res = await adminApi.cancelSubscription();
       setSub((prev) => (prev ? { ...prev, cancelRequestedAt: res.cancelRequestedAt } : prev));
     } catch (err: any) {
-      setRequestError(err.response?.data?.message || 'Kündigung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+      setRequestError(err.response?.data?.message || s.errCancelFailed);
     } finally {
       setCancelling(false);
     }
@@ -391,7 +407,8 @@ export default function AdminSubscriptionPage() {
     );
   }
 
-  const statusCfg = STATUS_CONFIG[sub?.status ?? 'Trial'];
+  const statusCfg = getStatusConfig(t)[sub?.status ?? 'Trial'];
+  const planFeatures = getPlanFeatures(t);
   const StatusIcon = statusCfg?.icon ?? Clock;
   const currentPlanKey = sub?.plan ?? 'Trial';
   const isExpired = sub?.status === 'Expired';
@@ -424,8 +441,8 @@ export default function AdminSubscriptionPage() {
     >
       {/* Header */}
       <motion.div variants={fadeUp}>
-        <h1 className="text-2xl font-bold text-gray-900">Abonnement & Plan</h1>
-        <p className="text-gray-500 mt-1">Verwalten Sie Ihren Plan und sehen Sie Ihre aktuelle Nutzung</p>
+        <h1 className="text-2xl font-bold text-gray-900">{s.title}</h1>
+        <p className="text-gray-500 mt-1">{s.subtitle}</p>
       </motion.div>
 
       {/* Expired Warning */}
@@ -433,9 +450,9 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-4">
           <XCircle className="text-red-500 shrink-0 mt-0.5" size={22} />
           <div>
-            <p className="font-semibold text-red-800">Ihr Testzeitraum ist abgelaufen</p>
+            <p className="font-semibold text-red-800">{s.expiredTitle}</p>
             <p className="text-red-600 text-sm mt-1">
-              Wählen Sie unten einen Plan, um Ihr Studio wieder zu aktivieren.
+              {s.expiredMessage}
             </p>
           </div>
         </motion.div>
@@ -450,26 +467,26 @@ export default function AdminSubscriptionPage() {
                 <StatusIcon size={20} className={statusCfg?.text} />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-500 font-medium">Aktueller Status</p>
+                <p className="text-xs uppercase tracking-wide text-gray-500 font-medium">{s.statusCardLabel}</p>
                 <p className={`font-bold text-lg ${statusCfg?.text}`}>{statusCfg?.label}</p>
               </div>
             </div>
             {sub.isInTrial && (
               <div className="text-right">
-                <p className="text-xs text-gray-500">Testphase endet</p>
+                <p className="text-xs text-gray-500">{s.trialEndsLabel}</p>
                 <p className="font-semibold text-gray-800">
-                  {new Date(sub.trialEndsAt).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  {new Date(sub.trialEndsAt).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>
                 <p className={`text-sm font-medium ${sub.trialDaysRemaining <= 3 ? 'text-red-600' : sub.trialDaysRemaining <= 7 ? 'text-amber-600' : 'text-gray-600'}`}>
-                  noch {sub.trialDaysRemaining} {sub.trialDaysRemaining === 1 ? 'Tag' : 'Tage'}
+                  {fillTemplate(sub.trialDaysRemaining === 1 ? s.daysRemaining_one : s.daysRemaining_other, { n: sub.trialDaysRemaining })}
                 </p>
               </div>
             )}
             {sub.status === 'Active' && !sub.cancelRequestedAt && sub.currentPeriodEnd && (
               <div className="text-right">
-                <p className="text-xs text-gray-500">Nächste Abbuchung {sub.interval === 'Yearly' ? '(jährlich)' : '(monatlich)'}</p>
+                <p className="text-xs text-gray-500">{sub.interval === 'Yearly' ? s.nextChargeYearly : s.nextChargeMonthly}</p>
                 <p className="font-semibold text-gray-800">
-                  {new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  {new Date(sub.currentPeriodEnd).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>
               </div>
             )}
@@ -486,7 +503,7 @@ export default function AdminSubscriptionPage() {
                 <div className="h-2 bg-white/50 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
                 </div>
-                <p className="text-xs text-gray-500 mt-1.5">{used} von 14 Testtagen verbraucht</p>
+                <p className="text-xs text-gray-500 mt-1.5">{fillTemplate(s.trialDaysUsedTemplate, { used })}</p>
               </div>
             );
           })()}
@@ -499,7 +516,7 @@ export default function AdminSubscriptionPage() {
                 disabled={cancelling}
                 className="text-xs font-medium text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
               >
-                {cancelling ? 'Wird gekündigt…' : 'Abonnement kündigen'}
+                {cancelling ? s.cancellingLabel : s.cancelSubscriptionBtn}
               </button>
             </div>
           )}
@@ -512,11 +529,13 @@ export default function AdminSubscriptionPage() {
           <XCircle className="text-gray-500 shrink-0 mt-0.5" size={22} />
           <div>
             <p className="font-semibold text-gray-800">
-              Gekündigt zum {sub.currentPeriodEnd
-                ? new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })
-                : '–'}
+              {fillTemplate(s.cancelledOnTemplate, {
+                date: sub.currentPeriodEnd
+                  ? new Date(sub.currentPeriodEnd).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })
+                  : '–',
+              })}
             </p>
-            <p className="text-gray-600 text-sm mt-1">Ihr Zugang bleibt bis dahin bestehen. Es werden keine weiteren Zahlungen eingezogen.</p>
+            <p className="text-gray-600 text-sm mt-1">{s.cancelledMessage}</p>
           </div>
         </motion.div>
       )}
@@ -527,7 +546,7 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <FileText size={18} className="text-[#6355E4]" />
-            Rechnungen
+            {s.invoicesTitle}
           </h2>
           <div className="divide-y divide-gray-100">
             {invoices.map(inv => (
@@ -535,9 +554,9 @@ export default function AdminSubscriptionPage() {
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 text-sm">{inv.invoiceNumber}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {new Date(inv.issueDate).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {new Date(inv.issueDate).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })}
                     {' · '}{inv.planName}
-                    {' · '}{inv.amount.toLocaleString('de-DE', { minimumFractionDigits: 2 })} {inv.currency}
+                    {' · '}{inv.amount.toLocaleString(locale, { minimumFractionDigits: 2 })} {inv.currency}
                   </p>
                 </div>
                 <button
@@ -561,18 +580,18 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
           <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <BarChart2 size={18} className="text-[#6355E4]" />
-            Aktuelle Nutzung ({usage.planDisplayName}-Plan)
+            {fillTemplate(s.usageTitleTemplate, { plan: usage.planDisplayName })}
           </h2>
           <div className="space-y-4">
             <UsageBar
-              label="Mitarbeiter"
+              label={s.employeesLabel}
               current={usage.employees.current}
               limit={usage.employees.limit}
               isUnlimited={usage.employees.isUnlimited}
               percentage={usage.employees.percentage}
             />
             <UsageBar
-              label="Services"
+              label={s.servicesLabel}
               current={usage.services.current}
               limit={usage.services.limit}
               isUnlimited={usage.services.isUnlimited}
@@ -582,7 +601,7 @@ export default function AdminSubscriptionPage() {
           {(usage.employees.percentage >= 80 || usage.services.percentage >= 80) && (
             <div className="mt-4 p-3 bg-amber-50 rounded-xl flex items-center gap-2 text-sm text-amber-700">
               <AlertTriangle size={16} />
-              Sie nähern sich dem Limit Ihres Plans. Upgraden Sie für mehr Kapazität.
+              {s.limitWarning}
             </div>
           )}
         </motion.div>
@@ -593,9 +612,9 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-green-50 border border-green-200 rounded-2xl p-5 flex gap-4">
           <CheckCircle className="text-green-500 shrink-0 mt-0.5" size={22} />
           <div>
-            <p className="font-semibold text-green-800">Plan gewechselt!</p>
+            <p className="font-semibold text-green-800">{s.planChangedTitle}</p>
             <p className="text-green-700 text-sm mt-1">
-              Sie sind jetzt auf dem <strong>{planChangeSuccess}-Plan</strong>. Die neuen Limits gelten sofort, der neue Preis ab der nächsten Abbuchung.
+              {s.planChangedPre}<strong>{fillTemplate(s.planChangedBoldTemplate, { plan: planChangeSuccess })}</strong>{s.planChangedPost}
             </p>
           </div>
         </motion.div>
@@ -606,9 +625,9 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-green-50 border border-green-200 rounded-2xl p-5 flex gap-4">
           <CheckCircle className="text-green-500 shrink-0 mt-0.5" size={22} />
           <div>
-            <p className="font-semibold text-green-800">Anfrage erfolgreich gesendet!</p>
+            <p className="font-semibold text-green-800">{s.requestSuccessTitle}</p>
             <p className="text-green-700 text-sm mt-1">
-              Wir haben Ihre Anfrage für den <strong>{requestedPlan}-Plan</strong> erhalten. Bei Agency senden wir Ihnen zunächst ein Angebot mit Monats- und Jahrespreis. Eine Aktivierung erfolgt erst nach Ihrer Auswahl und Zustimmung.
+              {s.requestSuccessPre}<strong>{fillTemplate(s.requestSuccessBoldTemplate, { plan: requestedPlan ?? '' })}</strong>{s.requestSuccessPost}
             </p>
           </div>
         </motion.div>
@@ -619,8 +638,8 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-blue-50 border border-blue-200 rounded-2xl p-5 flex gap-4">
           <span className="w-5 h-5 mt-0.5 border-2 border-blue-300 border-t-blue-600 rounded-full animate-spin shrink-0" />
           <div>
-            <p className="font-semibold text-blue-800">Zahlung wird verarbeitet…</p>
-            <p className="text-blue-700 text-sm mt-1">Dein SEPA-Mandat wird gerade bestätigt. Das dauert normalerweise nur wenige Sekunden.</p>
+            <p className="font-semibold text-blue-800">{s.mollieProcessingTitle}</p>
+            <p className="text-blue-700 text-sm mt-1">{s.mollieProcessingMessage}</p>
           </div>
         </motion.div>
       )}
@@ -630,9 +649,9 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex gap-4">
           <Clock className="text-amber-500 shrink-0 mt-0.5" size={22} />
           <div>
-            <p className="font-semibold text-amber-800">Anfrage in Bearbeitung</p>
+            <p className="font-semibold text-amber-800">{s.pendingRequestTitle}</p>
             <p className="text-amber-700 text-sm mt-1">
-              Ihre Anfrage für den <strong>{requestedPlan}-Plan</strong> wird gerade bearbeitet. Aktivierung innerhalb von 24 Stunden.
+              {s.pendingRequestPre}<strong>{fillTemplate(s.pendingRequestBoldTemplate, { plan: requestedPlan ?? '' })}</strong>{s.pendingRequestPost}
             </p>
           </div>
         </motion.div>
@@ -642,9 +661,9 @@ export default function AdminSubscriptionPage() {
         <motion.section variants={fadeUp} className="border border-[#6355E4]/30 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase text-[#6355E4]">Ihr persönliches Angebot</p>
+              <p className="text-xs font-bold uppercase text-[#6355E4]">{s.agencyOfferBadge}</p>
               <h2 className="mt-1 text-xl font-bold text-gray-900">GentleBook Agency</h2>
-              <p className="mt-1 text-sm text-gray-500">Gültig bis {new Date(agencyOffer.offerExpiresAt).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+              <p className="mt-1 text-sm text-gray-500">{fillTemplate(s.agencyOfferValidUntilTemplate, { date: new Date(agencyOffer.offerExpiresAt).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' }) })}</p>
             </div>
             <Shield className="text-[#6355E4]" size={24} />
           </div>
@@ -656,32 +675,32 @@ export default function AdminSubscriptionPage() {
               return (
                 <button key={interval} type="button" onClick={() => setBillingInterval(interval)} className={`border p-4 text-left transition-colors ${selected ? 'border-[#6355E4] bg-[#6355E4]/5 ring-1 ring-[#6355E4]' : 'border-gray-200 hover:border-gray-300'}`}>
                   <span className="flex items-center justify-between text-sm font-semibold text-gray-700">
-                    {interval === 'Monthly' ? 'Monatliche Abrechnung' : 'Jährliche Abrechnung'}
+                    {interval === 'Monthly' ? s.monthlyBillingLabel : s.yearlyBillingLabel}
                     <span className={`h-4 w-4 rounded-full border ${selected ? 'border-4 border-[#6355E4]' : 'border-gray-300'}`} />
                   </span>
-                  <span className="mt-2 block text-2xl font-bold text-gray-900">{price.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</span>
-                  <span className="text-xs text-gray-500">Gesamtpreis pro {interval === 'Monthly' ? 'Monat' : 'Jahr'}, im Voraus</span>
+                  <span className="mt-2 block text-2xl font-bold text-gray-900">{price.toLocaleString(locale, { minimumFractionDigits: 2 })} €</span>
+                  <span className="text-xs text-gray-500">{interval === 'Monthly' ? s.totalPricePerMonthLabel : s.totalPricePerYearLabel}</span>
                 </button>
               );
             })}
           </div>
 
           <fieldset className="mt-5 space-y-3 border-t border-gray-200 pt-5 text-sm text-gray-700">
-            <legend className="sr-only">Verbindliche Bestätigungen</legend>
-            <label className="flex items-start gap-3"><input type="checkbox" checked={businessConfirmed} onChange={(e) => setBusinessConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>Ich schließe das Abonnement als Unternehmer im Sinne des § 14 BGB ab.</span></label>
-            <label className="flex items-start gap-3"><input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>Ich akzeptiere die geltenden <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">GentleBook-AGB</a>.</span></label>
-            <label className="flex items-start gap-3"><input type="checkbox" checked={billingConfirmed} onChange={(e) => setBillingConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>Ich bestelle Agency verbindlich für {billingInterval === 'Monthly' ? `${agencyOffer.offeredMonthlyPrice.toLocaleString('de-DE', { minimumFractionDigits: 2 })} € pro Monat` : `${agencyOffer.offeredAnnualPrice.toLocaleString('de-DE', { minimumFractionDigits: 2 })} € pro Jahr`}. {hasMollieSubscription ? `Der neue Preis gilt ab der nächsten regulären Abbuchung${sub?.currentPeriodEnd ? ` am ${new Date(sub.currentPeriodEnd).toLocaleDateString('de-DE')}` : ''}.` : 'Die erste Zahlung erfolgt unmittelbar; ich stimme der entsprechend verkürzten Vorabankündigung dieser ersten Abbuchung zu.'} Folgezahlungen erfolgen jeweils zu Beginn der nächsten Periode. Das Abonnement verlängert sich bis zur Kündigung jeweils um denselben Zeitraum.</span></label>
-            <label className="flex items-start gap-3"><input type="checkbox" checked={sepaAuthorized} onChange={(e) => setSepaAuthorized(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>Ich ermächtige GentleBook, die fälligen Beträge per SEPA-Lastschrift von dem auf der folgenden Mollie-Zahlungsseite anzugebenden Konto einzuziehen, und weise mein Kreditinstitut an, diese Lastschriften einzulösen. <em className="text-gray-500">(Entwurf – vor Go-Live anwaltlich zu prüfen.)</em></span></label>
+            <legend className="sr-only">{s.bindingConfirmationsLegend}</legend>
+            <label className="flex items-start gap-3"><input type="checkbox" checked={businessConfirmed} onChange={(e) => setBusinessConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>{s.businessConfirmLabel}</span></label>
+            <label className="flex items-start gap-3"><input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>{s.termsAcceptPre}<a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">{s.agbLinkText}</a>{s.termsAcceptPost}</span></label>
+            <label className="flex items-start gap-3"><input type="checkbox" checked={billingConfirmed} onChange={(e) => setBillingConfirmed(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>{s.agencyOrderPre}{billingInterval === 'Monthly' ? `${agencyOffer.offeredMonthlyPrice.toLocaleString(locale, { minimumFractionDigits: 2 })} € ${s.perMonthWord}` : `${agencyOffer.offeredAnnualPrice.toLocaleString(locale, { minimumFractionDigits: 2 })} € ${s.perYearWord}`}. {hasMollieSubscription ? `${s.nextChargeAppliesPre}${sub?.currentPeriodEnd ? fillTemplate(s.nextChargeAppliesOnTemplate, { date: new Date(sub.currentPeriodEnd).toLocaleDateString(locale) }) : ''}.` : s.firstChargeImmediateText}{s.recurringChargeText}</span></label>
+            <label className="flex items-start gap-3"><input type="checkbox" checked={sepaAuthorized} onChange={(e) => setSepaAuthorized(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" /><span>{s.sepaAuthorizePre} <em className="text-gray-500">{s.draftLegalNote}</em></span></label>
           </fieldset>
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-gray-500">Ihre Auswahl, der Preis, der Zeitpunkt und die AGB-Version werden als Vertragsnachweis gespeichert.</p>
+            <p className="text-xs text-gray-500">{s.contractProofNote}</p>
             <button type="button" onClick={handleAcceptAgencyOffer} disabled={!contractConfirmed || acceptingOffer || (!hasMollieSubscription && mollieLiveMode !== true)} className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 bg-[#6355E4] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#5646D6] disabled:cursor-not-allowed disabled:opacity-50">
               {acceptingOffer ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : <ArrowRight size={16} />}
-              {hasMollieSubscription ? 'Zahlungspflichtig Agency abonnieren' : 'Zahlungspflichtig abonnieren und zu Mollie'}
+              {hasMollieSubscription ? s.subscribeAgencyBtn : s.subscribeAgencyMollieBtn}
             </button>
           </div>
-          {!hasMollieSubscription && mollieLiveMode === false && <p className="mt-3 text-sm text-amber-700">Die Online-Zahlung ist derzeit nicht verfügbar. Bitte kontaktieren Sie den Support.</p>}
+          {!hasMollieSubscription && mollieLiveMode === false && <p className="mt-3 text-sm text-amber-700">{s.paymentUnavailableMessage}</p>}
         </motion.section>
       )}
 
@@ -690,7 +709,7 @@ export default function AdminSubscriptionPage() {
         <motion.div variants={fadeUp} className="bg-red-50 border border-red-200 rounded-2xl p-5 flex gap-4">
           <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={22} />
           <div>
-            <p className="font-semibold text-red-800">Anfrage nicht möglich</p>
+            <p className="font-semibold text-red-800">{s.requestErrorTitle}</p>
             <p className="text-red-700 text-sm mt-1">{requestError}</p>
           </div>
         </motion.div>
@@ -699,10 +718,10 @@ export default function AdminSubscriptionPage() {
       {/* Pricing Cards */}
       <motion.div variants={fadeUp}>
         <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-xl font-bold text-gray-900">Pläne & Preise</h2>
-          <HelpTip text="Alle Pläne beinhalten das Online-Buchungssystem. Der Plan bestimmt wie viele Mitarbeiter & Services du anlegen kannst. Upgrade jederzeit per WhatsApp oder E-Mail möglich." />
+          <h2 className="text-xl font-bold text-gray-900">{s.plansAndPricingTitle}</h2>
+          <HelpTip text={s.helpTipText} />
         </div>
-        <p className="text-gray-500 text-sm mb-4">Alle angegebenen Preise sind die {billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'} zu zahlenden Gesamtpreise. Gemäß § 19 UStG wird keine Umsatzsteuer berechnet oder ausgewiesen. {billingInterval === 'Yearly' ? 'Jährlich' : 'Monatlich'} im Voraus · Keine Einrichtungsgebühr · Keine Provision pro Buchung · Jederzeit zum Periodenende kündbar</p>
+        <p className="text-gray-500 text-sm mb-4">{billingInterval === 'Yearly' ? s.pricingDisclaimerYearly : s.pricingDisclaimerMonthly}</p>
 
         {/* Monthly / Yearly toggle */}
         <div className="flex items-center gap-3 mb-6">
@@ -714,7 +733,7 @@ export default function AdminSubscriptionPage() {
                 billingInterval === 'Monthly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Monatlich
+              {s.monthlyToggleBtn}
             </button>
             <button
               type="button"
@@ -723,34 +742,34 @@ export default function AdminSubscriptionPage() {
                 billingInterval === 'Yearly' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              Jährlich
+              {s.yearlyToggleBtn}
             </button>
           </div>
           {maxSavingsPercent > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5">
-              Bis zu {maxSavingsPercent}% sparen bei jährlicher Zahlung
+              {fillTemplate(s.saveUpToTemplate, { percent: maxSavingsPercent })}
             </span>
           )}
         </div>
 
         {!hasMollieSubscription && (
           <fieldset className="mb-6 space-y-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <legend className="px-1 font-semibold text-gray-900">Verbindliche Bestätigungen vor dem Abschluss</legend>
+            <legend className="px-1 font-semibold text-gray-900">{s.bindingConfirmationsBeforeCheckoutLegend}</legend>
             <label className="flex items-start gap-3">
               <input type="checkbox" checked={businessConfirmed} onChange={(event) => setBusinessConfirmed(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
-              <span>Ich schließe das Abonnement als Unternehmer im Sinne des § 14 BGB ab.</span>
+              <span>{s.businessConfirmLabel}</span>
             </label>
             <label className="flex items-start gap-3">
               <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
-              <span>Ich akzeptiere die geltenden <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">GentleBook-AGB</a>.</span>
+              <span>{s.termsAcceptPre}<a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="text-[#6355E4] underline">{s.agbLinkText}</a>{s.termsAcceptPost}</span>
             </label>
             <label className="flex items-start gap-3">
               <input type="checkbox" checked={billingConfirmed} onChange={(event) => setBillingConfirmed(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
-              <span>Mir ist bekannt, dass das Abonnement {billingInterval === 'Yearly' ? 'jährlich' : 'monatlich'} im Voraus abgerechnet wird und sich jeweils um einen gleich langen Zeitraum verlängert, bis es gekündigt wird.</span>
+              <span>{billingInterval === 'Yearly' ? s.billingIntervalKnownYearly : s.billingIntervalKnownMonthly}</span>
             </label>
             <label className="flex items-start gap-3">
               <input type="checkbox" checked={sepaAuthorized} onChange={(event) => setSepaAuthorized(event.target.checked)} className="mt-0.5 h-4 w-4 accent-[#6355E4]" />
-              <span>Ich ermächtige GentleBook, die fälligen Beträge per SEPA-Lastschrift von dem auf der folgenden Mollie-Zahlungsseite anzugebenden Konto einzuziehen, und weise mein Kreditinstitut an, diese Lastschriften einzulösen. <em className="text-gray-500">(Entwurf – vor Go-Live anwaltlich zu prüfen.)</em></span>
+              <span>{s.sepaAuthorizePre} <em className="text-gray-500">{s.draftLegalNote}</em></span>
             </label>
           </fieldset>
         )}
@@ -773,14 +792,14 @@ export default function AdminSubscriptionPage() {
                 {plan.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="bg-[#6355E4] text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      Empfohlen
+                      {t.admin.recommended}
                     </span>
                   </div>
                 )}
                 {isCurrent && (
                   <div className="absolute -top-3 right-4">
                     <span className="bg-green-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      Ihr Plan
+                      {s.yourPlanBadge}
                     </span>
                   </div>
                 )}
@@ -788,20 +807,20 @@ export default function AdminSubscriptionPage() {
                   <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
                   {plan.priceOnRequest ? (
                     <div className="flex items-end gap-1 mt-2">
-                      <span className="text-2xl font-bold text-gray-900">Preis auf Anfrage</span>
+                      <span className="text-2xl font-bold text-gray-900">{s.priceOnRequestLabel}</span>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-end gap-1 mt-2">
                         <span className="text-3xl font-bold text-gray-900">€{displayPrice}</span>
-                        <span className="text-gray-500 mb-1">/Monat</span>
+                        <span className="text-gray-500 mb-1">{t.admin.perMonth}</span>
                       </div>
                       {billingInterval === 'Yearly' && (
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs text-gray-500">bei jährlicher Zahlung · €{annual}/Jahr</span>
+                          <span className="text-xs text-gray-500">{fillTemplate(s.yearlyPriceNoteTemplate, { annual })}</span>
                           {savingsPercent > 0 && (
                             <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5">
-                              Spare {savingsPercent}% (€{savingsAmount}/Jahr)
+                              {fillTemplate(s.saveAmountTemplate, { percent: savingsPercent, amount: savingsAmount })}
                             </span>
                           )}
                         </div>
@@ -809,11 +828,11 @@ export default function AdminSubscriptionPage() {
                     </>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    {plan.employees ? `${plan.employees} Mitarbeiter · ${plan.services} Services` : 'Unbegrenzte Mitarbeiter & Services'}
+                    {plan.employees ? fillTemplate(s.employeesServicesTemplate, { employees: plan.employees, services: plan.services }) : s.unlimitedEmployeesServices}
                   </p>
                 </div>
                 <ul className="space-y-2.5 flex-1 mb-6">
-                  {plan.features.map((f) => (
+                  {planFeatures[plan.key].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
                       <Check size={15} className="text-[#6355E4] shrink-0 mt-0.5" />
                       {f}
@@ -828,10 +847,10 @@ export default function AdminSubscriptionPage() {
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
                       disabled={requesting || !!requestedPlan}
-                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
+                      title={requestedPlan && requestedPlan !== plan.key ? fillTemplate(s.alreadyRequestedTitleTemplate, { plan: requestedPlan }) : undefined}
                       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-colors bg-gray-900 hover:bg-gray-700 text-white disabled:opacity-50"
                     >
-                      {requestedPlan === plan.key ? 'Anfrage gesendet ✓' : <>Angebot anfragen <ArrowRight size={14} /></>}
+                      {requestedPlan === plan.key ? s.requestSentCheck : <>{s.requestOfferBtn} <ArrowRight size={14} /></>}
                     </button>
                   )}
                   {/* Already a Mollie subscriber: switch in place (PATCH), no new checkout. */}
@@ -848,7 +867,7 @@ export default function AdminSubscriptionPage() {
                       {changingPlan === plan.key ? (
                         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>Zu {plan.name} wechseln <ArrowRight size={14} /></>
+                        <>{fillTemplate(s.switchToPlanTemplate, { plan: plan.name })} <ArrowRight size={14} /></>
                       )}
                     </button>
                   )}
@@ -867,21 +886,21 @@ export default function AdminSubscriptionPage() {
                       {mollieLoadingPlan === plan.key ? (
                         <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <>{plan.name} kostenpflichtig abonnieren <ArrowRight size={14} /></>
+                        <>{fillTemplate(s.subscribePlanTemplate, { plan: plan.name })} <ArrowRight size={14} /></>
                       )}
                     </button>
                   )}
                   {!isCurrent && !plan.priceOnRequest && !hasMollieSubscription && mollieLiveMode === false && (
                     <div
                       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
-                      title="SEPA-Zahlung ist bald verfügbar"
+                      title={s.sepaComingSoonLabel}
                     >
-                      SEPA-Zahlung bald verfügbar
+                      {s.sepaComingSoonLabel}
                     </div>
                   )}
                   {isCurrent && (
                     <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-medium bg-green-50 text-green-700">
-                      <Check size={15} /> Aktueller Plan
+                      <Check size={15} /> {s.currentPlanBadgeLabel}
                     </div>
                   )}
                   {/* Fallback: manual request (no SEPA) — only meaningful before any Mollie
@@ -890,16 +909,16 @@ export default function AdminSubscriptionPage() {
                     <button
                       onClick={() => handlePlanRequest(plan.key)}
                       disabled={!contractConfirmed || requesting || !!requestedPlan}
-                      title={requestedPlan && requestedPlan !== plan.key ? `Du hast bereits eine offene Anfrage für den ${requestedPlan}-Plan` : undefined}
+                      title={requestedPlan && requestedPlan !== plan.key ? fillTemplate(s.alreadyRequestedTitleTemplate, { plan: requestedPlan }) : undefined}
                       className="w-full text-center text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors py-1 disabled:opacity-50"
                     >
-                      {requestedPlan === plan.key ? 'Manuelle Anfrage gesendet ✓' : 'Andere Zahlungsart? Manuell anfragen'}
+                      {requestedPlan === plan.key ? s.manualRequestSentCheck : s.manualRequestBtn}
                     </button>
                   )}
                   {/* Secondary: WhatsApp / Email */}
                   <div className="flex gap-2">
                     <a
-                      href={supportConfig.whatsappUrl(`Hallo, ich möchte den ${plan.name}-Plan buchen.`)}
+                      href={supportConfig.whatsappUrl(fillTemplate(s.whatsappMessageTemplate, { plan: plan.name }))}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
@@ -907,10 +926,10 @@ export default function AdminSubscriptionPage() {
                       <MessageCircle size={13} /> WhatsApp
                     </a>
                     <a
-                      href={supportConfig.mailto(`${plan.name}-Plan Anfrage`)}
+                      href={supportConfig.mailto(fillTemplate(s.emailSubjectTemplate, { plan: plan.name }))}
                       className="flex items-center justify-center gap-1.5 flex-1 py-2 rounded-xl text-xs font-medium border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
                     >
-                      <Mail size={13} /> E-Mail
+                      <Mail size={13} /> {s.emailLabel}
                     </a>
                   </div>
                 </div>
@@ -923,8 +942,8 @@ export default function AdminSubscriptionPage() {
       {/* Contact */}
       <motion.div variants={fadeUp} className="bg-gray-50 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <p className="font-semibold text-gray-900">Fragen zu Ihrem Plan?</p>
-          <p className="text-sm text-gray-500 mt-0.5">Wir helfen Ihnen gerne persönlich weiter.</p>
+          <p className="font-semibold text-gray-900">{s.contactQuestionTitle}</p>
+          <p className="text-sm text-gray-500 mt-0.5">{s.contactQuestionSubtitle}</p>
         </div>
         <div className="flex gap-3">
           <a
@@ -939,7 +958,7 @@ export default function AdminSubscriptionPage() {
             href={supportConfig.mailto()}
             className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-medium transition-colors"
           >
-            <Mail size={16} /> E-Mail
+            <Mail size={16} /> {s.emailLabel}
           </a>
         </div>
       </motion.div>

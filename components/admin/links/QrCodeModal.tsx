@@ -5,10 +5,13 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Download, Copy, Check as CheckIcon } from "lucide-react";
 import QRCodeSVG from "react-qr-code";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function QrCodeModal({
   open, onClose, tenantSlug,
 }: { open: boolean; onClose: () => void; tenantSlug: string }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   const [copied, setCopied] = useState(false);
 
   return (
@@ -43,8 +46,8 @@ export function QrCodeModal({
             >
               <div className="flex items-center justify-between w-full">
                 <div>
-                  <p className="font-semibold text-[#111318] text-base">QR-Code</p>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">Zum Scannen & Teilen</p>
+                  <p className="font-semibold text-[#111318] text-base">{s.qrCodeTitle}</p>
+                  <p className="text-xs text-[#9CA3AF] mt-0.5">{s.qrCodeSubtitle}</p>
                 </div>
                 <button onClick={onClose}
                   className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
@@ -60,12 +63,12 @@ export function QrCodeModal({
                   className={`flex-shrink-0 flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors ${
                     copied ? "bg-[#D1FAE5] text-[#065F46]" : "bg-white border border-[#E5E7EB] text-[#374151] hover:bg-[#F7F7F8]"
                   }`}>
-                  {copied ? <><CheckIcon size={11} />Kopiert</> : <><Copy size={11} />Kopieren</>}
+                  {copied ? <><CheckIcon size={11} />{t.admin.copied}</> : <><Copy size={11} />{t.admin.copy}</>}
                 </button>
               </div>
               <button onClick={handleDownload}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#6355E4] text-white hover:bg-[#4338CA] transition-colors">
-                <Download size={14} />SVG herunterladen
+                <Download size={14} />{s.downloadSvgBtn}
               </button>
             </motion.div>
           </motion.div>

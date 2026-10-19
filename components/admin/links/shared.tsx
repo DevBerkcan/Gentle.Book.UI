@@ -8,19 +8,23 @@ import {
   Phone, Mail, ExternalLink, Calendar,
 } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
+import type { Translations } from "@/lib/i18n/translations";
 
-export const ICON_OPTIONS = [
-  { value: "Instagram",  label: "Instagram",   icon: <Instagram size={15} /> },
-  { value: "WhatsApp",   label: "WhatsApp",    icon: <MessageCircle size={15} /> },
-  { value: "GoogleMaps", label: "Google Maps", icon: <MapPin size={15} /> },
-  { value: "Facebook",   label: "Facebook",    icon: <Facebook size={15} /> },
-  { value: "TikTok",     label: "TikTok",      icon: <span className="text-[11px] font-bold">TT</span> },
-  { value: "YouTube",    label: "YouTube",     icon: <Youtube size={15} /> },
-  { value: "Website",    label: "Website",     icon: <Globe size={15} /> },
-  { value: "Phone",      label: "Telefon",     icon: <Phone size={15} /> },
-  { value: "Email",      label: "E-Mail",      icon: <Mail size={15} /> },
-  { value: "Custom",     label: "Sonstiges",   icon: <ExternalLink size={15} /> },
-];
+export function getIconOptions(t: Translations) {
+  const s = t.admin.linksPage;
+  return [
+    { value: "Instagram",  label: "Instagram",   icon: <Instagram size={15} /> },
+    { value: "WhatsApp",   label: "WhatsApp",    icon: <MessageCircle size={15} /> },
+    { value: "GoogleMaps", label: "Google Maps", icon: <MapPin size={15} /> },
+    { value: "Facebook",   label: "Facebook",    icon: <Facebook size={15} /> },
+    { value: "TikTok",     label: "TikTok",      icon: <span className="text-[11px] font-bold">TT</span> },
+    { value: "YouTube",    label: "YouTube",     icon: <Youtube size={15} /> },
+    { value: "Website",    label: "Website",     icon: <Globe size={15} /> },
+    { value: "Phone",      label: s.iconPhone,   icon: <Phone size={15} /> },
+    { value: "Email",      label: s.iconEmail,   icon: <Mail size={15} /> },
+    { value: "Custom",     label: s.iconOther,   icon: <ExternalLink size={15} /> },
+  ];
+}
 
 export const ICON_MAP: Record<string, ReactNode> = {
   Booking:    <Calendar size={17} />,

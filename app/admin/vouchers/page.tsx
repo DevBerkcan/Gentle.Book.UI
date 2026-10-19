@@ -5,18 +5,26 @@ import { useEffect, useState } from "react";
 import { Ticket, TrendingUp, AlertTriangle, Plus, X, Loader2, Search, Ban } from "lucide-react";
 import { adminApi, type AdminVoucher } from "@/lib/api/admin";
 import { customersApi, type CustomerListItem } from "@/lib/api/customers";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
-const STATUS_LABEL: Record<AdminVoucher["status"], { label: string; color: string; bg: string }> = {
-  Active: { label: "Aktiv", color: "#059669", bg: "#ECFDF5" },
-  Redeemed: { label: "Eingelöst", color: "#6B7280", bg: "#F3F4F6" },
-  Expired: { label: "Abgelaufen", color: "#D97706", bg: "#FFFBEB" },
-  Cancelled: { label: "Storniert", color: "#991B1B", bg: "#FEE2E2" },
-};
+function getStatusLabel(t: Translations): Record<AdminVoucher["status"], { label: string; color: string; bg: string }> {
+  const s = t.admin.vouchersPage;
+  return {
+    Active: { label: s.statusActive, color: "#059669", bg: "#ECFDF5" },
+    Redeemed: { label: s.statusRedeemed, color: "#6B7280", bg: "#F3F4F6" },
+    Expired: { label: s.statusExpired, color: "#D97706", bg: "#FFFBEB" },
+    Cancelled: { label: s.statusCancelled, color: "#991B1B", bg: "#FEE2E2" },
+  };
+}
 
 export default function AdminVouchersPage() {
+  const { t } = useTranslation();
+  const s = t.admin.vouchersPage;
+  const STATUS_LABEL = getStatusLabel(t);
   const [vouchers, setVouchers] = useState<AdminVoucher[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +62,7 @@ export default function AdminVouchersPage() {
           requiredPlan: err.response.data.requiredPlan,
         });
       } else {
-        setError(err.response?.data?.message || err.message || "Fehler beim Laden der Gutscheine");
+        setError(err.response?.data?.message || err.message || s.loadError);
       }
     } finally { setLoading(false); }
   }
@@ -70,13 +78,13 @@ export default function AdminVouchersPage() {
   async function handleIssue() {
     setIssueError(null);
     if (issueType === "MonetaryValue" && (!amount || parseFloat(amount) <= 0)) {
-      setIssueError("Bitte einen gültigen Geldwert angeben."); return;
+      setIssueError(s.invalidAmountError); return;
     }
     if (issueType === "SessionPackage" && (!sessions || parseInt(sessions, 10) <= 0)) {
-      setIssueError("Bitte eine gültige Anzahl Sitzungen angeben."); return;
+      setIssueError(s.invalidSessionsError); return;
     }
     if (issueType === "PercentageDiscount" && (!percentageValue || parseFloat(percentageValue) <= 0 || parseFloat(percentageValue) > 100)) {
-      setIssueError("Bitte einen gültigen Prozentsatz (1-100) angeben."); return;
+      setIssueError(s.invalidPercentageError); return;
     }
     setIssuing(true);
     try {
@@ -92,14 +100,14 @@ export default function AdminVouchersPage() {
       setAmount(""); setSessions(""); setPercentageValue(""); setPercentageUses("1"); setNote(""); setSelectedCustomer(null); setCustomerQuery("");
       await load();
     } catch (err: any) {
-      setIssueError(err.response?.data?.message ?? "Ausstellung fehlgeschlagen.");
+      setIssueError(err.response?.data?.message ?? s.issueFailedError);
     } finally {
       setIssuing(false);
     }
   }
 
   async function handleCancel(voucher: AdminVoucher) {
-    if (!confirm(`Gutschein ${voucher.code} wirklich stornieren?`)) return;
+    if (!confirm(fillTemplate(s.confirmCancelTemplate, { code: voucher.code }))) return;
     setBusyId(voucher.id);
     try {
       await adminApi.cancelVoucher(voucher.id);
@@ -132,18 +140,18 @@ export default function AdminVouchersPage() {
           <div className="w-12 h-12 bg-[#EEEBFC] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Ticket size={20} className="text-[#6355E4]" />
           </div>
-          <h2 className="text-lg font-bold text-[#111318] mb-2">Gutscheine & 10er-Karten</h2>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
             <p className="text-xs text-[#9CA3AF] mb-3">
-              Dein aktueller Tarif: <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
+              {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
           <p className="text-sm text-[#6B7280] mb-6">
-            {upgradeInfo.message ?? "Gutscheine sind in deinem aktuellen Tarif nicht enthalten."}
+            {upgradeInfo.message ?? s.upgradeDefaultMessage}
           </p>
           <a href="/admin/subscription"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors">
-            <TrendingUp size={15} /> Jetzt upgraden
+            <TrendingUp size={15} /> {s.upgradeNowBtn}
           </a>
         </div>
       </div>
@@ -157,8 +165,8 @@ export default function AdminVouchersPage() {
           <div className="w-11 h-11 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={18} className="text-[#991B1B]" />
           </div>
-          <p className="font-semibold text-[#111318] mb-1">Fehler beim Laden</p>
-          <p className="text-sm text-[#6B7280]">{error || "Unbekannter Fehler"}</p>
+          <p className="font-semibold text-[#111318] mb-1">{s.loadErrorTitle}</p>
+          <p className="text-sm text-[#6B7280]">{error || s.unknownError}</p>
         </div>
       </div>
     );
@@ -170,14 +178,14 @@ export default function AdminVouchersPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">Gutscheine & 10er-Karten</h1>
-            <p className="text-sm text-[#6B7280] mt-0.5">Guthaben ausstellen und verwalten — Einlösung bei der manuellen Buchung per Code.</p>
+            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">{s.pageTitle}</h1>
+            <p className="text-sm text-[#6B7280] mt-0.5">{s.pageSubtitle}</p>
           </div>
           <button
             onClick={() => setShowIssueForm((v) => !v)}
             className="inline-flex items-center gap-1.5 rounded-xl bg-[#6355E4] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#5548CE]"
           >
-            {showIssueForm ? <X size={15} /> : <Plus size={15} />} {showIssueForm ? "Abbrechen" : "Gutschein ausstellen"}
+            {showIssueForm ? <X size={15} /> : <Plus size={15} />} {showIssueForm ? t.cancel : s.issueVoucherBtn}
           </button>
         </div>
 
@@ -185,26 +193,26 @@ export default function AdminVouchersPage() {
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 space-y-3">
             <div className="flex gap-2">
               <select value={issueType} onChange={(e) => setIssueType(e.target.value as any)} className={inputCls}>
-                <option value="MonetaryValue">Geldwert-Gutschein</option>
-                <option value="SessionPackage">10er-Karte (Sitzungspaket)</option>
-                <option value="PercentageDiscount">Prozent-Rabatt</option>
+                <option value="MonetaryValue">{s.typeMonetaryValue}</option>
+                <option value="SessionPackage">{s.typeSessionPackage}</option>
+                <option value="PercentageDiscount">{s.typePercentageDiscount}</option>
               </select>
               {issueType === "MonetaryValue" && (
                 <input type="number" min={0.01} step={0.01} value={amount} onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Betrag" className={inputCls} />
+                  placeholder={s.amountPlaceholder} className={inputCls} />
               )}
               {issueType === "SessionPackage" && (
                 <input type="number" min={1} value={sessions} onChange={(e) => setSessions(e.target.value)}
-                  placeholder="Anzahl Sitzungen" className={inputCls} />
+                  placeholder={s.sessionsCountPlaceholder} className={inputCls} />
               )}
               {issueType === "PercentageDiscount" && (
                 <input type="number" min={1} max={100} value={percentageValue} onChange={(e) => setPercentageValue(e.target.value)}
-                  placeholder="% Rabatt" className={inputCls} />
+                  placeholder={s.percentageDiscountPlaceholder} className={inputCls} />
               )}
             </div>
             {issueType === "PercentageDiscount" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-[#6B7280]">Anzahl Nutzungen</label>
+                <label className="text-xs font-semibold text-[#6B7280]">{s.usesCountLabel}</label>
                 <input type="number" min={1} value={percentageUses} onChange={(e) => setPercentageUses(e.target.value)}
                   className={`${inputCls} max-w-[120px]`} />
               </div>
@@ -215,7 +223,7 @@ export default function AdminVouchersPage() {
                 type="text"
                 value={selectedCustomer ? `${selectedCustomer.fullName}` : customerQuery}
                 onChange={(e) => { setCustomerQuery(e.target.value); setSelectedCustomer(null); }}
-                placeholder="Kund:in suchen (optional)"
+                placeholder={s.customerSearchPlaceholder}
                 className={inputCls}
               />
               {selectedCustomer && (
@@ -236,7 +244,7 @@ export default function AdminVouchersPage() {
               )}
             </div>
 
-            <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notiz (optional)" className={inputCls} />
+            <input type="text" value={note} onChange={(e) => setNote(e.target.value)} placeholder={s.notePlaceholder} className={inputCls} />
 
             {issueError && <p className="text-xs text-[#991B1B] bg-[#FEE2E2] border border-[#FECACA] rounded-lg px-3 py-2">{issueError}</p>}
 
@@ -245,7 +253,7 @@ export default function AdminVouchersPage() {
               disabled={issuing}
               className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
             >
-              {issuing ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} Ausstellen
+              {issuing ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />} {s.issueBtn}
             </button>
           </div>
         )}
@@ -254,7 +262,7 @@ export default function AdminVouchersPage() {
           <input
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Code oder Kundenname suchen…" className={inputCls}
+            placeholder={s.searchPlaceholder} className={inputCls}
           />
           <button onClick={handleSearch} className="inline-flex items-center gap-1.5 rounded-xl border border-[#E5E7EB] bg-white px-4 py-2.5 text-sm font-semibold text-[#374151] hover:bg-[#F7F7F8]">
             <Search size={15} />
@@ -267,7 +275,7 @@ export default function AdminVouchersPage() {
               <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Ticket size={20} className="text-[#D1D5DB]" />
               </div>
-              <p className="text-sm font-medium text-[#374151]">Noch keine Gutscheine</p>
+              <p className="text-sm font-medium text-[#374151]">{s.noVouchersYet}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
@@ -283,11 +291,11 @@ export default function AdminVouchersPage() {
                         </span>
                       </div>
                       <p className="text-xs text-[#9CA3AF]">
-                        {v.customerName ?? "Kein Kunde zugeordnet"} · {v.type === "MonetaryValue"
-                          ? `${v.remainingAmount?.toFixed(2)} / ${v.initialAmount?.toFixed(2)} übrig`
+                        {v.customerName ?? s.noCustomerAssigned} · {v.type === "MonetaryValue"
+                          ? fillTemplate(s.monetaryRemainingTemplate, { remaining: v.remainingAmount?.toFixed(2) ?? '0.00', initial: v.initialAmount?.toFixed(2) ?? '0.00' })
                           : v.type === "PercentageDiscount"
-                          ? `${v.percentageValue}% Rabatt · ${v.remainingSessions} / ${v.initialSessions} Nutzungen übrig`
-                          : `${v.remainingSessions} / ${v.initialSessions} Sitzungen übrig`}
+                          ? fillTemplate(s.percentageRemainingTemplate, { percent: v.percentageValue ?? 0, remaining: v.remainingSessions ?? 0, initial: v.initialSessions ?? 0 })
+                          : fillTemplate(s.sessionsRemainingTemplate, { remaining: v.remainingSessions ?? 0, initial: v.initialSessions ?? 0 })}
                       </p>
                     </div>
                     {v.status === "Active" && (
@@ -296,7 +304,7 @@ export default function AdminVouchersPage() {
                         disabled={busyId === v.id}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-[#991B1B] hover:bg-[#FEE2E2] px-2.5 py-1.5 rounded-lg disabled:opacity-50"
                       >
-                        <Ban size={12} /> Stornieren
+                        <Ban size={12} /> {s.cancelBtn}
                       </button>
                     )}
                   </div>

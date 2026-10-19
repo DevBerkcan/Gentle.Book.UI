@@ -14,6 +14,7 @@ import { DesignAssistantChat } from "./DesignAssistantChat";
 import { CMS_TEMPLATE_PACKS, COLOR_PALETTES } from "./constants";
 import type { DesignSuggestion } from "@/lib/api/designAssistant";
 import type { BrandPreviewOverride, LinktreeConfig, PageTemplate, PlanTier, Theme } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function DesignAccordion({
   designOpen, onToggleDesignOpen, designSaving,
@@ -53,6 +54,8 @@ export function DesignAccordion({
   showToast: (type: "success" | "error", message: string) => void;
   onApplyDesignSuggestion: (suggestion: DesignSuggestion) => void;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <div className="mb-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
       <button
@@ -64,9 +67,9 @@ export function DesignAccordion({
             <Palette size={14} className="text-white" />
           </div>
           <div className="text-left">
-            <p className="font-semibold text-[#111318] text-sm leading-tight">Seiten-Design</p>
+            <p className="font-semibold text-[#111318] text-sm leading-tight">{s.pageDesignTitle}</p>
             {!designOpen && (
-              <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Template · Farben · Layout · Animationen</p>
+              <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.pageDesignSubtitle}</p>
             )}
           </div>
           {designSaving && <Loader2 size={12} className="animate-spin text-[#6355E4] ml-1" />}
@@ -99,10 +102,10 @@ export function DesignAccordion({
 
               <div className="border-t border-[#F3F4F6] pt-5">
                 <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-                  <Type size={11} className="text-[#6355E4]" />CTA-Text (Buchungsbutton)
+                  <Type size={11} className="text-[#6355E4]" />{s.ctaTextLabel}
                 </p>
                 <input type="text" value={config.ctaText} onChange={(e) => updateConfig("ctaText", e.target.value)}
-                  placeholder="Termin buchen" className={inputCls} />
+                  placeholder={t.booking.bookAppointment} className={inputCls} />
               </div>
 
               <AdvancedDesignOptions
@@ -115,7 +118,7 @@ export function DesignAccordion({
               {tenantSlug && (
                 <button onClick={onShowPreviewModal}
                   className="flex items-center gap-1.5 text-xs text-[#6355E4] hover:underline font-medium lg:hidden">
-                  <Eye size={12} />Vorschau öffnen
+                  <Eye size={12} />{s.openPreviewBtn}
                 </button>
               )}
             </div>

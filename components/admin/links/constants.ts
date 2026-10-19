@@ -4,6 +4,54 @@
 import type {
   BgPattern, ButtonStyle, LinktreeConfig, PageTemplate, PlanTier, Theme,
 } from "./types";
+import type { Translations } from "@/lib/i18n/translations";
+
+/** Localized label for an INDUSTRY_PRESETS key (the preset's `label` field stays German — used only as a stable key/fallback). */
+export function getIndustryPresetLabel(t: Translations, key: string): string {
+  const s = t.admin.linksPage;
+  const map: Record<string, string> = {
+    Hairdresser: s.industryHairdresser, Beauty: s.industryBeauty, Barbershop: s.industryBarbershop,
+    Massage: s.industryMassage, Nail: s.industryNails, Physio: s.industryPhysio, Tattoo: s.industryTattoo,
+    Yoga: s.industryYoga, Fitness: s.industryFitness, Restaurant: s.industryRestaurant,
+    Coaching: s.industryCoaching, Other: s.industryOther,
+  };
+  return map[key] ?? key;
+}
+
+/** Localized description for a PAGE_TEMPLATES entry. */
+export function getTplDesc(t: Translations, key: PageTemplate): string {
+  const s = t.admin.linksPage;
+  const map: Record<PageTemplate, string> = {
+    classic: s.tplDescClassic, soft: s.tplDescSoft, hero: s.tplDescHero, neon: s.tplDescNeon,
+    magazine: s.tplDescMagazine, split: s.tplDescSplit, corporate: s.tplDescCorporate,
+    organic: s.tplDescOrganic, tattoo: s.tplDescTattoo, barbershop: s.tplDescBarbershop,
+    beauty: s.tplDescBeauty, clinic: s.tplDescClinic, fitness: s.tplDescFitness,
+    restaurant: s.tplDescRestaurant, portfolio: s.tplDescPortfolio, hairsalon: s.tplDescHairsalon,
+  };
+  return map[key];
+}
+
+/** Localized description for a CMS_TEMPLATE_PACKS entry, looked up by its stable `key`. */
+export function getPackDesc(t: Translations, key: string): string {
+  const s = t.admin.linksPage;
+  const map: Record<string, string> = {
+    "salon-launch": s.packDescSalonLaunch,
+    "barbershop-classic": s.packDescBarbershopClassic,
+    "hair-beauty-elegant": s.packDescHairBeautyElegant,
+    "medical-trust": s.packDescMedicalTrust,
+    "fitness-energy": s.packDescFitnessEnergy,
+    "barber-dark-pro": s.packDescBarberDarkPro,
+    "food-reservation": s.packDescFoodReservation,
+    "creator-pro": s.packDescCreatorPro,
+    "night-studio": s.packDescNightStudio,
+    "nails-studio": s.packDescNailsStudio,
+    "spa-wellness": s.packDescSpaWellness,
+    "yoga-flow": s.packDescYogaFlow,
+    "beauty-fresh": s.packDescBeautyFresh,
+    "hairsalon-boutique": s.packDescHairsalonBoutique,
+  };
+  return map[key] ?? "";
+}
 
 export const DEFAULT_CONFIG: LinktreeConfig = {
   ctaText: "Termin buchen",

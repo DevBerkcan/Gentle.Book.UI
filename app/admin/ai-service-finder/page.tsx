@@ -13,12 +13,14 @@ import {
   type EvaluateFinderResponse,
 } from '@/lib/api/ai-finder';
 import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
+import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
 
 function pretty(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
 function InfoTooltip({ text }: { text: ReactNode }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <span className="relative inline-flex">
@@ -26,7 +28,7 @@ function InfoTooltip({ text }: { text: ReactNode }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         onBlur={() => setOpen(false)}
-        aria-label="Erklärung anzeigen"
+        aria-label={t.admin.aiServiceFinderPage.ariaShowExplanation}
         className="text-gray-400 hover:text-[#6355E4] transition-colors"
       >
         <Info size={15} />
@@ -41,6 +43,8 @@ function InfoTooltip({ text }: { text: ReactNode }) {
 }
 
 export default function AiServiceFinderAdminPage() {
+  const { t } = useTranslation();
+  const s = t.admin.aiServiceFinderPage;
   const [loading, setLoading] = useState(true);
   const [savingSettings, setSavingSettings] = useState(false);
   const [savingQuestions, setSavingQuestions] = useState(false);
@@ -98,7 +102,7 @@ export default function AiServiceFinderAdminPage() {
         setRulesJson(pretty(ruleData));
         setGuidanceJson(pretty(guidanceData));
       } catch (e: any) {
-        const msg = e.response?.data?.message || 'Fehler beim Laden.';
+        const msg = e.response?.data?.message || s.loadError;
         if (active) setError(msg);
       } finally {
         if (active) setLoading(false);
@@ -120,7 +124,7 @@ export default function AiServiceFinderAdminPage() {
   async function handleSubmitBudgetRequest() {
     const amount = parseFloat(budgetRequestAmount.replace(',', '.'));
     if (!Number.isFinite(amount) || amount <= 0) {
-      setBudgetRequestError('Bitte einen gültigen Betrag angeben.');
+      setBudgetRequestError(s.invalidAmountError);
       return;
     }
     setSubmittingBudgetRequest(true);
@@ -133,7 +137,7 @@ export default function AiServiceFinderAdminPage() {
       const fresh = await aiFinderApi.getOverview();
       setOverview(fresh);
     } catch (e: any) {
-      setBudgetRequestError(e.response?.data?.message || 'Anfrage konnte nicht gesendet werden.');
+      setBudgetRequestError(e.response?.data?.message || s.requestSendError);
     } finally {
       setSubmittingBudgetRequest(false);
     }
@@ -141,7 +145,7 @@ export default function AiServiceFinderAdminPage() {
 
   async function saveSettings() {
     if (!settings?.primaryIndustryProfileId) {
-      setError('Bitte zuerst ein Branchenprofil auswahlen.');
+      setError(s.selectProfileFirstError);
       return;
     }
 
@@ -155,9 +159,9 @@ export default function AiServiceFinderAdminPage() {
         settingsJson: settings.settingsJson,
         enabledCapabilities: settings.enabledCapabilities,
       });
-      setMessage('Branchenprofil gespeichert.');
+      setMessage(s.profileSavedMsg);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Speichern fehlgeschlagen.');
+      setError(e.response?.data?.message || s.saveFailedError);
     } finally {
       setSavingSettings(false);
     }
@@ -182,9 +186,9 @@ export default function AiServiceFinderAdminPage() {
           isActive: q.isActive,
         })),
       });
-      setMessage('Finder-Fragen gespeichert.');
+      setMessage(s.questionsSavedMsg);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Fragen konnten nicht gespeichert werden.');
+      setError(e.response?.data?.message || s.questionsSaveError);
     } finally {
       setSavingQuestions(false);
     }
@@ -208,9 +212,9 @@ export default function AiServiceFinderAdminPage() {
           approvalStatus: r.approvalStatus,
         })),
       });
-      setMessage('Service-Regeln gespeichert.');
+      setMessage(s.rulesSavedMsg);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Regeln konnten nicht gespeichert werden.');
+      setError(e.response?.data?.message || s.rulesSaveError);
     } finally {
       setSavingRules(false);
     }
@@ -235,9 +239,9 @@ export default function AiServiceFinderAdminPage() {
           validTo: g.validTo,
         })),
       });
-      setMessage('Kundenhinweise gespeichert.');
+      setMessage(s.guidanceSavedMsg);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Hinweise konnten nicht gespeichert werden.');
+      setError(e.response?.data?.message || s.guidanceSaveError);
     } finally {
       setSavingGuidance(false);
     }
@@ -251,7 +255,7 @@ export default function AiServiceFinderAdminPage() {
       const data = await aiFinderApi.preview({ answers, freeText });
       setPreview(data);
     } catch (e: any) {
-      setError(e.response?.data?.message || 'Preview fehlgeschlagen.');
+      setError(e.response?.data?.message || s.previewFailedError);
     } finally {
       setPreviewing(false);
     }
@@ -266,20 +270,20 @@ export default function AiServiceFinderAdminPage() {
   }
 
   const navItems: SettingsNavItem[] = [
-    { id: 'section-guide', label: 'Anleitung' },
-    ...(overview?.budget ? [{ id: 'section-budget', label: 'KI-Budget' }] : []),
-    { id: 'section-profile', label: 'Branchenprofil' },
-    { id: 'section-questions', label: 'Finder-Fragen' },
-    { id: 'section-rules', label: 'Service-Regeln' },
-    { id: 'section-guidance', label: 'Kundenhinweise' },
-    { id: 'section-test', label: 'Finder testen' },
+    { id: 'section-guide', label: s.navGuide },
+    ...(overview?.budget ? [{ id: 'section-budget', label: s.navBudget }] : []),
+    { id: 'section-profile', label: s.navProfile },
+    { id: 'section-questions', label: s.navQuestions },
+    { id: 'section-rules', label: s.navRules },
+    { id: 'section-guidance', label: s.navGuidance },
+    { id: 'section-test', label: s.navTest },
   ];
 
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[#14162B]">KI & Service Finder</h1>
-        <p className="text-sm text-gray-500 mt-1">Mandantenfaehige Konfiguration fur Branchenprofil, Fragen, Regeln, Hinweise und Finder-Preview.</p>
+        <h1 className="text-2xl font-bold text-[#14162B]">{t.admin.aiServiceFinder}</h1>
+        <p className="text-sm text-gray-500 mt-1">{s.pageSubtitle}</p>
       </div>
 
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
@@ -297,41 +301,36 @@ export default function AiServiceFinderAdminPage() {
         >
           <span className="flex items-center gap-2 text-sm font-semibold text-[#14162B]">
             <HelpCircle size={16} className="text-[#6355E4]" />
-            Wie funktioniert der Service Finder? So richtest du ihn ein.
+            {s.guideToggleLabel}
           </span>
           <ChevronDown size={16} className={`text-gray-400 transition-transform ${guideOpen ? 'rotate-180' : ''}`} />
         </button>
         {guideOpen && (
           <div className="px-4 pb-4 text-sm text-gray-600 space-y-3">
             <p>
-              Der Service Finder ist ein Frage-Assistent für deine Kund:innen: Sie beantworten ein paar Fragen
-              auf deiner Buchungsseite und bekommen automatisch den passenden Service vorgeschlagen. Wichtig zu wissen:
-              die Empfehlung kommt <strong>nicht von einer echten KI/Sprach-KI</strong>, sondern von Regeln, die du
-              hier selbst festlegst (&quot;wenn Antwort X, dann empfehle Service Y&quot;) — vollständig vorhersehbar
-              und ohne laufende KI-Kosten.
+              {s.guideIntroPre}<strong>{s.guideIntroBold}</strong>{s.guideIntroPost}
             </p>
             <ol className="list-decimal list-inside space-y-1">
-              <li><strong>Branchenprofil</strong> unten wählen und Häkchen bei den gewünschten Fähigkeiten setzen.</li>
-              <li><strong>Finder-Fragen</strong> anlegen — das sind die Fragen, die Kund:innen im Assistenten beantworten.</li>
-              <li><strong>Service-Regeln</strong> anlegen — verknüpfen Antworten mit einem konkreten Service aus deinem Angebot.</li>
-              <li><strong>Kundenhinweise</strong> (optional) — zusätzliche Infotexte, die bei einer Empfehlung angezeigt werden.</li>
-              <li>Mit <strong>&quot;Finder testen&quot;</strong> unten Beispielantworten durchspielen, bevor etwas live geht — wirkt sich nicht auf die echte Buchungsseite aus.</li>
-              <li>Erst wenn alles passt: oben bei &quot;Branchenprofil&quot; das Häkchen <strong>&quot;Finder öffentlich anzeigen&quot;</strong> setzen und speichern — das schaltet ihn für Kund:innen live.</li>
+              <li><strong>{s.guideStep1Bold}</strong>{s.guideStep1Rest}</li>
+              <li><strong>{s.guideStep2Bold}</strong>{s.guideStep2Rest}</li>
+              <li><strong>{s.guideStep3Bold}</strong>{s.guideStep3Rest}</li>
+              <li><strong>{s.guideStep4Bold}</strong>{s.guideStep4Rest}</li>
+              <li>{s.guideStep5Pre}<strong>{s.guideStep5Bold}</strong>{s.guideStep5Post}</li>
+              <li>{s.guideStep6Pre}<strong>{s.guideStep6Bold}</strong>{s.guideStep6Post}</li>
             </ol>
             <p className="text-gray-500">
-              Verfügbar ab Tarif <strong>Professional</strong>. Fragen/Regeln/Hinweise werden aktuell als JSON bearbeitet —
-              klicke auf das <Info size={12} className="inline align-text-bottom text-gray-400" />-Symbol neben jedem
-              Abschnittstitel für das genaue Format und ein Beispiel.
+              {s.guideFooterPre}<strong>{s.guideFooterBold}</strong>{s.guideFooterMid}
+              {' '}<Info size={12} className="inline align-text-bottom text-gray-400" />{s.guideFooterPost}
             </p>
           </div>
         )}
       </section>
 
       <section className="grid gap-4 md:grid-cols-4">
-        <StatCard label="Finder aktiv" value={overview?.finderEnabled ? 'Ja' : 'Nein'} />
-        <StatCard label="Aktive Fragen" value={String(overview?.questionCount ?? 0)} />
-        <StatCard label="Aktive Regeln" value={String(overview?.ruleCount ?? 0)} />
-        <StatCard label="Freigegebene Hinweise" value={String(overview?.guidanceCount ?? 0)} />
+        <StatCard label={s.statFinderActive} value={overview?.finderEnabled ? t.yes : t.no} />
+        <StatCard label={s.statActiveQuestions} value={String(overview?.questionCount ?? 0)} />
+        <StatCard label={s.statActiveRules} value={String(overview?.ruleCount ?? 0)} />
+        <StatCard label={s.statApprovedGuidance} value={String(overview?.guidanceCount ?? 0)} />
       </section>
 
       {overview?.budget && (
@@ -339,12 +338,15 @@ export default function AiServiceFinderAdminPage() {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <h2 className="text-sm font-semibold text-[#14162B] flex items-center gap-1.5">
-                KI-Budget diesen Monat
-                <InfoTooltip text="Deckt die tatsächlichen KI-Kosten (Service-Finder-Erklärung, KI-Tagline-Vorschläge). Ist das Budget aufgebraucht, laufen diese Features automatisch ohne KI weiter — keine Unterbrechung, nur weniger personalisierte Antworten, bis zur nächsten Periode." />
+                {s.budgetHeading}
+                <InfoTooltip text={s.budgetTooltip} />
               </h2>
               <p className="text-xs text-gray-500 mt-1">
-                {overview.usage.cost.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $ von {overview.budget.monthlyBudgetUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 })} $
-                {' · '}{overview.usage.requests} Anfragen
+                {fillTemplate(s.budgetUsageTemplate, {
+                  cost: overview.usage.cost.toLocaleString('de-DE', { minimumFractionDigits: 2 }),
+                  budget: overview.budget.monthlyBudgetUsd.toLocaleString('de-DE', { minimumFractionDigits: 2 }),
+                  requests: overview.usage.requests,
+                })}
               </p>
             </div>
             {!overview.pendingBudgetRequest ? (
@@ -353,11 +355,11 @@ export default function AiServiceFinderAdminPage() {
                 onClick={() => { setBudgetRequestOpen(true); setBudgetRequestError(null); }}
                 className="rounded-lg border border-[#6355E4] px-3 py-1.5 text-xs font-semibold text-[#6355E4] hover:bg-[#6355E4]/5"
               >
-                Mehr KI-Kapazität anfragen
+                {s.requestMoreBudgetBtn}
               </button>
             ) : (
               <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
-                Anfrage über {overview.pendingBudgetRequest.requestedBudgetUsd?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) ?? '–'} $ liegt vor
+                {fillTemplate(s.pendingRequestTemplate, { amount: overview.pendingBudgetRequest.requestedBudgetUsd?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) ?? '–' })}
               </span>
             )}
           </div>
@@ -368,7 +370,7 @@ export default function AiServiceFinderAdminPage() {
             />
           </div>
           {overview.budget.isHardCapped && (
-            <p className="text-xs text-red-600">Budget aufgebraucht — die KI-Features laufen bis zur nächsten Periode automatisch ohne KI weiter.</p>
+            <p className="text-xs text-red-600">{s.budgetCappedWarning}</p>
           )}
         </section>
       )}
@@ -376,22 +378,22 @@ export default function AiServiceFinderAdminPage() {
       {budgetRequestOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => !submittingBudgetRequest && setBudgetRequestOpen(false)}>
           <div className="w-full max-w-sm rounded-xl bg-white p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-base font-semibold text-[#14162B]">Mehr KI-Kapazität anfragen</h3>
-            <p className="text-xs text-gray-500">Wir melden uns mit einer Rückmeldung. Der monatliche Preis kann sich dabei anpassen.</p>
+            <h3 className="text-base font-semibold text-[#14162B]">{s.requestMoreBudgetBtn}</h3>
+            <p className="text-xs text-gray-500">{s.budgetModalDesc}</p>
             <label className="block text-sm font-medium text-gray-700">
-              Gewünschtes Monatsbudget ($)
+              {s.desiredBudgetLabel}
               <input
                 type="number"
                 min={0}
                 step={0.01}
                 value={budgetRequestAmount}
                 onChange={(e) => setBudgetRequestAmount(e.target.value)}
-                placeholder="z.B. 50.00"
+                placeholder={s.budgetAmountPlaceholder}
                 className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
               />
             </label>
             <label className="block text-sm font-medium text-gray-700">
-              Nachricht (optional)
+              {s.messageOptionalLabel}
               <textarea
                 value={budgetRequestNote}
                 onChange={(e) => setBudgetRequestNote(e.target.value)}
@@ -401,9 +403,9 @@ export default function AiServiceFinderAdminPage() {
             </label>
             {budgetRequestError && <p className="text-sm text-red-600">{budgetRequestError}</p>}
             <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => setBudgetRequestOpen(false)} disabled={submittingBudgetRequest} className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">Abbrechen</button>
+              <button type="button" onClick={() => setBudgetRequestOpen(false)} disabled={submittingBudgetRequest} className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100">{t.cancel}</button>
               <button type="button" onClick={handleSubmitBudgetRequest} disabled={submittingBudgetRequest} className="rounded-lg bg-[#6355E4] px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">
-                {submittingBudgetRequest ? 'Wird gesendet…' : 'Anfrage senden'}
+                {submittingBudgetRequest ? s.sendingEllipsis : s.sendRequestBtn}
               </button>
             </div>
           </div>
@@ -412,21 +414,19 @@ export default function AiServiceFinderAdminPage() {
 
       <section id="section-profile" className="rounded-xl border border-gray-200 bg-white p-4 space-y-4 scroll-mt-6">
         <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
-          Branchenprofil
+          {s.navProfile}
           <InfoTooltip text={
             <>
-              Bestimmt, welche Fähigkeiten (z.B. Terminarten) für deine Branche zur Verfügung stehen.
+              {s.profileTooltipPart1}
               <br /><br />
-              <strong>&quot;Finder öffentlich anzeigen&quot;</strong> ist der eigentliche An/Aus-Schalter: nur wenn
-              dieses Häkchen gesetzt ist, sehen deine Kund:innen den Finder auf der Buchungsseite. Erst aktivieren,
-              wenn Fragen und Regeln fertig eingerichtet sind.
+              <strong>{s.profileTooltipBold}</strong>{s.profileTooltipPart2}
             </>
           } />
         </h2>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Hauptbranche</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{s.mainIndustryLabel}</label>
             <select
               value={settings?.primaryIndustryProfileId ?? ''}
               onChange={(event) => {
@@ -436,7 +436,7 @@ export default function AiServiceFinderAdminPage() {
               }}
               className="w-full rounded-lg border border-gray-300 px-3 py-2"
             >
-              <option value="">Bitte waehlen</option>
+              <option value="">{s.pleaseChooseOption}</option>
               {profiles.map((profile) => (
                 <option key={profile.id} value={profile.id}>{profile.name}</option>
               ))}
@@ -452,12 +452,12 @@ export default function AiServiceFinderAdminPage() {
                 setSettings((prev) => prev ? { ...prev, isFinderEnabled: event.target.checked } : null);
               }}
             />
-            <label htmlFor="finder-enabled" className="text-sm text-gray-700">Finder oeffentlich anzeigen</label>
+            <label htmlFor="finder-enabled" className="text-sm text-gray-700">{s.showFinderPubliclyLabel}</label>
           </div>
         </div>
 
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">Aktive Faehigkeiten</p>
+          <p className="text-sm font-medium text-gray-700 mb-2">{s.activeCapabilitiesLabel}</p>
           <div className="grid gap-2 md:grid-cols-3">
             {(selectedProfile?.capabilities ?? []).map((capability) => {
               const checked = settings?.enabledCapabilities.includes(capability.capabilityKey) ?? false;
@@ -488,93 +488,91 @@ export default function AiServiceFinderAdminPage() {
           disabled={savingSettings || !settings}
           className="rounded-lg bg-[#6355E4] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
         >
-          {savingSettings ? 'Speichern...' : 'Branchenprofil speichern'}
+          {savingSettings ? s.savingDotsEllipsis : s.saveProfileBtn}
         </button>
       </section>
 
       <JsonEditorCard
         id="section-questions"
-        title="Finder-Fragen"
+        title={s.navQuestions}
         value={questionsJson}
         onChange={setQuestionsJson}
         onSave={() => void saveQuestions()}
         saving={savingQuestions}
         tooltip={
           <>
-            Die Fragen, die Kund:innen im Finder-Assistenten beantworten (in der Reihenfolge von <code>displayOrder</code>).
+            {s.qTooltipIntroPre} <code>displayOrder</code>{s.qTooltipIntroPost}
             <br /><br />
-            <strong>answerType</strong>: funktionieren direkt: <code>SingleChoice</code>, <code>MultiChoice</code>
-            (Optionen über <code>configJson: {`{"options":["Option A","Option B"]}`}</code>), <code>YesNo</code>,
+            <strong>answerType</strong>: {s.qAnswerTypeIntro} <code>SingleChoice</code>, <code>MultiChoice</code>
+            {' '}{s.qOptionsViaPrefix} <code>configJson: {`{"options":["Option A","Option B"]}`}</code>), <code>YesNo</code>,
             <code> Number</code>, <code>FreeText</code>, <code>DateRange</code>, <code>PriceRange</code>,
-            <code> DurationRange</code>. <em>Noch nicht unterstützt:</em> <code>EmployeeChoice</code>,{' '}
-            <code>ImageUpload</code> (werden im Finder als &quot;bald verfügbar&quot; angezeigt).
+            <code> DurationRange</code>. <em>{s.qNotYetSupportedLabel}</em> <code>EmployeeChoice</code>,{' '}
+            <code>ImageUpload</code> {s.qComingSoonNote}
             <br /><br />
-            <code>questionKey</code> muss pro Frage eindeutig sein — wird in den Regeln unten referenziert.
-            <code> isActive: false</code> blendet eine Frage aus, ohne sie zu löschen.
+            <code>questionKey</code> {s.qKeyUniqueNote}
+            <code> isActive: false</code> {s.qActiveFalseNote}
           </>
         }
       />
 
       <JsonEditorCard
         id="section-rules"
-        title="Service-Regeln"
+        title={s.navRules}
         value={rulesJson}
         onChange={setRulesJson}
         onSave={() => void saveRules()}
         saving={savingRules}
         tooltip={
           <>
-            Verknüpft Antworten mit einem Service — das Herzstück der Empfehlung. Keine KI, sondern feste Regeln,
-            die du selbst definierst.
+            {s.rTooltipIntro}
             <br /><br />
-            <strong>conditionJson</strong> (wann greift die Regel):{' '}
-            <code>{`{"questionKey":"anlass","operator":"equals","value":"hochzeit"}`}</code>. Operatoren:
-            equals, notEquals, contains, in, exists, greaterThan, lessThan. Mehrere Bedingungen kombinieren mit{' '}
-            <code>{`{"all":[...]}`}</code> (alle müssen zutreffen) oder <code>{`{"any":[...]}`}</code> (mind. eine).
+            <strong>conditionJson</strong> {s.rConditionIntro}{' '}
+            <code>{`{"questionKey":"anlass","operator":"equals","value":"hochzeit"}`}</code>. {s.rOperatorsIntro}
+            {' '}equals, notEquals, contains, in, exists, greaterThan, lessThan. {s.rCombineIntro}{' '}
+            <code>{`{"all":[...]}`}</code> {s.rCombineAllNote} <code>{`{"any":[...]}`}</code> {s.rCombineAnyNote}
             <br /><br />
-            <strong>resultJson</strong> (was passiert bei Treffer): <code>{`{"score":10}`}</code> erhöht die
-            Trefferwertung des Service, <code>{`{"exclude":true}`}</code> schließt ihn aus. Ohne{' '}
-            <code>serviceIds</code> im Result gilt die Regel für den in <code>serviceId</code> gewählten Service.
+            <strong>resultJson</strong> {s.rResultIntro} <code>{`{"score":10}`}</code> {s.rScoreNote}{' '}
+            <code>{`{"exclude":true}`}</code> {s.rExcludeNote}{' '}
+            <code>serviceIds</code> {s.rServiceIdsNote} <code>serviceId</code> {s.rServiceIdNote}
             <br /><br />
-            Mit &quot;Finder testen&quot; unten kannst du das Ergebnis vor der Veröffentlichung prüfen.
+            {s.rTestNote}
           </>
         }
       />
 
       <JsonEditorCard
         id="section-guidance"
-        title="Kundenhinweise"
+        title={s.navGuidance}
         value={guidanceJson}
         onChange={setGuidanceJson}
         onSave={() => void saveGuidance()}
         saving={savingGuidance}
         tooltip={
           <>
-            Zusätzliche Infotexte (z.B. Vorbereitungshinweise), die Kund:innen angezeigt werden, wenn der
-            zugehörige <code>serviceId</code>-Service empfohlen wird.
+            {s.gTooltipIntro}{' '}
+            <code>serviceId</code>{s.gTooltipServiceIdNote}
             <br /><br />
-            Wird nur angezeigt, wenn <code>isActive: true</code> und <code>approvalStatus: &quot;Approved&quot;</code>{' '}
-            gesetzt sind (optional zeitlich begrenzbar über <code>validFrom</code>/<code>validTo</code>).
+            {s.gTooltipShownOnlyIntro} <code>isActive: true</code> {s.gTooltipAndNote} <code>approvalStatus: &quot;Approved&quot;</code>{' '}
+            {s.gTooltipSetNote} <code>validFrom</code>/<code>validTo</code>{s.gTooltipValidToNote}
           </>
         }
       />
 
       <section id="section-test" className="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-6">
         <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
-          Finder testen
+          {s.navTest}
           <InfoTooltip text={
             <>
-              Simuliert einen Kunden-Durchlauf mit von dir eingegebenen Beispielantworten, ohne dass etwas live
-              auf der Buchungsseite passiert — sicher zum Ausprobieren.
+              {s.testTooltipPart1}
               <br /><br />
-              Format: <code>{`[{"key":"anlass","value":"hochzeit"}]`}</code> — der <code>key</code> muss einem{' '}
-              <code>questionKey</code> aus den Finder-Fragen entsprechen.
+              {s.testTooltipFormatIntro} <code>{`[{"key":"anlass","value":"hochzeit"}]`}</code> {s.testTooltipKeyNote} <code>key</code> {s.testTooltipMustMatch}{' '}
+              <code>questionKey</code> {s.testTooltipFromQuestions}
             </>
           } />
         </h2>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Antworten (JSON)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{s.answersJsonLabel}</label>
           <textarea
             value={answerJson}
             onChange={(event) => setAnswerJson(event.target.value)}
@@ -583,12 +581,12 @@ export default function AiServiceFinderAdminPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Optionaler Freitext</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{s.freeTextLabel}</label>
           <input
             value={freeText}
             onChange={(event) => setFreeText(event.target.value)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-            placeholder="z.B. ich bin Erstkundin und unsicher"
+            placeholder={s.freeTextPlaceholder}
           />
         </div>
 
@@ -597,15 +595,15 @@ export default function AiServiceFinderAdminPage() {
           disabled={previewing}
           className="rounded-lg bg-[#17A398] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
         >
-          {previewing ? 'Teste...' : 'Preview ausfuehren'}
+          {previewing ? s.testingEllipsis : s.runPreviewBtn}
         </button>
 
         {preview && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
-            <p className="text-sm text-gray-700"><strong>Antwort:</strong> {preview.message}</p>
-            <p className="text-sm text-gray-700"><strong>Empfehlungen:</strong> {preview.recommendations.map((r) => r.serviceName).join(', ') || 'Keine'}</p>
-            <p className="text-sm text-gray-700"><strong>Fehlende Fragen:</strong> {preview.missingQuestions.map((q) => q.questionText).join(', ') || 'Keine'}</p>
-            <p className="text-sm text-gray-700"><strong>Fallback:</strong> {preview.usedAiFallback ? 'Ja' : 'Nein'}</p>
+            <p className="text-sm text-gray-700"><strong>{s.previewAnswerLabel}</strong> {preview.message}</p>
+            <p className="text-sm text-gray-700"><strong>{s.previewRecommendationsLabel}</strong> {preview.recommendations.map((r) => r.serviceName).join(', ') || s.previewNoneFallback}</p>
+            <p className="text-sm text-gray-700"><strong>{s.previewMissingQuestionsLabel}</strong> {preview.missingQuestions.map((q) => q.questionText).join(', ') || s.previewNoneFallback}</p>
+            <p className="text-sm text-gray-700"><strong>{s.previewFallbackLabel}</strong> {preview.usedAiFallback ? t.yes : t.no}</p>
           </div>
         )}
       </section>
@@ -642,6 +640,8 @@ function JsonEditorCard({
   saving: boolean;
   tooltip?: ReactNode;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.aiServiceFinderPage;
   return (
     <section id={id} className="rounded-xl border border-gray-200 bg-white p-4 space-y-3 scroll-mt-6">
       <h2 className="text-lg font-semibold text-[#14162B] flex items-center gap-1.5">
@@ -658,7 +658,7 @@ function JsonEditorCard({
         disabled={saving}
         className="rounded-lg bg-[#6355E4] text-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
       >
-        {saving ? 'Speichern...' : 'Speichern'}
+        {saving ? s.savingDotsEllipsis : t.save}
       </button>
     </section>
   );

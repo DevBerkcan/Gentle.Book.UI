@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Eye, X } from "lucide-react";
 import type { BrandPreviewOverride } from "./types";
 import { BRAND_PREVIEW_MESSAGE_TYPE } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function MobilePreviewModal({
   open, onClose, previewUrl, previewKey, brandPreviewOverride,
@@ -17,6 +18,8 @@ export function MobilePreviewModal({
   previewKey: number;
   brandPreviewOverride?: BrandPreviewOverride | null;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const postOverride = () => {
@@ -43,7 +46,7 @@ export function MobilePreviewModal({
           >
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#F3F4F6]">
               <p className="font-semibold text-sm text-[#111318] flex items-center gap-2">
-                <Eye size={13} className="text-[#6355E4]" />Live-Vorschau
+                <Eye size={13} className="text-[#6355E4]" />{s.livePreviewLabel}
               </p>
               <button onClick={onClose}
                 className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
@@ -55,7 +58,7 @@ export function MobilePreviewModal({
                 src={`${previewUrl}?v=${previewKey}`}
                 onLoad={postOverride}
                 className="w-full h-full" style={{ border: "none", height: "100%" }}
-                title="Buchungsseite Vorschau" />
+                title={s.bookingPagePreviewTitle} />
             </div>
           </motion.div>
         </motion.div>

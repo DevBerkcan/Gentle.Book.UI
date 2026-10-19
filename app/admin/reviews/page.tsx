@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { Star, TrendingUp, AlertTriangle, Eye, EyeOff, MessageSquareOff } from "lucide-react";
 import { adminApi, type AdminReview } from "@/lib/api/admin";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 function StarRow({ rating }: { rating: number }) {
   return (
@@ -21,6 +22,9 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export default function AdminReviewsPage() {
+  const { t, lang } = useTranslation();
+  const s = t.admin.reviewsPage;
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
   const [reviews, setReviews] = useState<AdminReview[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +48,7 @@ export default function AdminReviewsPage() {
           requiredPlan: err.response.data.requiredPlan,
         });
       } else {
-        setError(err.response?.data?.message || err.message || "Fehler beim Laden der Bewertungen");
+        setError(err.response?.data?.message || err.message || s.loadReviewsError);
       }
     } finally { setLoading(false); }
   }
@@ -76,18 +80,18 @@ export default function AdminReviewsPage() {
           <div className="w-12 h-12 bg-[#EEEBFC] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Star size={20} className="text-[#6355E4]" />
           </div>
-          <h2 className="text-lg font-bold text-[#111318] mb-2">Bewertungen</h2>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
             <p className="text-xs text-[#9CA3AF] mb-3">
-              Dein aktueller Tarif: <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
+              {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
           <p className="text-sm text-[#6B7280] mb-6">
-            {upgradeInfo.message ?? "Automatische Bewertungsanfragen sind in deinem aktuellen Tarif nicht enthalten."}
+            {upgradeInfo.message ?? s.upgradeDefaultMessage}
           </p>
           <a href="/admin/subscription"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors">
-            <TrendingUp size={15} /> Jetzt upgraden
+            <TrendingUp size={15} /> {s.upgradeNowBtn}
           </a>
         </div>
       </div>
@@ -101,8 +105,8 @@ export default function AdminReviewsPage() {
           <div className="w-11 h-11 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={18} className="text-[#991B1B]" />
           </div>
-          <p className="font-semibold text-[#111318] mb-1">Fehler beim Laden</p>
-          <p className="text-sm text-[#6B7280]">{error || "Unbekannter Fehler"}</p>
+          <p className="font-semibold text-[#111318] mb-1">{s.loadErrorTitle}</p>
+          <p className="text-sm text-[#6B7280]">{error || s.unknownError}</p>
         </div>
       </div>
     );
@@ -118,26 +122,26 @@ export default function AdminReviewsPage() {
       <div className="max-w-4xl mx-auto space-y-5">
 
         <div>
-          <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">Bewertungen</h1>
+          <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">{s.pageTitle}</h1>
           <p className="text-sm text-[#6B7280] mt-0.5">
-            Kunden werden nach einem abgeschlossenen Termin automatisch um eine Bewertung gebeten.
+            {s.pageSubtitle}
           </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">Gesamt</p>
+            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statTotal}</p>
             <p className="text-2xl font-bold text-[#111318]">{reviews.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">Ø Bewertung</p>
+            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statAverageRating}</p>
             <div className="flex items-center gap-2">
               <p className="text-2xl font-bold text-[#111318]">{averageRating}</p>
               <Star size={16} className="text-amber-400" fill="currentColor" />
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">Veröffentlicht</p>
+            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statPublished}</p>
             <p className="text-2xl font-bold text-[#111318]">{publishedCount}</p>
           </div>
         </div>
@@ -148,8 +152,8 @@ export default function AdminReviewsPage() {
               <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <MessageSquareOff size={20} className="text-[#D1D5DB]" />
               </div>
-              <p className="text-sm font-medium text-[#374151]">Noch keine Bewertungen</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">Sobald Termine abgeschlossen werden, gehen hier Bewertungen ein.</p>
+              <p className="text-sm font-medium text-[#374151]">{s.noReviewsYet}</p>
+              <p className="text-xs text-[#9CA3AF] mt-1">{s.noReviewsYetDesc}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
@@ -159,7 +163,7 @@ export default function AdminReviewsPage() {
                     <div className="flex items-center gap-3 mb-1.5">
                       <StarRow rating={review.rating} />
                       <span className="text-xs text-[#9CA3AF]">
-                        {new Date(review.createdAt).toLocaleDateString("de-DE")}
+                        {new Date(review.createdAt).toLocaleDateString(dateLocale)}
                       </span>
                     </div>
                     <p className="text-sm font-semibold text-[#111318]">
@@ -179,7 +183,7 @@ export default function AdminReviewsPage() {
                     }`}
                   >
                     {review.isPublished ? <Eye size={13} /> : <EyeOff size={13} />}
-                    {review.isPublished ? "Veröffentlicht" : "Verborgen"}
+                    {review.isPublished ? s.published : s.hidden}
                   </button>
                 </div>
               ))}

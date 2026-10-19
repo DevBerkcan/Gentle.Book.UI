@@ -10,7 +10,7 @@ import { AuthProvider, useAuth } from '@/lib/contexts/AuthContext';
 import { MessageCircle, Mail, LockKeyhole, Check, ArrowRight, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api/client';
-import { LanguageProvider, useTranslation } from '@/lib/i18n/LanguageContext';
+import { LanguageProvider, useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
 import { supportConfig } from '@/lib/config';
 import { isSafeAdminRedirectPath } from '@/lib/auth/redirect';
 
@@ -44,14 +44,14 @@ function TrialExpiredModal() {
 
           <div className="px-6 pb-5">
             <p className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-white/65">
-              Es wurde kein kostenpflichtiges Abonnement abgeschlossen und es erfolgen keine automatischen Abbuchungen. Wählen Sie jetzt ein Monats- oder Jahresabo, um GentleBook und Ihre Buchungsseite wieder zu aktivieren. Ihre Daten bleiben 30 Tage gespeichert und können auf Anfrage exportiert werden.
+              {t.admin.trialExpiredBody}
             </p>
             <Link href="/admin/subscription" className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#6355E4] px-5 py-3 text-sm font-semibold text-white hover:bg-[#5646D6]">
-              Tarif auswählen <ArrowRight size={15} />
+              {t.admin.selectPlanBtn} <ArrowRight size={15} />
             </Link>
             <div className="mt-3 flex gap-2.5">
                 <a
-                  href={supportConfig.whatsappUrl("Hallo, ich möchte GentleBook upgraden")}
+                  href={supportConfig.whatsappUrl(t.admin.upgradeWhatsappMessage)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white transition-all hover:opacity-90"
@@ -63,14 +63,14 @@ function TrialExpiredModal() {
                   href={supportConfig.mailto("Upgrade GentleBook")}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-sm text-white border border-white/15 transition-all hover:bg-white/10"
                 >
-                  <Mail size={14} /> E-Mail
+                  <Mail size={14} /> {t.admin.email}
                 </a>
             </div>
           </div>
 
           <div className="px-6 pb-6 text-center">
             <Link href="/admin/subscription" className="text-xs text-white/30 hover:text-white/60 transition-colors inline-flex items-center gap-1">
-              Keine automatische kostenpflichtige Verlängerung
+              {t.admin.noAutoRenewalNote}
             </Link>
           </div>
         </div>
@@ -80,19 +80,20 @@ function TrialExpiredModal() {
 }
 
 function TrialBanner({ daysLeft }: { daysLeft: number }) {
+  const { t } = useTranslation();
   const isUrgent = daysLeft <= 3;
   const bg      = isUrgent ? 'bg-red-500' : 'bg-amber-500';
   return (
     <div className={`${bg} px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap`}>
       <p className="text-white text-sm font-medium">
         {isUrgent ? '⚠️' : '⏰'}{' '}
-        Noch <strong>{daysLeft} Tag{daysLeft !== 1 ? 'e' : ''}</strong> in Ihrer kostenlosen Testphase
+        {t.admin.trialBannerPre}<strong>{fillTemplate(daysLeft === 1 ? t.admin.trialBannerBold_one : t.admin.trialBannerBold_other, { days: daysLeft })}</strong>{t.admin.trialBannerPost}
       </p>
       <Link
         href="/admin/subscription"
         className="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
       >
-        Jetzt upgraden <ArrowRight size={12} />
+        {t.admin.upgradeNow} <ArrowRight size={12} />
       </Link>
     </div>
   );

@@ -15,6 +15,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export interface SettingsNavItem {
   id: string;
@@ -24,6 +25,7 @@ export interface SettingsNavItem {
 const STICK_TOP = 24;
 
 export function SettingsNav({ items }: { items: SettingsNavItem[] }) {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const observerRef = useRef<IntersectionObserver | null>(null);
   const placeholderRef = useRef<HTMLDivElement>(null);
@@ -89,7 +91,7 @@ export function SettingsNav({ items }: { items: SettingsNavItem[] }) {
         className="max-h-[calc(100vh-3rem)] overflow-y-auto"
         style={fixedPos ? { position: "fixed", top: STICK_TOP, left: fixedPos.left, width: fixedPos.width } : undefined}
       >
-        <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide px-3 mb-1.5">Auf dieser Seite</p>
+        <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide px-3 mb-1.5">{t.admin.settingsPage.onThisPage}</p>
         <ul className="space-y-0.5">
           {items.map((item) => {
             const isActive = item.id === activeId;

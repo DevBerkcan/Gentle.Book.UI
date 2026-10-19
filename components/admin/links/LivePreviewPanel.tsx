@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { ExternalLink, Loader2, Smartphone, Tablet, Monitor } from "lucide-react";
 import type { BrandPreviewOverride, PreviewDevice } from "./types";
 import { BRAND_PREVIEW_MESSAGE_TYPE } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 const PREVIEW_DEVICE_STYLE: Record<PreviewDevice, { width: string; label: string }> = {
   mobile: { width: "390px", label: "Mobile" },
@@ -24,6 +25,8 @@ export function LivePreviewPanel({
   /** When set, posted into the preview iframe so it renders an unsaved AI Brand Import proposal (spec section 17). */
   brandPreviewOverride?: BrandPreviewOverride | null;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const postOverride = () => {
@@ -49,7 +52,7 @@ export function LivePreviewPanel({
             <div className="w-2.5 h-2.5 rounded-full bg-[#29C940]" />
           </div>
           <div className="h-4 w-px bg-[#D1D5DB] mx-1" />
-          <span className="text-xs font-semibold text-[#6B7280]">Live-Vorschau</span>
+          <span className="text-xs font-semibold text-[#6B7280]">{s.livePreviewLabel}</span>
           {designSaving && <Loader2 size={11} className="animate-spin text-[#6355E4]" />}
         </div>
         <div className="flex items-center gap-2">
@@ -69,7 +72,7 @@ export function LivePreviewPanel({
           </div>
           <a href={previewUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs font-medium text-[#6B7280] hover:text-[#111318] transition-colors bg-white border border-[#E5E7EB] shadow-sm px-2.5 py-1.5 rounded-xl">
-            <ExternalLink size={11} />Öffnen
+            <ExternalLink size={11} />{s.openBtn}
           </a>
         </div>
       </div>
@@ -89,7 +92,7 @@ export function LivePreviewPanel({
               src={`${previewUrl}?v=${previewKey}`}
               onLoad={postOverride}
               className="w-full h-full" style={{ border: "none", minHeight: "100%" }}
-              title="Buchungsseite Vorschau" />
+              title={s.bookingPagePreviewTitle} />
           </div>
         </div>
       </div>

@@ -12,20 +12,21 @@ import {
 import api from '@/lib/api/client';
 import { getAdminCategories, createAdminCategory, createAdminService, bulkAssignServicesToEmployee } from '@/lib/api/admin-services';
 import { toast } from 'sonner';
+import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
+import type { Translations } from '@/lib/i18n/translations';
 
-const DAYS = [
-  { value: 1, label: 'Mo' }, { value: 2, label: 'Di' }, { value: 3, label: 'Mi' },
-  { value: 4, label: 'Do' }, { value: 5, label: 'Fr' }, { value: 6, label: 'Sa' },
-  { value: 0, label: 'So' },
-];
+const DAY_VALUES = [1, 2, 3, 4, 5, 6, 0];
 
-const STEPS = [
-  { icon: Building2, title: 'Firmenprofil',     desc: 'Name, Slogan & Farbe Ihres Studios' },
-  { icon: Clock,     title: 'Öffnungszeiten',   desc: 'Wann sind Sie erreichbar?' },
-  { icon: Scissors, title: 'Erster Service',    desc: 'Welchen Service bieten Sie an?' },
-  { icon: Users,     title: 'Erster Mitarbeiter', desc: 'Wer arbeitet in Ihrem Studio?' },
-  { icon: PartyPopper, title: 'Fertig!',         desc: 'Ihr Studio ist bereit für Buchungen' },
-];
+function getSteps(t: Translations) {
+  const s = t.admin.onboardingPage;
+  return [
+    { icon: Building2, title: s.step1Title, desc: s.step1Desc },
+    { icon: Clock,     title: s.step2Title, desc: s.step2Desc },
+    { icon: Scissors,  title: s.step3Title, desc: s.step3Desc },
+    { icon: Users,     title: s.step4Title, desc: s.step4Desc },
+    { icon: PartyPopper, title: s.step5Title, desc: s.step5Desc },
+  ];
+}
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
@@ -34,6 +35,10 @@ const slideVariants = {
 };
 
 export default function OnboardingPage() {
+  const { t } = useTranslation();
+  const s = t.admin.onboardingPage;
+  const STEPS = getSteps(t);
+  const DAYS = DAY_VALUES.map((v, i) => ({ value: v, label: t.admin.blockedSlotsPage.weekdayShort[i] }));
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
@@ -119,7 +124,7 @@ export default function OnboardingPage() {
         navigate(4);
       }
     } catch (e: any) {
-      toast.error(e.response?.data?.message || 'Fehler beim Speichern');
+      toast.error(e.response?.data?.message || s.errSaveFallback);
     } finally {
       setSaving(false);
     }
@@ -141,18 +146,18 @@ export default function OnboardingPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-[#1E1E1E]">Studio einrichten</h1>
+          <h1 className="text-2xl font-bold text-[#1E1E1E]">{s.headerTitle}</h1>
           <p className="text-[#8A8A8A] text-sm mt-1">
-            Schritt {Math.min(step + 1, 5)} von 5 — {STEPS[step]?.desc}
+            {fillTemplate(s.stepOfTemplate, { current: Math.min(step + 1, 5), desc: STEPS[step]?.desc ?? '' })}
           </p>
         </div>
 
         {/* Progress bar */}
         <div className="flex items-center gap-1.5 mb-8">
-          {STEPS.map((s, i) => {
+          {STEPS.map((stp, i) => {
             const done = i < step;
             const active = i === step;
-            const Icon = s.icon;
+            const Icon = stp.icon;
             return (
               <div key={i} className="flex items-center flex-1">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold shrink-0 transition-all ${
@@ -191,20 +196,20 @@ export default function OnboardingPage() {
               {step === 0 && (
                 <div className="space-y-4">
                   <Input
-                    label="Studioname *"
-                    placeholder="z.B. Beauty Studio München"
+                    label={s.studioNameLabel}
+                    placeholder={s.studioNamePlaceholder}
                     value={company.companyName}
                     onChange={e => setCompany(p => ({ ...p, companyName: e.target.value }))}
                     isRequired
                   />
                   <Input
-                    label="Slogan (optional)"
-                    placeholder="z.B. Ihr Wohlfühlsalon im Herzen der Stadt"
+                    label={s.taglineLabel}
+                    placeholder={s.taglinePlaceholder}
                     value={company.tagline}
                     onChange={e => setCompany(p => ({ ...p, tagline: e.target.value }))}
                   />
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">Akzentfarbe</label>
+                    <label className="text-sm font-medium text-gray-700 mb-1.5 block">{s.accentColorLabel}</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -247,7 +252,7 @@ export default function OnboardingPage() {
                                 className="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-white" />
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400">Geschlossen</span>
+                            <span className="text-xs text-gray-400">{s.closedLabel}</span>
                           )}
                         </div>
                       </div>
@@ -260,22 +265,22 @@ export default function OnboardingPage() {
               {step === 2 && (
                 <div className="space-y-4">
                   <Input
-                    label="Servicename *"
-                    placeholder="z.B. Gesichtsbehandlung Classic"
+                    label={s.serviceNameLabel}
+                    placeholder={s.serviceNamePlaceholder}
                     value={service.name}
                     onChange={e => setService(p => ({ ...p, name: e.target.value }))}
                     isRequired
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <Input
-                      label="Dauer (Minuten) *"
+                      label={s.durationMinutesLabel}
                       type="number"
                       value={String(service.durationMinutes)}
                       onChange={e => setService(p => ({ ...p, durationMinutes: parseInt(e.target.value) || 60 }))}
                       min={15}
                     />
                     <Input
-                      label="Preis (€)"
+                      label={s.priceLabel}
                       type="number"
                       value={String(service.price)}
                       onChange={e => setService(p => ({ ...p, price: parseFloat(e.target.value) || 0 }))}
@@ -283,8 +288,8 @@ export default function OnboardingPage() {
                     />
                   </div>
                   <Input
-                    label="Kategorie (optional)"
-                    placeholder="z.B. Gesicht, Körper, Haare"
+                    label={s.categoryLabel}
+                    placeholder={s.categoryPlaceholder}
                     value={service.categoryName}
                     onChange={e => setService(p => ({ ...p, categoryName: e.target.value }))}
                   />
@@ -295,30 +300,30 @@ export default function OnboardingPage() {
               {step === 3 && (
                 <div className="space-y-4">
                   <Input
-                    label="Name *"
-                    placeholder="z.B. Anna Meier"
+                    label={s.employeeNameLabel}
+                    placeholder={s.employeeNamePlaceholder}
                     value={employee.name}
                     onChange={e => setEmployee(p => ({ ...p, name: e.target.value }))}
                     isRequired
                   />
                   <Input
-                    label="Rolle / Berufsbezeichnung *"
-                    placeholder="z.B. Kosmetikerin"
+                    label={s.roleLabel}
+                    placeholder={s.rolePlaceholder}
                     value={employee.role}
                     onChange={e => setEmployee(p => ({ ...p, role: e.target.value }))}
                     isRequired
                   />
                   <Input
-                    label="Benutzername *"
-                    placeholder="z.B. anna.meier"
+                    label={s.usernameLabel}
+                    placeholder={s.usernamePlaceholder}
                     value={employee.username}
                     onChange={e => setEmployee(p => ({ ...p, username: e.target.value }))}
                     isRequired
                   />
                   <Input
-                    label="Passwort *"
+                    label={s.passwordLabel}
                     type="password"
-                    placeholder="Mindestens 6 Zeichen"
+                    placeholder={s.passwordPlaceholder}
                     value={employee.password}
                     onChange={e => setEmployee(p => ({ ...p, password: e.target.value }))}
                     isRequired
@@ -333,10 +338,9 @@ export default function OnboardingPage() {
                     <PartyPopper size={36} className="text-[#6355E4]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-[#1E1E1E] mb-2">Herzlichen Glückwunsch! 🎉</h3>
+                    <h3 className="text-xl font-bold text-[#1E1E1E] mb-2">{s.congratsTitle}</h3>
                     <p className="text-[#8A8A8A] text-sm leading-relaxed">
-                      Ihr Studio ist eingerichtet und bereit für die ersten Buchungen.
-                      Teilen Sie Ihre Buchungsseite mit Ihren Kunden!
+                      {s.congratsDesc}
                     </p>
                   </div>
                   {slug && (
@@ -347,7 +351,7 @@ export default function OnboardingPage() {
                       className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#6355E4]/10 text-[#6355E4] rounded-xl text-sm font-semibold hover:bg-[#6355E4]/20 transition-colors"
                     >
                       <ExternalLink size={15} />
-                      Buchungsseite öffnen
+                      {s.openBookingPageBtn}
                     </a>
                   )}
                   <Button
@@ -355,7 +359,7 @@ export default function OnboardingPage() {
                     size="lg"
                     onPress={() => router.push('/admin/dashboard')}
                   >
-                    Zum Dashboard
+                    {s.goToDashboardBtn}
                   </Button>
                 </div>
               )}
@@ -373,7 +377,7 @@ export default function OnboardingPage() {
                   onPress={() => navigate(step - 1)}
                   isDisabled={saving}
                 >
-                  Zurück
+                  {t.back}
                 </Button>
               ) : (
                 <div />
@@ -385,7 +389,7 @@ export default function OnboardingPage() {
                 isLoading={saving}
                 isDisabled={!canProceed()}
               >
-                {step === 3 ? 'Fertigstellen' : 'Weiter'}
+                {step === 3 ? s.finishBtn : t.next}
               </Button>
             </div>
           )}
@@ -398,7 +402,7 @@ export default function OnboardingPage() {
               onClick={() => router.push('/admin/dashboard')}
               className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Einrichtung überspringen und später fortfahren →
+              {s.skipSetupLink}
             </button>
           </div>
         )}

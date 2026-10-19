@@ -34,6 +34,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { getAccessToken } from "@/lib/auth/storage";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { formatPrice } from "@/lib/utils/currency";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const modalClassNames = {
   base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
@@ -51,6 +53,7 @@ const manualBookingModalClassNames = {
 
 export default function AdminBookingsPage() {
   const { user, employee, hasRole, isEmployee, isTenantAdmin, loading: authLoading } = useAuth();
+  const { t, lang } = useTranslation();
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']) || isTenantAdmin;
 
   const [bookings, setBookings] = useState<BookingListItem[]>([]);
@@ -247,7 +250,7 @@ export default function AdminBookingsPage() {
 
       const currentEmployee: Employee = {
         id: user.id,
-        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
+        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || t.admin.roleEmployee,
         role: user.role,
         specialty: user.specialty || null,
         location: user.location || null,
@@ -261,7 +264,7 @@ export default function AdminBookingsPage() {
     }
 
     void loadEmployees();
-  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadEmployees, loadServicesForEmployee]);
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadEmployees, loadServicesForEmployee, t]);
 
   useEffect(() => {
     if (bookingForm.serviceId && bookingForm.bookingDate && selectedEmployeeId) {
@@ -343,7 +346,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
       onStatusModalClose();
     } catch (err: any) {
-      toast.error("Fehler beim Aktualisieren: " + err.message);
+      toast.error(t.admin.bookingsPage.updateErrorPrefix + err.message);
     } finally {
       setUpdating(false);
     }
@@ -358,7 +361,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
       onDeleteModalClose();
     } catch (err: any) {
-      toast.error("Fehler beim Löschen: " + err.message);
+      toast.error(t.admin.bookingsPage.deleteErrorPrefix + err.message);
     } finally {
       setDeleting(false);
     }
@@ -377,7 +380,7 @@ export default function AdminBookingsPage() {
     try {
       const selectedService = employeeServices.find(s => s.id === bookingForm.serviceId) ||
         services.find(s => s.id === bookingForm.serviceId);
-      if (!selectedService) throw new Error("Service nicht gefunden");
+      if (!selectedService) throw new Error(t.admin.calendarPage.serviceNotFound);
 
       const availabilityCheck = await getAvailability(
         bookingForm.serviceId,
@@ -388,7 +391,7 @@ export default function AdminBookingsPage() {
       const isSlotAvailable = availabilityCheck.availableSlots?.some(
         slot => slot.startTime === bookingForm.startTime && slot.isAvailable
       );
-      if (!isSlotAvailable) throw new Error("Dieser Zeitslot ist nicht mehr verfügbar.");
+      if (!isSlotAvailable) throw new Error(t.admin.calendarPage.slotNoLongerAvailable);
 
       const bookingData: CreateManualBookingDto = {
         serviceId: bookingForm.serviceId,
@@ -429,7 +432,7 @@ export default function AdminBookingsPage() {
 
     } catch (error: any) {
       /* silent */
-      setError(error.message || "Fehler beim Erstellen der Buchung");
+      setError(error.message || t.admin.calendarPage.bookingCreateError);
     }
   }
 
@@ -442,7 +445,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
 
       if (!booking.confirmationSent && booking.customer?.email) {
-        toast.warning("Buchung erstellt, aber Bestätigungs-E-Mail konnte nicht gesendet werden.");
+        toast.warning(t.admin.bookingsPage.createdButEmailFailed);
       }
 
       setTimeout(() => {
@@ -451,7 +454,7 @@ export default function AdminBookingsPage() {
       }, 3000);
     } catch (error: any) {
       /* silent */
-      setError(error.message || "Fehler beim Erstellen der Buchung");
+      setError(error.message || t.admin.calendarPage.bookingCreateError);
     } finally {
       setSubmitting(false);
     }
@@ -471,7 +474,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
 
       if (!booking.confirmationSent && booking.customer?.email) {
-        toast.warning("Buchung erstellt, aber Bestätigungs-E-Mail konnte nicht gesendet werden.");
+        toast.warning(t.admin.bookingsPage.createdButEmailFailed);
       }
 
       // Close the conflict modal
@@ -485,7 +488,7 @@ export default function AdminBookingsPage() {
       }, 3000);
     } catch (error: any) {
       /* silent */
-      setError(error.message || "Fehler beim Erstellen der Buchung");
+      setError(error.message || t.admin.calendarPage.bookingCreateError);
     } finally {
       setSubmitting(false);
     }
@@ -499,7 +502,7 @@ export default function AdminBookingsPage() {
       setResendSuccess(true);
       setTimeout(() => setResendSuccess(false), 3000);
     } catch (err: any) {
-      toast.error("Fehler: " + (err.response?.data?.message || err.message));
+      toast.error(t.admin.bookingsPage.resendErrorPrefix + (err.response?.data?.message || err.message));
     } finally {
       setResending(false);
     }
@@ -513,7 +516,7 @@ export default function AdminBookingsPage() {
       const res = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error('Export fehlgeschlagen');
+      if (!res.ok) throw new Error(t.admin.bookingsPage.exportFailed);
       const blob = await res.blob();
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -523,7 +526,7 @@ export default function AdminBookingsPage() {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (err: any) {
-      toast.error('Export fehlgeschlagen: ' + err.message);
+      toast.error(t.admin.bookingsPage.exportFailedPrefix + err.message);
     } finally {
       setExportLoading(false);
     }
@@ -542,25 +545,26 @@ export default function AdminBookingsPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Confirmed": return "Bestätigt";
-      case "Pending": return "Ausstehend";
-      case "Completed": return "Abgeschlossen";
-      case "Cancelled": return "Storniert";
-      case "NoShow": return "Nicht erschienen";
+      case "Confirmed": return t.admin.bookingStatus.confirmed;
+      case "Pending": return t.admin.bookingStatus.pending;
+      case "Completed": return t.admin.bookingStatus.completed;
+      case "Cancelled": return t.admin.bookingStatus.cancelled;
+      case "NoShow": return t.admin.bookingStatus.noShow;
       default: return status;
     }
   };
 
   const statusOptions = [
-    { value: "", label: "Alle Status" },
-    { value: "Pending", label: "Ausstehend" },
-    { value: "Confirmed", label: "Bestätigt" },
-    { value: "Completed", label: "Abgeschlossen" },
-    { value: "Cancelled", label: "Storniert" },
-    { value: "NoShow", label: "Nicht erschienen" },
+    { value: "", label: t.admin.bookingsPage.allStatuses },
+    { value: "Pending", label: t.admin.bookingStatus.pending },
+    { value: "Confirmed", label: t.admin.bookingStatus.confirmed },
+    { value: "Completed", label: t.admin.bookingStatus.completed },
+    { value: "Cancelled", label: t.admin.bookingStatus.cancelled },
+    { value: "NoShow", label: t.admin.bookingStatus.noShow },
   ];
 
   const hasActiveFilters = !!(filter.searchTerm || filter.status || filter.fromDate || filter.toDate);
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
 
   const inputClassNames = {
     input: "text-[#1E1E1E]",
@@ -586,11 +590,11 @@ export default function AdminBookingsPage() {
         </Chip>
       </div>
       <div className="text-sm text-[#8A8A8A] space-y-1 mb-3">
-        <div>{new Date(booking.bookingDate).toLocaleDateString("de-DE")} · {booking.startTime} – {booking.endTime}</div>
+        <div>{new Date(booking.bookingDate).toLocaleDateString(dateLocale)} · {booking.startTime} – {booking.endTime}</div>
         <div>{booking.serviceName}</div>
         {booking.customerEmail
           ? <div className="break-all">{booking.customerEmail}</div>
-          : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full w-fit"><Mail size={11} />kein E-Mail</div>
+          : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full w-fit"><Mail size={11} />{t.admin.bookingsPage.noEmail}</div>
         }
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-[#ECEBF2]/20">
@@ -624,7 +628,7 @@ export default function AdminBookingsPage() {
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">Buchungsverwaltung</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">{t.admin.bookingsPage.title}</h1>
               {totalCount > 0 && (
                 <span className="bg-[#6355E4]/10 text-[#6355E4] text-sm font-semibold px-3 py-1 rounded-full">
                   {totalCount}
@@ -632,7 +636,7 @@ export default function AdminBookingsPage() {
               )}
             </div>
             <p className="text-sm text-[#8A8A8A]">
-              {isAdmin ? "Alle Buchungen verwalten (Admin)" : "Ihre persönlichen Buchungen verwalten"}
+              {isAdmin ? t.admin.bookingsPage.subtitleAdmin : t.admin.bookingsPage.subtitleOwn}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -645,7 +649,7 @@ export default function AdminBookingsPage() {
               onPress={handleExportCsv}
               isDisabled={exportLoading}
             >
-              CSV Export
+              {t.admin.bookingsPage.csvExport}
             </Button>
             <Button
               className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -655,7 +659,7 @@ export default function AdminBookingsPage() {
                 onManualBookingModalOpen();
               }}
             >
-              Buchung erstellen
+              {t.admin.calendarPage.createBooking}
             </Button>
           </div>
         </div>
@@ -666,8 +670,8 @@ export default function AdminBookingsPage() {
             <div className="grid grid-cols-5 gap-3 items-end">
               <div className="col-span-2 flex gap-2">
                 <Input
-                  label="Suchen"
-                  placeholder="Name, E-Mail, Telefon..."
+                  label={t.admin.bookingsPage.searchLabel}
+                  placeholder={t.admin.bookingsPage.searchPlaceholder}
                   startContent={<Search size={16} className="text-[#8A8A8A]" />}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
@@ -683,7 +687,7 @@ export default function AdminBookingsPage() {
               </div>
 
               <Select
-                label="Status"
+                label={t.admin.status}
                 selectedKeys={filter.status ? [filter.status] : [""]}
                 onChange={(e) => handleFilterChange("status", e.target.value)}
                 classNames={{
@@ -696,15 +700,15 @@ export default function AdminBookingsPage() {
                 ))}
               </Select>
 
-              <Input type="date" label="Von" value={filter.fromDate || ""}
+              <Input type="date" label={t.admin.bookingsPage.fromLabel} value={filter.fromDate || ""}
                 onChange={(e) => handleFilterChange("fromDate", e.target.value)} classNames={inputClassNames} />
-              <Input type="date" label="Bis" value={filter.toDate || ""}
+              <Input type="date" label={t.admin.bookingsPage.toLabel} value={filter.toDate || ""}
                 onChange={(e) => handleFilterChange("toDate", e.target.value)} classNames={inputClassNames} />
             </div>
 
             {hasActiveFilters && (
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#ECEBF2]/20">
-                <span className="text-xs text-[#8A8A8A]">Aktive Filter:</span>
+                <span className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.activeFiltersLabel}</span>
                 {filter.searchTerm && (
                   <span className="text-xs bg-[#6355E4]/10 text-[#6355E4] px-2 py-0.5 rounded-full font-medium">
                     "{filter.searchTerm}"
@@ -717,7 +721,7 @@ export default function AdminBookingsPage() {
                 )}
                 <Button size="sm" variant="flat" className="bg-red-50 text-red-500 text-xs ml-auto"
                   startContent={<X size={12} />} onPress={clearAllFilters}>
-                  Filter zurücksetzen
+                  {t.admin.bookingsPage.resetFilters}
                 </Button>
               </div>
             )}
@@ -742,7 +746,7 @@ export default function AdminBookingsPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-[#1E1E1E]">
-                        {isEditMode ? "Buchung bearbeiten" : "Buchungsdetails"}
+                        {isEditMode ? t.admin.bookingsPage.editBooking : t.admin.bookingsPage.bookingDetails}
                       </h2>
                       {selectedBookingDetails && (
                         <p className="text-xs text-[#8A8A8A]">
@@ -758,7 +762,7 @@ export default function AdminBookingsPage() {
                     <div className="space-y-4">
                       {/* Service Info */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Service</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.service}</h3>
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="font-medium text-[#1E1E1E]">{selectedBookingDetails.serviceName}</p>
@@ -777,7 +781,7 @@ export default function AdminBookingsPage() {
 
                       {/* Customer Info */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Kunde</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customer}</h3>
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
                             {selectedBookingDetails.customerName.charAt(0)}
@@ -808,7 +812,7 @@ export default function AdminBookingsPage() {
 
                       {/* Status */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Status</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.status}</h3>
                         <Chip color={getStatusColor(selectedBookingDetails.status)} size="md" variant="flat">
                           {getStatusLabel(selectedBookingDetails.status)}
                         </Chip>
@@ -820,23 +824,23 @@ export default function AdminBookingsPage() {
                       {/* Notes */}
                       {selectedBookingDetails.customerNotes && (
                         <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                          <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Notizen</h3>
+                          <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.admin.calendarPage.notes}</h3>
                           <p className="text-sm text-[#1E1E1E] italic">"{selectedBookingDetails.customerNotes}"</p>
                         </div>
                       )}
 
                       {/* Timestamps */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Zeitstempel</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.bookingsPage.timestamps}</h3>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs text-[#8A8A8A]">Erstellt am</p>
+                            <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.createdOn}</p>
                             <p className="text-sm font-semibold text-[#1E1E1E]">
                               {moment(selectedBookingDetails.createdAt).format("DD.MM.YYYY HH:mm")}
                             </p>
                           </div>
                           <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs text-[#8A8A8A]">Datum</p>
+                            <p className="text-xs text-[#8A8A8A]">{t.admin.date}</p>
                             <p className="text-sm font-semibold text-[#1E1E1E]">
                               {moment(selectedBookingDetails.bookingDate).format("DD.MM.YYYY")}
                             </p>
@@ -854,7 +858,7 @@ export default function AdminBookingsPage() {
                     startContent={<X size={14} />}
                     onPress={onModalClose}
                   >
-                    Schließen
+                    {t.close}
                   </Button>
                   {!isEditMode && selectedBookingDetails?.status !== 'Cancelled' && (
                     <Button
@@ -870,7 +874,7 @@ export default function AdminBookingsPage() {
                       isDisabled={resending}
                       onPress={() => handleResendConfirmation(selectedBookingDetails!.id)}
                     >
-                      {resendSuccess ? 'Gesendet!' : 'Bestätigung senden'}
+                      {resendSuccess ? t.admin.bookingsPage.sent : t.admin.bookingsPage.resendConfirmation}
                     </Button>
                   )}
                   {!isEditMode && (
@@ -879,7 +883,7 @@ export default function AdminBookingsPage() {
                       onPress={() => openStatusModal(selectedBookingDetails!)}
                     >
                       <Edit size={14} className="mr-2" />
-                      Status ändern
+                      {t.admin.bookingsPage.changeStatus}
                     </Button>
                   )}
                 </ModalFooter>
@@ -908,7 +912,7 @@ export default function AdminBookingsPage() {
                       <AlertTriangle size={18} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold text-[#1E1E1E]">Kunde bereits vorhanden</h2>
+                      <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.bookingsPage.customerAlreadyExists}</h2>
                     </div>
                   </div>
                 </ModalHeader>
@@ -918,34 +922,37 @@ export default function AdminBookingsPage() {
                     <div className="space-y-4">
                       <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
                         <p className="text-sm text-amber-700">
-                          Die E-Mail <strong>{conflictData.existingEmail}</strong> ist bereits dem Kunden
-                          <strong> {conflictData.existingName}</strong> der Fachkraft{' '}
-                          <strong>{employees.find(e => e.id === selectedEmployeeId)?.name}</strong> zugeordnet.
+                          {fillTemplate(t.admin.bookingsPage.emailConflictTemplate, {
+                            email: conflictData.existingEmail,
+                            name: conflictData.existingName,
+                            employee: employees.find(e => e.id === selectedEmployeeId)?.name || '',
+                          })}
                         </p>
 
                       </div>
 
                       <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
-                        <p className="text-sm text-[#1E1E1E] font-medium mb-3">Was passiert jetzt?</p>
+                        <p className="text-sm text-[#1E1E1E] font-medium mb-3">{t.admin.bookingsPage.whatHappensNow}</p>
                         <ul className="text-sm text-[#8A8A8A] space-y-3">
                           <li className="flex items-start gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
-                              Der Name des bestehenden Kunden wird von{' '}
-                              <strong className="text-[#1E1E1E]">{conflictData.existingName}</strong> zu{' '}
-                              <strong className="text-[#1E1E1E]">{conflictData.bookingData.firstName} {conflictData.bookingData.lastName}</strong> geändert.
+                              {fillTemplate(t.admin.bookingsPage.nameWillChangeTemplate, {
+                                oldName: conflictData.existingName,
+                                newName: `${conflictData.bookingData.firstName} ${conflictData.bookingData.lastName}`,
+                              })}
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
-                              Diese Änderung betrifft <strong>alle vergangenen und zukünftigen Buchungen</strong> dieses Kunden.
+                              {t.admin.bookingsPage.affectsAllBookings}
                             </span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
-                              Die Buchung wird mit den neuen Kundendaten erstellt.
+                              {t.admin.bookingsPage.bookingWillUseNewData}
                             </span>
                           </li>
                         </ul>
@@ -964,7 +971,7 @@ export default function AdminBookingsPage() {
                     }}
                     startContent={<X size={14} />}
                   >
-                    Abbrechen
+                    {t.cancel}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-lg shadow-amber-500/20"
@@ -972,7 +979,7 @@ export default function AdminBookingsPage() {
                     isLoading={submitting}
                     startContent={<Check size={14} />}
                   >
-                    Trotzdem fortfahren
+                    {t.admin.bookingsPage.proceedAnyway}
                   </Button>
                 </ModalFooter>
               </>
@@ -984,7 +991,7 @@ export default function AdminBookingsPage() {
         <div className="md:hidden mb-4 space-y-3">
           <div className="flex gap-2">
             <Input
-              placeholder="Suchen..."
+              placeholder={t.admin.bookingsPage.searchLabel + "..."}
               startContent={<Search size={16} className="text-[#8A8A8A]" />}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -997,25 +1004,25 @@ export default function AdminBookingsPage() {
             </Button>
             <Button variant="flat" className="bg-[#F6F5FA] text-[#1E1E1E]"
               startContent={<Filter size={16} />} onPress={() => setShowMobileFilters(!showMobileFilters)}>
-              Filter
+              {t.admin.filter}
             </Button>
           </div>
 
           {showMobileFilters && (
             <Card className="border border-[#ECEBF2]/30">
               <CardBody className="p-4 space-y-3">
-                <Select label="Status" selectedKeys={filter.status ? [filter.status] : [""]}
+                <Select label={t.admin.status} selectedKeys={filter.status ? [filter.status] : [""]}
                   onChange={(e) => handleFilterChange("status", e.target.value)} size="sm">
                   {statusOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                 </Select>
-                <Input type="date" label="Von Datum" value={filter.fromDate || ""}
+                <Input type="date" label={t.admin.calendarPage.fromDate} value={filter.fromDate || ""}
                   onChange={(e) => handleFilterChange("fromDate", e.target.value)} size="sm" />
-                <Input type="date" label="Bis Datum" value={filter.toDate || ""}
+                <Input type="date" label={t.admin.calendarPage.toDate} value={filter.toDate || ""}
                   onChange={(e) => handleFilterChange("toDate", e.target.value)} size="sm" />
                 {hasActiveFilters && (
                   <Button size="sm" variant="flat" className="bg-red-50 text-red-500 w-full"
                     startContent={<X size={14} />} onPress={clearAllFilters}>
-                    Alle Filter zurücksetzen
+                    {t.admin.bookingsPage.resetAllFilters}
                   </Button>
                 )}
               </CardBody>
@@ -1033,10 +1040,10 @@ export default function AdminBookingsPage() {
             ) : bookings.length === 0 ? (
               <div className="text-center py-16 text-[#8A8A8A]">
                 <Calendar className="mx-auto mb-4 text-[#ECEBF2]" size={40} />
-                <p className="font-medium">Keine Buchungen gefunden</p>
+                <p className="font-medium">{t.admin.bookingsPage.noBookingsFound}</p>
                 {hasActiveFilters && (
                   <Button size="sm" className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]" onPress={clearAllFilters}>
-                    Filter zurücksetzen
+                    {t.admin.bookingsPage.resetFilters}
                   </Button>
                 )}
               </div>
@@ -1047,7 +1054,7 @@ export default function AdminBookingsPage() {
                   <table className="w-full">
                     <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                       <tr>
-                        {["Buchungsnr.", "Datum & Zeit", "Kunde", "Service", "Status", "Preis", "Aktionen"].map(h => (
+                        {[t.admin.bookingsPage.bookingNumberHeader, t.admin.calendarPage.dateAndTime, t.admin.customer, t.admin.service, t.admin.status, t.admin.price, t.admin.actions].map(h => (
                           <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{h}</th>
                         ))}
                       </tr>
@@ -1059,17 +1066,17 @@ export default function AdminBookingsPage() {
                           className={`hover:bg-[#F6F5FA]/60 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F6F5FA]/20"}`}>
                           <td className="px-5 py-4">
                             <div className="font-mono text-xs text-[#8A8A8A]">{booking.bookingNumber}</div>
-                            <div className="text-xs text-[#8A8A8A] mt-0.5">{new Date(booking.createdAt).toLocaleDateString("de-DE")}</div>
+                            <div className="text-xs text-[#8A8A8A] mt-0.5">{new Date(booking.createdAt).toLocaleDateString(dateLocale)}</div>
                           </td>
                           <td className="px-5 py-4">
-                            <div className="font-semibold text-[#1E1E1E] text-sm">{new Date(booking.bookingDate).toLocaleDateString("de-DE")}</div>
+                            <div className="font-semibold text-[#1E1E1E] text-sm">{new Date(booking.bookingDate).toLocaleDateString(dateLocale)}</div>
                             <div className="text-xs text-[#8A8A8A]">{booking.startTime} – {booking.endTime}</div>
                           </td>
                           <td className="px-5 py-4">
                             <div className="font-semibold text-[#1E1E1E] text-sm">{booking.customerName}</div>
                             {booking.customerEmail
                               ? <div className="text-xs text-[#8A8A8A] break-all">{booking.customerEmail}</div>
-                              : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full w-fit mt-0.5"><Mail size={10} />kein E-Mail</div>
+                              : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full w-fit mt-0.5"><Mail size={10} />{t.admin.bookingsPage.noEmail}</div>
                             }
                             <div className="text-xs text-[#8A8A8A]">{booking.customerPhone}</div>
                           </td>
@@ -1120,19 +1127,19 @@ export default function AdminBookingsPage() {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
-                    <div className="text-sm text-[#8A8A8A]">Seite {currentPage} von {totalPages}</div>
+                    <div className="text-sm text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.pageOfTemplate, { page: currentPage, total: totalPages })}</div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="flat" isDisabled={currentPage === 1}
                         onPress={() => handlePageChange(currentPage - 1)}
                         startContent={<ChevronLeft size={15} />}
                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold">
-                        Zurück
+                        {t.back}
                       </Button>
                       <Button size="sm" variant="flat" isDisabled={currentPage === totalPages}
                         onPress={() => handlePageChange(currentPage + 1)}
                         endContent={<ChevronRight size={15} />}
                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold">
-                        Weiter
+                        {t.next}
                       </Button>
                     </div>
                   </div>
@@ -1154,7 +1161,7 @@ export default function AdminBookingsPage() {
                     <CheckCircle size={18} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#1E1E1E]">Status aktualisieren</h2>
+                    <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.calendarPage.updateStatus}</h2>
                     <p className="text-xs text-[#8A8A8A]">{selectedBooking?.bookingNumber}</p>
                   </div>
                 </div>
@@ -1166,12 +1173,12 @@ export default function AdminBookingsPage() {
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
                       <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
                       <div className="text-xs text-[#8A8A8A]">
-                        {new Date(selectedBooking.bookingDate).toLocaleDateString("de-DE")} · {selectedBooking.startTime}
+                        {new Date(selectedBooking.bookingDate).toLocaleDateString(dateLocale)} · {selectedBooking.startTime}
                       </div>
                     </div>
 
                     <Select
-                      label="Neuer Status"
+                      label={t.admin.bookingsPage.newStatus}
                       selectedKeys={[newStatus]}
                       onChange={(e) => setNewStatus(e.target.value)}
                       isRequired
@@ -1180,16 +1187,16 @@ export default function AdminBookingsPage() {
                         label: "text-[#8A8A8A]",
                       }}
                     >
-                      <SelectItem key="Pending" value="Pending">Ausstehend</SelectItem>
-                      <SelectItem key="Confirmed" value="Confirmed">Bestätigt</SelectItem>
-                      <SelectItem key="Completed" value="Completed">Abgeschlossen</SelectItem>
-                      <SelectItem key="NoShow" value="NoShow">Nicht erschienen</SelectItem>
-                      <SelectItem key="Cancelled" value="Cancelled">Storniert</SelectItem>
+                      <SelectItem key="Pending" value="Pending">{t.admin.bookingStatus.pending}</SelectItem>
+                      <SelectItem key="Confirmed" value="Confirmed">{t.admin.bookingStatus.confirmed}</SelectItem>
+                      <SelectItem key="Completed" value="Completed">{t.admin.bookingStatus.completed}</SelectItem>
+                      <SelectItem key="NoShow" value="NoShow">{t.admin.bookingStatus.noShow}</SelectItem>
+                      <SelectItem key="Cancelled" value="Cancelled">{t.admin.bookingStatus.cancelled}</SelectItem>
                     </Select>
 
                     <Textarea
-                      label="Admin Notizen (optional)"
-                      placeholder="z.B. Telefonisch bestätigt..."
+                      label={t.admin.bookingsPage.adminNotesOptional}
+                      placeholder={t.admin.bookingsPage.adminNotesPlaceholder}
                       value={adminNotes}
                       onChange={(e) => setAdminNotes(e.target.value)}
                       minRows={3}
@@ -1200,7 +1207,7 @@ export default function AdminBookingsPage() {
               </ModalBody>
               <ModalFooter>
                 <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -1209,7 +1216,7 @@ export default function AdminBookingsPage() {
                   startContent={!submitting && <Save size={14} />}
                   isDisabled={!newStatus}
                 >
-                  Speichern
+                  {t.save}
                 </Button>
               </ModalFooter>
             </>
@@ -1228,7 +1235,7 @@ export default function AdminBookingsPage() {
                     <AlertTriangle size={18} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#1E1E1E]">Buchung löschen</h2>
+                    <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.bookingsPage.deleteBooking}</h2>
                     <p className="text-xs text-[#8A8A8A]">{selectedBooking?.bookingNumber}</p>
                   </div>
                 </div>
@@ -1238,7 +1245,7 @@ export default function AdminBookingsPage() {
                   <div className="space-y-4">
                     <div className="bg-red-50 p-4 rounded-xl border border-red-200">
                       <p className="text-sm text-red-700">
-                        <strong>Achtung:</strong> Diese Aktion kann nicht rückgängig gemacht werden.
+                        {t.admin.bookingsPage.deleteWarning}
                       </p>
                     </div>
 
@@ -1246,7 +1253,7 @@ export default function AdminBookingsPage() {
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
                       <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
                       <div className="text-xs text-[#8A8A8A]">
-                        {new Date(selectedBooking.bookingDate).toLocaleDateString("de-DE")} · {selectedBooking.startTime} – {selectedBooking.endTime}
+                        {new Date(selectedBooking.bookingDate).toLocaleDateString(dateLocale)} · {selectedBooking.startTime} – {selectedBooking.endTime}
                       </div>
                     </div>
 
@@ -1255,7 +1262,7 @@ export default function AdminBookingsPage() {
               </ModalBody>
               <ModalFooter>
                 <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" startContent={<X size={14} />} onPress={onModalClose}>
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-lg shadow-red-500/20"
@@ -1263,7 +1270,7 @@ export default function AdminBookingsPage() {
                   isLoading={deleting}
                   startContent={<Trash2 size={14} />}
                 >
-                  Endgültig löschen
+                  {t.admin.bookingsPage.deletePermanently}
                 </Button>
               </ModalFooter>
             </>
@@ -1288,8 +1295,8 @@ export default function AdminBookingsPage() {
                     <Plus size={18} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-[#1E1E1E]">Manuelle Buchung</h2>
-                    <p className="text-xs text-[#8A8A8A]">Termin manuell für einen Kunden anlegen</p>
+                    <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.manualBooking}</h2>
+                    <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.manualBookingDesc}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1303,8 +1310,8 @@ export default function AdminBookingsPage() {
                             <CheckCircle size={20} className="text-white" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-bold text-[#1E1E1E]">Buchung erfolgreich!</h3>
-                            <p className="text-xs text-[#8A8A8A] font-mono">Nr: {createdBooking.bookingNumber}</p>
+                            <h3 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.bookingSuccess}</h3>
+                            <p className="text-xs text-[#8A8A8A] font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
                           </div>
                         </div>
                       </div>
@@ -1314,7 +1321,7 @@ export default function AdminBookingsPage() {
                           <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
                             <Scissors size={16} className="text-[#6355E4]" />
                           </div>
-                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Service</span>
+                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.service}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <p className="font-medium text-[#1E1E1E] text-base">{createdBooking.booking.serviceName}</p>
@@ -1327,11 +1334,11 @@ export default function AdminBookingsPage() {
                           <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
                             <Calendar size={16} className="text-[#6355E4]" />
                           </div>
-                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Datum & Zeit</span>
+                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.calendarPage.dateAndTime}</span>
                         </div>
                         <div className="space-y-2">
                           <p className="text-[#1E1E1E] font-medium">
-                            {new Date(createdBooking.booking.bookingDate).toLocaleDateString('de-DE', {
+                            {new Date(createdBooking.booking.bookingDate).toLocaleDateString(dateLocale, {
                               weekday: 'long',
                               day: '2-digit',
                               month: 'long',
@@ -1341,7 +1348,7 @@ export default function AdminBookingsPage() {
                           <div className="flex items-center gap-2">
                             <Clock size={16} className="text-[#8A8A8A]" />
                             <p className="text-[#1E1E1E]">
-                              {createdBooking.booking.startTime} – {createdBooking.booking.endTime} Uhr
+                              {createdBooking.booking.startTime} – {createdBooking.booking.endTime} {t.admin.calendarPage.clockSuffix}
                             </p>
                           </div>
                         </div>
@@ -1352,7 +1359,7 @@ export default function AdminBookingsPage() {
                           <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
                             <User size={16} className="text-[#6355E4]" />
                           </div>
-                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Kunde</span>
+                          <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.customer}</span>
                         </div>
                         <p className="text-[#1E1E1E] font-medium text-base">
                           {createdBooking.customer.firstName} {createdBooking.customer.lastName}
@@ -1365,7 +1372,7 @@ export default function AdminBookingsPage() {
                             <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
                               <User size={16} className="text-[#6355E4]" />
                             </div>
-                            <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Fachkraft</span>
+                            <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.calendarPage.specialist}</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
@@ -1383,11 +1390,11 @@ export default function AdminBookingsPage() {
 
                     {/* Step 1: Employee */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">1. Fachkraft wählen</p>
+                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step1ChooseEmployee}</p>
                       {loadingEmployees ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">Lade Mitarbeiter...</span>
+                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingEmployees}</span>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-2">
@@ -1420,16 +1427,16 @@ export default function AdminBookingsPage() {
 
                     {/* Step 2: Service with integrated search */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">2. Service auswählen</p>
+                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step2ChooseService}</p>
 
                       {!selectedEmployeeId ? (
                         <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
-                          Bitte zuerst eine Fachkraft auswählen
+                          {t.admin.calendarPage.chooseEmployeeFirst}
                         </div>
                       ) : loadingEmployeeServices ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">Lade Services...</span>
+                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingServices}</span>
                         </div>
                       ) : (
                         <Popover placement="bottom" isOpen={isServicePopoverOpen} onOpenChange={setIsServicePopoverOpen}>
@@ -1443,14 +1450,14 @@ export default function AdminBookingsPage() {
                               {bookingForm.serviceId ?
                                 (employeeServices.find(s => s.id === bookingForm.serviceId)?.name ||
                                   services.find(s => s.id === bookingForm.serviceId)?.name ||
-                                  "Service auswählen...")
-                                : "Service suchen oder auswählen..."}
+                                  t.admin.calendarPage.chooseServicePlaceholder)
+                                : t.admin.calendarPage.searchOrChooseService}
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent className="w-[400px] p-0">
                             <div className="w-full">
                               <Input
-                                placeholder="Service suchen..."
+                                placeholder={t.admin.calendarPage.searchServicePlaceholder}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="border-b border-[#ECEBF2]/20"
@@ -1485,7 +1492,7 @@ export default function AdminBookingsPage() {
                                             {formatPrice(service.price, service.currency)}
                                           </span>
                                           <span className="text-xs text-[#8A8A8A]">
-                                            {service.durationMinutes} Min
+                                            {service.durationMinutes} {t.admin.durationUnits.minShort}
                                           </span>
                                         </div>
                                         {service.description && (
@@ -1497,7 +1504,7 @@ export default function AdminBookingsPage() {
                                     ))
                                 ) : (
                                   <div className="p-4 text-center text-[#8A8A8A]">
-                                    Keine Services für diese Fachkraft gefunden
+                                    {t.admin.calendarPage.noServicesForEmployee}
                                   </div>
                                 )}
                               </div>
@@ -1509,7 +1516,7 @@ export default function AdminBookingsPage() {
 
                     {/* Step 3: Date */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">3. Datum wählen</p>
+                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step3ChooseDate}</p>
                       <Input
                         type="date"
                         value={bookingForm.bookingDate}
@@ -1523,11 +1530,11 @@ export default function AdminBookingsPage() {
 
                     {/* Step 4: Time */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">4. Uhrzeit wählen</p>
+                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step4ChooseTime}</p>
                       {loadingSlots ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">Lade verfügbare Zeiten...</span>
+                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingSlots}</span>
                         </div>
                       ) : availableSlots.length > 0 ? (
                         <div className="grid grid-cols-4 gap-2">
@@ -1549,19 +1556,19 @@ export default function AdminBookingsPage() {
                       ) : (
                         <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
                           {bookingForm.serviceId
-                            ? (slotsMessage || "Keine verfügbaren Zeiten — prüfen Sie Öffnungszeiten (Einstellungen) und Arbeitszeiten des Mitarbeiters")
-                            : "Bitte zuerst Service und Datum wählen"}
+                            ? (slotsMessage || t.admin.calendarPage.noSlotsAvailable)
+                            : t.admin.calendarPage.chooseServiceAndDateFirst}
                         </div>
                       )}
                     </div>
 
                     {/* Step 5: Customer */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">5. Kundendaten</p>
+                      <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step5CustomerData}</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <Input
-                          label="Vorname"
-                          placeholder="Max"
+                          label={t.admin.calendarPage.firstName}
+                          placeholder={t.admin.calendarPage.firstNamePlaceholder}
                           value={bookingForm.firstName}
                           onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
                           isRequired
@@ -1569,8 +1576,8 @@ export default function AdminBookingsPage() {
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
-                          label="Nachname"
-                          placeholder="Mustermann"
+                          label={t.admin.calendarPage.lastName}
+                          placeholder={t.admin.calendarPage.lastNamePlaceholder}
                           value={bookingForm.lastName}
                           onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
                           isRequired
@@ -1578,7 +1585,7 @@ export default function AdminBookingsPage() {
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
-                          label="E-Mail (optional)"
+                          label={t.admin.calendarPage.emailOptional}
                           type="email"
                           value={bookingForm.email}
                           onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
@@ -1586,7 +1593,7 @@ export default function AdminBookingsPage() {
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
                         <Input
-                          label="Telefon (optional)"
+                          label={t.admin.calendarPage.phoneOptional}
                           type="tel"
                           value={bookingForm.phone}
                           onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
@@ -1596,7 +1603,7 @@ export default function AdminBookingsPage() {
                       </div>
                       <div className="mt-3">
                         <Textarea
-                          label="Notizen (optional)"
+                          label={t.admin.calendarPage.notesOptionalField}
                           value={bookingForm.customerNotes}
                           onChange={(e) => setBookingForm({ ...bookingForm, customerNotes: e.target.value })}
                           isDisabled={submitting}
@@ -1605,7 +1612,7 @@ export default function AdminBookingsPage() {
                       </div>
                       <div className="mt-3">
                         <Input
-                          label="Gutschein-Code (optional)"
+                          label={t.admin.bookingsPage.voucherCodeOptional}
                           value={bookingForm.voucherCode}
                           onChange={(e) => setBookingForm({ ...bookingForm, voucherCode: e.target.value.toUpperCase() })}
                           isDisabled={submitting}
@@ -1620,7 +1627,7 @@ export default function AdminBookingsPage() {
                         <div>
                           <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
                           <p className="text-xs text-[#8A8A8A]">
-                            {selectedService.durationMinutes} Min
+                            {selectedService.durationMinutes} {t.admin.durationUnits.minShort}
                             {employees.find(e => e.id === selectedEmployeeId)?.name
                               ? ` · ${employees.find(e => e.id === selectedEmployeeId)!.name}`
                               : ''}
@@ -1639,7 +1646,7 @@ export default function AdminBookingsPage() {
                   onPress={onModalClose}
                   startContent={<X size={14} />}
                   isDisabled={submitting}>
-                  {success ? "Schließen" : "Abbrechen"}
+                  {success ? t.close : t.cancel}
                 </Button>
                 {!success && !createdBooking && (
                   <Button
@@ -1648,7 +1655,7 @@ export default function AdminBookingsPage() {
                     isLoading={submitting}
                     isDisabled={!bookingForm.serviceId || !bookingForm.bookingDate || !bookingForm.startTime || !bookingForm.firstName || !bookingForm.lastName}
                     endContent={<ChevronRightIcon size={18} />}>
-                    Buchung erstellen
+                    {t.admin.calendarPage.createBooking}
                   </Button>
                 )}
               </ModalFooter>

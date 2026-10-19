@@ -6,6 +6,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Printer, Award } from "lucide-react";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 export function CustomerLoyaltyCardModal({
   open, onClose, customerName, totalBookings, threshold, tenantName,
@@ -17,6 +18,7 @@ export function CustomerLoyaltyCardModal({
   threshold: number;
   tenantName?: string | null;
 }) {
+  const { t } = useTranslation();
   const progress = totalBookings % threshold === 0 && totalBookings > 0 ? threshold : totalBookings % threshold;
   const stamps = Array.from({ length: threshold }, (_, i) => i < progress);
 
@@ -45,8 +47,8 @@ export function CustomerLoyaltyCardModal({
           >
             <div className="flex items-center justify-between w-full print:hidden">
               <div>
-                <p className="font-semibold text-[#111318] text-base">Kundenkarte</p>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">Zum Ausdrucken für {customerName}</p>
+                <p className="font-semibold text-[#111318] text-base">{t.admin.customersPage.loyaltyCardTitle}</p>
+                <p className="text-xs text-[#9CA3AF] mt-0.5">{fillTemplate(t.admin.customersPage.loyaltyCardPrintForTemplate, { name: customerName })}</p>
               </div>
               <button onClick={onClose}
                 className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
@@ -60,7 +62,7 @@ export function CustomerLoyaltyCardModal({
                 <Award size={18} className="text-white" />
               </div>
               <p className="font-bold text-[#111318]">{customerName}</p>
-              <p className="text-sm text-[#6B7280]">{progress} von {threshold} Besuchen</p>
+              <p className="text-sm text-[#6B7280]">{fillTemplate(t.admin.customersPage.visitsProgressTemplate, { progress, threshold })}</p>
               <div className="flex flex-wrap justify-center gap-2 max-w-[280px]">
                 {stamps.map((filled, i) => (
                   <div key={i}
@@ -72,12 +74,12 @@ export function CustomerLoyaltyCardModal({
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-[#9CA3AF] text-center mt-1">Beim {threshold}. Besuch gibt es eine Belohnung.</p>
+              <p className="text-[11px] text-[#9CA3AF] text-center mt-1">{fillTemplate(t.admin.customersPage.rewardAtVisitTemplate, { threshold })}</p>
             </div>
 
             <button onClick={() => window.print()}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#6355E4] text-white hover:bg-[#4338CA] transition-colors print:hidden">
-              <Printer size={14} />Drucken
+              <Printer size={14} />{t.admin.customersPage.print}
             </button>
           </motion.div>
         </motion.div>

@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/admin";
 import { socialLinks, footerLinks } from "@/lib/config";
 import { formatPrice } from "@/lib/utils/currency";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 // ── Design Tokens (matching full admin suite) ─────────────────────────────────
 // bg:         #F7F7F8
@@ -81,6 +82,7 @@ function RevenuePeriodCard({
   revenueByCurrency: Record<string, number>;
   icon: React.ElementType;
 }) {
+  const { t } = useTranslation();
   return (
     <GlowingEffect glowColor="#6355E4" spread={35}>
       <div className="relative overflow-hidden bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
@@ -101,7 +103,7 @@ function RevenuePeriodCard({
             </div>
           ))}
           <div className="pt-1 border-t border-[#F3F4F6] flex items-center justify-between">
-            <span className="text-[10px] text-[#9CA3AF] uppercase tracking-wide">Buchungen</span>
+            <span className="text-[10px] text-[#9CA3AF] uppercase tracking-wide">{t.admin.trackingPage.bookingsLabel}</span>
             <span className="text-sm font-bold text-[#374151] tabular-nums">
               <AnimatedNumber value={bookings} />
             </span>
@@ -116,6 +118,8 @@ function RevenuePeriodCard({
 
 export default function TrackingPage() {
   const { isEmployee } = useAuth();
+  const { t } = useTranslation();
+  const s = t.admin.trackingPage;
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
 
@@ -147,7 +151,7 @@ export default function TrackingPage() {
           requiredPlan: err.response.data.requiredPlan,
         });
       } else {
-        setError(err.response?.data?.message || err.message || "Fehler beim Laden der Statistiken");
+        setError(err.response?.data?.message || err.message || s.loadStatsError);
       }
     } finally { setLoading(false); }
   }
@@ -172,19 +176,18 @@ export default function TrackingPage() {
           <div className="w-12 h-12 bg-[#EEEBFC] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <BarChart3 size={20} className="text-[#6355E4]" />
           </div>
-          <h2 className="text-lg font-bold text-[#111318] mb-2">Statistiken & Analytics</h2>
+          <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
             <p className="text-xs text-[#9CA3AF] mb-3">
-              Dein aktueller Tarif: <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
+              {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
           <p className="text-sm text-[#6B7280] mb-6">
             {upgradeInfo.message ?? (
               <>
-                Detaillierte Auswertungen zu Klicks, Seitenaufrufen und Umsatz sind in deinem
-                aktuellen Tarif nicht enthalten.
+                {s.upgradeDefaultMessage}
                 {upgradeInfo.requiredPlan && (
-                  <> Mit dem Tarif „{upgradeInfo.requiredPlan}" kannst du sehen, wie deine Buchungsseite performt.</>
+                  <>{fillTemplate(s.upgradeWithPlanTemplate, { plan: upgradeInfo.requiredPlan })}</>
                 )}
               </>
             )}
@@ -193,7 +196,7 @@ export default function TrackingPage() {
             href="/admin/subscription"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] transition-colors"
           >
-            <TrendingUp size={15} /> Jetzt upgraden
+            <TrendingUp size={15} /> {s.upgradeNowBtn}
           </a>
         </div>
       </div>
@@ -209,8 +212,8 @@ export default function TrackingPage() {
           <div className="w-11 h-11 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={18} className="text-[#991B1B]" />
           </div>
-          <p className="font-semibold text-[#111318] mb-1">Fehler beim Laden</p>
-          <p className="text-sm text-[#6B7280]">{error || "Unbekannter Fehler"}</p>
+          <p className="font-semibold text-[#111318] mb-1">{s.loadErrorTitle}</p>
+          <p className="text-sm text-[#6B7280]">{error || s.unknownError}</p>
         </div>
       </div>
     );
@@ -245,19 +248,19 @@ export default function TrackingPage() {
 
         {/* ── Page header ───────────────────────────────────────────────── */}
         <div>
-          <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">Statistiken</h1>
-          <p className="text-sm text-[#6B7280] mt-0.5">Gesamtübersicht aller Zeiten</p>
+          <h1 className="text-[22px] font-bold text-[#111318] tracking-tight">{s.pageTitle}</h1>
+          <p className="text-sm text-[#6B7280] mt-0.5">{s.pageSubtitle}</p>
         </div>
 
         {/* ── Conversion Insights ───────────────────────────────────────── */}
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-          <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-3">Conversion</p>
+          <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-3">{s.conversionLabel}</p>
           <div className="grid grid-cols-2 gap-3 mb-4">
             {/* Booking conversion */}
             <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
               <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-xl bg-[#059669]" />
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#059669] mb-1">
-                <TrendingUp size={11} />Zur Buchung
+                <TrendingUp size={11} />{s.toBookingLabel}
               </div>
               <p className="text-2xl font-bold text-[#111318]">{bookingConversion.toFixed(1)}%</p>
             </div>
@@ -265,7 +268,7 @@ export default function TrackingPage() {
             <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
               <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-xl bg-[#D97706]" />
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#D97706] mb-1">
-                <BarChart3 size={11} />CTR
+                <BarChart3 size={11} />{s.ctrLabel}
               </div>
               <p className="text-2xl font-bold text-[#111318]">{clickThroughRate.toFixed(1)}%</p>
             </div>
@@ -275,13 +278,13 @@ export default function TrackingPage() {
           <div className="space-y-2">
             {[
               {
-                label: "Meist geklickter Link",
-                value: topLink ? `${topLink.linkName} · ${topLink.clickCount} Klicks` : "Noch keine Klicks",
+                label: s.mostClickedLinkLabel,
+                value: topLink ? fillTemplate(s.clicksTemplate, { name: topLink.linkName, count: topLink.clickCount }) : s.noClicksYet,
                 icon: <MousePointerClick size={14} className="text-[#6355E4]" />,
               },
               {
-                label: "Top-Service",
-                value: topService ? `${topService.serviceName} · ${topService.bookingCount} Buchungen` : "Noch keine Daten",
+                label: s.topServiceLabel,
+                value: topService ? fillTemplate(s.bookingsTemplate, { name: topService.serviceName, count: topService.bookingCount }) : s.noDataYet,
                 icon: <Calendar size={14} className="text-[#6355E4]" />,
               },
             ].map(({ label, value, icon }) => (
@@ -300,35 +303,35 @@ export default function TrackingPage() {
         {/* ── Overview Stat Tiles ───────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           <OverviewTile
-            label="Seitenaufrufe (gesamt)"
+            label={s.totalPageViewsLabel}
             value={stats.totalPageViews}
             icon={Eye}
             accent="#6355E4"
-            helpText="Wie oft deine Buchungsseite von Besuchern aufgerufen wurde — inkl. wiederholter Besuche"
+            helpText={s.totalPageViewsHelp}
           />
           <OverviewTile
-            label="Klicks (gesamt)"
+            label={s.totalClicksLabel}
             value={stats.totalLinkClicks}
             icon={MousePointerClick}
             accent="#8B5CF6"
-            helpText="Wie oft Besucher auf Links geklickt haben — z.B. Buchung starten, Social Media, Route"
+            helpText={s.totalClicksHelp}
           />
           <OverviewTile
-            label="Buchungen (gesamt)"
+            label={s.totalBookingsLabel}
             value={stats.totalBookings}
             icon={BarChart3}
             accent="#059669"
-            helpText="Gesamtzahl aller Buchungen die über deine Buchungsseite eingegangen sind"
+            helpText={s.totalBookingsHelp}
           />
           {Object.entries(stats.averageBookingValueByCurrency ?? {}).map(([currency, value]) => (
             <OverviewTile
               key={currency}
-              label={`Ø Buchungswert ${currency}`}
+              label={fillTemplate(s.avgBookingValueTemplate, { currency })}
               value={value}
               icon={DollarSign}
               accent="#D97706"
               formatFn={(n) => formatPrice(n, currency)}
-              helpText={`Durchschnittlicher Wert aller abgeschlossenen Buchungen in ${currency}`}
+              helpText={fillTemplate(s.avgBookingValueHelpTemplate, { currency })}
             />
           ))}
         </div>
@@ -343,8 +346,8 @@ export default function TrackingPage() {
                 <DollarSign size={20} className="text-white" />
               </div>
               <div>
-                <p className="font-semibold text-white text-base">Gesamtumsatz aller Zeiten</p>
-                <p className="text-white/55 text-xs">{revenue.allTimeBookings} Buchungen insgesamt</p>
+                <p className="font-semibold text-white text-base">{s.allTimeRevenueLabel}</p>
+                <p className="text-white/55 text-xs">{fillTemplate(s.allTimeBookingsTemplate, { count: revenue.allTimeBookings })}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-6">
@@ -363,19 +366,19 @@ export default function TrackingPage() {
         {/* ── Revenue Periods ───────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <RevenuePeriodCard
-            label="Heute"
+            label={s.today}
             bookings={revenue.todayBookings}
             revenueByCurrency={revenue.todayRevenueByCurrency}
             icon={Clock}
           />
           <RevenuePeriodCard
-            label="Letzte 7 Tage"
+            label={s.last7Days}
             bookings={revenue.weekBookings}
             revenueByCurrency={revenue.weekRevenueByCurrency}
             icon={Calendar}
           />
           <RevenuePeriodCard
-            label="Letzte 30 Tage"
+            label={s.last30Days}
             bookings={revenue.monthBookings}
             revenueByCurrency={revenue.monthRevenueByCurrency}
             icon={Calendar}
@@ -390,8 +393,8 @@ export default function TrackingPage() {
               <MousePointerClick size={15} className="text-[#6355E4]" />
             </div>
             <div>
-              <p className="font-semibold text-sm text-[#111318]">Klicks nach Link</p>
-              <p className="text-[11px] text-[#9CA3AF]">Gesamte Klick-Verteilung</p>
+              <p className="font-semibold text-sm text-[#111318]">{s.clicksByLinkTitle}</p>
+              <p className="text-[11px] text-[#9CA3AF]">{s.clicksByLinkSubtitle}</p>
             </div>
           </div>
 
@@ -402,8 +405,8 @@ export default function TrackingPage() {
                 <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                   <MousePointerClick size={20} className="text-[#D1D5DB]" />
                 </div>
-                <p className="text-sm font-medium text-[#374151]">Noch keine Klicks vorhanden</p>
-                <p className="text-xs text-[#9CA3AF] mt-1">Klicks auf deine Links werden hier angezeigt</p>
+                <p className="text-sm font-medium text-[#374151]">{s.noClicksYetTitle}</p>
+                <p className="text-xs text-[#9CA3AF] mt-1">{s.noClicksYetDesc}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -425,11 +428,11 @@ export default function TrackingPage() {
                                 <span className="text-sm font-semibold text-[#111318] truncate">{displayName}</span>
                                 {isFooter && (
                                   <span className="text-[9px] font-semibold text-[#9CA3AF] bg-[#F3F4F6] px-1.5 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0">
-                                    Footer
+                                    {s.footerBadge}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-[#9CA3AF]">{link.clickCount} Klicks</p>
+                              <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(s.clicksCountTemplate, { count: link.clickCount })}</p>
                             </div>
                           </div>
                           <span className="text-base font-bold text-[#111318] tabular-nums flex-shrink-0">

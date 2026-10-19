@@ -49,6 +49,8 @@ import {
 } from "@/lib/api/admin-services";
 import { formatPrice } from "@/lib/utils/currency";
 import { getBusinessLocations, type BusinessLocation } from "@/lib/api/locations";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const modalClassNames = {
     base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
@@ -66,26 +68,23 @@ type ModalMode = "create" | "edit" | "view" | "create-category" | "edit-category
 
 const SERVICES_GUIDE_STORAGE_KEY = "admin-services-guide-seen";
 
-const servicesGuideSteps = [
-    {
-        title: "Kategorie erstellen",
-        description: "Erstelle zuerst eine Kategorie. Kategorien strukturieren deine Leistungen, zum Beispiel Gesicht, Beratung oder Laser.",
-    },
-    {
-        title: "Service zur Kategorie anlegen",
-        description: "Danach legst du einen Service an und wählst die passende Kategorie aus. Dort definierst du Dauer, Preis und Beschreibung.",
-    },
-    {
-        title: "Mitarbeiter zuweisen",
-        description: "Zum Schluss ordnest du zu, welche Mitarbeiter den Service ausführen. Erst dann kann der Service sauber gebucht werden.",
-    },
-];
+function getServicesGuideSteps(t: Translations) {
+    const s = t.admin.servicesPage;
+    return [
+        { title: s.guideStep1Title, description: s.guideStep1Desc },
+        { title: s.guideStep2Title, description: s.guideStep2Desc },
+        { title: s.guideStep3Title, description: s.guideStep3Desc },
+    ];
+}
 
-const currencyLabels: Record<string, string> = {
-    EUR: "EUR - Euro",
-    USD: "USD - US-Dollar",
-    CHF: "CHF - Schweizer Franken",
-};
+function getCurrencyLabels(t: Translations): Record<string, string> {
+    const s = t.admin.servicesPage;
+    return {
+        EUR: s.currencyLabelEUR,
+        USD: s.currencyLabelUSD,
+        CHF: s.currencyLabelCHF,
+    };
+}
 
 const currencySymbols: Record<string, string> = {
     EUR: "€",
@@ -122,6 +121,9 @@ const categoryIcons: Record<string, React.ReactNode> = {
 
 export default function AdminServicesPage() {
     const { isEmployee } = useAuth();
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
+    const servicesGuideSteps = getServicesGuideSteps(t);
     const router = useRouter();
     useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
     const [viewMode, setViewMode] = useState<ViewMode>("services");
@@ -270,11 +272,11 @@ export default function AdminServicesPage() {
             }
 
         } catch (err: any) {
-            setError(err.message || "Fehler beim Laden der Daten");
+            setError(err.message || s.loadError);
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, searchTerm, viewMode]);
+    }, [page, pageSize, searchTerm, viewMode, s.loadError]);
 
     useEffect(() => {
         void loadData();
@@ -299,7 +301,7 @@ export default function AdminServicesPage() {
     const handleCreateService = async () => {
         try {
             if (!serviceForm.name || !serviceForm.categoryId || !serviceForm.currency) {
-                setModalError("Bitte füllen Sie alle Pflichtfelder aus");
+                setModalError(t.booking.errorFillAllRequired);
                 return;
             }
             setSubmitting(true);
@@ -381,7 +383,7 @@ export default function AdminServicesPage() {
     const handleCreateCategory = async () => {
         try {
             if (!categoryForm.name) {
-                setModalError("Bitte geben Sie einen Namen ein");
+                setModalError(s.nameRequired);
                 return;
             }
             setSubmitting(true);
@@ -557,7 +559,7 @@ export default function AdminServicesPage() {
                     variant="flat"
                     className={service.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                 >
-                    {service.isActive ? "Aktiv" : "Inaktiv"}
+                    {service.isActive ? t.admin.active : t.admin.inactive}
                 </Chip>
             </div>
 
@@ -568,7 +570,7 @@ export default function AdminServicesPage() {
                 <div className="flex flex-wrap gap-2 mt-2">
                     <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-3 py-1.5 rounded-full">
                         <Clock size={12} className="text-[#6355E4]" />
-                        {service.durationMinutes} Min
+                        {service.durationMinutes} {t.admin.durationUnits.minShort}
                     </span>
                     <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-3 py-1.5 rounded-full">
                         <DollarSign size={12} className="text-[#6355E4]" />
@@ -595,7 +597,7 @@ export default function AdminServicesPage() {
 
             <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
                 <div className="text-xs text-[#8A8A8A]">
-                    Reihenfolge: {service.displayOrder}
+                    {fillTemplate(s.displayOrderTemplate, { order: service.displayOrder })}
                 </div>
                 <div className="flex gap-2">
                     <Button
@@ -651,7 +653,7 @@ export default function AdminServicesPage() {
                         variant="flat"
                         className={category.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                     >
-                        {category.isActive ? "Aktiv" : "Inaktiv"}
+                        {category.isActive ? t.admin.active : t.admin.inactive}
                     </Chip>
                 </div>
 
@@ -661,7 +663,7 @@ export default function AdminServicesPage() {
 
                 <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
                     <div className="text-xs text-[#8A8A8A]">
-                        Reihenfolge: {category.displayOrder}
+                        {fillTemplate(s.displayOrderTemplate, { order: category.displayOrder })}
                     </div>
                     <div className="flex gap-2">
                         <Button
@@ -703,7 +705,7 @@ export default function AdminServicesPage() {
             <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-[#F6F5FA] to-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 text-[#ECEBF2] animate-spin mx-auto mb-4" />
-                    <p className="text-[#8A8A8A]">Daten werden geladen...</p>
+                    <p className="text-[#8A8A8A]">{s.loadingData}</p>
                 </div>
             </div>
         );
@@ -722,14 +724,14 @@ export default function AdminServicesPage() {
                             >
                                 <ArrowLeft size={20} className="text-[#8A8A8A]" />
                             </Link>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">Service Verwaltung</h1>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">{s.pageTitle}</h1>
                             {totalCount > 0 && viewMode !== "assignments" && (
                                 <span className="bg-[#6355E4]/10 text-[#6355E4] text-sm font-semibold px-3 py-1 rounded-full">
                                     {totalCount}
                                 </span>
                             )}
                         </div>
-                        <p className="text-sm text-[#8A8A8A]">Services, Kategorien und Mitarbeiter-Zuordnung verwalten</p>
+                        <p className="text-sm text-[#8A8A8A]">{s.pageSubtitle}</p>
                     </div>
                     {viewMode === "services" && (
                         <Button
@@ -737,7 +739,7 @@ export default function AdminServicesPage() {
                             startContent={<Plus size={18} />}
                             onPress={() => openServiceModal("create")}
                         >
-                            Neuer Service
+                            {s.newService}
                         </Button>
                     )}
                     {viewMode === "categories" && (
@@ -746,7 +748,7 @@ export default function AdminServicesPage() {
                             startContent={<Plus size={18} />}
                             onPress={() => openCategoryModal("create")}
                         >
-                            Neue Kategorie
+                            {s.newCategory}
                         </Button>
                     )}
                 </div>
@@ -764,7 +766,7 @@ export default function AdminServicesPage() {
                             setSearchTerm("");
                         }}
                     >
-                        Services
+                        {s.tabServices}
                     </Button>
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "categories"
@@ -777,7 +779,7 @@ export default function AdminServicesPage() {
                             setSearchTerm("");
                         }}
                     >
-                        Kategorien
+                        {s.tabCategories}
                     </Button>
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "assignments"
@@ -789,7 +791,7 @@ export default function AdminServicesPage() {
                             setSearchTerm("");
                         }}
                     >
-                        Mitarbeiter-Zuordnung
+                        {s.tabAssignments}
                     </Button>
                 </div>
 
@@ -803,9 +805,9 @@ export default function AdminServicesPage() {
                             <Info size={18} />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-[#1E1E1E]">So legst du Services richtig an</p>
+                            <p className="text-sm font-semibold text-[#1E1E1E]">{s.guideBannerTitle}</p>
                             <p className="mt-0.5 text-sm text-[#5F5F5F]">
-                                Zuerst eine Kategorie erstellen, danach Services in dieser Kategorie anlegen und Mitarbeiter zuweisen.
+                                {s.guideBannerDesc}
                             </p>
                         </div>
                     </div>
@@ -816,7 +818,7 @@ export default function AdminServicesPage() {
                         startContent={<Info size={15} />}
                         onPress={openServicesGuide}
                     >
-                        Anleitung öffnen
+                        {s.openGuide}
                     </Button>
                 </motion.div>
 
@@ -827,8 +829,8 @@ export default function AdminServicesPage() {
                             <div className="flex gap-2">
                                 <Input
                                     placeholder={viewMode === "services"
-                                        ? "Services suchen (Name, Kategorie, Mitarbeiter)..."
-                                        : "Kategorien suchen (Name, Beschreibung)..."
+                                        ? s.searchServicesPlaceholder
+                                        : s.searchCategoriesPlaceholder
                                     }
                                     startContent={<Search size={18} className="text-[#8A8A8A]" />}
                                     value={searchTerm}
@@ -844,7 +846,7 @@ export default function AdminServicesPage() {
                                         loadData();
                                     }}
                                 >
-                                    Suchen
+                                    {t.admin.search}
                                 </Button>
                                 {searchTerm && (
                                     <Button
@@ -856,7 +858,7 @@ export default function AdminServicesPage() {
                                         }}
                                     >
                                         <X size={16} className="mr-2" />
-                                        Zurücksetzen
+                                        {s.reset}
                                     </Button>
                                 )}
                             </div>
@@ -883,7 +885,7 @@ export default function AdminServicesPage() {
                             services.length === 0 ? (
                                 <div className="text-center py-16 text-[#8A8A8A]">
                                     <Scissors className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
-                                    <p className="font-medium">Keine Services gefunden</p>
+                                    <p className="font-medium">{s.noServicesFound}</p>
                                     {searchTerm && (
                                         <Button
                                             size="sm"
@@ -894,7 +896,7 @@ export default function AdminServicesPage() {
                                                 loadData();
                                             }}
                                         >
-                                            Suche zurücksetzen
+                                            {s.resetSearch}
                                         </Button>
                                     )}
                                 </div>
@@ -905,12 +907,12 @@ export default function AdminServicesPage() {
                                         <table className="w-full">
                                             <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Service</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.service}</th>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Details</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Kategorie</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Mitarbeiter</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Status</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Aktionen</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.category}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.employees}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.status}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -936,7 +938,7 @@ export default function AdminServicesPage() {
                                                             <div className="flex items-center gap-3">
                                                                 <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
                                                                     <Clock size={10} className="text-[#6355E4]" />
-                                                                    {service.durationMinutes} Min
+                                                                    {service.durationMinutes} {t.admin.durationUnits.minShort}
                                                                 </span>
                                                                 <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-2 py-1 rounded-full">
                                                                     <DollarSign size={10} className="text-[#6355E4]" />
@@ -986,7 +988,7 @@ export default function AdminServicesPage() {
                                                                 variant="flat"
                                                                 className={service.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                                                             >
-                                                                {service.isActive ? "Aktiv" : "Inaktiv"}
+                                                                {service.isActive ? t.admin.active : t.admin.inactive}
                                                             </Chip>
                                                         </td>
                                                         <td className="px-5 py-4">
@@ -1042,7 +1044,7 @@ export default function AdminServicesPage() {
                             categories.length === 0 ? (
                                 <div className="text-center py-16 text-[#8A8A8A]">
                                     <Tag className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
-                                    <p className="font-medium">Keine Kategorien gefunden</p>
+                                    <p className="font-medium">{s.noCategoriesFound}</p>
                                     {searchTerm && (
                                         <Button
                                             size="sm"
@@ -1053,7 +1055,7 @@ export default function AdminServicesPage() {
                                                 loadData();
                                             }}
                                         >
-                                            Suche zurücksetzen
+                                            {s.resetSearch}
                                         </Button>
                                     )}
                                 </div>
@@ -1064,12 +1066,12 @@ export default function AdminServicesPage() {
                                         <table className="w-full">
                                             <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Kategorie</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Beschreibung</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.category}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.description}</th>
                                                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Services</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Reihenfolge</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Status</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Aktionen</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.order}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.status}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -1111,7 +1113,7 @@ export default function AdminServicesPage() {
                                                                     variant="flat"
                                                                     className={category.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                                                                 >
-                                                                    {category.isActive ? "Aktiv" : "Inaktiv"}
+                                                                    {category.isActive ? t.admin.active : t.admin.inactive}
                                                                 </Chip>
                                                             </td>
                                                             <td className="px-5 py-4">
@@ -1158,7 +1160,7 @@ export default function AdminServicesPage() {
                                 {employees.length === 0 ? (
                                     <div className="text-center py-16 text-[#8A8A8A]">
                                         <Users className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
-                                        <p className="font-medium">Keine Mitarbeiter gefunden</p>
+                                        <p className="font-medium">{s.noEmployeesFound}</p>
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1184,28 +1186,28 @@ export default function AdminServicesPage() {
                                                     </div>
 
                                                     <div className="mb-4">
-                                                        <p className="text-xs text-[#8A8A8A] mb-2">Zugewiesene Services:</p>
+                                                        <p className="text-xs text-[#8A8A8A] mb-2">{s.assignedServicesLabel}</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             {services
-                                                                .filter(s => s.assignedEmployees?.some(emp => emp.id === employee.id))
+                                                                .filter(svc => svc.assignedEmployees?.some(emp => emp.id === employee.id))
                                                                 .slice(0, 5)
-                                                                .map(s => (
+                                                                .map(svc => (
                                                                     <Chip
-                                                                        key={s.id}
+                                                                        key={svc.id}
                                                                         size="sm"
                                                                         variant="flat"
                                                                         className="bg-[#F6F5FA] text-[#1E1E1E]"
                                                                     >
-                                                                        {s.name}
+                                                                        {svc.name}
                                                                     </Chip>
                                                                 ))}
                                                             {employee.serviceCount > 5 && (
                                                                 <Chip size="sm" variant="flat" className="bg-[#F6F5FA] text-[#1E1E1E]">
-                                                                    +{employee.serviceCount - 5} weitere
+                                                                    {fillTemplate(s.moreServicesInListTemplate, { count: employee.serviceCount - 5 })}
                                                                 </Chip>
                                                             )}
                                                             {employee.serviceCount === 0 && (
-                                                                <p className="text-xs text-[#8A8A8A]">Keine Services zugewiesen</p>
+                                                                <p className="text-xs text-[#8A8A8A]">{s.noServicesAssigned}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1217,12 +1219,12 @@ export default function AdminServicesPage() {
                                                             setSelectedEmployee(employee);
                                                             setSelectedServices(new Set(
                                                                 services
-                                                                    .filter(s => s.assignedEmployees?.some(emp => emp.id === employee.id))
-                                                                    .map(s => s.id)
+                                                                    .filter(svc => svc.assignedEmployees?.some(emp => emp.id === employee.id))
+                                                                    .map(svc => svc.id)
                                                             ));
                                                         }}
                                                     >
-                                                        Services zuweisen
+                                                        {s.assignServicesBtn}
                                                     </Button>
                                                 </CardBody>
                                             </Card>
@@ -1236,7 +1238,7 @@ export default function AdminServicesPage() {
                         {viewMode !== "assignments" && totalPages > 1 && (
                             <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
                                 <div className="text-sm text-[#8A8A8A]">
-                                    Seite {page} von {totalPages}
+                                    {fillTemplate(s.paginationPageTemplate, { page, totalPages })}
                                 </div>
                                 <div className="flex gap-2">
                                     <Button
@@ -1247,7 +1249,7 @@ export default function AdminServicesPage() {
                                         startContent={<ChevronLeft size={15} />}
                                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                     >
-                                        Zurück
+                                        {t.back}
                                     </Button>
                                     <Button
                                         size="sm"
@@ -1257,7 +1259,7 @@ export default function AdminServicesPage() {
                                         endContent={<ChevronRight size={15} />}
                                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                                     >
-                                        Weiter
+                                        {t.next}
                                     </Button>
                                 </div>
                             </div>
@@ -1285,7 +1287,7 @@ export default function AdminServicesPage() {
                                             <Users size={18} className="text-white" />
                                         </div>
                                         <div>
-                                            <h2 className="text-lg font-bold text-[#1E1E1E]">Services zuweisen</h2>
+                                            <h2 className="text-lg font-bold text-[#1E1E1E]">{s.assignServicesBtn}</h2>
                                             {selectedEmployee && (
                                                 <p className="text-xs text-[#8A8A8A]">
                                                     {selectedEmployee.name} · {selectedEmployee.role}
@@ -1399,7 +1401,7 @@ export default function AdminServicesPage() {
                                         </div>
                                         <div>
                                             <p className="text-xs font-semibold uppercase tracking-wide text-[#6355E4]">
-                                                Schritt {guideStep + 1} von {servicesGuideSteps.length}
+                                                {fillTemplate(t.booking.stepOf, { current: guideStep + 1, total: servicesGuideSteps.length })}
                                             </p>
                                             <h2 className="mt-1 text-lg font-bold text-[#1E1E1E]">
                                                 {servicesGuideSteps[guideStep].title}
@@ -1412,7 +1414,7 @@ export default function AdminServicesPage() {
                                         variant="light"
                                         className="text-[#8A8A8A]"
                                         onPress={closeServicesGuide}
-                                        aria-label="Anleitung schließen"
+                                        aria-label={s.closeGuideAria}
                                     >
                                         <X size={18} />
                                     </Button>
@@ -1442,7 +1444,7 @@ export default function AdminServicesPage() {
                                                     index === guideStep ? "bg-[#6355E4]" : "bg-[#ECEBF2]/45"
                                                 }`}
                                                 onClick={() => setGuideStep(index)}
-                                                aria-label={`Schritt ${index + 1} anzeigen`}
+                                                aria-label={fillTemplate(s.stepButtonAriaTemplate, { n: index + 1 })}
                                             />
                                         ))}
                                     </div>
@@ -1456,7 +1458,7 @@ export default function AdminServicesPage() {
                                         startContent={<ChevronLeft size={16} />}
                                         onPress={() => setGuideStep((step) => Math.max(0, step - 1))}
                                     >
-                                        Zurück
+                                        {t.back}
                                     </Button>
                                     {guideStep < servicesGuideSteps.length - 1 ? (
                                         <Button
@@ -1464,7 +1466,7 @@ export default function AdminServicesPage() {
                                             endContent={<ChevronRight size={16} />}
                                             onPress={() => setGuideStep((step) => Math.min(servicesGuideSteps.length - 1, step + 1))}
                                         >
-                                            Weiter
+                                            {t.next}
                                         </Button>
                                     ) : (
                                         <Button
@@ -1478,7 +1480,7 @@ export default function AdminServicesPage() {
                                                 openCategoryModal("create");
                                             }}
                                         >
-                                            Kategorie erstellen
+                                            {s.guideStep1Title}
                                         </Button>
                                     )}
                                 </div>
@@ -1521,6 +1523,9 @@ function ServiceModals({
     onSave: () => void;
     onClose: () => void;
 }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
+    const currencyLabels = getCurrencyLabels(t);
     const isCreateOrEdit = modalMode === "create" || modalMode === "edit";
     const [showCurrencyInfo, setShowCurrencyInfo] = useState(false);
     const selectedLocation = locations.find((location) => location.id === serviceForm.locationId);
@@ -1528,7 +1533,7 @@ function ServiceModals({
     const selectedCurrencyLabel = currencyLabels[selectedCurrency] || selectedCurrency;
     const selectedCurrencySymbol = currencySymbols[selectedCurrency] || selectedCurrency;
     const employeeOptions = [
-        { id: "none", name: "Bitte wählen", role: "" },
+        { id: "none", name: s.pleaseSelect, role: "" },
         ...employees,
     ];
 
@@ -1554,12 +1559,12 @@ function ServiceModals({
                                 </div>
                                 <div>
                                     <h2 className="text-base font-bold text-[#1E1E1E]">
-                                        {modalMode === "edit" ? "Service bearbeiten" : "Neuen Service erstellen"}
+                                        {modalMode === "edit" ? s.serviceModalEditTitle : s.serviceModalCreateTitle}
                                     </h2>
                                     <p className="text-xs text-[#8A8A8A]">
                                         {modalMode === "edit"
-                                            ? "Servicedaten aktualisieren"
-                                            : "Neuen Service zum System hinzufügen"}
+                                            ? s.serviceModalEditSubtitle
+                                            : s.serviceModalCreateSubtitle}
                                     </p>
                                 </div>
                             </div>
@@ -1574,8 +1579,8 @@ function ServiceModals({
                                 )}
 
                                 <Input
-                                    label="Name *"
-                                    placeholder="z.B. Medizinisches Microneedling"
+                                    label={`${t.admin.name} *`}
+                                    placeholder={s.servicePlaceholderName}
                                     value={serviceForm.name || ""}
                                     onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
                                     isRequired
@@ -1584,8 +1589,8 @@ function ServiceModals({
                                 />
 
                                 <Textarea
-                                    label="Beschreibung"
-                                    placeholder="Beschreibung des Services..."
+                                    label={t.admin.description}
+                                    placeholder={s.serviceDescPlaceholder}
                                     value={serviceForm.description || ""}
                                     onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
                                     isDisabled={submitting}
@@ -1594,7 +1599,7 @@ function ServiceModals({
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <Input
-                                        label="Dauer (Minuten) *"
+                                        label={`${s.durationMinutesLabel} *`}
                                         type="number"
                                         min={5}
                                         value={serviceForm.durationMinutes?.toString() || "30"}
@@ -1605,20 +1610,20 @@ function ServiceModals({
                                         classNames={inputClassNames}
                                     />
                                     <Input
-                                        label="Pufferzeit (Min)"
+                                        label={s.bufferTimeLabel}
                                         type="number"
                                         min={0}
                                         max={120}
                                         value={(serviceForm.bufferTimeMinutes ?? 0).toString()}
                                         onChange={(e) => setServiceForm({ ...serviceForm, bufferTimeMinutes: parseInt(e.target.value) || 0 })}
                                         isDisabled={submitting}
-                                        description="Pause nach dem Termin"
+                                        description={s.bufferTimeDesc}
                                         classNames={inputClassNames}
                                     />
                                 </div>
 
                                 <Select
-                                    label="Standort *"
+                                    label={`${s.locationLabel} *`}
                                     selectedKeys={serviceForm.locationId ? [serviceForm.locationId] : []}
                                     onSelectionChange={(keys) => {
                                         const locationId = Array.from(keys)[0]?.toString() || "";
@@ -1632,8 +1637,8 @@ function ServiceModals({
                                     isRequired
                                     isDisabled={submitting || locations.length === 0}
                                     description={locations.length === 0
-                                        ? "Bitte zuerst unter Einstellungen einen Standort anlegen"
-                                        : "Die Währung wird vom Standort übernommen"}
+                                        ? s.locationRequiredNote
+                                        : s.locationCurrencyNote}
                                 >
                                     {locations.map((location) => (
                                         <SelectItem key={location.id} textValue={`${location.name} (${location.currency})`}>
@@ -1650,16 +1655,16 @@ function ServiceModals({
                                         disabled={submitting}
                                     >
                                         <Input
-                                            label="Währung *"
+                                            label={`${s.currencyLabel} *`}
                                             value={selectedCurrencyLabel}
                                             isReadOnly
                                             isDisabled={submitting}
-                                            description="Wird durch den Standort festgelegt"
+                                            description={s.currencyReadonlyDesc}
                                             classNames={inputClassNames}
                                         />
                                     </button>
                                     <Input
-                                        label="Preis*"
+                                        label={`${t.admin.price}*`}
                                         type="number"
                                         min={0}
                                         step={0.01}
@@ -1680,13 +1685,13 @@ function ServiceModals({
                                     >
                                         <Info size={16} className="mt-0.5 shrink-0 text-[#6355E4]" />
                                         <div className="flex-1">
-                                            Die Währung wird durch den gewählten Standort festgelegt. Standortwährungen verwalten Sie unter Einstellungen → Standorte.
+                                            {s.currencyInfoText}
                                         </div>
                                         <button
                                             type="button"
                                             className="text-[#8A8A8A] hover:text-[#1E1E1E]"
                                             onClick={() => setShowCurrencyInfo(false)}
-                                            aria-label="Währungshinweis schließen"
+                                            aria-label={s.closeCurrencyInfoAria}
                                         >
                                             <X size={15} />
                                         </button>
@@ -1694,7 +1699,7 @@ function ServiceModals({
                                 )}
 
                                 <Input
-                                    label="Sortierreihenfolge"
+                                    label={s.displayOrderFieldLabel}
                                     type="number"
                                     min={0}
                                     value={serviceForm.displayOrder?.toString() || "0"}
@@ -1705,8 +1710,8 @@ function ServiceModals({
 
                                 {/* Kategorie Select */}
                                 <Select
-                                    label="Kategorie *"
-                                    placeholder="Kategorie auswählen"
+                                    label={`${s.category} *`}
+                                    placeholder={s.categoryPlaceholder}
                                     selectedKeys={serviceForm.categoryId ? [serviceForm.categoryId] : []}
                                     onChange={(e) => {
                                         const value = e.target.value;
@@ -1731,8 +1736,8 @@ function ServiceModals({
 
                                 {/* Mitarbeiter Multi-Select */}
                                 <Select
-                                    label="Mitarbeiter (optional)"
-                                    placeholder="Bitte wählen"
+                                    label={s.employeesOptionalLabel}
+                                    placeholder={s.pleaseSelect}
                                     selectionMode="multiple"
                                     selectedKeys={new Set(serviceForm.employeeIds || [])}
                                     onSelectionChange={(keys) => {
@@ -1755,7 +1760,7 @@ function ServiceModals({
                                     isDisabled={submitting}
                                     renderValue={(items) => {
                                         if (items.length === 0) {
-                                            return <span className="text-[#8A8A8A]">Bitte wählen</span>;
+                                            return <span className="text-[#8A8A8A]">{s.pleaseSelect}</span>;
                                         }
 
                                         return (
@@ -1791,7 +1796,7 @@ function ServiceModals({
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}
                             >
-                                Abbrechen
+                                {t.cancel}
                             </Button>
                             <Button
                                 className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -1799,7 +1804,7 @@ function ServiceModals({
                                 isLoading={submitting}
                                 startContent={!submitting && <Save size={14} />}
                             >
-                                {modalMode === "edit" ? "Speichern" : "Erstellen"}
+                                {modalMode === "edit" ? t.save : s.createBtn}
                             </Button>
                         </ModalFooter>
                     </>
@@ -1831,6 +1836,8 @@ function CategoryModals({
     onSave: () => void;
     onClose: () => void;
 }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
     const isCreateOrEdit = modalMode === "create-category" || modalMode === "edit-category";
 
     return (
@@ -1855,12 +1862,12 @@ function CategoryModals({
                                 </div>
                                 <div>
                                     <h2 className="text-base font-bold text-[#1E1E1E]">
-                                        {modalMode === "edit-category" ? "Kategorie bearbeiten" : "Neue Kategorie erstellen"}
+                                        {modalMode === "edit-category" ? s.categoryModalEditTitle : s.categoryModalCreateTitle}
                                     </h2>
                                     <p className="text-xs text-[#8A8A8A]">
                                         {modalMode === "edit-category"
-                                            ? "Kategoriedaten aktualisieren"
-                                            : "Neue Kategorie zum System hinzufügen"}
+                                            ? s.categoryModalEditSubtitle
+                                            : s.categoryModalCreateSubtitle}
                                     </p>
                                 </div>
                             </div>
@@ -1875,8 +1882,8 @@ function CategoryModals({
                                 )}
 
                                 <Input
-                                    label="Name *"
-                                    placeholder="z.B. Microneedling"
+                                    label={`${t.admin.name} *`}
+                                    placeholder={s.categoryPlaceholderName}
                                     value={categoryForm.name || ""}
                                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
                                     isRequired
@@ -1885,8 +1892,8 @@ function CategoryModals({
                                 />
 
                                 <Textarea
-                                    label="Beschreibung"
-                                    placeholder="Beschreibung der Kategorie..."
+                                    label={t.admin.description}
+                                    placeholder={s.categoryDescPlaceholder}
                                     value={categoryForm.description || ""}
                                     onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                                     isDisabled={submitting}
@@ -1894,7 +1901,7 @@ function CategoryModals({
                                 />
 
                                 <Input
-                                    label="Sortierreihenfolge"
+                                    label={s.displayOrderFieldLabel}
                                     type="number"
                                     min={0}
                                     value={categoryForm.displayOrder?.toString() || "0"}
@@ -1913,7 +1920,7 @@ function CategoryModals({
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}
                             >
-                                Abbrechen
+                                {t.cancel}
                             </Button>
                             <Button
                                 className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -1921,7 +1928,7 @@ function CategoryModals({
                                 isLoading={submitting}
                                 startContent={!submitting && <Save size={14} />}
                             >
-                                {modalMode === "edit-category" ? "Speichern" : "Erstellen"}
+                                {modalMode === "edit-category" ? t.save : s.createBtn}
                             </Button>
                         </ModalFooter>
                     </>
@@ -1953,6 +1960,8 @@ function ViewModals({
     onClose: () => void;
     onEdit: () => void;
 }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
     const [hasClosed, setHasClosed] = useState(false);
     const isView = modalMode === "view" || modalMode === "view-category";
     const isService = modalMode === "view" && selectedItem && 'categoryId' in selectedItem;
@@ -1993,7 +2002,7 @@ function ViewModals({
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-bold text-[#1E1E1E]">
-                                        {isService ? "Service Details" : "Kategorie Details"}
+                                        {isService ? s.serviceDetailsTitle : s.categoryDetailsTitle}
                                     </h2>
                                     <p className="text-xs text-[#8A8A8A]">
                                         {isService ? (selectedItem as AdminService).name : (selectedItem as AdminServiceCategory).name}
@@ -2026,7 +2035,7 @@ function ViewModals({
                                 onPress={handleClose}
                                 startContent={<X size={14} />}
                             >
-                                Schließen
+                                {t.close}
                             </Button>
                             <Button
                                 className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -2039,7 +2048,7 @@ function ViewModals({
                                 }}
                                 startContent={<Edit size={14} />}
                             >
-                                Bearbeiten
+                                {t.admin.edit}
                             </Button>
                         </ModalFooter>
                     </>
@@ -2050,30 +2059,32 @@ function ViewModals({
 }
 // Service View Content
 function ServiceViewContent({ service, categories, employees, tenantCurrency }: { service: AdminService; categories: AdminServiceCategory[]; employees: EmployeeForAssignment[]; tenantCurrency: string }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
     const category = categories.find(c => c.id === service.categoryId);
 
     return (
         <div className="space-y-4">
             {/* Basic Info */}
             <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Grunddaten</h3>
+                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.basicDataTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">Name</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.name}</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{service.name}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">Standort</p>
-                        <p className="text-sm font-medium text-[#1E1E1E]">{service.locationName || "Standardstandort"}</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.locationLabel}</p>
+                        <p className="text-sm font-medium text-[#1E1E1E]">{service.locationName || s.defaultLocationFallback}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">Status</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.status}</p>
                         <Chip
                             size="sm"
                             variant="flat"
                             className={service.isActive ? "bg-green-100 text-green-700 mt-1" : "bg-red-100 text-red-700 mt-1"}
                         >
-                            {service.isActive ? "Aktiv" : "Inaktiv"}
+                            {service.isActive ? t.admin.active : t.admin.inactive}
                         </Chip>
                     </div>
                 </div>
@@ -2082,39 +2093,39 @@ function ServiceViewContent({ service, categories, employees, tenantCurrency }: 
             {/* Description */}
             {service.description && (
                 <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Beschreibung</h3>
+                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.admin.description}</h3>
                     <p className="text-sm text-[#1E1E1E]">{service.description}</p>
                 </div>
             )}
 
             {/* Service Details */}
             <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Leistungsdetails</h3>
+                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.serviceDetailsSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Dauer</p>
-                        <p className="text-base font-bold text-[#6355E4]">{service.durationMinutes} Min</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.durationMinutesLabel}</p>
+                        <p className="text-base font-bold text-[#6355E4]">{service.durationMinutes} {t.admin.durationUnits.minShort}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Preis</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.price}</p>
                         <p className="text-base font-bold text-[#6355E4]">{formatPrice(service.price, service.currency)}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Sortierreihenfolge</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.order}</p>
                         <p className="text-sm font-semibold text-[#1E1E1E]">{service.displayOrder}</p>
                     </div>
                 </div>
             </div>
 
             <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Zuordnung</h3>
+                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.assignmentSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Kategorie</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.category}</p>
                         <p className="text-sm font-semibold text-[#1E1E1E]">{category?.name || "—"}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Mitarbeiter</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.employees}</p>
                         <div className="flex flex-wrap gap-1 mt-1">
                             {service.assignedEmployees && service.assignedEmployees.length > 0 ? (
                                 service.assignedEmployees.map(emp => (
@@ -2135,26 +2146,28 @@ function ServiceViewContent({ service, categories, employees, tenantCurrency }: 
 
 // Category View Content
 function CategoryViewContent({ category, services, tenantCurrency }: { category: AdminServiceCategory; services: AdminService[]; tenantCurrency: string }) {
-    const categoryServices = services.filter(s => s.categoryId === category.id);
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
+    const categoryServices = services.filter(svc => svc.categoryId === category.id);
 
     return (
         <div className="space-y-4">
             {/* Basic Info */}
             <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Grunddaten</h3>
+                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.basicDataTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">Name</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.name}</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{category.name}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">Status</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.status}</p>
                         <Chip
                             size="sm"
                             variant="flat"
                             className={category.isActive ? "bg-green-100 text-green-700 mt-1" : "bg-red-100 text-red-700 mt-1"}
                         >
-                            {category.isActive ? "Aktiv" : "Inaktiv"}
+                            {category.isActive ? t.admin.active : t.admin.inactive}
                         </Chip>
                     </div>
                 </div>
@@ -2163,21 +2176,21 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
             {/* Description */}
             {category.description && (
                 <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Beschreibung</h3>
+                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.admin.description}</h3>
                     <p className="text-sm text-[#1E1E1E]">{category.description}</p>
                 </div>
             )}
 
             {/* Category Details */}
             <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Kategoriedetails</h3>
+                <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.categoryDetailsSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Sortierreihenfolge</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.order}</p>
                         <p className="text-base font-bold text-[#1E1E1E]">{category.displayOrder}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">Services in dieser Kategorie</p>
+                        <p className="text-xs text-[#8A8A8A]">{s.servicesInCategoryTitle}</p>
                         <p className="text-base font-bold text-[#6355E4]">{categoryServices.length}</p>
                     </div>
                 </div>
@@ -2186,7 +2199,7 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
             {/* Services in this category */}
             {categoryServices.length > 0 && (
                 <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Services in dieser Kategorie</h3>
+                    <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.servicesInCategoryTitle}</h3>
                     <div className="space-y-2">
                         {categoryServices.slice(0, 5).map((service) => (
                             <div key={service.id} className="bg-white p-3 rounded-lg border border-[#ECEBF2]/20">
@@ -2194,7 +2207,7 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                                     <div>
                                         <p className="font-semibold text-[#1E1E1E] text-sm">{service.name}</p>
                                         <p className="text-xs text-[#8A8A8A] mt-1">
-                                            {service.durationMinutes} Min · {formatPrice(service.price, service.currency)}
+                                            {service.durationMinutes} {t.admin.durationUnits.minShort} · {formatPrice(service.price, service.currency)}
                                         </p>
                                     </div>
                                     <Chip
@@ -2202,14 +2215,14 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                                         variant="flat"
                                         className={service.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}
                                     >
-                                        {service.isActive ? "Aktiv" : "Inaktiv"}
+                                        {service.isActive ? t.admin.active : t.admin.inactive}
                                     </Chip>
                                 </div>
                             </div>
                         ))}
                         {categoryServices.length > 5 && (
                             <p className="text-xs text-[#8A8A8A] text-center mt-2">
-                                + {categoryServices.length - 5} weitere Services
+                                {fillTemplate(s.moreServicesInCategoryTemplate, { count: categoryServices.length - 5 })}
                             </p>
                         )}
                     </div>
@@ -2239,11 +2252,13 @@ function AssignmentModalContent({
     submitting: boolean;
     tenantCurrency: string;
 }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
     const [searchTerm, setSearchTerm] = useState("");
 
-    const filteredServices = services.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredServices = services.filter(svc =>
+        svc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        svc.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const toggleService = (serviceId: string) => {
@@ -2257,7 +2272,7 @@ function AssignmentModalContent({
     };
 
     const selectAll = () => {
-        setSelectedServices(new Set(filteredServices.map(s => s.id)));
+        setSelectedServices(new Set(filteredServices.map(svc => svc.id)));
     };
 
     const deselectAll = () => {
@@ -2268,7 +2283,7 @@ function AssignmentModalContent({
         <div className="space-y-4">
             <div className="mb-4">
                 <Input
-                    placeholder="Services durchsuchen..."
+                    placeholder={s.searchServicesDurchsuchen}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     startContent={<Search size={18} className="text-[#8A8A8A]" />}
@@ -2278,7 +2293,7 @@ function AssignmentModalContent({
 
             <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-[#8A8A8A]">
-                    {selectedServices.size} von {filteredServices.length} ausgewählt
+                    {fillTemplate(s.selectedOfTotalTemplate, { selected: selectedServices.size, total: filteredServices.length })}
                 </p>
                 <div className="flex gap-2">
                     <Button
@@ -2288,7 +2303,7 @@ function AssignmentModalContent({
                         onPress={selectAll}
                         isDisabled={submitting}
                     >
-                        Alle auswählen
+                        {s.selectAll}
                     </Button>
                     <Button
                         size="sm"
@@ -2297,7 +2312,7 @@ function AssignmentModalContent({
                         onPress={deselectAll}
                         isDisabled={submitting}
                     >
-                        Alle abwählen
+                        {s.deselectAll}
                     </Button>
                 </div>
             </div>
@@ -2328,7 +2343,7 @@ function AssignmentModalContent({
                                         {service.name}
                                     </h4>
                                     <p className="text-xs text-[#8A8A8A]">
-                                        {service.categoryName} · {service.durationMinutes} Min · {formatPrice(service.price, service.currency)}
+                                        {service.categoryName} · {service.durationMinutes} {t.admin.durationUnits.minShort} · {formatPrice(service.price, service.currency)}
                                     </p>
                                 </div>
                             </div>
@@ -2345,7 +2360,7 @@ function AssignmentModalContent({
                     startContent={<X size={14} />}
                     isDisabled={submitting}
                 >
-                    Abbrechen
+                    {t.cancel}
                 </Button>
                 <Button
                     className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -2353,7 +2368,7 @@ function AssignmentModalContent({
                     startContent={!submitting && <Save size={14} />}
                     isLoading={submitting}
                 >
-                    Zuweisung speichern
+                    {s.saveAssignmentBtn}
                 </Button>
             </div>
         </div>
@@ -2376,10 +2391,12 @@ function DeleteModal({
     onConfirm: () => void;
     onClose: () => void;
 }) {
+    const { t } = useTranslation();
+    const s = t.admin.servicesPage;
     const isService = selectedItem && 'categoryId' in selectedItem;
     const isCategory = selectedItem && 'services' in selectedItem;
-    
-    const title = isService ? "Service löschen" : isCategory ? "Kategorie löschen" : "Löschen";
+
+    const title = isService ? s.deleteServiceTitle : isCategory ? s.deleteCategoryTitle : t.admin.delete;
     const name = selectedItem?.name || "";
     
     // For services - check if there are employee assignments
@@ -2420,7 +2437,7 @@ function DeleteModal({
                                     <p className="text-sm text-red-700 flex items-start gap-2">
                                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                                         <span>
-                                            <strong>Achtung:</strong> Das Löschen {isService ? "eines Services" : "einer Kategorie"} ist endgültig und kann nicht rückgängig gemacht werden.
+                                            {isService ? s.deleteWarningService : s.deleteWarningCategory}
                                         </span>
                                     </p>
                                 </div>
@@ -2434,7 +2451,7 @@ function DeleteModal({
                                         <div>
                                             <p className="font-semibold text-[#1E1E1E]">{name}</p>
                                             <p className="text-xs text-[#8A8A8A]">
-                                                {isService ? "Service" : "Kategorie"}
+                                                {isService ? t.admin.service : s.category}
                                             </p>
                                         </div>
                                     </div>
@@ -2445,23 +2462,22 @@ function DeleteModal({
                                     <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
                                         <p className="text-sm text-amber-700 flex items-start gap-2 mb-3">
                                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                                            <span className="font-semibold">Folgende Daten werden gelöscht:</span>
+                                            <span className="font-semibold">{s.followingDataWillBeDeleted}</span>
                                         </p>
-                                        
+
                                         <div className="space-y-2 pl-7">
                                             {hasEmployeeAssignments && (
                                                 <div className="flex items-center gap-2 text-sm text-amber-700">
                                                     <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
                                                     <span>
-                                                        <strong>{employeeCount}</strong> {employeeCount === 1 ? 'Mitarbeiter-Zuordnung' : 'Mitarbeiter-Zuordnungen'}
+                                                        {fillTemplate(employeeCount === 1 ? s.employeeAssignmentCount_one : s.employeeAssignmentCount_other, { count: employeeCount })}
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
-                                        
+
                                         <p className="text-sm text-amber-700 mt-3 pt-2 border-t border-amber-200">
-                                            <strong>Hinweis:</strong> Dieser Service wird aus allen Systemen entfernt. 
-                                            Alle Buchungen und zugehörigen Daten (E-Mail-Logs) werden unwiderruflich gelöscht.
+                                            {s.deleteServiceCascadeNote}
                                         </p>
                                     </div>
                                 )}
@@ -2472,8 +2488,7 @@ function DeleteModal({
                                         <p className="text-sm text-amber-700 flex items-start gap-2">
                                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
                                             <span>
-                                                <strong>Hinweis:</strong> Beim Löschen dieses Services werden auch alle 
-                                                zugehörigen Buchungen und E-Mail-Logs unwiderruflich gelöscht.
+                                                {s.deleteServiceSimpleNote}
                                             </span>
                                         </p>
                                     </div>
@@ -2485,8 +2500,7 @@ function DeleteModal({
                                         <p className="text-sm text-amber-700 flex items-start gap-2">
                                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
                                             <span>
-                                                <strong>Auswirkung:</strong> Diese Kategorie enthält <strong>{servicesCount} Services</strong>.
-                                                Sie können die Kategorie erst löschen, wenn alle Services entfernt oder einer anderen Kategorie zugewiesen wurden.
+                                                {fillTemplate(s.deleteCategoryImpactTemplate, { count: servicesCount })}
                                             </span>
                                         </p>
                                     </div>
@@ -2512,9 +2526,9 @@ function DeleteModal({
                                 isDisabled={submitting}
                                 startContent={<X size={14} />}
                             >
-                                Abbrechen
+                                {t.cancel}
                             </Button>
-                            
+
                             {/* Show delete button for services even with assignments (cascade delete) */}
                             {isService && (
                                 <Button
@@ -2523,12 +2537,12 @@ function DeleteModal({
                                     isLoading={submitting}
                                     startContent={!submitting && <Trash2 size={14} />}
                                 >
-                                    {hasEmployeeAssignments 
-                                        ? "Trotzdem löschen" 
-                                        : "Endgültig löschen"}
+                                    {hasEmployeeAssignments
+                                        ? s.deleteAnyway
+                                        : s.deleteFinal}
                                 </Button>
                             )}
-                            
+
                             {/* Show delete button for categories only if no services */}
                             {isCategory && !hasServices && (
                                 <Button
@@ -2537,7 +2551,7 @@ function DeleteModal({
                                     isLoading={submitting}
                                     startContent={!submitting && <Trash2 size={14} />}
                                 >
-                                    Endgültig löschen
+                                    {s.deleteFinal}
                                 </Button>
                             )}
                         </ModalFooter>

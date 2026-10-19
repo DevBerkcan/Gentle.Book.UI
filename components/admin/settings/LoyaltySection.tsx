@@ -6,17 +6,25 @@
 import { useCallback, useEffect, useState } from "react";
 import { Gift, Loader2, Lock, Award } from "lucide-react";
 import { adminApi, type LoyaltySettings } from "@/lib/api/admin";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
-const REWARD_TYPE_LABEL: Record<LoyaltySettings["rewardType"], string> = {
-  MonetaryValue: "Geldwert-Gutschein",
-  PercentageDiscount: "Prozent-Rabatt",
-  SessionPackage: "Freie Sitzung(en)",
-};
+function getRewardTypeLabel(t: Translations): Record<LoyaltySettings["rewardType"], string> {
+  const s = t.admin.settingsPage;
+  return {
+    MonetaryValue: s.lsRewardTypeMonetary,
+    PercentageDiscount: s.lsRewardTypePercentage,
+    SessionPackage: s.lsRewardTypeSession,
+  };
+}
 
 export function LoyaltySection() {
+  const { t } = useTranslation();
+  const s = t.admin.settingsPage;
+  const REWARD_TYPE_LABEL = getRewardTypeLabel(t);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<LoyaltySettings>({ pointsPerBooking: 0, rewardEveryNVisits: 0, rewardType: "MonetaryValue", rewardValue: null });
   const [saving, setSaving] = useState(false);
@@ -47,9 +55,9 @@ export function LoyaltySection() {
     try {
       const saved = await adminApi.updateLoyaltySettings(settings);
       setSettings(saved);
-      setSuccess("Gespeichert.");
+      setSuccess(t.admin.genericSavedInfo);
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Die Einstellung konnte nicht gespeichert werden.");
+      setError(err?.response?.data?.message ?? t.admin.genericSaveError);
     } finally {
       setSaving(false);
     }
@@ -58,7 +66,7 @@ export function LoyaltySection() {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl overflow-hidden">
-        <div className="flex items-center gap-2 text-xs text-[#9CA3AF] px-1"><Loader2 size={13} className="animate-spin" /> Lade…</div>
+        <div className="flex items-center gap-2 text-xs text-[#9CA3AF] px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
       </div>
     );
   }
@@ -71,15 +79,15 @@ export function LoyaltySection() {
             <Lock size={14} className="text-[#9CA3AF]" />
           </div>
           <div>
-            <p className="font-semibold text-[#111318] text-sm leading-tight">Treuepunkte</p>
-            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Agency-exklusiv</p>
+            <p className="font-semibold text-[#111318] text-sm leading-tight">{t.admin.customersPage.loyaltyPoints}</p>
+            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{t.admin.agencyExclusive}</p>
           </div>
         </div>
         <div className="px-1">
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] p-3.5 text-xs text-[#565A72]">
             {locked.message}
-            {locked.currentPlan && <span className="block mt-1 text-[#9CA3AF]">Aktueller Plan: {locked.currentPlan}</span>}
-            <a href="/admin/subscription" className="inline-block mt-2 text-[#6355E4] font-semibold hover:underline">Jetzt upgraden →</a>
+            {locked.currentPlan && <span className="block mt-1 text-[#9CA3AF]">{fillTemplate(t.admin.currentPlanTemplate, { plan: locked.currentPlan })}</span>}
+            <a href="/admin/subscription" className="inline-block mt-2 text-[#6355E4] font-semibold hover:underline">{t.admin.upgradeNowCta}</a>
           </div>
         </div>
       </div>
@@ -93,14 +101,14 @@ export function LoyaltySection() {
           <Gift size={15} className="text-white" />
         </div>
         <div>
-          <p className="font-semibold text-[#111318] text-sm leading-tight">Treuepunkte</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Kund:innen sammeln Punkte für jeden abgeschlossenen Termin</p>
+          <p className="font-semibold text-[#111318] text-sm leading-tight">{t.admin.customersPage.loyaltyPoints}</p>
+          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.lsSubtitle}</p>
         </div>
       </div>
 
       <div className="px-1 space-y-4">
         <div className="flex flex-col gap-1.5 max-w-xs">
-          <label className="text-xs font-semibold text-[#6B7280]">Punkte pro abgeschlossenem Termin</label>
+          <label className="text-xs font-semibold text-[#6B7280]">{s.lsPointsPerBookingLabel}</label>
           <input
             type="number"
             min={0}
@@ -109,7 +117,7 @@ export function LoyaltySection() {
             className={inputCls}
             disabled={saving}
           />
-          <p className="text-[11px] text-[#9CA3AF]">0 = Treuepunkte-Programm deaktiviert</p>
+          <p className="text-[11px] text-[#9CA3AF]">{s.lsPointsPerBookingDesc}</p>
         </div>
       </div>
 
@@ -118,14 +126,14 @@ export function LoyaltySection() {
           <Award size={15} className="text-white" />
         </div>
         <div>
-          <p className="font-semibold text-[#111318] text-sm leading-tight">Stammkunden-Belohnung</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Automatischer Gutschein, sobald ein Kunde eine bestimmte Besuchsanzahl erreicht</p>
+          <p className="font-semibold text-[#111318] text-sm leading-tight">{s.lsRewardTitle}</p>
+          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.lsRewardSubtitle}</p>
         </div>
       </div>
 
       <div className="px-1 space-y-4">
         <div className="flex flex-col gap-1.5 max-w-xs">
-          <label className="text-xs font-semibold text-[#6B7280]">Belohnung alle X Besuche</label>
+          <label className="text-xs font-semibold text-[#6B7280]">{s.lsRewardEveryNVisitsLabel}</label>
           <input
             type="number"
             min={0}
@@ -134,7 +142,7 @@ export function LoyaltySection() {
             className={inputCls}
             disabled={saving}
           />
-          <p className="text-[11px] text-[#9CA3AF]">0 = deaktiviert. Z. B. 10 = bei jedem 10., 20., 30. Besuch usw.</p>
+          <p className="text-[11px] text-[#9CA3AF]">{s.lsRewardEveryNVisitsDesc}</p>
         </div>
 
         {settings.rewardEveryNVisits > 0 && (
@@ -153,7 +161,7 @@ export function LoyaltySection() {
               step={settings.rewardType === "PercentageDiscount" ? 1 : 0.01}
               value={settings.rewardValue ?? ""}
               onChange={(e) => setSettings((s) => ({ ...s, rewardValue: e.target.value ? parseFloat(e.target.value) : null }))}
-              placeholder={settings.rewardType === "PercentageDiscount" ? "%" : settings.rewardType === "SessionPackage" ? "Sitzungen" : "Betrag"}
+              placeholder={settings.rewardType === "PercentageDiscount" ? s.lsRewardValuePercentPlaceholder : settings.rewardType === "SessionPackage" ? s.lsRewardValueSessionsPlaceholder : s.lsRewardValueAmountPlaceholder}
               className={inputCls}
               disabled={saving}
             />
@@ -169,7 +177,7 @@ export function LoyaltySection() {
           disabled={saving}
           className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
         >
-          {saving ? <Loader2 size={13} className="animate-spin" /> : <Gift size={13} />} Speichern
+          {saving ? <Loader2 size={13} className="animate-spin" /> : <Gift size={13} />} {t.save}
         </button>
       </div>
     </div>

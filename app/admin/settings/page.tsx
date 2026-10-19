@@ -19,6 +19,8 @@ import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSec
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
 import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
 import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
+import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
+import type { Translations } from '@/lib/i18n/translations';
 import api from '@/lib/api/client';
 import { resolveLogoUrl } from '@/lib/utils/logo';
 import {
@@ -45,31 +47,40 @@ import {
 // warning:    #92400E on #FFFBEB / border #FDE68A
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SETTINGS_NAV_ITEMS: SettingsNavItem[] = [
-  { id: 'section-logo', label: 'Logo' },
-  { id: 'section-company', label: 'Firmeninformationen' },
-  { id: 'section-contact', label: 'Kontakt' },
-  { id: 'section-website', label: 'Unternehmenswebsite' },
-  { id: 'section-domain', label: 'Eigene Domain' },
-  { id: 'section-reports', label: 'Team-Reports' },
-  { id: 'section-loyalty', label: 'Treuepunkte' },
-  { id: 'section-locations', label: 'Standorte' },
-  { id: 'section-billing', label: 'Rechnungsadresse' },
-  { id: 'section-colors', label: 'Farben' },
-  { id: 'section-booking', label: 'Buchungseinstellungen' },
-  { id: 'section-hours', label: 'Öffnungszeiten' },
-  { id: 'section-password', label: 'Passwort ändern' },
-];
+function getSettingsNavItems(t: Translations): SettingsNavItem[] {
+  const s = t.admin.settingsPage;
+  return [
+    { id: 'section-logo', label: s.logo },
+    { id: 'section-company', label: s.companyInfo },
+    { id: 'section-contact', label: s.contact },
+    { id: 'section-website', label: s.companyWebsite },
+    { id: 'section-domain', label: s.customDomain },
+    { id: 'section-reports', label: s.teamReports },
+    { id: 'section-loyalty', label: t.admin.customersPage.loyaltyPoints },
+    { id: 'section-locations', label: s.locations },
+    { id: 'section-billing', label: s.billingAddress },
+    { id: 'section-colors', label: s.colors },
+    { id: 'section-booking', label: s.bookingSettings },
+    { id: 'section-hours', label: s.openingHours },
+    { id: 'section-password', label: s.changePassword },
+  ];
+}
 
-const DAYS = [
-  { value: 1, label: 'Montag' },
-  { value: 2, label: 'Dienstag' },
-  { value: 3, label: 'Mittwoch' },
-  { value: 4, label: 'Donnerstag' },
-  { value: 5, label: 'Freitag' },
-  { value: 6, label: 'Samstag' },
-  { value: 0, label: 'Sonntag' },
-];
+// Day-of-week display order, independent of language (labels come from getDays(t) below).
+const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+function getDays(t: Translations) {
+  const s = t.admin.settingsPage;
+  return [
+    { value: 1, label: s.dayMonday },
+    { value: 2, label: s.dayTuesday },
+    { value: 3, label: s.dayWednesday },
+    { value: 4, label: s.dayThursday },
+    { value: 5, label: s.dayFriday },
+    { value: 6, label: s.daySaturday },
+    { value: 0, label: s.daySunday },
+  ];
+}
 
 interface BusinessHoursItem {
   dayOfWeek: number;
@@ -177,6 +188,8 @@ const emptyLocation = (currency = 'EUR', timeZone = 'Europe/Berlin'): BusinessLo
 
 export default function AdminSettingsPage() {
   const { isEmployee } = useAuth();
+  const { t, lang } = useTranslation();
+  const cetLabel = lang === 'de' ? 'MEZ/MESZ' : 'CET/CEST';
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const searchParams = useSearchParams();
@@ -230,8 +243,8 @@ export default function AdminSettingsPage() {
   const [pwSuccess, setPwSuccess] = useState('');
 
   const [businessHours, setBusinessHours] = useState<BusinessHoursItem[]>(
-    DAYS.map((d) => ({
-      dayOfWeek: d.value,
+    DAY_ORDER.map((value) => ({
+      dayOfWeek: value,
       isOpen: false,
       openTime: '',
       closeTime: '',
@@ -278,11 +291,11 @@ export default function AdminSettingsPage() {
       const data: any[] = res.data?.data ?? [];
       if (data.length > 0) {
         setBusinessHours(
-          DAYS.map((d) => {
-            const existing = data.find((bh: any) => bh.dayOfWeek === d.value);
+          DAY_ORDER.map((value) => {
+            const existing = data.find((bh: any) => bh.dayOfWeek === value);
             return existing
-              ? { dayOfWeek: d.value, isOpen: existing.isOpen, openTime: existing.openTime ?? '', closeTime: existing.closeTime ?? '', breakStartTime: existing.breakStartTime ?? '', breakEndTime: existing.breakEndTime ?? '' }
-              : { dayOfWeek: d.value, isOpen: false, openTime: '', closeTime: '', breakStartTime: '', breakEndTime: '' };
+              ? { dayOfWeek: value, isOpen: existing.isOpen, openTime: existing.openTime ?? '', closeTime: existing.closeTime ?? '', breakStartTime: existing.breakStartTime ?? '', breakEndTime: existing.breakEndTime ?? '' }
+              : { dayOfWeek: value, isOpen: false, openTime: '', closeTime: '', breakStartTime: '', breakEndTime: '' };
           })
         );
       }
@@ -293,7 +306,7 @@ export default function AdminSettingsPage() {
     try {
       setLocations(await getBusinessLocations());
     } catch {
-      setLocationError('Standorte konnten nicht geladen werden.');
+      setLocationError(t.admin.settingsPage.locationsLoadError);
     }
   }
 
@@ -308,11 +321,11 @@ export default function AdminSettingsPage() {
   }
 
   async function handleInviteLocationAdmin(location: BusinessLocation) {
-    const email = window.prompt(`E-Mail-Adresse des Standort-Admins für "${location.name}":`);
+    const email = window.prompt(fillTemplate(t.admin.settingsPage.promptAdminEmailTemplate, { name: location.name }));
     if (!email || !email.trim()) return;
-    const firstName = window.prompt('Vorname:');
+    const firstName = window.prompt(t.admin.calendarPage.firstName + ':');
     if (!firstName || !firstName.trim()) return;
-    const lastName = window.prompt('Nachname (optional):') ?? '';
+    const lastName = window.prompt(t.admin.settingsPage.promptLastNameOptional) ?? '';
 
     setInvitingLocationId(location.id);
     setLocationError('');
@@ -320,20 +333,20 @@ export default function AdminSettingsPage() {
       await inviteLocationAdmin(location.id, email.trim(), firstName.trim(), lastName.trim() || undefined);
       await loadLocationAdmins();
     } catch (err: any) {
-      setLocationError(err.response?.data?.message || 'Einladung fehlgeschlagen.');
+      setLocationError(err.response?.data?.message || t.admin.settingsPage.inviteFailed);
     } finally {
       setInvitingLocationId(null);
     }
   }
 
   async function handleRemoveLocationAdmin(admin: LocationAdmin) {
-    if (!window.confirm(`Zugang von "${admin.firstName} ${admin.lastName}" entfernen?`)) return;
+    if (!window.confirm(fillTemplate(t.admin.settingsPage.confirmRemoveAccessTemplate, { name: `${admin.firstName} ${admin.lastName}` }))) return;
     setLocationError('');
     try {
       await removeLocationAdmin(admin.id);
       await loadLocationAdmins();
     } catch (err: any) {
-      setLocationError(err.response?.data?.message || 'Entfernen fehlgeschlagen.');
+      setLocationError(err.response?.data?.message || t.admin.settingsPage.removeFailed);
     }
   }
 
@@ -379,20 +392,20 @@ export default function AdminSettingsPage() {
       setEditingLocationId(null);
       await Promise.all([loadLocations(), loadSettings()]);
     } catch (err: any) {
-      setLocationError(err.response?.data?.message || 'Standort konnte nicht gespeichert werden.');
+      setLocationError(err.response?.data?.message || t.admin.settingsPage.locationSaveError);
     } finally {
       setLocationSaving(false);
     }
   }
 
   async function removeLocation(location: BusinessLocation) {
-    if (!window.confirm(`Standort „${location.name}“ wirklich löschen?`)) return;
+    if (!window.confirm(fillTemplate(t.admin.settingsPage.confirmDeleteLocationTemplate, { name: location.name }))) return;
     setLocationError('');
     try {
       await deleteBusinessLocation(location.id);
       await loadLocations();
     } catch (err: any) {
-      setLocationError(err.response?.data?.message || 'Standort konnte nicht gelöscht werden.');
+      setLocationError(err.response?.data?.message || t.admin.settingsPage.locationDeleteError);
     }
   }
 
@@ -410,7 +423,7 @@ export default function AdminSettingsPage() {
       setBhSaved(true);
       setTimeout(() => setBhSaved(false), 3000);
     } catch (err: any) {
-      setBhError(err.response?.data?.message || 'Fehler beim Speichern');
+      setBhError(err.response?.data?.message || t.admin.customersPage.saveError);
     } finally { setBhSaving(false); }
   }
 
@@ -430,7 +443,7 @@ export default function AdminSettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Fehler beim Speichern');
+      setError(err.response?.data?.message || t.admin.customersPage.saveError);
     } finally { setSaving(false); }
   }
 
@@ -441,7 +454,7 @@ export default function AdminSettingsPage() {
       await api.delete('/tenant/logo');
       setSettings((s) => ({ ...s, logoUrl: '' }));
     } catch (err: any) {
-      setLogoError(err.response?.data?.message || 'Fehler beim Löschen');
+      setLogoError(err.response?.data?.message || t.admin.customersPage.deleteError);
     } finally {
       setLogoDeleting(false);
     }
@@ -457,7 +470,7 @@ export default function AdminSettingsPage() {
       const res = await api.post('/tenant/logo', formData);
       setSettings((s) => ({ ...s, logoUrl: res.data.logoUrl }));
     } catch (err: any) {
-      setLogoError(err.response?.data?.message || 'Fehler beim Hochladen');
+      setLogoError(err.response?.data?.message || t.admin.settingsPage.uploadError);
     } finally {
       setLogoUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -467,21 +480,24 @@ export default function AdminSettingsPage() {
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
     setPwError(''); setPwSuccess('');
-    if (newPassword !== confirmPassword) { setPwError('Die neuen Passwörter stimmen nicht überein.'); return; }
-    if (newPassword.length < 6) { setPwError('Das neue Passwort muss mindestens 6 Zeichen lang sein.'); return; }
+    if (newPassword !== confirmPassword) { setPwError(t.admin.settingsPage.passwordMismatch); return; }
+    if (newPassword.length < 6) { setPwError(t.admin.settingsPage.passwordTooShort); return; }
     setPwSaving(true);
     try {
       await api.put('/auth/change-password', { currentPassword, newPassword });
-      setPwSuccess('Passwort erfolgreich geändert.');
+      setPwSuccess(t.admin.settingsPage.passwordChangeSuccess);
       setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
       setTimeout(() => setPwSuccess(''), 4000);
     } catch (err: any) {
-      setPwError(err.response?.data?.message || 'Fehler beim Ändern des Passworts.');
+      setPwError(err.response?.data?.message || t.admin.settingsPage.passwordChangeError);
     } finally { setPwSaving(false); }
   }
 
   const set = (key: keyof TenantSettings, value: string | number) =>
     setSettings((s) => ({ ...s, [key]: value }));
+
+  const days = getDays(t);
+  const navItems = getSettingsNavItems(t);
 
   // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -505,13 +521,13 @@ export default function AdminSettingsPage() {
             <Settings size={17} className="text-white" />
           </div>
           <div>
-            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight leading-tight">Einstellungen</h1>
-            <p className="text-sm text-[#6B7280]">Branding & Firmendaten verwalten</p>
+            <h1 className="text-[22px] font-bold text-[#111318] tracking-tight leading-tight">{t.admin.settings}</h1>
+            <p className="text-sm text-[#6B7280]">{t.admin.settingsPage.subtitle}</p>
           </div>
         </div>
 
         <div className="lg:flex lg:items-start lg:gap-10">
-          <SettingsNav items={SETTINGS_NAV_ITEMS} />
+          <SettingsNav items={navItems} />
 
           <div className="flex-1 min-w-0 max-w-3xl">
 
@@ -521,15 +537,15 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-logo"
             icon={<ImageIcon size={15} className="text-white" />}
-            title="Logo"
-            subtitle="Firmenlogo hochladen"
+            title={t.admin.settingsPage.logo}
+            subtitle={t.admin.settingsPage.uploadLogoDesc}
           >
             <div className="flex items-center gap-5">
               <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-[#E5E7EB] bg-[#F7F7F8] flex items-center justify-center overflow-hidden flex-shrink-0">
                 {settings.logoUrl ? (
                   <Image
                     src={resolveLogoUrl(settings.logoUrl)!}
-                    alt="Logo"
+                    alt={t.admin.settingsPage.logo}
                     width={80}
                     height={80}
                     unoptimized
@@ -554,8 +570,8 @@ export default function AdminSettingsPage() {
                   className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#6355E4] disabled:opacity-50 transition-all"
                 >
                   {logoUploading
-                    ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />Wird hochgeladen…</>
-                    : <><Upload size={13} />Logo hochladen</>}
+                    ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />{t.admin.settingsPage.uploading}</>
+                    : <><Upload size={13} />{t.admin.settingsPage.uploadLogo}</>}
                 </button>
                 {settings.logoUrl && (
                   <button
@@ -565,11 +581,11 @@ export default function AdminSettingsPage() {
                     className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-[#FECACA] bg-[#FEF2F2] text-[#991B1B] hover:border-[#FCA5A5] hover:bg-[#FEE2E2] disabled:opacity-50 transition-all"
                   >
                     {logoDeleting
-                      ? <><span className="w-3.5 h-3.5 border-2 border-[#FECACA] border-t-[#991B1B] rounded-full animate-spin" />Wird gelöscht…</>
-                      : <><Trash2 size={13} />Logo löschen</>}
+                      ? <><span className="w-3.5 h-3.5 border-2 border-[#FECACA] border-t-[#991B1B] rounded-full animate-spin" />{t.admin.settingsPage.deleting}</>
+                      : <><Trash2 size={13} />{t.admin.settingsPage.deleteLogo}</>}
                   </button>
                 )}
-                <p className="text-[10px] text-[#9CA3AF]">JPG, PNG, WebP · max. 5 MB</p>
+                <p className="text-[10px] text-[#9CA3AF]">{t.admin.settingsPage.logoFileHint}</p>
                 {logoError && <p className="text-[11px] text-[#991B1B]">{logoError}</p>}
               </div>
             </div>
@@ -579,45 +595,45 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-company"
             icon={<Building2 size={15} className="text-white" />}
-            title="Firmeninformationen"
-            subtitle="Name, Slogan und Texte"
+            title={t.admin.settingsPage.companyInfo}
+            subtitle={t.admin.settingsPage.companyInfoDesc}
             accentClass="bg-[#1F2937]"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Firmenname">
+              <Field label={t.admin.settingsPage.companyName}>
                 <input
                   type="text"
                   value={settings.companyName}
                   onChange={(e) => set('companyName', e.target.value)}
-                  placeholder="Mein Salon"
+                  placeholder={t.admin.settingsPage.companyNamePlaceholder}
                   required
                   className={inputCls}
                 />
               </Field>
-              <Field label="Slogan">
+              <Field label={t.admin.settingsPage.tagline}>
                 <input
                   type="text"
                   value={settings.tagline}
                   onChange={(e) => set('tagline', e.target.value)}
-                  placeholder="Ihr Wohlfühlsalon"
+                  placeholder={t.admin.settingsPage.taglinePlaceholder}
                   className={inputCls}
                 />
               </Field>
             </div>
-            <Field label="Willkommensnachricht">
+            <Field label={t.admin.settingsPage.welcomeMessage}>
               <textarea
                 value={settings.welcomeMessage}
                 onChange={(e) => set('welcomeMessage', e.target.value)}
-                placeholder="Herzlich willkommen! Wir freuen uns auf Ihren Besuch."
+                placeholder={t.admin.settingsPage.welcomeMessagePlaceholder}
                 rows={2}
                 className={`${inputCls} resize-none`}
               />
             </Field>
-            <Field label="Stornierungsrichtlinie">
+            <Field label={t.admin.settingsPage.cancellationPolicy}>
               <textarea
                 value={settings.cancellationPolicy}
                 onChange={(e) => set('cancellationPolicy', e.target.value)}
-                placeholder="Kostenlose Stornierung bis 24h vor dem Termin."
+                placeholder={t.admin.settingsPage.cancellationPolicyPlaceholder}
                 rows={2}
                 className={`${inputCls} resize-none`}
               />
@@ -628,31 +644,31 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-contact"
             icon={<Phone size={15} className="text-white" />}
-            title="Kontakt"
-            subtitle="Telefon, E-Mail und Adresse"
+            title={t.admin.settingsPage.contact}
+            subtitle={t.admin.settingsPage.contactDesc}
             accentClass="bg-[#1F2937]"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Telefon">
+              <Field label={t.admin.phone}>
                 <input type="tel" value={settings.phone} onChange={(e) => set('phone', e.target.value)}
-                  placeholder="+49 171 123 45 67" className={inputCls} />
+                  placeholder={t.admin.settingsPage.phonePlaceholder} className={inputCls} />
               </Field>
-              <Field label="E-Mail">
+              <Field label={t.admin.email}>
                 <input type="email" value={settings.email} onChange={(e) => set('email', e.target.value)}
-                  placeholder="info@ihrsalon.de" className={inputCls} />
+                  placeholder={t.admin.settingsPage.emailPlaceholder} className={inputCls} />
               </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Website">
+              <Field label={t.admin.settingsPage.website}>
                 <div className="relative">
                   <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
                   <input type="url" value={settings.website} onChange={(e) => set('website', e.target.value)}
-                    placeholder="https://ihrsalon.de" className={`${inputCls} pl-8`} />
+                    placeholder={t.admin.settingsPage.websitePlaceholder} className={`${inputCls} pl-8`} />
                 </div>
               </Field>
-              <Field label="Adresse">
+              <Field label={t.admin.settingsPage.address}>
                 <input type="text" value={settings.address} onChange={(e) => set('address', e.target.value)}
-                  placeholder="Musterstraße 1, 10115 Berlin" className={inputCls} />
+                  placeholder={t.admin.settingsPage.addressPlaceholder} className={inputCls} />
               </Field>
             </div>
           </SectionCard>
@@ -681,21 +697,20 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-locations"
             icon={<MapPin size={15} className="text-white" />}
-            title="Standorte"
-            subtitle="Adressen, Zeitzonen und Währungen je Filiale"
+            title={t.admin.settingsPage.locations}
+            subtitle={t.admin.settingsPage.locationsDesc}
             accentClass="bg-[#17A398]"
           >
             <div className="flex items-start justify-between gap-4 rounded-xl border border-[#C7D2FE] bg-[#F8F7FF] p-3.5">
               <p className="text-xs leading-relaxed text-[#565A72]">
-                Jeder Service wird einem Standort zugeordnet und übernimmt automatisch dessen Währung.
-                Der Standardstandort gilt für bestehende Services und allgemeine Einstellungen.
+                {t.admin.settingsPage.locationsInfoText}
               </p>
               <button
                 type="button"
                 onClick={openNewLocation}
                 className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE]"
               >
-                <Plus size={13} /> Standort
+                <Plus size={13} /> {t.admin.settingsPage.addLocation}
               </button>
             </div>
 
@@ -714,12 +729,12 @@ export default function AdminSettingsPage() {
                         <p className="font-semibold text-[#111318]">{location.name}</p>
                         {location.isDefault && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[#EEEBFC] px-2 py-0.5 text-[10px] font-semibold text-[#6355E4]">
-                            <Star size={10} fill="currentColor" /> Standard
+                            <Star size={10} fill="currentColor" /> {t.admin.settingsPage.defaultBadge}
                           </span>
                         )}
                         {!location.isActive && (
                           <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold text-[#6B7280]">
-                            Inaktiv
+                            {t.admin.inactive}
                           </span>
                         )}
                       </div>
@@ -741,7 +756,7 @@ export default function AdminSettingsPage() {
                           {locationAdmins.filter((a) => a.locationId === location.id).map((admin) => (
                             <span key={admin.id} className="inline-flex items-center gap-1.5 rounded-full bg-[#EEF2FF] px-2 py-1 text-[10px] font-medium text-[#4338CA]">
                               <ShieldCheck size={10} /> {admin.firstName} {admin.lastName}
-                              <button type="button" onClick={() => handleRemoveLocationAdmin(admin)} className="text-[#4338CA]/60 hover:text-red-600" aria-label="Zugang entfernen">
+                              <button type="button" onClick={() => handleRemoveLocationAdmin(admin)} className="text-[#4338CA]/60 hover:text-red-600" aria-label={t.admin.settingsPage.removeAccessAriaLabel}>
                                 <X size={10} />
                               </button>
                             </span>
@@ -754,19 +769,19 @@ export default function AdminSettingsPage() {
                         disabled={invitingLocationId === location.id}
                         className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-[#6355E4] hover:text-[#4338CA] disabled:opacity-50"
                       >
-                        <UserPlus size={11} /> {invitingLocationId === location.id ? 'Wird eingeladen…' : 'Standort-Admin einladen'}
+                        <UserPlus size={11} /> {invitingLocationId === location.id ? t.admin.settingsPage.inviting : t.admin.settingsPage.inviteLocationAdmin}
                       </button>
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => openEditLocation(location)}
                         className="rounded-lg p-2 text-[#6B7280] hover:bg-[#EEEBFC] hover:text-[#6355E4]"
-                        aria-label={`${location.name} bearbeiten`}>
+                        aria-label={fillTemplate(t.admin.settingsPage.editAriaLabelTemplate, { name: location.name })}>
                         <Pencil size={14} />
                       </button>
                       {!location.isDefault && (
                         <button type="button" onClick={() => removeLocation(location)}
                           className="rounded-lg p-2 text-[#9CA3AF] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
-                          aria-label={`${location.name} löschen`}>
+                          aria-label={fillTemplate(t.admin.settingsPage.deleteAriaLabelTemplate, { name: location.name })}>
                           <Trash2 size={14} />
                         </button>
                       )}
@@ -776,7 +791,7 @@ export default function AdminSettingsPage() {
               ))}
               {locations.length === 0 && (
                 <div className="rounded-xl border border-dashed border-[#D1D5DB] p-5 text-center text-xs text-[#9CA3AF]">
-                  Noch kein Standort angelegt. Der erste Standort wird automatisch zum Standard.
+                  {t.admin.settingsPage.noLocationsYet}
                 </div>
               )}
             </div>
@@ -785,47 +800,47 @@ export default function AdminSettingsPage() {
               <div className="space-y-4 rounded-2xl border-2 border-[#C7D2FE] bg-[#F8F7FF] p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-[#111318]">
-                    {editingLocationId ? 'Standort bearbeiten' : 'Neuer Standort'}
+                    {editingLocationId ? t.admin.settingsPage.editLocation : t.admin.settingsPage.newLocation}
                   </p>
                   <button type="button" onClick={() => setShowLocationForm(false)}
                     className="text-xs font-medium text-[#6B7280] hover:text-[#111318]">
-                    Schließen
+                    {t.close}
                   </button>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Field label="Name">
+                  <Field label={t.admin.name}>
                     <input className={inputCls} value={locationForm.name}
                       onChange={(e) => setLocationForm((form) => ({ ...form, name: e.target.value }))}
-                      placeholder="Filiale Basel" />
+                      placeholder={t.admin.settingsPage.locationNamePlaceholder} />
                   </Field>
-                  <Field label="Straße & Hausnummer">
+                  <Field label={t.admin.settingsPage.streetAddress}>
                     <input className={inputCls} value={locationForm.street ?? ''}
                       onChange={(e) => setLocationForm((form) => ({ ...form, street: e.target.value }))}
-                      placeholder="Freie Straße 10" />
+                      placeholder={t.admin.settingsPage.streetPlaceholder} />
                   </Field>
-                  <Field label="PLZ">
+                  <Field label={t.admin.settingsPage.postalCode}>
                     <input className={inputCls} value={locationForm.postalCode ?? ''}
                       onChange={(e) => setLocationForm((form) => ({ ...form, postalCode: e.target.value }))}
-                      placeholder="4001" />
+                      placeholder={t.admin.settingsPage.postalCodePlaceholder} />
                   </Field>
-                  <Field label="Ort">
+                  <Field label={t.admin.settingsPage.city}>
                     <input className={inputCls} value={locationForm.city}
                       onChange={(e) => setLocationForm((form) => ({ ...form, city: e.target.value }))}
-                      placeholder="Basel" />
+                      placeholder={t.admin.settingsPage.cityPlaceholder} />
                   </Field>
-                  <Field label="Land">
+                  <Field label={t.admin.settingsPage.country}>
                     <select className={selectCls} value={locationForm.countryCode}
                       onChange={(e) => setLocationForm((form) => ({ ...form, countryCode: e.target.value }))}>
-                      <option value="DE">Deutschland</option>
-                      <option value="CH">Schweiz</option>
-                      <option value="AT">Österreich</option>
-                      <option value="FR">Frankreich</option>
-                      <option value="NL">Niederlande</option>
-                      <option value="GB">Großbritannien</option>
-                      <option value="US">USA</option>
+                      <option value="DE">{t.admin.settingsPage.countryGermany}</option>
+                      <option value="CH">{t.admin.settingsPage.countrySwitzerland}</option>
+                      <option value="AT">{t.admin.settingsPage.countryAustria}</option>
+                      <option value="FR">{t.admin.settingsPage.countryFrance}</option>
+                      <option value="NL">{t.admin.settingsPage.countryNetherlands}</option>
+                      <option value="GB">{t.admin.settingsPage.countryUK}</option>
+                      <option value="US">{t.admin.settingsPage.countryUSA}</option>
                     </select>
                   </Field>
-                  <Field label="Währung">
+                  <Field label={t.admin.settingsPage.currency}>
                     <select className={selectCls} value={locationForm.currency}
                       onChange={(e) => setLocationForm((form) => ({ ...form, currency: e.target.value }))}>
                       <option value="EUR">EUR (€)</option>
@@ -834,7 +849,7 @@ export default function AdminSettingsPage() {
                       <option value="GBP">GBP (£)</option>
                     </select>
                   </Field>
-                  <Field label="Zeitzone">
+                  <Field label={t.admin.settingsPage.timezone}>
                     <select className={selectCls} value={locationForm.timeZone}
                       onChange={(e) => setLocationForm((form) => ({ ...form, timeZone: e.target.value }))}>
                       <option value="Europe/Berlin">Europe/Berlin</option>
@@ -850,23 +865,23 @@ export default function AdminSettingsPage() {
                       <input type="checkbox" checked={locationForm.isDefault}
                         onChange={(e) => setLocationForm((form) => ({ ...form, isDefault: e.target.checked }))}
                         disabled={locations.find((location) => location.id === editingLocationId)?.isDefault} />
-                      Standardstandort
+                      {t.admin.settingsPage.defaultLocationCheckbox}
                     </label>
                     <label className="flex items-center gap-2 text-xs font-medium text-[#374151]">
                       <input type="checkbox" checked={locationForm.isActive}
                         onChange={(e) => setLocationForm((form) => ({ ...form, isActive: e.target.checked }))} />
-                      Aktiv
+                      {t.admin.active}
                     </label>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setShowLocationForm(false)}
                     className="rounded-xl border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#374151]">
-                    Abbrechen
+                    {t.cancel}
                   </button>
                   <button type="button" onClick={saveLocation} disabled={locationSaving}
                     className="rounded-xl bg-[#6355E4] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
-                    {locationSaving ? 'Speichert…' : 'Standort speichern'}
+                    {locationSaving ? t.admin.settingsPage.savingEllipsis : t.admin.settingsPage.saveLocationBtn}
                   </button>
                 </div>
               </div>
@@ -877,43 +892,43 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-billing"
             icon={<CreditCard size={15} className="text-white" />}
-            title="Rechnungsadresse"
-            subtitle="Wird für Abo-Zahlungen und Rechnungen benötigt"
+            title={t.admin.settingsPage.billingAddress}
+            subtitle={t.admin.settingsPage.billingAddressDesc}
             accentClass="bg-[#1F2937]"
           >
             {settings.hasCompleteBillingProfile === false && (
               <div className="flex items-center gap-2 px-3.5 py-3 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-sm text-[#92400E]">
                 <AlertTriangle size={13} className="shrink-0" />
-                Bitte vollständig ausfüllen, um dein Abo per SEPA-Lastschrift bezahlen zu können.
+                {t.admin.settingsPage.billingIncompleteWarning}
               </div>
             )}
-            <Field label="Rechtlicher Firmenname / Inhaber">
+            <Field label={t.admin.settingsPage.legalCompanyName}>
               <input type="text" value={settings.legalCompanyName} onChange={(e) => set('legalCompanyName', e.target.value)}
-                placeholder="Max Mustermann" required className={inputCls} />
+                placeholder={t.admin.settingsPage.legalNamePlaceholder} required className={inputCls} />
             </Field>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Straße & Hausnummer">
+              <Field label={t.admin.settingsPage.streetAddress}>
                 <input type="text" value={settings.billingStreet} onChange={(e) => set('billingStreet', e.target.value)}
-                  placeholder="Musterstraße 1" required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingStreetPlaceholder} required className={inputCls} />
               </Field>
-              <Field label="PLZ">
+              <Field label={t.admin.settingsPage.postalCode}>
                 <input type="text" value={settings.billingZipCode} onChange={(e) => set('billingZipCode', e.target.value)}
-                  placeholder="10115" required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingZipPlaceholder} required className={inputCls} />
               </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Ort">
+              <Field label={t.admin.settingsPage.city}>
                 <input type="text" value={settings.billingCity} onChange={(e) => set('billingCity', e.target.value)}
-                  placeholder="Berlin" required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingCityPlaceholder} required className={inputCls} />
               </Field>
-              <Field label="Land (ISO-Code)">
+              <Field label={t.admin.settingsPage.countryIsoCode}>
                 <input type="text" value={settings.billingCountry} onChange={(e) => set('billingCountry', e.target.value.toUpperCase())}
-                  placeholder="DE" maxLength={2} required className={inputCls} />
+                  placeholder={t.admin.settingsPage.countryIsoPlaceholder} maxLength={2} required className={inputCls} />
               </Field>
             </div>
-            <Field label="USt-IdNr. (optional)">
+            <Field label={t.admin.settingsPage.vatIdLabel}>
               <input type="text" value={settings.vatId} onChange={(e) => set('vatId', e.target.value)}
-                placeholder="DE123456789" className={inputCls} />
+                placeholder={t.admin.settingsPage.vatIdPlaceholder} className={inputCls} />
             </Field>
           </SectionCard>
 
@@ -921,15 +936,15 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-colors"
             icon={<Palette size={15} className="text-white" />}
-            title="Farben"
-            subtitle="Primär-, Sekundär- und Akzentfarbe der Buchungsseite"
+            title={t.admin.settingsPage.colors}
+            subtitle={t.admin.settingsPage.colorsDesc}
           >
             <div className="grid grid-cols-3 gap-4">
               {(['primaryColor', 'secondaryColor', 'accentColor'] as const).map((key) => {
                 const labels: Record<string, string> = {
-                  primaryColor: 'Primärfarbe',
-                  secondaryColor: 'Sekundärfarbe',
-                  accentColor: 'Akzentfarbe',
+                  primaryColor: t.admin.settingsPage.primaryColor,
+                  secondaryColor: t.admin.settingsPage.secondaryColor,
+                  accentColor: t.admin.settingsPage.accentColor,
                 };
                 return (
                   <Field key={key} label={labels[key]}>
@@ -959,22 +974,22 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-booking"
             icon={<Sliders size={15} className="text-white" />}
-            title="Buchungseinstellungen"
-            subtitle="Intervalle, Vorlauf und Stornierung"
+            title={t.admin.settingsPage.bookingSettings}
+            subtitle={t.admin.settingsPage.bookingSettingsDesc}
             accentClass="bg-[#1F2937]"
           >
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Field label="Intervall (Min)" description="Zeitabstand zwischen Terminen, z.B. 30 = 9:00, 9:30…">
+              <Field label={t.admin.settingsPage.intervalLabel} description={t.admin.settingsPage.intervalDesc}>
                 <input type="number" value={settings.bookingIntervalMinutes}
                   onChange={(e) => set('bookingIntervalMinutes', parseInt(e.target.value) || 30)}
                   min={15} max={120} className={inputCls} />
               </Field>
-              <Field label="Max. Vorlauf (Tage)" description="Wie weit in die Zukunft können Kunden buchen?">
+              <Field label={t.admin.settingsPage.maxAdvanceLabel} description={t.admin.settingsPage.maxAdvanceDesc}>
                 <input type="number" value={settings.maxAdvanceBookingDays}
                   onChange={(e) => set('maxAdvanceBookingDays', parseInt(e.target.value) || 60)}
                   min={7} max={365} className={inputCls} />
               </Field>
-              <Field label="Währung">
+              <Field label={t.admin.settingsPage.currency}>
                 <select
                   value={settings.defaultCurrency.toUpperCase()}
                   onChange={(e) => set('defaultCurrency', e.target.value)}
@@ -985,18 +1000,18 @@ export default function AdminSettingsPage() {
                   <option value="USD">USD ($)</option>
                 </select>
               </Field>
-              <Field label="Zeitzone">
+              <Field label={t.admin.settingsPage.timezone}>
                 <select value={settings.timeZone} onChange={(e) => set('timeZone', e.target.value)} className={selectCls}>
-                  <option value="Europe/Berlin">Europe/Berlin (MEZ/MESZ)</option>
-                  <option value="Europe/Zurich">Europe/Zurich (MEZ/MESZ)</option>
-                  <option value="Europe/Vienna">Europe/Vienna (MEZ/MESZ)</option>
+                  <option value="Europe/Berlin">Europe/Berlin ({cetLabel})</option>
+                  <option value="Europe/Zurich">Europe/Zurich ({cetLabel})</option>
+                  <option value="Europe/Vienna">Europe/Vienna ({cetLabel})</option>
                   <option value="Europe/London">Europe/London (GMT/BST)</option>
-                  <option value="Europe/Paris">Europe/Paris (MEZ/MESZ)</option>
-                  <option value="Europe/Amsterdam">Europe/Amsterdam (MEZ/MESZ)</option>
-                  <option value="Europe/Brussels">Europe/Brussels (MEZ/MESZ)</option>
-                  <option value="Europe/Rome">Europe/Rome (MEZ/MESZ)</option>
-                  <option value="Europe/Madrid">Europe/Madrid (MEZ/MESZ)</option>
-                  <option value="Europe/Warsaw">Europe/Warsaw (MEZ/MESZ)</option>
+                  <option value="Europe/Paris">Europe/Paris ({cetLabel})</option>
+                  <option value="Europe/Amsterdam">Europe/Amsterdam ({cetLabel})</option>
+                  <option value="Europe/Brussels">Europe/Brussels ({cetLabel})</option>
+                  <option value="Europe/Rome">Europe/Rome ({cetLabel})</option>
+                  <option value="Europe/Madrid">Europe/Madrid ({cetLabel})</option>
+                  <option value="Europe/Warsaw">Europe/Warsaw ({cetLabel})</option>
                   <option value="UTC">UTC</option>
                   <option value="America/New_York">America/New_York (ET)</option>
                   <option value="America/Los_Angeles">America/Los_Angeles (PT)</option>
@@ -1010,15 +1025,15 @@ export default function AdminSettingsPage() {
             <div className="mt-1 p-4 bg-[#FFFBEB] rounded-xl border border-[#FDE68A]">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle size={14} className="text-[#D97706]" />
-                <p className="text-xs font-semibold text-[#92400E]">Stornierungsrichtlinie</p>
+                <p className="text-xs font-semibold text-[#92400E]">{t.admin.settingsPage.cancellationPolicy}</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Kostenlos stornierbar bis (Stunden)" description="0 = immer kostenlos stornierbar">
+                <Field label={t.admin.settingsPage.freeCancelHoursLabel} description={t.admin.settingsPage.freeCancelHoursDesc}>
                   <input type="number" value={settings.cancellationHoursNotice}
                     onChange={(e) => set('cancellationHoursNotice', parseInt(e.target.value) || 0)}
                     min={0} max={720} className={inputCls} />
                 </Field>
-                <Field label="Stornogebühr (%)" description="Prozent des Servicepreises bei verspäteter Stornierung">
+                <Field label={t.admin.settingsPage.cancellationFeeLabel} description={t.admin.settingsPage.cancellationFeeDesc}>
                   <input type="number" value={settings.cancellationFeePercent}
                     onChange={(e) => set('cancellationFeePercent', parseFloat(e.target.value) || 0)}
                     min={0} max={100} className={inputCls} />
@@ -1031,12 +1046,12 @@ export default function AdminSettingsPage() {
           <SectionCard
             id="section-hours"
             icon={<Clock size={15} className="text-white" />}
-            title="Öffnungszeiten"
-            subtitle="Wochentage und Geschäftszeiten"
+            title={t.admin.settingsPage.openingHours}
+            subtitle={t.admin.settingsPage.openingHoursDesc}
             accentClass="bg-[#1F2937]"
           >
             <div className="divide-y divide-[#F3F4F6]">
-              {DAYS.map((day) => {
+              {days.map((day) => {
                 const bh = businessHours.find((b) => b.dayOfWeek === day.value)!;
                 return (
                   <div
@@ -1083,7 +1098,7 @@ export default function AdminSettingsPage() {
                         />
                       </div>
                     ) : (
-                      <span className="text-xs text-[#9CA3AF]">Geschlossen</span>
+                      <span className="text-xs text-[#9CA3AF]">{t.admin.settingsPage.closed}</span>
                     )}
                   </div>
                 );
@@ -1098,7 +1113,7 @@ export default function AdminSettingsPage() {
             )}
             {bhSaved && (
               <div className="px-3.5 py-3 bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl text-sm text-[#065F46] font-medium">
-                Öffnungszeiten gespeichert ✓
+                {t.admin.settingsPage.hoursSavedConfirmation}
               </div>
             )}
 
@@ -1109,8 +1124,8 @@ export default function AdminSettingsPage() {
               className="inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#111318] text-white hover:bg-[#374151] disabled:opacity-50 transition-all"
             >
               {bhSaving
-                ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Wird gespeichert…</>
-                : <><Save size={13} />Öffnungszeiten speichern</>}
+                ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t.admin.settingsPage.savingEllipsis}</>
+                : <><Save size={13} />{t.admin.settingsPage.saveHoursBtn}</>}
             </button>
           </SectionCard>
 
@@ -1122,7 +1137,7 @@ export default function AdminSettingsPage() {
           )}
           {saved && (
             <div className="px-4 py-3.5 bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl text-sm text-[#065F46] font-medium">
-              Einstellungen gespeichert ✓
+              {t.admin.settingsPage.settingsSavedConfirmation}
             </div>
           )}
 
@@ -1133,8 +1148,8 @@ export default function AdminSettingsPage() {
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#6355E4] text-white text-sm font-semibold hover:bg-[#4338CA] disabled:opacity-50 transition-all shadow-sm"
           >
             {saving
-              ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Wird gespeichert…</>
-              : <><Save size={15} />Einstellungen speichern</>}
+              ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t.admin.settingsPage.savingEllipsis}</>
+              : <><Save size={15} />{t.admin.settingsPage.saveSettingsBtn}</>}
           </button>
         </form>
 
@@ -1148,8 +1163,8 @@ export default function AdminSettingsPage() {
             <div className="flex items-start gap-3 px-4 py-3.5 bg-[#FFFBEB] border border-[#FDE68A] rounded-xl text-sm text-[#92400E]">
               <AlertTriangle size={15} className="mt-0.5 flex-shrink-0 text-[#D97706]" />
               <span>
-                <strong>Passwort ändern erforderlich.</strong>{' '}
-                Du hast ein vom Admin generiertes Passwort. Bitte lege jetzt ein eigenes Passwort fest.
+                <strong>{t.admin.settingsPage.passwordChangeRequired}</strong>{' '}
+                {t.admin.settingsPage.passwordChangeRequiredDesc}
               </span>
             </div>
           )}
@@ -1158,11 +1173,11 @@ export default function AdminSettingsPage() {
             <SectionCard
               id="section-password"
               icon={<Lock size={15} className="text-white" />}
-              title="Passwort ändern"
-              subtitle="Sicherheit und Zugangsdaten"
+              title={t.admin.settingsPage.changePassword}
+              subtitle={t.admin.settingsPage.securityDesc}
               accentClass="bg-[#111318]"
             >
-              <Field label="Aktuelles Passwort">
+              <Field label={t.admin.settingsPage.currentPasswordLabel}>
                 <input
                   type="password"
                   value={currentPassword}
@@ -1172,7 +1187,7 @@ export default function AdminSettingsPage() {
                 />
               </Field>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Field label="Neues Passwort">
+                <Field label={t.admin.settingsPage.newPasswordLabel}>
                   <input
                     type="password"
                     value={newPassword}
@@ -1181,7 +1196,7 @@ export default function AdminSettingsPage() {
                     className={inputCls}
                   />
                 </Field>
-                <Field label="Neues Passwort wiederholen">
+                <Field label={t.admin.settingsPage.confirmPasswordLabel}>
                   <input
                     type="password"
                     value={confirmPassword}
@@ -1209,8 +1224,8 @@ export default function AdminSettingsPage() {
                 className="inline-flex items-center gap-1.5 text-sm font-semibold px-5 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-[#374151] hover:border-[#C7D2FE] hover:text-[#6355E4] disabled:opacity-40 transition-all"
               >
                 {pwSaving
-                  ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />Wird gespeichert…</>
-                  : <><Lock size={13} />Passwort ändern</>}
+                  ? <><span className="w-3.5 h-3.5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />{t.admin.settingsPage.savingEllipsis}</>
+                  : <><Lock size={13} />{t.admin.settingsPage.changePassword}</>}
               </button>
             </SectionCard>
           </form>

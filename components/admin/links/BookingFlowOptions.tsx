@@ -5,6 +5,7 @@
 import { Calendar, LayoutList, LayoutGrid, Sparkles } from "lucide-react";
 import { SectionLabel, OptionPill, Toggle } from "./shared";
 import type { LinktreeConfig } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function BookingFlowOptions({
   config, primaryColor, updateConfig, inputCls,
@@ -14,18 +15,20 @@ export function BookingFlowOptions({
   updateConfig: (field: keyof LinktreeConfig, value: string | boolean | undefined) => void;
   inputCls: string;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <div className="border-t border-[#F3F4F6] pt-5">
-      <SectionLabel icon={<Calendar size={13} />}>Buchungsflow gestalten</SectionLabel>
+      <SectionLabel icon={<Calendar size={13} />}>{s.bookingFlowSectionLabel}</SectionLabel>
 
       <div className="space-y-4">
         <div>
-          <p className="text-[11px] font-semibold text-[#6B7280] mb-2">Buchungs-Hintergrund</p>
+          <p className="text-[11px] font-semibold text-[#6B7280] mb-2">{s.bookingBackgroundLabel}</p>
           <div className="flex gap-2">
             {([
-              { v: "light", label: "Hell", cls: "bg-gradient-to-br from-[#F3F4F6] to-white" },
-              { v: "dark", label: "Dunkel", cls: "" },
-              { v: "branded", label: "Branded", cls: "" },
+              { v: "light", label: s.bookingBgLight, cls: "bg-gradient-to-br from-[#F3F4F6] to-white" },
+              { v: "dark", label: s.bookingBgDark, cls: "" },
+              { v: "branded", label: s.bookingBgBranded, cls: "" },
             ] as const).map(({ v, label, cls }) => (
               <button key={v} onClick={() => updateConfig("bookingTheme", v)}
                 className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 border rounded-xl text-xs font-medium transition-all ${
@@ -44,34 +47,34 @@ export function BookingFlowOptions({
         </div>
 
         <div>
-          <p className="text-[11px] font-semibold text-[#6B7280] mb-2">Service-Ansicht</p>
+          <p className="text-[11px] font-semibold text-[#6B7280] mb-2">{s.serviceViewLabel}</p>
           <div className="flex gap-2">
             <OptionPill active={(config.serviceLayout ?? "list") === "list"} onClick={() => updateConfig("serviceLayout", "list")} className="flex-1 justify-center gap-2 flex items-center">
-              <LayoutList size={13} />Liste
+              <LayoutList size={13} />{s.serviceViewList}
             </OptionPill>
             <OptionPill active={(config.serviceLayout ?? "list") === "cards"} onClick={() => updateConfig("serviceLayout", "cards")} className="flex-1 justify-center gap-2 flex items-center">
-              <LayoutGrid size={13} />Karten
+              <LayoutGrid size={13} />{s.serviceViewCards}
             </OptionPill>
           </div>
         </div>
 
         <div className="flex items-center justify-between py-3 px-3.5 bg-[#F7F7F8] rounded-xl border border-[#F3F4F6]">
           <div>
-            <p className="text-xs font-semibold text-[#111318]">Preise anzeigen</p>
-            <p className="text-[10px] text-[#9CA3AF]">Im Service-Schritt des Buchungsflows</p>
+            <p className="text-xs font-semibold text-[#111318]">{s.showPricesLabel}</p>
+            <p className="text-[10px] text-[#9CA3AF]">{s.showPricesHint}</p>
           </div>
           <Toggle on={config.showPrices ?? true} onToggle={() => updateConfig("showPrices", !(config.showPrices ?? true))} />
         </div>
 
         <div>
           <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-            <Sparkles size={11} className="text-[#6355E4]" />Button-Badge <span className="text-[#9CA3AF] font-normal">(optional)</span>
+            <Sparkles size={11} className="text-[#6355E4]" />{s.buttonBadgeLabel} <span className="text-[#9CA3AF] font-normal">{s.optionalSuffix}</span>
           </p>
           <input type="text" value={config.ctaBadge ?? ""}
             onChange={(e) => updateConfig("ctaBadge", e.target.value)}
-            placeholder='z.B. "Kostenlos" oder "Neu"'
+            placeholder={s.buttonBadgePlaceholder}
             className={inputCls} />
-          <p className="text-[10px] text-[#9CA3AF] mt-1.5">Erscheint als kleines Badge am Buchungsbutton</p>
+          <p className="text-[10px] text-[#9CA3AF] mt-1.5">{s.buttonBadgeHint}</p>
         </div>
       </div>
     </div>

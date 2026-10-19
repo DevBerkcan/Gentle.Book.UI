@@ -9,10 +9,13 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 import { resolvePostLoginRedirect } from '@/lib/auth/redirect';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 type LoginMode = 'employee' | 'admin';
 
 export default function AdminLoginPage() {
+  const { t } = useTranslation();
+  const s = t.admin.loginPage;
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next');
@@ -43,7 +46,7 @@ export default function AdminLoginPage() {
     try {
       if (mode === 'admin') {
         if (!tenantSlug.trim()) {
-          setError('Bitte Buchungssystem-ID eingeben');
+          setError(s.errTenantSlugRequired);
           setLoading(false);
           return;
         }
@@ -59,7 +62,7 @@ export default function AdminLoginPage() {
             next,
           }));
         } else {
-          setError(result.message || 'Ungültige Anmeldedaten');
+          setError(result.message || s.errInvalidCredentials);
         }
       } else {
         const result = await login({
@@ -69,11 +72,11 @@ export default function AdminLoginPage() {
         if (result.success) {
           router.push(resolvePostLoginRedirect({ kind: 'employee' }));
         } else {
-          setError(result.message || 'Ungültige Anmeldedaten');
+          setError(result.message || s.errInvalidCredentials);
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Ungültige Anmeldedaten');
+      setError(err.message || s.errInvalidCredentials);
     } finally {
       setLoading(false);
     }
@@ -104,7 +107,7 @@ export default function AdminLoginPage() {
               <GentleBookMark size={48} />
             </div>
             <h1 className="text-2xl font-bold text-white">GentleBook</h1>
-            <p className="text-white/40 text-sm mt-1">Buchungssystem Administration</p>
+            <p className="text-white/40 text-sm mt-1">{s.subtitle}</p>
           </div>
 
           {/* Mode tabs */}
@@ -126,7 +129,7 @@ export default function AdminLoginPage() {
                 )}
                 <span className="relative flex items-center justify-center gap-1.5">
                   {m === 'admin' ? <Building2 size={14} /> : <User size={14} />}
-                  {m === 'admin' ? 'Admin-Login' : 'Mitarbeiter'}
+                  {m === 'admin' ? s.adminTabLabel : s.employeeTabLabel}
                 </span>
               </button>
             ))}
@@ -147,7 +150,7 @@ export default function AdminLoginPage() {
                   <InputField
                     icon={<Building2 size={16} className="text-white/30" />}
                     type="text"
-                    placeholder="Buchungssystem-ID (z.B. barber-wagner)"
+                    placeholder={s.tenantSlugPlaceholder}
                     value={tenantSlug}
                     onChange={(v) => setTenantSlug(v)}
                     autoFocus
@@ -155,7 +158,7 @@ export default function AdminLoginPage() {
                   <InputField
                     icon={<Mail size={16} className="text-white/30" />}
                     type="email"
-                    placeholder="E-Mail"
+                    placeholder={t.admin.email}
                     value={email}
                     onChange={(v) => setEmail(v)}
                   />
@@ -171,7 +174,7 @@ export default function AdminLoginPage() {
                   <InputField
                     icon={<User size={16} className="text-white/30" />}
                     type="text"
-                    placeholder="Benutzername"
+                    placeholder={s.usernamePlaceholder}
                     value={username}
                     onChange={(v) => setUsername(v)}
                     autoFocus
@@ -185,7 +188,7 @@ export default function AdminLoginPage() {
               <Lock size={16} className="text-white/30 flex-shrink-0" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Passwort"
+                placeholder={s.passwordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
@@ -226,10 +229,10 @@ export default function AdminLoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  Anmeldung…
+                  {s.signingIn}
                 </span>
               ) : (
-                <>Anmelden <ArrowRight size={15} /></>
+                <>{s.signInBtn} <ArrowRight size={15} /></>
               )}
             </ShimmerButton>
 
@@ -239,7 +242,7 @@ export default function AdminLoginPage() {
                   href="/admin/forgot-password"
                   className="text-sm text-white/35 hover:text-white/60 transition-colors"
                 >
-                  Passwort vergessen?
+                  {s.forgotPasswordLink}
                 </Link>
               </div>
             )}

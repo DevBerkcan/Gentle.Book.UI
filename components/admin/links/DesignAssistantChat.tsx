@@ -12,14 +12,15 @@ import { Sparkles, Loader2, Send, Lock, ArrowUpRight, Check } from "lucide-react
 import { sendDesignAssistantMessage, type DesignAssistantHistoryTurn, type DesignSuggestion } from "@/lib/api/designAssistant";
 import { PAGE_TEMPLATES, COLOR_PALETTES } from "./constants";
 import type { PlanTier } from "./types";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const MAX_MESSAGE_LENGTH = 800;
 
-const QUICK_PROMPTS = [
-  "Ich bin ein Barbershop, modern und dunkel.",
-  "Elegantes Beauty-Studio, helle und warme Farben.",
-  "Yoga-Studio, ruhig und natürlich.",
-];
+function getQuickPrompts(t: Translations): string[] {
+  const s = t.admin.linksPage;
+  return [s.quickPrompt1, s.quickPrompt2, s.quickPrompt3];
+}
 
 interface ChatTurn {
   role: "user" | "assistant";
@@ -34,7 +35,9 @@ function suggestionIsEmpty(s: DesignSuggestion | null | undefined): boolean {
 }
 
 function SuggestionCard({ suggestion, onApply, applied }: { suggestion: DesignSuggestion; onApply: () => void; applied: boolean }) {
-  const tpl = suggestion.pageTemplate ? PAGE_TEMPLATES.find((t) => t.key === suggestion.pageTemplate) : null;
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
+  const tpl = suggestion.pageTemplate ? PAGE_TEMPLATES.find((tp) => tp.key === suggestion.pageTemplate) : null;
   const palette = suggestion.colorPaletteKey ? COLOR_PALETTES.find((p) => p.key === suggestion.colorPaletteKey) : null;
 
   return (
@@ -64,7 +67,7 @@ function SuggestionCard({ suggestion, onApply, applied }: { suggestion: DesignSu
         className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5548CE] disabled:opacity-60"
       >
         {applied ? <Check size={12} /> : <Sparkles size={12} />}
-        {applied ? "Übernommen" : "Vorschlag übernehmen"}
+        {applied ? s.suggestionApplied : s.applySuggestionBtn}
       </button>
     </div>
   );
@@ -80,6 +83,9 @@ export function DesignAssistantChat({
   showToast: (type: "success" | "error", message: string) => void;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
+  const QUICK_PROMPTS = getQuickPrompts(t);
   const isAgency = tenantPlan === "business";
 
   const [messages, setMessages] = useState<ChatTurn[]>([]);
@@ -95,7 +101,7 @@ export function DesignAssistantChat({
     const content = (text ?? input).trim();
     if (!content || loading) return;
     if (content.length > MAX_MESSAGE_LENGTH) {
-      showToast("error", `Nachricht ist zu lang (max. ${MAX_MESSAGE_LENGTH} Zeichen).`);
+      showToast("error", fillTemplate(s.messageTooLongTemplate, { max: MAX_MESSAGE_LENGTH }));
       return;
     }
 
@@ -107,7 +113,7 @@ export function DesignAssistantChat({
       const res = await sendDesignAssistantMessage(content, history);
       setMessages((prev) => [...prev, { role: "assistant", content: res.reply, suggestion: res.suggestion }]);
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? "Der Design-Assistent ist gerade nicht erreichbar.";
+      const msg = err?.response?.data?.message ?? s.assistantUnavailable;
       setMessages((prev) => [...prev, { role: "assistant", content: msg }]);
     } finally {
       setLoading(false);
@@ -117,7 +123,7 @@ export function DesignAssistantChat({
   function handleApply(turnIndex: number, suggestion: DesignSuggestion) {
     onApplySuggestion(suggestion);
     setMessages((prev) => prev.map((m, i) => (i === turnIndex ? { ...m, appliedKey: suggestion.pageTemplate ?? suggestion.colorPaletteKey ?? "applied" } : m)));
-    showToast("success", "Vorschlag übernommen ✓");
+    showToast("success", s.suggestionAppliedToast);
   }
 
   if (!isAgency) {
@@ -128,20 +134,20 @@ export function DesignAssistantChat({
             <Sparkles size={13} className="text-white" />
           </div>
           <div>
-            <p className="font-semibold text-[#111318] text-sm leading-tight">KI-Design-Assistent</p>
-            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Beschreibe dein Business im Chat — die KI wählt Vorlage, Farben und Text für dich aus</p>
+            <p className="font-semibold text-[#111318] text-sm leading-tight">{s.aiDesignAssistantTitle}</p>
+            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.aiAssistantLockedSubtitle}</p>
           </div>
         </div>
         <div className="rounded-xl bg-[#F7F7F8] border border-[#E5E7EB] p-4 flex items-center justify-between gap-3">
           <p className="text-[11px] text-[#6B7280] leading-relaxed flex items-center gap-1.5">
             <Lock size={12} className="text-[#9CA3AF] flex-shrink-0" />
-            Verfügbar ab Tarif „Agency".
+            {fillTemplate(s.aiAssistantAvailableFromTemplate, { plan: "Agency" })}
           </p>
           <button
             onClick={() => router.push("/admin/subscription")}
             className="inline-flex items-center gap-1 rounded-lg bg-[#6355E4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5245D0] flex-shrink-0"
           >
-            Jetzt upgraden <ArrowUpRight size={12} />
+            {s.upgradeNowBtn} <ArrowUpRight size={12} />
           </button>
         </div>
       </div>
@@ -155,8 +161,8 @@ export function DesignAssistantChat({
           <Sparkles size={13} className="text-white" />
         </div>
         <div>
-          <p className="font-semibold text-[#111318] text-sm leading-tight">KI-Design-Assistent</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Beschreibe dein Business — wir schlagen Vorlage, Farben und Text vor</p>
+          <p className="font-semibold text-[#111318] text-sm leading-tight">{s.aiDesignAssistantTitle}</p>
+          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.aiAssistantUnlockedSubtitle}</p>
         </div>
       </div>
 
@@ -206,7 +212,7 @@ export function DesignAssistantChat({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
           maxLength={MAX_MESSAGE_LENGTH}
-          placeholder="Beschreibe dein Business und deinen Wunsch-Look…"
+          placeholder={s.assistantInputPlaceholder}
           disabled={loading}
           className="flex-1 border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all disabled:opacity-60"
         />
@@ -215,7 +221,7 @@ export function DesignAssistantChat({
           onClick={() => handleSend()}
           disabled={loading || !input.trim()}
           className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-[#6355E4] text-white hover:bg-[#5548CE] disabled:opacity-50 flex-shrink-0"
-          aria-label="Senden"
+          aria-label={s.sendAriaLabel}
         >
           {loading ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
         </button>

@@ -5,10 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Building2, ArrowLeft, Send, CheckCircle } from 'lucide-react';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
+  const s = t.admin.forgotPasswordPage;
   const [tenantSlug, setTenantSlug] = useState('');
   const [email,      setEmail]      = useState('');
   const [status,     setStatus]     = useState<Status>('idle');
@@ -33,11 +36,11 @@ export default function ForgotPasswordPage() {
         setStatus('success');
       } else {
         setStatus('error');
-        setErrMsg('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
+        setErrMsg(s.errGeneric);
       }
     } catch {
       setStatus('error');
-      setErrMsg('Verbindungsfehler. Bitte versuche es erneut.');
+      setErrMsg(s.errConnection);
     }
   };
 
@@ -62,8 +65,8 @@ export default function ForgotPasswordPage() {
             <div className="flex justify-center mb-0">
               <GentleBookMark size={48} />
             </div>
-            <h1 className="text-2xl font-bold text-white">Passwort vergessen?</h1>
-            <p className="text-white/40 text-sm mt-1">Wir senden dir einen Reset-Link per E-Mail</p>
+            <h1 className="text-2xl font-bold text-white">{s.title}</h1>
+            <p className="text-white/40 text-sm mt-1">{s.subtitle}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -76,14 +79,14 @@ export default function ForgotPasswordPage() {
                 <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-emerald-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white mb-2">E-Mail gesendet!</h2>
+                <h2 className="text-lg font-bold text-white mb-2">{s.successTitle}</h2>
                 <p className="text-white/50 text-sm leading-relaxed mb-6">
-                  Falls ein Konto mit dieser Adresse existiert, wurde ein Reset-Link gesendet. Bitte überprüfe deinen Posteingang.
+                  {s.successDesc}
                 </p>
-                <p className="text-white/30 text-xs mb-6">Der Link ist 1 Stunde gültig.</p>
+                <p className="text-white/30 text-xs mb-6">{s.linkValidityNote}</p>
                 <Link href="/admin/login"
                   className="flex items-center justify-center gap-2 text-sm text-white/50 hover:text-white transition-colors">
-                  <ArrowLeft size={14} /> Zurück zum Login
+                  <ArrowLeft size={14} /> {s.backToLogin}
                 </Link>
               </motion.div>
             ) : (
@@ -93,7 +96,7 @@ export default function ForgotPasswordPage() {
                   <Building2 size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Buchungssystem-ID (z.B. barber-wagner)"
+                    placeholder={t.admin.loginPage.tenantSlugPlaceholder}
                     value={tenantSlug}
                     onChange={(e) => setTenantSlug(e.target.value)}
                     required
@@ -105,7 +108,7 @@ export default function ForgotPasswordPage() {
                   <Mail size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type="email"
-                    placeholder="Deine E-Mail-Adresse"
+                    placeholder={s.emailAddressPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -136,17 +139,17 @@ export default function ForgotPasswordPage() {
                   {status === 'loading' ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Wird gesendet…
+                      {s.sending}
                     </span>
                   ) : (
-                    <><Send size={15} /> Reset-Link senden</>
+                    <><Send size={15} /> {s.sendResetLinkBtn}</>
                   )}
                 </motion.button>
 
                 <div className="text-center">
                   <Link href="/admin/login"
                     className="text-sm text-white/40 hover:text-white/70 transition-colors flex items-center justify-center gap-1.5">
-                    <ArrowLeft size={13} /> Zurück zum Login
+                    <ArrowLeft size={13} /> {s.backToLogin}
                   </Link>
                 </div>
               </motion.form>

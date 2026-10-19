@@ -13,6 +13,8 @@ import Link from "next/link";
 import { getDashboard, getOnboardingStatus, type DashboardOverview, type OnboardingStatus } from "@/lib/api/admin";
 import { formatPrice } from "@/lib/utils/currency";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { HelpTip } from "@/components/ui/help-tip";
@@ -28,26 +30,28 @@ import { HelpTip } from "@/components/ui/help-tip";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-const STATUS_MAP: Record<string, { label: string; dot: string; bg: string; text: string }> = {
-  Confirmed: { label: "Bestätigt",        dot: "bg-emerald-400", bg: "bg-[#D1FAE5]", text: "text-[#065F46]" },
-  Pending:   { label: "Ausstehend",       dot: "bg-amber-400",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
-  Completed: { label: "Abgeschlossen",    dot: "bg-[#6355E4]",   bg: "bg-[#EEEBFC]", text: "text-[#6355E4]" },
-  Cancelled: { label: "Storniert",        dot: "bg-red-400",     bg: "bg-[#FEE2E2]", text: "text-[#991B1B]" },
-  NoShow:    { label: "Nicht erschienen", dot: "bg-[#9CA3AF]",   bg: "bg-[#F3F4F6]", text: "text-[#374151]" },
-};
-
-function formatTime(mins: number) {
-  if (mins < 60)   return `${mins} Min`;
-  if (mins < 1440) return `${Math.floor(mins / 60)} Std`;
-  const d = Math.floor(mins / 1440);
-  return `${d} Tag${d > 1 ? "e" : ""}`;
+function getStatusMap(t: Translations): Record<string, { label: string; dot: string; bg: string; text: string }> {
+  return {
+    Confirmed: { label: t.admin.bookingStatus.confirmed, dot: "bg-emerald-400", bg: "bg-[#D1FAE5]", text: "text-[#065F46]" },
+    Pending:   { label: t.admin.bookingStatus.pending,   dot: "bg-amber-400",   bg: "bg-[#FEF3C7]", text: "text-[#92400E]" },
+    Completed: { label: t.admin.bookingStatus.completed, dot: "bg-[#6355E4]",   bg: "bg-[#EEEBFC]", text: "text-[#6355E4]" },
+    Cancelled: { label: t.admin.bookingStatus.cancelled, dot: "bg-red-400",     bg: "bg-[#FEE2E2]", text: "text-[#991B1B]" },
+    NoShow:    { label: t.admin.bookingStatus.noShow,    dot: "bg-[#9CA3AF]",   bg: "bg-[#F3F4F6]", text: "text-[#374151]" },
+  };
 }
 
-function greeting() {
+function formatTime(mins: number, t: Translations) {
+  if (mins < 60)   return `${mins} ${t.admin.durationUnits.minShort}`;
+  if (mins < 1440) return `${Math.floor(mins / 60)} ${t.admin.durationUnits.hourShort}`;
+  const d = Math.floor(mins / 1440);
+  return `${d} ${d > 1 ? t.admin.durationUnits.dayShort_other : t.admin.durationUnits.dayShort_one}`;
+}
+
+function greeting(t: Translations) {
   const h = new Date().getHours();
-  if (h < 12) return "Guten Morgen";
-  if (h < 17) return "Guten Tag";
-  return "Guten Abend";
+  if (h < 12) return t.admin.dashboardPage.greetingMorning;
+  if (h < 17) return t.admin.dashboardPage.greetingDay;
+  return t.admin.dashboardPage.greetingEvening;
 }
 
 const stagger = {
@@ -118,6 +122,7 @@ function StatCard({
 
 export default function AdminDashboardPage() {
   const { user, isTenantAdmin, isEmployee } = useAuth();
+  const { t } = useTranslation();
   const router = useRouter();
 
   // Redirect employees to their own dashboard — no admin API calls for them
@@ -191,8 +196,8 @@ export default function AdminDashboardPage() {
           <div className="w-12 h-12 bg-[#FEE2E2] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <AlertTriangle size={20} className="text-[#991B1B]" />
           </div>
-          <h2 className="text-base font-bold text-[#111318] mb-2">Fehler beim Laden</h2>
-          <p className="text-sm text-[#6B7280]">{error || "Dashboard nicht verfügbar"}</p>
+          <h2 className="text-base font-bold text-[#111318] mb-2">{t.admin.dashboardPage.loadError}</h2>
+          <p className="text-sm text-[#6B7280]">{error || t.admin.dashboardPage.dashboardUnavailable}</p>
         </div>
       </div>
     );
@@ -213,6 +218,7 @@ export default function AdminDashboardPage() {
     ? ((revenueThis - revenueLast) / revenueLast) * 100 : 0;
 
   const todayDate = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long" });
+  const statusMap = getStatusMap(t);
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -230,13 +236,13 @@ export default function AdminDashboardPage() {
               <p className="text-xs text-[#9CA3AF] font-medium">{todayDate}</p>
               <span className="flex items-center gap-1 text-[10px] font-bold text-[#065F46] bg-[#D1FAE5] px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live
+                {t.admin.dashboardPage.live}
               </span>
             </div>
             <h1 className="text-2xl sm:text-[28px] font-bold text-[#111318] tracking-tight">
-              {greeting()}{user?.firstName ? `, ${user.firstName}` : ""}! 👋
+              {greeting(t)}{user?.firstName ? `, ${user.firstName}` : ""}! 👋
             </h1>
-            <p className="text-sm text-[#6B7280] mt-1">Hier ist deine heutige Übersicht.</p>
+            <p className="text-sm text-[#6B7280] mt-1">{t.admin.dashboardPage.subtitle}</p>
           </div>
         </motion.div>
 
@@ -254,7 +260,7 @@ export default function AdminDashboardPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <ExternalLink size={13} className="text-white/60" />
-                  <p className="text-white/60 text-xs font-medium">Dein Buchungslink</p>
+                  <p className="text-white/60 text-xs font-medium">{t.admin.dashboardPage.bookingLink}</p>
                 </div>
                 <p className="text-white font-mono text-sm sm:text-base font-semibold truncate">
                   {typeof window !== "undefined" ? window.location.origin : ""}/booking/{user.tenantSlug}
@@ -273,7 +279,7 @@ export default function AdminDashboardPage() {
                   className="flex items-center gap-1.5 bg-white/15 hover:bg-white/25 text-white px-3.5 py-2 rounded-xl text-sm font-medium transition-colors"
                 >
                   {copied ? <Check size={13} /> : <Copy size={13} />}
-                  {copied ? "Kopiert!" : "Kopieren"}
+                  {copied ? t.admin.copied : t.admin.copy}
                 </button>
                 <a
                   href={`/booking/${user.tenantSlug}`}
@@ -281,7 +287,7 @@ export default function AdminDashboardPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 bg-white text-[#6355E4] px-3.5 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-colors shadow-sm"
                 >
-                  <ArrowUpRight size={13} />Öffnen
+                  <ArrowUpRight size={13} />{t.admin.open}
                 </a>
               </div>
             </div>
@@ -301,9 +307,9 @@ export default function AdminDashboardPage() {
                   <Sparkles size={15} className="text-[#6355E4]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-[#111318]">Setup-Checkliste</p>
+                  <p className="font-semibold text-sm text-[#111318]">{t.admin.dashboardPage.setupChecklist}</p>
                   <p className="text-[11px] text-[#9CA3AF]">
-                    {onboarding.completedSteps} von {onboarding.totalSteps} Schritten abgeschlossen
+                    {fillTemplate(t.admin.dashboardPage.stepsCompletedTemplate, { completed: onboarding.completedSteps, total: onboarding.totalSteps })}
                   </p>
                 </div>
               </div>
@@ -324,7 +330,7 @@ export default function AdminDashboardPage() {
                     if (typeof window !== "undefined") sessionStorage.setItem("onboarding_dismissed", "1");
                   }}
                   className="text-[#D1D5DB] hover:text-[#6B7280] transition-colors p-1 rounded-lg hover:bg-[#F3F4F6]"
-                  title="Ausblenden"
+                  title={t.admin.dashboardPage.dismiss}
                 >
                   <X size={14} />
                 </button>
@@ -334,11 +340,11 @@ export default function AdminDashboardPage() {
             {/* Steps */}
             <div className="divide-y divide-[#F3F4F6]">
               {[
-                { done: onboarding.hasCompany,   label: "Firmenname eintragen",     href: "/admin/settings",  desc: "Name deines Studios festlegen" },
-                { done: onboarding.hasLogo,      label: "Logo hochladen",            href: "/admin/settings",  desc: "Dein Logo für Buchungsseite & E-Mails" },
-                { done: onboarding.hasHours,     label: "Öffnungszeiten festlegen",  href: "/admin/settings",  desc: "Wann ist dein Studio geöffnet?" },
-                { done: onboarding.hasServices,  label: "Ersten Service anlegen",    href: "/admin/services",  desc: "Welche Leistungen bietest du an?" },
-                { done: onboarding.hasEmployees, label: "Mitarbeiter hinzufügen",    href: "/admin/employees", desc: "Wer führt die Termine durch?" },
+                { done: onboarding.hasCompany,   label: t.admin.dashboardPage.stepCompanyName, href: "/admin/settings",  desc: t.admin.dashboardPage.stepCompanyNameDesc },
+                { done: onboarding.hasLogo,      label: t.admin.dashboardPage.stepLogo,         href: "/admin/settings",  desc: t.admin.dashboardPage.stepLogoDesc },
+                { done: onboarding.hasHours,     label: t.admin.dashboardPage.stepHours,        href: "/admin/settings",  desc: t.admin.dashboardPage.stepHoursDesc },
+                { done: onboarding.hasServices,  label: t.admin.dashboardPage.stepServices,     href: "/admin/services",  desc: t.admin.dashboardPage.stepServicesDesc },
+                { done: onboarding.hasEmployees, label: t.admin.dashboardPage.stepEmployees,    href: "/admin/employees", desc: t.admin.dashboardPage.stepEmployeesDesc },
               ].map(({ done, label, href, desc }) => (
                 <a
                   key={label}
@@ -369,26 +375,26 @@ export default function AdminDashboardPage() {
           <StatCard
             icon={<Calendar size={18} style={{ color: "#6355E4" }} />}
             value={statistics.totalBookingsThisMonth}
-            label="Buchungen diesen Monat"
+            label={t.admin.dashboardPage.bookingsThisMonth}
             growth={monthGrowth}
             accent="#6355E4"
-            helpText="Alle neuen Buchungen die in diesem Kalendermonat erstellt wurden"
+            helpText={t.admin.dashboardPage.bookingsThisMonthHelp}
           />
           <StatCard
             icon={<Euro size={18} style={{ color: "#059669" }} />}
             value={monthlyRevenueDisplay}
-            label="Umsatz diesen Monat"
+            label={t.admin.dashboardPage.revenueThisMonth}
             growth={monthlyRevenueEntries.length <= 1 ? revenueGrowth : null}
             accent="#059669"
-            helpText="Summe aller nicht-stornierten Buchungen dieses Monats basierend auf dem Servicepreis"
+            helpText={t.admin.dashboardPage.revenueThisMonthHelp}
           />
           <StatCard
             icon={<Users size={18} style={{ color: "#8B5CF6" }} />}
             value={statistics.totalCustomers}
-            label={`Kunden gesamt (${statistics.newCustomersThisMonth} neu)`}
+            label={fillTemplate(t.admin.dashboardPage.customersTotalTemplate, { new: statistics.newCustomersThisMonth })}
             growth={null}
             accent="#8B5CF6"
-            helpText="Alle registrierten Kunden in deinem System"
+            helpText={t.admin.dashboardPage.customersTotalHelp}
           />
         </motion.div>
 
@@ -402,18 +408,18 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2">
                 <BarChart2 size={15} className="text-[#6355E4]" />
                 <span className="text-sm font-semibold text-[#111318]">
-                  Plan-Nutzung <span className="text-[#9CA3AF] font-normal">({usage.planDisplayName})</span>
+                  {t.admin.dashboardPage.planUsage} <span className="text-[#9CA3AF] font-normal">({usage.planDisplayName})</span>
                 </span>
               </div>
               <Link href="/admin/subscription"
                 className="text-xs font-medium text-[#6355E4] hover:text-[#4338CA] transition-colors">
-                Upgraden →
+                {t.admin.upgrade} →
               </Link>
             </div>
             <div className="space-y-3">
               {[
-                { label: "Mitarbeiter", data: usage.employees },
-                { label: "Services",   data: usage.services   },
+                { label: t.admin.employees, data: usage.employees },
+                { label: t.admin.services,  data: usage.services   },
               ].map(({ label, data }) => {
                 if (!data) return null;
                 const pct = data.isUnlimited ? 10 : Math.min(data.percentage, 100);
@@ -437,8 +443,8 @@ export default function AdminDashboardPage() {
               {(usage.employees?.percentage >= 80 || usage.services?.percentage >= 80) && (
                 <div className="flex items-center gap-2 pt-1 text-xs text-[#92400E] bg-[#FFFBEB] border border-[#FDE68A] rounded-xl px-3 py-2.5">
                   <AlertTriangle size={12} className="shrink-0" />
-                  Sie nähern sich dem Limit Ihres Plans.{" "}
-                  <Link href="/admin/subscription" className="font-semibold underline">Upgrade</Link>
+                  {t.admin.dashboardPage.nearingLimit}{" "}
+                  <Link href="/admin/subscription" className="font-semibold underline">{t.admin.upgrade}</Link>
                 </div>
               )}
             </div>
@@ -453,14 +459,14 @@ export default function AdminDashboardPage() {
           {/* Primary CTA */}
           <Link href="/admin/bookings?new=1"
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#6355E4] hover:bg-[#4338CA] shadow-sm active:scale-[0.97] transition-all">
-            <Calendar size={14} />Neue Buchung
+            <Calendar size={14} />{t.admin.dashboardPage.newBooking}
           </Link>
           {/* Secondary actions */}
           {[
-            { href: "/admin/bookings",      icon: <Clock size={14} className="text-[#6355E4]" />,   label: "Buchungen heute", badge: today.totalBookings > 0 ? today.totalBookings : null },
-            { href: "/admin/customers",     icon: <Users size={14} className="text-[#8B5CF6]" />,   label: "Kunden",          badge: null },
-            { href: "/admin/calendar",      icon: <CalendarDays size={14} className="text-[#059669]" />, label: "Kalender",    badge: null },
-            { href: "/admin/blocked-slots", icon: <Ban size={14} className="text-[#EF4444]" />,     label: "Sperrzeiten",     badge: null },
+            { href: "/admin/bookings",      icon: <Clock size={14} className="text-[#6355E4]" />,   label: t.admin.dashboardPage.bookingsToday, badge: today.totalBookings > 0 ? today.totalBookings : null },
+            { href: "/admin/customers",     icon: <Users size={14} className="text-[#8B5CF6]" />,   label: t.admin.customers,          badge: null },
+            { href: "/admin/calendar",      icon: <CalendarDays size={14} className="text-[#059669]" />, label: t.admin.calendar,    badge: null },
+            { href: "/admin/blocked-slots", icon: <Ban size={14} className="text-[#EF4444]" />,     label: t.admin.dashboardPage.blockedSlots,     badge: null },
           ].map(({ href, icon, label, badge }) => (
             <Link key={href} href={href}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-white text-[#374151] border border-[#E5E7EB] shadow-sm hover:border-[#C7D2FE] hover:text-[#6355E4] active:scale-[0.97] transition-all">
@@ -485,21 +491,21 @@ export default function AdminDashboardPage() {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
                 <div>
-                  <h2 className="text-sm font-bold text-[#111318]">Heute</h2>
+                  <h2 className="text-sm font-bold text-[#111318]">{t.admin.dashboardPage.today}</h2>
                   <p className="text-[11px] text-[#9CA3AF]">{todayDate}</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Live
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />{t.admin.dashboardPage.live}
                 </div>
               </div>
 
               {/* Mini stats row */}
               <div className="grid grid-cols-4 divide-x divide-[#F3F4F6] border-b border-[#F3F4F6]">
                 {[
-                  { value: today.totalBookings,     label: "Gesamt",     color: "text-[#111318]",  bg: "" },
-                  { value: today.completedBookings, label: "Erledigt",   color: "text-[#059669]",   bg: "bg-[#F0FDF4]" },
-                  { value: today.pendingBookings,   label: "Ausstehend", color: "text-[#D97706]",   bg: "bg-[#FFFBEB]" },
-                  { value: today.cancelledBookings, label: "Storniert",  color: "text-[#EF4444]",   bg: "bg-[#FFF5F5]" },
+                  { value: today.totalBookings,     label: t.admin.dashboardPage.total,       color: "text-[#111318]",  bg: "" },
+                  { value: today.completedBookings, label: t.admin.dashboardPage.done,         color: "text-[#059669]",   bg: "bg-[#F0FDF4]" },
+                  { value: today.pendingBookings,   label: t.admin.bookingStatus.pending,      color: "text-[#D97706]",   bg: "bg-[#FFFBEB]" },
+                  { value: today.cancelledBookings, label: t.admin.bookingStatus.cancelled,    color: "text-[#EF4444]",   bg: "bg-[#FFF5F5]" },
                 ].map(({ value, label, color, bg }) => (
                   <div key={label} className={`text-center py-4 px-2 ${bg}`}>
                     <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
@@ -513,7 +519,7 @@ export default function AdminDashboardPage() {
                 {today.bookings.length > 0 ? (
                   <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
                     {today.bookings.map((b, i) => {
-                      const s = STATUS_MAP[b.status] ?? STATUS_MAP["Pending"];
+                      const s = statusMap[b.status] ?? statusMap["Pending"];
                       return (
                         <motion.div
                           key={b.id}
@@ -552,8 +558,8 @@ export default function AdminDashboardPage() {
                     <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                       <Calendar size={20} className="text-[#D1D5DB]" />
                     </div>
-                    <p className="text-sm font-medium text-[#374151]">Keine Termine heute</p>
-                    <p className="text-xs text-[#9CA3AF] mt-1">Genieße den freien Tag!</p>
+                    <p className="text-sm font-medium text-[#374151]">{t.admin.dashboardPage.noAppointmentsToday}</p>
+                    <p className="text-xs text-[#9CA3AF] mt-1">{t.admin.dashboardPage.enjoyFreeDay}</p>
                   </div>
                 )}
               </div>
@@ -573,23 +579,23 @@ export default function AdminDashboardPage() {
                   <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
                     <Clock size={15} className="text-[#6355E4]" />
                   </div>
-                  <h3 className="font-bold text-[#111318] text-sm">Nächster Termin</h3>
+                  <h3 className="font-bold text-[#111318] text-sm">{t.admin.dashboardPage.nextAppointment}</h3>
                 </div>
                 <div className="p-5">
                   {/* Countdown */}
                   <div className="text-center mb-4 py-4 bg-[#EEEBFC] rounded-xl border border-[#C7D2FE]">
                     <div className="text-4xl font-black text-[#6355E4] tabular-nums leading-none">
-                      {formatTime(nextBooking.minutesUntil)}
+                      {formatTime(nextBooking.minutesUntil, t)}
                     </div>
-                    <div className="text-[11px] text-[#6B7280] mt-1.5">bis zum nächsten Termin</div>
+                    <div className="text-[11px] text-[#6B7280] mt-1.5">{t.admin.dashboardPage.untilNextAppointment}</div>
                   </div>
                   {/* Details */}
                   <div className="space-y-2.5">
                     {[
-                      { label: "Service",  value: nextBooking.serviceName },
-                      { label: "Kunde",    value: nextBooking.customerName },
-                      { label: "Uhrzeit",  value: `${nextBooking.startTime} – ${nextBooking.endTime}` },
-                      { label: "Datum",    value: new Date(nextBooking.date).toLocaleDateString("de-DE") },
+                      { label: t.admin.service,  value: nextBooking.serviceName },
+                      { label: t.admin.customer, value: nextBooking.customerName },
+                      { label: t.admin.time,     value: `${nextBooking.startTime} – ${nextBooking.endTime}` },
+                      { label: t.admin.date,     value: new Date(nextBooking.date).toLocaleDateString("de-DE") },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex items-center justify-between gap-3">
                         <span className="text-xs text-[#9CA3AF] flex-shrink-0">{label}</span>
@@ -607,7 +613,7 @@ export default function AdminDashboardPage() {
                 <div className="w-11 h-11 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
                   <Sparkles size={18} className="text-[#D1D5DB]" />
                 </div>
-                <p className="text-sm font-medium text-[#374151]">Kein bevorstehender Termin</p>
+                <p className="text-sm font-medium text-[#374151]">{t.admin.dashboardPage.noUpcomingAppointment}</p>
               </motion.div>
             )}
 
@@ -618,7 +624,7 @@ export default function AdminDashboardPage() {
                 className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden"
               >
                 <div className="px-5 py-4 border-b border-[#F3F4F6]">
-                  <h3 className="font-bold text-[#111318] text-sm">Beliebte Services</h3>
+                  <h3 className="font-bold text-[#111318] text-sm">{t.admin.dashboardPage.popularServices}</h3>
                 </div>
                 <div className="p-3">
                   {statistics.popularServices.map((s, idx) => (
@@ -628,7 +634,7 @@ export default function AdminDashboardPage() {
                       <span className="text-[11px] font-bold text-[#9CA3AF] w-4 text-center">{idx + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-[#111318] truncate">{s.serviceName}</p>
-                        <p className="text-[11px] text-[#9CA3AF]">{s.bookingCount}× gebucht</p>
+                        <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(t.admin.dashboardPage.bookedCountTemplate, { count: s.bookingCount })}</p>
                       </div>
                       <span className="text-sm font-bold text-[#374151] whitespace-nowrap tabular-nums">
                         {formatPrice(defaultCurrency === "CHF" ? s.revenueCHF : s.revenueEUR, defaultCurrency)}

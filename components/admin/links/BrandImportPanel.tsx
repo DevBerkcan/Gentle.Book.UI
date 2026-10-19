@@ -19,18 +19,23 @@ import {
 } from "@/lib/api/brandImport";
 import { useConfirm } from "@/components/ConfirmDialog";
 import type { BrandPreviewOverride } from "./types";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
-const STATUS_LABEL: Record<string, string> = {
-  Queued: "Warteschlange…",
-  Fetching: "Website wird geprüft…",
-  Extracting: "Inhalte werden geladen…",
-  Analyzing: "Branding wird analysiert…",
-  Ready: "Analyse abgeschlossen",
-  Failed: "Analyse fehlgeschlagen",
-};
+function getStatusLabel(t: Translations): Record<string, string> {
+  const s = t.admin.settingsPage;
+  return {
+    Queued: s.wbsStatusQueued,
+    Fetching: s.wbsStatusFetching,
+    Extracting: s.wbsStatusExtracting,
+    Analyzing: s.wbsStatusAnalyzing,
+    Ready: s.wbsStatusReady,
+    Failed: s.wbsStatusFailed,
+  };
+}
 
 type ImportSection = "branding" | "services" | "links";
 
@@ -70,6 +75,9 @@ export function BrandImportPanel({
   showToast: (type: "success" | "error", message: string) => void;
 }) {
   const { confirm, dialog } = useConfirm();
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
+  const STATUS_LABEL = getStatusLabel(t);
 
   const [url, setUrl] = useState(defaultWebsiteUrl ?? "");
   const [consent, setConsent] = useState(false);
@@ -114,8 +122,8 @@ export function BrandImportPanel({
 
   async function handleAnalyze() {
     setError(null);
-    if (!url.trim()) { setError("Bitte gib eine Website-Adresse ein."); return; }
-    if (!consent) { setError("Bitte bestätige, dass du berechtigt bist, diese Website zu verwenden."); return; }
+    if (!url.trim()) { setError(s.brandImportUrlRequired); return; }
+    if (!consent) { setError(s.brandImportConsentRequired); return; }
 
     setAnalyzing(true);
     setStatus("Queued");
@@ -124,12 +132,12 @@ export function BrandImportPanel({
       const job = await pollBrandImportJob(jobId, (j) => setStatus(j.status));
       if (job.status === "Ready" && job.resultId) {
         await loadResult(job.resultId);
-        showToast("success", "Analyse abgeschlossen");
+        showToast("success", s.analysisCompleteToast);
       } else {
-        setError(job.errorMessageSafe ?? "Die Analyse ist fehlgeschlagen.");
+        setError(job.errorMessageSafe ?? t.admin.settingsPage.wbsAnalysisFailedError);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Die Analyse konnte nicht gestartet werden.");
+      setError(err?.response?.data?.message ?? t.admin.settingsPage.wbsAnalysisStartError);
     } finally {
       setAnalyzing(false);
       setStatus(null);
@@ -146,12 +154,12 @@ export function BrandImportPanel({
       const job = await pollBrandImportJob(jobId, (j) => setStatus(j.status));
       if (job.status === "Ready" && job.resultId) {
         await loadResult(job.resultId);
-        showToast("success", "Analyse aktualisiert");
+        showToast("success", s.analysisUpdatedToast);
       } else {
-        setError(job.errorMessageSafe ?? "Die Analyse ist fehlgeschlagen.");
+        setError(job.errorMessageSafe ?? t.admin.settingsPage.wbsAnalysisFailedError);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Die erneute Analyse konnte nicht gestartet werden.");
+      setError(err?.response?.data?.message ?? s.reanalysisStartErrorToast);
     } finally {
       setAnalyzing(false);
       setStatus(null);
@@ -165,9 +173,9 @@ export function BrandImportPanel({
       setResult(null);
       setSelectedProposalId(null);
       onPreviewOverrideChange(null);
-      showToast("success", "Entwurf verworfen");
+      showToast("success", s.draftDiscardedToast);
     } catch {
-      showToast("error", "Entwurf konnte nicht verworfen werden");
+      showToast("error", s.draftDiscardErrorToast);
     }
   }
 
@@ -176,16 +184,16 @@ export function BrandImportPanel({
 
     const confirmMessage =
       section === "branding"
-        ? "Die ausgewählten Branding-Werte werden auf deine Buchungsseite angewendet. Deine Services, Mitarbeiter, Links und Buchungen bleiben erhalten."
+        ? s.brandingApplyConfirmMessage
         : section === "services"
-        ? `${selectedServiceCount} erkannte Leistung${selectedServiceCount === 1 ? "" : "en"} werden zu deinen Services hinzugefügt. Bestehende Services bleiben unverändert.`
-        : `${detectedSocialLinks.length} erkannte Link${detectedSocialLinks.length === 1 ? "" : "s"} werden zu deinen Links hinzugefügt. Bestehende Links bleiben unverändert.`;
+        ? fillTemplate(selectedServiceCount === 1 ? s.servicesApplyConfirmTemplate_one : s.servicesApplyConfirmTemplate_other, { count: selectedServiceCount })
+        : fillTemplate(detectedSocialLinks.length === 1 ? s.linksApplyConfirmTemplate_one : s.linksApplyConfirmTemplate_other, { count: detectedSocialLinks.length });
 
     const ok = await confirm({
-      title: section === "branding" ? "Aktuelles Design ersetzen?" : "Übernehmen?",
+      title: section === "branding" ? s.replaceDesignConfirmTitle : s.applyConfirmTitle,
       message: confirmMessage,
-      confirmLabel: "Übernehmen",
-      cancelLabel: "Abbrechen",
+      confirmLabel: s.applyBtn,
+      cancelLabel: t.cancel,
       variant: "info",
     });
     if (!ok) return;
@@ -221,17 +229,17 @@ export function BrandImportPanel({
 
       if (section === "services") {
         showToast("success", response.skippedServicesCount > 0
-          ? `${response.importedServicesCount} Leistungen importiert, ${response.skippedServicesCount} wegen Plan-Limit übersprungen.`
-          : `${response.importedServicesCount} Leistungen importiert.`);
+          ? fillTemplate(s.servicesImportedWithSkippedTemplate, { imported: response.importedServicesCount, skipped: response.skippedServicesCount })
+          : fillTemplate(s.servicesImportedTemplate, { imported: response.importedServicesCount }));
       } else {
-        showToast("success", "Übernommen");
+        showToast("success", s.appliedBadge);
       }
 
       setAppliedSections((prev) => new Set(prev).add(section));
       if (section === "branding") onPreviewOverrideChange(null);
       onApplied();
     } catch (err: any) {
-      showToast("error", err?.response?.data?.message ?? "Konnte nicht übernommen werden");
+      showToast("error", err?.response?.data?.message ?? s.couldNotApplyErrorToast);
     } finally {
       setApplyingSection(null);
     }
@@ -245,8 +253,8 @@ export function BrandImportPanel({
           <Sparkles size={13} className="text-white" />
         </div>
         <div>
-          <p className="font-semibold text-[#111318] text-sm leading-tight">Branding aus Website übernehmen</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">Analysiert deine bestehende Website und schlägt Branding, Services und Links vor</p>
+          <p className="font-semibold text-[#111318] text-sm leading-tight">{s.brandImportTitle}</p>
+          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.brandImportSubtitle}</p>
         </div>
       </div>
 
@@ -257,7 +265,7 @@ export function BrandImportPanel({
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://ihr-unternehmen.de"
+              placeholder={t.admin.settingsPage.wbsUrlPlaceholder}
               className={inputCls}
               disabled={analyzing}
             />
@@ -267,14 +275,14 @@ export function BrandImportPanel({
               disabled={analyzing}
               className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
             >
-              {analyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} Website analysieren
+              {analyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} {t.admin.settingsPage.wbsCheckWebsite}
             </button>
           </div>
 
           <label className="flex items-start gap-2.5">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" disabled={analyzing} />
             <span className="text-[11px] text-[#565A72] leading-relaxed">
-              Ich bestätige, dass ich berechtigt bin, die Inhalte und das Branding dieser Website für mein Unternehmen zu verwenden.
+              {t.admin.settingsPage.wbsConsentLabel}
             </span>
           </label>
 
@@ -289,16 +297,16 @@ export function BrandImportPanel({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-[#374151]">
-              Erkannt: <span className="text-[#111318]">{result.websiteTitle ?? "Website"}</span>
+              {s.detectedLabel} <span className="text-[#111318]">{result.websiteTitle ?? "Website"}</span>
             </p>
             <div className="flex items-center gap-1.5">
               <button type="button" onClick={handleReanalyze} disabled={analyzing}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-[#6B7280] hover:text-[#111318] px-2 py-1 rounded-lg hover:bg-[#F3F4F6] disabled:opacity-50">
-                <RefreshCw size={11} className={analyzing ? "animate-spin" : ""} /> Erneut analysieren
+                <RefreshCw size={11} className={analyzing ? "animate-spin" : ""} /> {s.reanalyzeBtn}
               </button>
               <button type="button" onClick={handleDiscard} disabled={analyzing}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-[#991B1B] hover:bg-[#FEE2E2] px-2 py-1 rounded-lg disabled:opacity-50">
-                <Trash2 size={11} /> Verwerfen
+                <Trash2 size={11} /> {s.discardBtn}
               </button>
             </div>
           </div>
@@ -306,7 +314,7 @@ export function BrandImportPanel({
           {/* ── Erkannte Marke ── */}
           {result.detectedData && (
             <div className="rounded-xl bg-[#F7F7F8] p-3 space-y-2">
-              <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide">Erkannte Marke</p>
+              <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide">{s.detectedBrandLabel}</p>
               <div className="flex flex-wrap items-center gap-2">
                 {result.detectedData.colors.slice(0, 6).map((c) => (
                   <span key={c} className="w-6 h-6 rounded-full border border-[#E5E7EB]" style={{ backgroundColor: c }} title={c} />
@@ -320,9 +328,9 @@ export function BrandImportPanel({
               </div>
               {result.detectedData.warnings.length > 0 && (
                 <p className="text-[10px] text-[#92400E]">
-                  Hinweis: {result.detectedData.warnings.includes("no_colors_detected") && "Keine eindeutigen Farben erkannt. "}
-                  {result.detectedData.warnings.includes("no_logo_detected") && "Kein Logo erkannt. "}
-                  {result.detectedData.warnings.includes("no_fonts_detected") && "Keine Schriftart erkannt. "}
+                  {s.noteLabel} {result.detectedData.warnings.includes("no_colors_detected") && `${s.noColorsDetected} `}
+                  {result.detectedData.warnings.includes("no_logo_detected") && `${s.noLogoDetected} `}
+                  {result.detectedData.warnings.includes("no_fonts_detected") && `${s.noFontsDetected} `}
                 </p>
               )}
             </div>
@@ -330,7 +338,7 @@ export function BrandImportPanel({
 
           {/* ── Designvorschläge ── */}
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide">Designvorschläge</p>
+            <p className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wide">{s.designSuggestionsLabel}</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {result.proposals.map((p) => (
                 <button
@@ -357,17 +365,17 @@ export function BrandImportPanel({
           <div className="rounded-xl border border-[#E5E7EB] p-3 space-y-3">
             <div className="flex items-center gap-2">
               <Palette size={14} className="text-[#6355E4]" />
-              <p className="text-xs font-semibold text-[#111318]">Branding</p>
+              <p className="text-xs font-semibold text-[#111318]">{s.brandingSectionTitle}</p>
               {appliedSections.has("branding") && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#15803D] bg-[#DCFCE7] px-1.5 py-0.5 rounded-md ml-auto">
-                  <Check size={10} /> Übernommen
+                  <Check size={10} /> {s.appliedBadge}
                 </span>
               )}
             </div>
 
             {logoCandidates.length > 0 && (
               <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">Logo-Kandidaten</p>
+                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">{s.logoCandidatesLabel}</p>
                 <div className="flex flex-wrap gap-2">
                   {logoCandidates.map((asset) => (
                     <button
@@ -380,7 +388,7 @@ export function BrandImportPanel({
                       title={asset.discoveryHint ?? undefined}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={asset.sourceUrl} alt="Logo-Kandidat" className="max-w-full max-h-full object-contain"
+                      <img src={asset.sourceUrl} alt={s.logoCandidateAlt} className="max-w-full max-h-full object-contain"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     </button>
                   ))}
@@ -390,10 +398,10 @@ export function BrandImportPanel({
 
             <div className="space-y-1.5">
               {([
-                ["logo", "Logo übernehmen", logoCandidates.length > 0],
-                ["colors", "Markenfarben übernehmen", true],
-                ["typography", "Typografie übernehmen", true],
-                ["description", "Unternehmensbeschreibung übernehmen", !!result.detectedData?.content.description],
+                ["logo", s.applyLogoLabel, logoCandidates.length > 0],
+                ["colors", s.applyColorsLabel, true],
+                ["typography", s.applyTypographyLabel, true],
+                ["description", s.applyDescriptionLabel, !!result.detectedData?.content.description],
               ] as [keyof BrandingFields, string, boolean][]).map(([key, label, available]) => (
                 <label key={key} className={`flex items-center gap-2 text-xs ${available ? "text-[#374151]" : "text-[#D1D5DB]"}`}>
                   <input
@@ -409,9 +417,9 @@ export function BrandImportPanel({
 
             {result.detectedData?.content && (result.detectedData.content.phone || result.detectedData.content.email || result.detectedData.content.address) && (
               <div className="rounded-lg bg-[#F7F7F8] p-2.5 space-y-0.5 text-[11px] text-[#565A72]">
-                {result.detectedData.content.phone && <p>Telefon: {result.detectedData.content.phone}</p>}
-                {result.detectedData.content.email && <p>E-Mail: {result.detectedData.content.email}</p>}
-                {result.detectedData.content.address && <p>Adresse: {result.detectedData.content.address}</p>}
+                {result.detectedData.content.phone && <p>{s.phoneLabel} {result.detectedData.content.phone}</p>}
+                {result.detectedData.content.email && <p>{s.emailLabel} {result.detectedData.content.email}</p>}
+                {result.detectedData.content.address && <p>{s.addressLabel} {result.detectedData.content.address}</p>}
               </div>
             )}
 
@@ -422,7 +430,7 @@ export function BrandImportPanel({
                 disabled={applyingSection !== null || !selectedProposal}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
               >
-                {applyingSection === "branding" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Branding übernehmen
+                {applyingSection === "branding" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} {s.applyBrandingBtn}
               </button>
             </div>
           </div>
@@ -431,44 +439,44 @@ export function BrandImportPanel({
           <div className="rounded-xl border border-[#E5E7EB] p-3 space-y-3">
             <div className="flex items-center gap-2">
               <Briefcase size={14} className="text-[#6355E4]" />
-              <p className="text-xs font-semibold text-[#111318]">Services</p>
+              <p className="text-xs font-semibold text-[#111318]">{s.servicesSectionTitle}</p>
               {appliedSections.has("services") && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#15803D] bg-[#DCFCE7] px-1.5 py-0.5 rounded-md ml-auto">
-                  <Check size={10} /> Übernommen
+                  <Check size={10} /> {s.appliedBadge}
                 </span>
               )}
             </div>
 
             {detectedServices.length === 0 ? (
-              <p className="text-[11px] text-[#9CA3AF]">Auf der Website wurden keine buchbaren Leistungen erkannt.</p>
+              <p className="text-[11px] text-[#9CA3AF]">{s.noServicesDetected}</p>
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">{selectedServiceCount} von {detectedServices.length} ausgewählt</p>
+                  <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">{fillTemplate(s.selectedOfTotalTemplate, { selected: selectedServiceCount, total: detectedServices.length })}</p>
                   <button
                     type="button"
-                    onClick={() => setDeselectedServiceNames((prev) => prev.size === 0 ? new Set(detectedServices.map((s) => s.name)) : new Set())}
+                    onClick={() => setDeselectedServiceNames((prev) => prev.size === 0 ? new Set(detectedServices.map((svc) => svc.name)) : new Set())}
                     className="text-[10px] font-medium text-[#6355E4] hover:underline"
                   >
-                    {deselectedServiceNames.size === 0 ? "Alle abwählen" : "Alle auswählen"}
+                    {deselectedServiceNames.size === 0 ? s.deselectAllBtn : s.selectAllBtn}
                   </button>
                 </div>
                 <div className="max-h-56 overflow-y-auto space-y-0.5 rounded-lg border border-[#F3F4F6]">
-                  {detectedServices.map((s) => {
-                    const price = formatPrice(s.priceAmount, s.currency);
-                    const checked = !deselectedServiceNames.has(s.name);
+                  {detectedServices.map((svc) => {
+                    const price = formatPrice(svc.priceAmount, svc.currency);
+                    const checked = !deselectedServiceNames.has(svc.name);
                     return (
-                      <label key={s.name} className="flex items-center gap-2 text-xs text-[#374151] px-2 py-1.5 hover:bg-[#F7F7F8]">
+                      <label key={svc.name} className="flex items-center gap-2 text-xs text-[#374151] px-2 py-1.5 hover:bg-[#F7F7F8]">
                         <input
                           type="checkbox"
                           checked={checked}
                           onChange={(e) => setDeselectedServiceNames((prev) => {
                             const next = new Set(prev);
-                            if (e.target.checked) next.delete(s.name); else next.add(s.name);
+                            if (e.target.checked) next.delete(svc.name); else next.add(svc.name);
                             return next;
                           })}
                         />
-                        <span className="flex-1 truncate">{s.name}</span>
+                        <span className="flex-1 truncate">{svc.name}</span>
                         {price && <span className="text-[#9CA3AF] flex-shrink-0">{price}</span>}
                       </label>
                     );
@@ -481,7 +489,7 @@ export function BrandImportPanel({
                     disabled={applyingSection !== null || !selectedProposal || selectedServiceCount === 0}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
                   >
-                    {applyingSection === "services" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Services übernehmen
+                    {applyingSection === "services" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} {s.applyServicesBtn}
                   </button>
                 </div>
               </>
@@ -492,16 +500,16 @@ export function BrandImportPanel({
           <div className="rounded-xl border border-[#E5E7EB] p-3 space-y-3">
             <div className="flex items-center gap-2">
               <Link2 size={14} className="text-[#6355E4]" />
-              <p className="text-xs font-semibold text-[#111318]">Links</p>
+              <p className="text-xs font-semibold text-[#111318]">{s.linksSectionTitle}</p>
               {appliedSections.has("links") && (
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#15803D] bg-[#DCFCE7] px-1.5 py-0.5 rounded-md ml-auto">
-                  <Check size={10} /> Übernommen
+                  <Check size={10} /> {s.appliedBadge}
                 </span>
               )}
             </div>
 
             {detectedSocialLinks.length === 0 ? (
-              <p className="text-[11px] text-[#9CA3AF]">Auf der Website wurden keine Social-Media-Links erkannt.</p>
+              <p className="text-[11px] text-[#9CA3AF]">{s.noSocialLinksDetected}</p>
             ) : (
               <>
                 <div className="space-y-1">
@@ -518,7 +526,7 @@ export function BrandImportPanel({
                     disabled={applyingSection !== null || !selectedProposal}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
                   >
-                    {applyingSection === "links" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Links übernehmen
+                    {applyingSection === "links" ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} {s.applyLinksBtn}
                   </button>
                 </div>
               </>

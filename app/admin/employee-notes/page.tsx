@@ -27,7 +27,7 @@ export default function EmployeeNotesPage() {
     if (isTenantAdmin) router.replace("/admin/inbox");
   }, [isTenantAdmin, router]);
 
-  const [subject, setSubject] = useState(t.admin.subjectOptions[0]);
+  const [subject, setSubject] = useState<string>(t.admin.subjectOptions[0]);
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);

@@ -23,6 +23,8 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import api, { apiOrigin } from "@/lib/api/client";
 import { useConfirm } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 
 const MODAL_CLS = {
   base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
@@ -43,16 +45,20 @@ const AVATAR_COLORS = [
 const initials = (name: string) => name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) || "?";
 const avatarBg = (name: string) => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 
-const DAYS = [
-  { value: 1, label: 'Mo' }, { value: 2, label: 'Di' }, { value: 3, label: 'Mi' },
-  { value: 4, label: 'Do' }, { value: 5, label: 'Fr' }, { value: 6, label: 'Sa' },
-  { value: 0, label: 'So' },
-];
+const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+function getDays(t: Translations) {
+  const s = t.admin.employeesPage;
+  const labels: Record<number, string> = {
+    1: s.dayMon, 2: s.dayTue, 3: s.dayWed, 4: s.dayThu, 5: s.dayFri, 6: s.daySat, 0: s.daySun,
+  };
+  return DAY_ORDER.map((value) => ({ value, label: labels[value] }));
+}
 
 interface ScheduleItem { dayOfWeek: number; isWorkingDay: boolean; startTime: string; endTime: string; }
 
 const defaultSchedule = (): ScheduleItem[] =>
-  DAYS.map((d) => ({ dayOfWeek: d.value, isWorkingDay: d.value >= 1 && d.value <= 5, startTime: '09:00', endTime: '18:00' }));
+  DAY_ORDER.map((value) => ({ dayOfWeek: value, isWorkingDay: value >= 1 && value <= 5, startTime: '09:00', endTime: '18:00' }));
 
 const EMPTY: CreateEmployeeDto = {
   name: "",
@@ -75,19 +81,25 @@ interface Vacation {
   createdAt: string;
 }
 
-const VACATION_TYPES = [
-  { value: "Vacation", label: "Urlaub" },
-  { value: "SickLeave", label: "Krankenstand" },
-  { value: "PersonalDay", label: "Persönlicher Tag" },
-];
-
-const vacationTypeLabel = (type: string) =>
-  VACATION_TYPES.find(t => t.value === type)?.label ?? type;
+function getVacationTypes(t: Translations) {
+  const s = t.admin.employeesPage;
+  return [
+    { value: "Vacation", label: s.vacationTypeVacation },
+    { value: "SickLeave", label: s.vacationTypeSickLeave },
+    { value: "PersonalDay", label: s.vacationTypePersonalDay },
+  ];
+}
 
 const EMPTY_VACATION = { startDate: "", endDate: "", type: "Vacation", note: "" };
 
 export default function EmployeesPage() {
   const { isEmployee } = useAuth();
+  const { t, lang } = useTranslation();
+  const s = t.admin.employeesPage;
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
+  const DAYS = getDays(t);
+  const VACATION_TYPES = getVacationTypes(t);
+  const vacationTypeLabel = (type: string) => VACATION_TYPES.find(vt => vt.value === type)?.label ?? type;
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
 
@@ -193,7 +205,7 @@ export default function EmployeesPage() {
       setEditPhotoUrl(res.photoUrl);
       await load();
     } catch (err: any) {
-      setModalErr(err.response?.data?.message || "Fehler beim Hochladen.");
+      setModalErr(err.response?.data?.message || s.uploadError);
     } finally {
       setPhotoUploading(false);
       if (editFileInputRef.current) editFileInputRef.current.value = "";
@@ -208,7 +220,7 @@ export default function EmployeesPage() {
       setEditPhotoUrl(null);
       await load();
     } catch (err: any) {
-      setModalErr(err.response?.data?.message || "Fehler beim Löschen.");
+      setModalErr(err.response?.data?.message || s.deletePhotoError);
     } finally {
       setPhotoDeleting(false);
     }
@@ -222,7 +234,7 @@ export default function EmployeesPage() {
       setEditTagline(res.tagline ?? "");
       await load();
     } catch (err: any) {
-      setModalErr(err.response?.data?.message || "Fehler beim Speichern.");
+      setModalErr(err.response?.data?.message || s.saveTaglineError);
     } finally {
       setTaglineSaving(false);
     }
@@ -235,7 +247,7 @@ export default function EmployeesPage() {
       const res = await suggestEmployeeTagline(editing.id);
       setEditTagline(res.suggestion);
     } catch (err: any) {
-      setModalErr(err.response?.data?.message || "KI-Vorschlag nicht verfügbar.");
+      setModalErr(err.response?.data?.message || s.aiSuggestionUnavailable);
     } finally {
       setSuggestingTagline(false);
     }
@@ -243,17 +255,17 @@ export default function EmployeesPage() {
 
   async function handleSubmit() {
     if (!form.name.trim() || !form.role.trim()) {
-      setModalErr("Name und Rolle sind Pflichtfelder");
+      setModalErr(s.nameRoleRequired);
       return;
     }
 
     if (!editing && (!form.username?.trim() || !form.password?.trim())) {
-      setModalErr("Benutzername und Passwort sind erforderlich");
+      setModalErr(s.usernamePasswordRequired);
       return;
     }
 
     if (editing && resetPassword && !form.password?.trim()) {
-      setModalErr("Neues Passwort ist erforderlich");
+      setModalErr(s.newPasswordRequired);
       return;
     }
 
@@ -377,7 +389,7 @@ export default function EmployeesPage() {
       setScheduleSaved(true);
       setTimeout(() => setScheduleSaved(false), 3000);
     } catch (e: any) {
-      setScheduleError(e.response?.data?.message || 'Fehler beim Speichern');
+      setScheduleError(e.response?.data?.message || s.saveGenericError);
     } finally {
       setScheduleSaving(false);
     }
@@ -399,7 +411,7 @@ export default function EmployeesPage() {
       const res = await api.get(`/admin/vacations?employeeId=${emp.id}`);
       setVacations(res.data ?? []);
     } catch {
-      setVacationError('Fehler beim Laden der Abwesenheiten');
+      setVacationError(s.loadAbsencesError);
     } finally {
       setVacationLoading(false);
     }
@@ -408,11 +420,11 @@ export default function EmployeesPage() {
   async function createVacation() {
     if (!vacationEmployee) return;
     if (!vacationForm.startDate || !vacationForm.endDate) {
-      setVacationError('Start- und Enddatum sind Pflichtfelder');
+      setVacationError(s.startEndDateRequired);
       return;
     }
     if (vacationForm.startDate > vacationForm.endDate) {
-      setVacationError('Startdatum muss vor Enddatum liegen');
+      setVacationError(s.startBeforeEndRequired);
       return;
     }
     setVacationSaving(true);
@@ -428,9 +440,9 @@ export default function EmployeesPage() {
       const res = await api.get(`/admin/vacations?employeeId=${vacationEmployee.id}`);
       setVacations(res.data ?? []);
       setVacationForm(EMPTY_VACATION);
-      toast.success('Abwesenheit eingetragen');
+      toast.success(s.absenceAddedToast);
     } catch (e: any) {
-      setVacationError(e.response?.data?.message || 'Fehler beim Speichern');
+      setVacationError(e.response?.data?.message || s.saveGenericError);
     } finally {
       setVacationSaving(false);
     }
@@ -441,9 +453,9 @@ export default function EmployeesPage() {
     try {
       await api.delete(`/admin/vacations/${id}`);
       setVacations(prev => prev.filter(v => v.id !== id));
-      toast.success('Abwesenheit gelöscht');
+      toast.success(s.absenceDeletedToast);
     } catch (e: any) {
-      toast.error(e.response?.data?.message || 'Fehler beim Löschen');
+      toast.error(e.response?.data?.message || s.deleteGenericError);
     } finally {
       setDeletingVacationId(null);
     }
@@ -459,15 +471,15 @@ export default function EmployeesPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">Mitarbeiter</h1>
-            <p className="text-sm text-[#8A8A8A]">Fachkräfte verwalten und zuweisen</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">{t.admin.employees}</h1>
+            <p className="text-sm text-[#8A8A8A]">{s.pageSubtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
             startContent={<Plus size={18} />}
             onPress={openCreate}
           >
-            Mitarbeiter hinzufügen
+            {s.addEmployee}
           </Button>
         </div>
 
@@ -491,7 +503,7 @@ export default function EmployeesPage() {
                       <AlertCircle size={20} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-[#1E1E1E]">Mitarbeiter löschen</h2>
+                      <h2 className="text-lg font-bold text-[#1E1E1E]">{s.deleteTitle}</h2>
                       <p className="text-xs text-[#8A8A8A]">
                         {selectedEmployeeForDelete?.name}
                       </p>
@@ -506,7 +518,7 @@ export default function EmployeesPage() {
                         <p className="text-sm text-red-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
                           <span>
-                            <strong>Achtung:</strong> Das Löschen eines Mitarbeiters ist endgültig und kann nicht rückgängig gemacht werden.
+                            {s.deleteWarning}
                           </span>
                         </p>
                       </div>
@@ -530,7 +542,7 @@ export default function EmployeesPage() {
                             variant="flat"
                             className={selectedEmployeeForDelete.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}
                           >
-                            {selectedEmployeeForDelete.isActive ? "Aktiv" : "Inaktiv"}
+                            {selectedEmployeeForDelete.isActive ? t.admin.active : t.admin.inactive}
                           </Chip>
                         </div>
                       </div>
@@ -539,7 +551,7 @@ export default function EmployeesPage() {
                         <p className="text-sm text-amber-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
                           <span>
-                            <strong>Auswirkung:</strong> Beim Löschen eines Mitarbeiters werden alle zukünftigen Buchungen ungültig.
+                            {s.deleteImpact}
                           </span>
                         </p>
                       </div>
@@ -548,7 +560,7 @@ export default function EmployeesPage() {
                         <p className="text-sm text-[#6355E4] flex items-start gap-2">
                           <UserX size={16} className="shrink-0 mt-0.5" />
                           <span>
-                            <strong>Alternative:</strong> Statt zu löschen, können Sie den Mitarbeiter auch <strong>deaktivieren</strong>.
+                            {s.deleteAlternative}
                           </span>
                         </p>
                       </div>
@@ -567,7 +579,7 @@ export default function EmployeesPage() {
                     isDisabled={deleting}
                     startContent={<X size={14} />}
                   >
-                    Abbrechen
+                    {t.cancel}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-lg shadow-red-500/20"
@@ -575,7 +587,7 @@ export default function EmployeesPage() {
                     isLoading={deleting}
                     startContent={!deleting && <Trash2 size={14} />}
                   >
-                    Endgültig löschen
+                    {s.deleteFinal}
                   </Button>
                 </ModalFooter>
               </>
@@ -607,7 +619,7 @@ export default function EmployeesPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-[#1E1E1E]">
-                        {selectedEmployeeForToggle?.isActive ? "Mitarbeiter deaktivieren" : "Mitarbeiter aktivieren"}
+                        {selectedEmployeeForToggle?.isActive ? s.deactivateTitle : s.activateTitle}
                       </h2>
                       <p className="text-xs text-[#8A8A8A]">{selectedEmployeeForToggle?.name}</p>
                     </div>
@@ -626,13 +638,13 @@ export default function EmployeesPage() {
                           <span>
                             <strong>
                               {selectedEmployeeForToggle.isActive
-                                ? "Möchten Sie diesen Mitarbeiter wirklich deaktivieren?"
-                                : "Möchten Sie diesen Mitarbeiter wirklich aktivieren?"}
+                                ? s.confirmDeactivate
+                                : s.confirmActivate}
                             </strong>
                             <br />
                             {selectedEmployeeForToggle.isActive
-                              ? "Deaktivierte Mitarbeiter erscheinen nicht mehr in Buchungsformularen."
-                              : "Aktivierte Mitarbeiter sind wieder für Buchungen verfügbar."}
+                              ? s.deactivatedDesc
+                              : s.activatedDesc}
                           </span>
                         </p>
                       </div>
@@ -653,7 +665,7 @@ export default function EmployeesPage() {
                           </div>
                           <Chip size="sm" variant="flat"
                             className={selectedEmployeeForToggle.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
-                            {selectedEmployeeForToggle.isActive ? "Aktiv" : "Inaktiv"}
+                            {selectedEmployeeForToggle.isActive ? t.admin.active : t.admin.inactive}
                           </Chip>
                         </div>
                       </div>
@@ -663,7 +675,7 @@ export default function EmployeesPage() {
                           <p className="text-sm text-amber-700 flex items-start gap-2">
                             <AlertCircle size={16} className="shrink-0 mt-0.5" />
                             <span>
-                              <strong>Auswirkung:</strong> Der Mitarbeiter wird in zukünftigen Buchungsformularen nicht mehr angezeigt.
+                              {s.toggleImpact}
                             </span>
                           </p>
                         </div>
@@ -683,7 +695,7 @@ export default function EmployeesPage() {
                     isDisabled={toggling}
                     startContent={<X size={14} />}
                   >
-                    Abbrechen
+                    {t.cancel}
                   </Button>
                   <Button
                     className={selectedEmployeeForToggle?.isActive
@@ -694,7 +706,7 @@ export default function EmployeesPage() {
                     isLoading={toggling}
                     startContent={!toggling && (selectedEmployeeForToggle?.isActive ? <UserX size={14} /> : <UserCheck size={14} />)}
                   >
-                    {selectedEmployeeForToggle?.isActive ? "Deaktivieren" : "Aktivieren"}
+                    {selectedEmployeeForToggle?.isActive ? s.deactivateBtn : s.activateBtn}
                   </Button>
                 </ModalFooter>
               </>
@@ -705,9 +717,9 @@ export default function EmployeesPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: "Gesamt", value: employees.length, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
-            { label: "Aktiv", value: activeCount, cls: "text-[#6355E4]", glow: "#6355E4" },
-            { label: "Inaktiv", value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#ECEBF2" },
+            { label: s.statTotal, value: employees.length, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
+            { label: t.admin.active, value: activeCount, cls: "text-[#6355E4]", glow: "#6355E4" },
+            { label: t.admin.inactive, value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#ECEBF2" },
           ].map(({ label, value, cls, glow }) => (
             <GlowingEffect key={label} glowColor={glow} spread={40}>
               <Card className="border border-[#ECEBF2]/30 shadow-md relative z-[1]">
@@ -728,7 +740,7 @@ export default function EmployeesPage() {
             size="sm"
             color="default"
           />
-          <span className="text-sm text-[#8A8A8A]">Inaktive anzeigen</span>
+          <span className="text-sm text-[#8A8A8A]">{s.showInactiveLabel}</span>
         </div>
 
         {/* Error */}
@@ -748,13 +760,13 @@ export default function EmployeesPage() {
             <div className="w-16 h-16 bg-[#F6F5FA] rounded-full flex items-center justify-center mx-auto mb-4">
               <Users size={28} className="text-[#ECEBF2]" />
             </div>
-            <p className="text-[#8A8A8A] font-medium">Noch keine Mitarbeiter vorhanden</p>
+            <p className="text-[#8A8A8A] font-medium">{s.emptyStateText}</p>
             <Button
               className="mt-4 bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
               startContent={<Plus size={16} />}
               onPress={openCreate}
             >
-              Ersten Mitarbeiter hinzufügen
+              {s.addFirstEmployee}
             </Button>
           </div>
         ) : (
@@ -785,7 +797,7 @@ export default function EmployeesPage() {
                         <span className="font-bold text-[#1E1E1E]">{emp.name}</span>
                         <Chip size="sm" variant="flat"
                           className={emp.isActive ? "bg-[#6355E4]/10 text-[#6355E4]" : "bg-[#6b7280]/10 text-[#6b7280]"}>
-                          {emp.isActive ? "Aktiv" : "Inaktiv"}
+                          {emp.isActive ? t.admin.active : t.admin.inactive}
                         </Chip>
                       </div>
                       <p className="text-sm text-[#8A8A8A] font-medium">{emp.role}</p>
@@ -802,7 +814,7 @@ export default function EmployeesPage() {
                         </p>
                       )}
                       {!emp.hasPassword && emp.username && (
-                        <p className="text-xs text-amber-600 mt-1 font-medium">Kein Passwort gesetzt</p>
+                        <p className="text-xs text-amber-600 mt-1 font-medium">{s.noPasswordSet}</p>
                       )}
                     </div>
                     {/* Actions */}
@@ -811,7 +823,7 @@ export default function EmployeesPage() {
                         isIconOnly size="sm" variant="flat"
                         className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                         onPress={() => openEdit(emp)}
-                        title="Bearbeiten"
+                        title={s.editAction}
                       >
                         <Edit size={14} />
                       </Button>
@@ -819,7 +831,7 @@ export default function EmployeesPage() {
                         isIconOnly size="sm" variant="flat"
                         className="bg-[#F6F5FA] text-[#8A8A8A] hover:bg-[#ECEBF2]/30"
                         onPress={() => openSchedule(emp)}
-                        title="Arbeitszeiten"
+                        title={s.scheduleAction}
                       >
                         <Clock size={14} />
                       </Button>
@@ -827,7 +839,7 @@ export default function EmployeesPage() {
                         isIconOnly size="sm" variant="flat"
                         className="bg-blue-50 text-blue-500 hover:bg-blue-100"
                         onPress={() => openVacation(emp)}
-                        title="Abwesenheiten"
+                        title={s.vacationAction}
                       >
                         <CalendarDays size={14} />
                       </Button>
@@ -835,7 +847,7 @@ export default function EmployeesPage() {
                         isIconOnly size="sm" variant="flat"
                         className={emp.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-[#6355E4]/10 text-[#6355E4] hover:bg-[#6355E4]/20"}
                         onPress={() => handleToggle(emp)}
-                        title={emp.isActive ? "Deaktivieren" : "Aktivieren"}
+                        title={emp.isActive ? s.deactivateBtn : s.activateBtn}
                       >
                         {emp.isActive ? <UserX size={14} /> : <UserCheck size={14} />}
                       </Button>
@@ -843,7 +855,7 @@ export default function EmployeesPage() {
                         isIconOnly size="sm" variant="flat"
                         className="bg-red-50 text-red-500 hover:bg-red-100"
                         onPress={() => handleDelete(emp)}
-                        title="Löschen"
+                        title={s.deleteAction}
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -870,10 +882,10 @@ export default function EmployeesPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">
-                      {editing ? "Mitarbeiter bearbeiten" : "Mitarbeiter hinzufügen"}
+                      {editing ? s.editEmployeeTitle : s.addEmployeeTitle}
                     </h2>
                     <p className="text-xs text-[#8A8A8A]">
-                      {editing ? `${editing.name} bearbeiten` : "Neue Fachkraft anlegen"}
+                      {editing ? fillTemplate(s.editEmployeeSubtitleTemplate, { name: editing.name }) : s.newEmployeeSubtitle}
                     </p>
                   </div>
                 </div>
@@ -919,7 +931,7 @@ export default function EmployeesPage() {
                             startContent={!photoUploading && <Upload size={13} />}
                             onPress={() => editFileInputRef.current?.click()}
                           >
-                            Foto hochladen
+                            {s.uploadPhoto}
                           </Button>
                           {editPhotoUrl && (
                             <Button
@@ -931,15 +943,15 @@ export default function EmployeesPage() {
                               startContent={!photoDeleting && <Trash2 size={13} />}
                               onPress={handleEditPhotoDelete}
                             >
-                              Löschen
+                              {t.admin.delete}
                             </Button>
                           )}
                         </div>
                       </div>
                       <div className="flex gap-2 items-end">
                         <Input
-                          label="Beschreibung in 3 Wörtern"
-                          placeholder="z.B. Kreativ, präzise, freundlich"
+                          label={s.taglineLabel}
+                          placeholder={s.taglinePlaceholder}
                           value={editTagline}
                           maxLength={60}
                           onChange={(e) => setEditTagline(e.target.value)}
@@ -953,9 +965,9 @@ export default function EmployeesPage() {
                           isLoading={suggestingTagline}
                           startContent={!suggestingTagline && <Sparkles size={13} />}
                           onPress={handleSuggestTagline}
-                          title="KI-Vorschlag (Agency-Feature)"
+                          title={s.aiSuggestTitle}
                         >
-                          KI
+                          {s.aiBtn}
                         </Button>
                         <Button
                           size="sm"
@@ -965,16 +977,16 @@ export default function EmployeesPage() {
                           startContent={!taglineSaving && <Save size={13} />}
                           onPress={handleEditTaglineSave}
                         >
-                          Speichern
+                          {t.save}
                         </Button>
                       </div>
-                      <p className="text-[10px] text-[#8A8A8A]">Foto &amp; Beschreibung werden Kunden während des Buchens angezeigt.</p>
+                      <p className="text-[10px] text-[#8A8A8A]">{s.photoTaglineHint}</p>
                     </div>
                   )}
 
                   <Input
-                    label="Name"
-                    placeholder="z.B. Anna Meier"
+                    label={t.admin.name}
+                    placeholder={s.namePlaceholder}
                     value={form.name}
                     isRequired={true}
                     isDisabled={submitting}
@@ -983,8 +995,8 @@ export default function EmployeesPage() {
                   />
 
                   <Input
-                    label="Rolle"
-                    placeholder="z.B. Ästhetik-Expertin"
+                    label={s.roleLabel}
+                    placeholder={s.rolePlaceholder}
                     value={form.role}
                     isRequired={true}
                     isDisabled={submitting}
@@ -993,8 +1005,8 @@ export default function EmployeesPage() {
                   />
 
                   <Input
-                    label="Spezialgebiet (optional)"
-                    placeholder="z.B. Wimpern, Botox, Filler"
+                    label={s.specialtyLabel}
+                    placeholder={s.specialtyPlaceholder}
                     value={form.specialty ?? ""}
                     isDisabled={submitting}
                     onChange={(e) => setForm({ ...form, specialty: e.target.value })}
@@ -1002,8 +1014,8 @@ export default function EmployeesPage() {
                   />
 
                   <Input
-                    label="Standort (optional)"
-                    placeholder="z.B. Basel, Zürich, Bern"
+                    label={s.locationFieldLabel}
+                    placeholder={s.locationFieldPlaceholder}
                     value={form.location ?? ""}
                     isDisabled={submitting}
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
@@ -1012,8 +1024,8 @@ export default function EmployeesPage() {
                   />
 
                   <Input
-                    label="Benutzername (für Login)"
-                    placeholder="z.B. anna.meier"
+                    label={s.usernameLabel}
+                    placeholder={s.usernamePlaceholder}
                     value={form.username ?? ""}
                     isRequired={!editing ? true : false}
                     isDisabled={submitting || (!!editing && !resetPassword)}
@@ -1024,9 +1036,9 @@ export default function EmployeesPage() {
 
                   {!editing && (
                     <Input
-                      label="Passwort"
+                      label={s.passwordLabel}
                       type={showPassword ? "text" : "password"}
-                      placeholder="Mindestens 8 Zeichen"
+                      placeholder={s.passwordPlaceholder}
                       value={form.password ?? ""}
                       isRequired={true}
                       isDisabled={submitting}
@@ -1050,7 +1062,7 @@ export default function EmployeesPage() {
                     <>
                       {!resetPassword ? (
                         <div className="p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
-                          <p className="text-sm text-[#8A8A8A] mb-2">Passwort ändern?</p>
+                          <p className="text-sm text-[#8A8A8A] mb-2">{s.changePasswordPrompt}</p>
                           <Button
                             size="sm"
                             variant="flat"
@@ -1058,15 +1070,15 @@ export default function EmployeesPage() {
                             startContent={<Lock size={14} />}
                             onPress={() => setResetPassword(true)}
                           >
-                            Neues Passwort setzen
+                            {s.setNewPasswordBtn}
                           </Button>
                         </div>
                       ) : (
                         <div className="space-y-3">
                           <Input
-                            label="Neues Passwort"
+                            label={s.newPasswordLabel}
                             type={showNewPassword ? "text" : "password"}
-                            placeholder="Mindestens 8 Zeichen"
+                            placeholder={s.passwordPlaceholder}
                             value={form.password ?? ""}
                             isRequired={true}
                             isDisabled={submitting}
@@ -1093,7 +1105,7 @@ export default function EmployeesPage() {
                               setForm({ ...form, password: "" });
                             }}
                           >
-                            Abbrechen
+                            {t.cancel}
                           </Button>
                         </div>
                       )}
@@ -1110,9 +1122,9 @@ export default function EmployeesPage() {
                         isDisabled={submitting}
                       />
                       <div>
-                        <p className="text-sm font-semibold text-[#1E1E1E]">{formActive ? "Aktiv" : "Inaktiv"}</p>
+                        <p className="text-sm font-semibold text-[#1E1E1E]">{formActive ? t.admin.active : t.admin.inactive}</p>
                         <p className="text-xs text-[#8A8A8A]">
-                          {formActive ? "Erscheint in Buchungsformularen" : "Nicht buchbar – versteckt"}
+                          {formActive ? s.activeStatusDesc : s.inactiveStatusDesc}
                         </p>
                       </div>
                     </div>
@@ -1127,7 +1139,7 @@ export default function EmployeesPage() {
                   isDisabled={submitting}
                   startContent={<X size={14} />}
                 >
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -1141,7 +1153,7 @@ export default function EmployeesPage() {
                   }
                   startContent={!submitting && <Save size={14} />}
                 >
-                  {editing ? "Speichern" : "Hinzufügen"}
+                  {editing ? t.save : s.addBtn}
                 </Button>
               </ModalFooter>
             </>
@@ -1160,7 +1172,7 @@ export default function EmployeesPage() {
                     <Clock size={16} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#1E1E1E]">Arbeitszeiten</h2>
+                    <h2 className="text-base font-bold text-[#1E1E1E]">{s.scheduleTitle}</h2>
                     <p className="text-xs text-[#8A8A8A]">{scheduleEmployee?.name}</p>
                   </div>
                 </div>
@@ -1204,20 +1216,20 @@ export default function EmployeesPage() {
                                 />
                               </div>
                             ) : (
-                              <span className="text-xs text-[#8A8A8A]">Frei</span>
+                              <span className="text-xs text-[#8A8A8A]">{s.dayOff}</span>
                             )}
                           </div>
                         </div>
                       );
                     })}
                     {scheduleError && <p className="text-xs text-red-600">{scheduleError}</p>}
-                    {scheduleSaved && <p className="text-xs text-green-600">Arbeitszeiten gespeichert!</p>}
+                    {scheduleSaved && <p className="text-xs text-green-600">{s.scheduleSavedConfirmation}</p>}
                   </div>
                 )}
               </ModalBody>
               <ModalFooter className="gap-2">
                 <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
-                  Schließen
+                  {t.close}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-[#ECEBF2] to-[#D8D7E2] text-white font-semibold"
@@ -1225,7 +1237,7 @@ export default function EmployeesPage() {
                   isLoading={scheduleSaving}
                   startContent={!scheduleSaving && <Save size={14} />}
                 >
-                  Speichern
+                  {t.save}
                 </Button>
               </ModalFooter>
             </>
@@ -1244,7 +1256,7 @@ export default function EmployeesPage() {
                     <Plane size={16} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-[#1E1E1E]">Abwesenheiten</h2>
+                    <h2 className="text-base font-bold text-[#1E1E1E]">{s.vacationTitle}</h2>
                     <p className="text-xs text-[#8A8A8A]">{vacationEmployee?.name}</p>
                   </div>
                 </div>
@@ -1253,7 +1265,7 @@ export default function EmployeesPage() {
                 <div className="space-y-5">
                   {/* Existing vacations list */}
                   <div>
-                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">Eingetragene Abwesenheiten</p>
+                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">{s.recordedAbsences}</p>
                     {vacationLoading ? (
                       <div className="flex justify-center py-6">
                         <div className="animate-spin rounded-full h-7 w-7 border-b-4 border-blue-400" />
@@ -1261,7 +1273,7 @@ export default function EmployeesPage() {
                     ) : vacations.length === 0 ? (
                       <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         <CalendarDays size={24} className="mx-auto text-gray-300 mb-1" />
-                        <p className="text-sm text-[#8A8A8A]">Noch keine Abwesenheiten eingetragen</p>
+                        <p className="text-sm text-[#8A8A8A]">{s.noAbsencesYet}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -1270,9 +1282,9 @@ export default function EmployeesPage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-sm font-semibold text-[#1E1E1E]">
-                                  {new Date(v.startDate).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                  {new Date(v.startDate).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })}
                                   {' – '}
-                                  {new Date(v.endDate).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                  {new Date(v.endDate).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </span>
                                 <Chip
                                   size="sm"
@@ -1304,11 +1316,11 @@ export default function EmployeesPage() {
 
                   {/* Add new vacation form */}
                   <div className="border-t border-gray-100 pt-4">
-                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">Neue Abwesenheit eintragen</p>
+                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">{s.newAbsenceSection}</p>
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Von</label>
+                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.fromLabel}</label>
                           <input
                             type="date"
                             value={vacationForm.startDate}
@@ -1317,7 +1329,7 @@ export default function EmployeesPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Bis</label>
+                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.toLabel}</label>
                           <input
                             type="date"
                             value={vacationForm.endDate}
@@ -1329,23 +1341,23 @@ export default function EmployeesPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Typ</label>
+                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.typeLabel}</label>
                         <select
                           value={vacationForm.type}
                           onChange={(e) => setVacationForm(prev => ({ ...prev, type: e.target.value }))}
                           className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
                         >
-                          {VACATION_TYPES.map(t => (
-                            <option key={t.value} value={t.value}>{t.label}</option>
+                          {VACATION_TYPES.map(vt => (
+                            <option key={vt.value} value={vt.value}>{vt.label}</option>
                           ))}
                         </select>
                       </div>
 
                       <div>
-                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">Notiz (optional)</label>
+                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.noteLabel}</label>
                         <input
                           type="text"
-                          placeholder="z.B. Genehmigt am 01.05."
+                          placeholder={s.notePlaceholder}
                           value={vacationForm.note}
                           onChange={(e) => setVacationForm(prev => ({ ...prev, note: e.target.value }))}
                           className="w-full text-sm border border-[#ECEBF2]/40 bg-[#F6F5FA] rounded-xl px-3 py-2 text-[#1E1E1E] focus:outline-none focus:border-[#6355E4]"
@@ -1365,7 +1377,7 @@ export default function EmployeesPage() {
                         isDisabled={!vacationForm.startDate || !vacationForm.endDate}
                         startContent={!vacationSaving && <Plus size={15} />}
                       >
-                        Abwesenheit eintragen
+                        {s.submitAbsenceBtn}
                       </Button>
                     </div>
                   </div>
@@ -1373,7 +1385,7 @@ export default function EmployeesPage() {
               </ModalBody>
               <ModalFooter>
                 <Button variant="flat" className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" onPress={close} startContent={<X size={14} />}>
-                  Schließen
+                  {t.close}
                 </Button>
               </ModalFooter>
             </>

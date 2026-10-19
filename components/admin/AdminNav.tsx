@@ -71,7 +71,7 @@ export function AdminNav() {
     {
       label: t.admin.myArea,
       items: [
-        { href: "/admin/employee-dashboard", label: "Mein Bereich",       icon: LayoutDashboard },
+        { href: "/admin/employee-dashboard", label: t.admin.myArea,       icon: LayoutDashboard },
         { href: "/admin/calendar",           label: t.admin.myCalendar,   icon: Calendar },
         { href: "/admin/bookings",           label: t.admin.bookings,     icon: BookOpen },
         { href: "/admin/blocked-slots",      label: t.admin.absences,     icon: Ban },
@@ -87,7 +87,7 @@ export function AdminNav() {
         { href: "/admin/dashboard",    label: t.admin.dashboard, icon: LayoutDashboard },
         { href: "/admin/calendar",     label: t.admin.calendar,  icon: Calendar },
         { href: "/admin/bookings",     label: t.admin.bookings,  icon: BookOpen },
-        { href: "/admin/waitlist",     label: "Warteliste",      icon: ClipboardList },
+        { href: "/admin/waitlist",     label: t.admin.waitlist,  icon: ClipboardList },
         { href: "/admin/customers",    label: t.admin.customers, icon: Users },
       ],
     },
@@ -103,7 +103,7 @@ export function AdminNav() {
       label: t.admin.analytics,
       items: [
         { href: "/admin/tracking", label: t.admin.tracking, icon: BarChart3 },
-        { href: "/admin/reviews",  label: "Bewertungen",    icon: Star },
+        { href: "/admin/reviews",  label: t.admin.reviews,  icon: Star },
       ],
     },
   ];
@@ -112,15 +112,15 @@ export function AdminNav() {
     label: t.admin.administration,
     items: [
       { href: "/admin/inbox",        label: t.admin.inbox,        icon: Inbox },
-        { href: "/admin/ai-service-finder", label: "KI & Service Finder", icon: Bot },
+      { href: "/admin/ai-service-finder", label: t.admin.aiServiceFinder, icon: Bot },
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
-      ...(showIntakeForm ? [{ href: "/admin/intake-form", label: "Formulare", icon: IntakeIcon }] : []),
+      ...(showIntakeForm ? [{ href: "/admin/intake-form", label: t.admin.intakeForm, icon: IntakeIcon }] : []),
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
-      { href: "/admin/api-keys",     label: "API-Zugang",         icon: KeyRound },
+      { href: "/admin/api-keys",     label: t.admin.apiAccess,    icon: KeyRound },
       { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
       // Gutscheine sind tenant-weites Guthaben, bewusst TenantAdmin/SuperAdmin only — nicht für
       // LocationAdmin (siehe AdminVoucherController). Nur anzeigen wenn nicht LocationAdmin.
-      ...(!isLocationAdmin ? [{ href: "/admin/vouchers", label: "Gutscheine", icon: Ticket }] : []),
+      ...(!isLocationAdmin ? [{ href: "/admin/vouchers", label: t.admin.vouchers, icon: Ticket }] : []),
     ],
   };
 
@@ -130,10 +130,10 @@ export function AdminNav() {
     || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "")
     || employee?.name || "?";
   const ROLE_LABELS: Record<string, string> = {
-    TenantAdmin: "Inhaber",
-    LocationAdmin: "Standort-Admin",
-    Employee: "Mitarbeiter",
-    SuperAdmin: "Betreiber",
+    TenantAdmin: t.admin.roleOwner,
+    LocationAdmin: t.admin.roleLocationAdmin,
+    Employee: t.admin.roleEmployee,
+    SuperAdmin: t.admin.roleOperator,
   };
   const rawRole = user?.role || employee?.role || "";
   const displayRole = ROLE_LABELS[rawRole] || rawRole;
@@ -262,9 +262,9 @@ export function AdminNav() {
               </button>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1 px-2 pt-1 text-[10px] text-white/35">
-              <a href={legalConfig.imprint} target="_blank" rel="noopener noreferrer" className="hover:text-white">Impressum</a>
-              <a href={legalConfig.privacy} target="_blank" rel="noopener noreferrer" className="hover:text-white">Datenschutz</a>
-              <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="hover:text-white">AGB</a>
+              <a href={legalConfig.imprint} target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.admin.imprint}</a>
+              <a href={legalConfig.privacy} target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.admin.privacy}</a>
+              <a href={legalConfig.terms} target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.admin.terms}</a>
             </div>
           </div>
         )}
@@ -283,8 +283,8 @@ export function AdminNav() {
         <button
           onClick={toggleCollapsed}
           className="hidden md:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
-          title={collapsed ? "Sidebar einblenden" : "Sidebar ausblenden"}
-          aria-label={collapsed ? "Sidebar einblenden" : "Sidebar ausblenden"}
+          title={collapsed ? t.admin.expandSidebar : t.admin.collapseSidebar}
+          aria-label={collapsed ? t.admin.expandSidebar : t.admin.collapseSidebar}
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>

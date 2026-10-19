@@ -42,3 +42,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function useTranslation() {
   return useContext(LanguageContext);
 }
+
+/** Fills `{placeholder}` tokens in a translated template string, e.g. "{count}× booked". */
+export function fillTemplate(template: string, values: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, key) => (key in values ? String(values[key]) : match));
+}

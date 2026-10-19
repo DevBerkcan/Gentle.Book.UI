@@ -8,6 +8,7 @@ import { AppearanceOptions } from "./AppearanceOptions";
 import { BookingFlowOptions } from "./BookingFlowOptions";
 import { COLOR_PALETTES } from "./constants";
 import type { LinktreeConfig, Theme } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AdvancedDesignOptions({
   open, onToggle, config, theme, primaryColor, industryType,
@@ -26,6 +27,8 @@ export function AdvancedDesignOptions({
   applyPreset: (key: string) => void;
   inputCls: string;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <>
       <button
@@ -34,8 +37,8 @@ export function AdvancedDesignOptions({
       >
         <span className="flex items-center gap-2 text-xs font-semibold text-[#374151]">
           <SlidersHorizontal size={13} className="text-[#6355E4]" />
-          Erweiterte Design-Optionen
-          <span className="text-[10px] font-normal text-[#9CA3AF]">Feintuning · Schrift · Layout · Buchungsflow</span>
+          {s.advancedDesignOptionsLabel}
+          <span className="text-[10px] font-normal text-[#9CA3AF]">{s.advancedDesignOptionsSubtitle}</span>
         </span>
         <ChevronDown size={14} className={`text-[#9CA3AF] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>

@@ -24,9 +24,10 @@ import { adminApi, BookingListItem, Service, CreateManualBookingDto, ManualBooki
 import { bookingApi, TimeSlot, Employee, getAvailability } from "@/lib/api/booking";
 import { blockedTimeSlotsApi, BlockedTimeSlot, CreateBlockedTimeSlotDto, CreateBlockedDateRangeDto } from "@/lib/api/blockedTimeSlots";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
+import type { Translations } from "@/lib/i18n/translations";
 import { formatPrice } from "@/lib/utils/currency";
 
-moment.locale('de');
 const localizer = momentLocalizer(moment);
 
 interface BookingEvent {
@@ -43,10 +44,12 @@ const statusColors = {
   Confirmed: "#10b981", Pending: "#f59e0b", Completed: "#3b82f6",
   Cancelled: "#ef4444", NoShow: "#6b7280"
 };
-const statusLabels = {
-  Confirmed: "Bestätigt", Pending: "Ausstehend", Completed: "Abgeschlossen",
-  Cancelled: "Storniert", NoShow: "Nicht erschienen"
-};
+function getStatusLabels(t: Translations) {
+  return {
+    Confirmed: t.admin.bookingStatus.confirmed, Pending: t.admin.bookingStatus.pending, Completed: t.admin.bookingStatus.completed,
+    Cancelled: t.admin.bookingStatus.cancelled, NoShow: t.admin.bookingStatus.noShow,
+  };
+}
 const modalClassNames = {
   base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
   header: "border-b border-[#ECEBF2]/20 bg-gradient-to-r from-[#F6F5FA] to-white",
@@ -56,7 +59,11 @@ const modalClassNames = {
 
 export default function AdminCalendarPage() {
   const { hasRole, isEmployee, user, loading: authLoading } = useAuth();
+  const { t, lang } = useTranslation();
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']);
+  const statusLabels = getStatusLabels(t);
+
+  useEffect(() => { moment.locale(lang); }, [lang]);
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -149,7 +156,7 @@ const loadServicesForEmployee = useCallback(async (employeeId: string) => {
 
       const currentEmployee: Employee = {
         id: user.id,
-        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || 'Mitarbeiter',
+        name: user.name || [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username || t.admin.roleEmployee,
         role: user.role,
         specialty: user.specialty || null,
         location: user.location || null,
@@ -172,7 +179,7 @@ const loadServicesForEmployee = useCallback(async (employeeId: string) => {
       })
       .catch(() => setEmployees([]))
       .finally(() => setLoadingEmployees(false));
-  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadServicesForEmployee]);
+  }, [authLoading, isEmployee, user?.id, user?.name, user?.firstName, user?.lastName, user?.username, user?.role, user?.specialty, user?.location, loadServicesForEmployee, t]);
   const loadEvents = useCallback(async () => {
     try {
       setLoading(true);
@@ -207,7 +214,7 @@ const loadServicesForEmployee = useCallback(async (employeeId: string) => {
 
       const blockedEvents: BlockedEvent[] = blockedSlots.map((slot: BlockedTimeSlot) => ({
         id: `blocked-${slot.id}`,
-        title: `🚫 Blockiert${slot.reason ? `: ${slot.reason}` : ''}`,
+        title: `🚫 ${t.admin.calendarPage.blocked}${slot.reason ? `: ${slot.reason}` : ''}`,
         start: new Date(`${slot.blockDate}T${slot.startTime}`),
         end: new Date(`${slot.blockDate}T${slot.endTime}`),
         resource: slot,
@@ -220,7 +227,7 @@ const loadServicesForEmployee = useCallback(async (employeeId: string) => {
     } finally {
       setLoading(false);
     }
-  }, [date, isAdmin, isEmployee, user?.id]);
+  }, [date, isAdmin, isEmployee, user?.id, t]);
 
   useEffect(() => { void loadEvents(); }, [loadEvents]);
 
@@ -322,7 +329,7 @@ const handleCreateManualBooking = async () => {
     const selectedService = employeeServices.find(s => s.id === bookingForm.serviceId) || 
                            services.find(s => s.id === bookingForm.serviceId);
     
-    if (!selectedService) throw new Error("Service nicht gefunden");
+    if (!selectedService) throw new Error(t.admin.calendarPage.serviceNotFound);
 
     const availabilityCheck = await bookingApi.getAvailability(
       bookingForm.serviceId,
@@ -332,7 +339,7 @@ const handleCreateManualBooking = async () => {
     const isSlotAvailable = availabilityCheck.availableSlots?.some(
       (slot: { startTime: string; isAvailable: any; }) => slot.startTime === bookingForm.startTime && slot.isAvailable
     );
-    if (!isSlotAvailable) throw new Error("Dieser Zeitslot ist nicht mehr verfügbar.");
+    if (!isSlotAvailable) throw new Error(t.admin.calendarPage.slotNoLongerAvailable);
 
     const bookingData: CreateManualBookingDto = {
       serviceId: bookingForm.serviceId,
@@ -357,7 +364,7 @@ const handleCreateManualBooking = async () => {
     }, 3000);
   } catch (error: any) {
     void error;
-    setError(error.message || "Fehler beim Erstellen der Buchung");
+    setError(error.message || t.admin.calendarPage.bookingCreateError);
   } finally {
     setSubmitting(false);
   }
@@ -369,13 +376,13 @@ const handleCreateManualBooking = async () => {
     try {
       if (isRange) {
         if (!rangeForm.fromDate || !rangeForm.toDate || !rangeForm.startTime || !rangeForm.endTime) {
-          throw new Error("Bitte alle Pflichtfelder ausfüllen");
+          throw new Error(t.admin.calendarPage.fillRequiredFields);
         }
         const result = await blockedTimeSlotsApi.createRange(rangeForm);
         if (!result.success) throw new Error(result.message);
       } else {
         if (!singleForm.blockDate || !singleForm.startTime || !singleForm.endTime) {
-          throw new Error("Bitte alle Pflichtfelder ausfüllen");
+          throw new Error(t.admin.calendarPage.fillRequiredFields);
         }
         const result = await blockedTimeSlotsApi.create(singleForm);
         if (!result.success) throw new Error(result.message);
@@ -390,7 +397,7 @@ const handleCreateManualBooking = async () => {
       setRangeForm({ fromDate: "", toDate: "", startTime: "", endTime: "", reason: "" });
 
     } catch (error: any) {
-      setError(error.message || "Fehler beim Erstellen des blockierten Slots");
+      setError(error.message || t.admin.calendarPage.blockedSlotError);
     } finally {
       setSubmittingBlocked(false);
     }
@@ -461,7 +468,7 @@ const handleCreateManualBooking = async () => {
       <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white flex items-center justify-center">
         <div className="text-center">
           <Spinner size="lg" />
-          <p className="mt-4 text-[#8A8A8A]">Kalender wird geladen...</p>
+          <p className="mt-4 text-[#8A8A8A]">{t.admin.calendarPage.calendarLoading}</p>
         </div>
       </div>
     );
@@ -473,9 +480,9 @@ const handleCreateManualBooking = async () => {
         {/* Header */}
         <div className="mb-3 flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <h1 className="text-2xl font-bold leading-tight text-[#1E1E1E] sm:text-[28px]">Kalender</h1>
+            <h1 className="text-2xl font-bold leading-tight text-[#1E1E1E] sm:text-[28px]">{t.admin.calendar}</h1>
             <p className="mt-0.5 flex items-center gap-2 text-xs text-[#8A8A8A] sm:text-sm">
-              Verwalten Sie Termine und blockierte Zeiten
+              {t.admin.calendarPage.subtitle}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -485,7 +492,7 @@ const handleCreateManualBooking = async () => {
               startContent={<Ban size={16} />}
               onPress={() => setIsBlockedSlotModalOpen(true)}
             >
-              Zeitslot blockieren
+              {t.admin.calendarPage.blockSlot}
             </Button>
             <Button
               size="sm"
@@ -493,7 +500,7 @@ const handleCreateManualBooking = async () => {
               startContent={<Plus size={16} />}
               onPress={handleOpenManualBooking}
             >
-              Buchung erstellen
+              {t.admin.calendarPage.createBooking}
             </Button>
           </div>
         </div>
@@ -504,19 +511,19 @@ const handleCreateManualBooking = async () => {
             <div className="flex flex-col gap-2.5 xl:flex-row xl:items-center xl:justify-between">
               <Select
                 size="sm"
-                label="Filter nach Status"
+                label={t.admin.calendarPage.filterByStatus}
                 selectedKeys={filterStatus ? [filterStatus] : []}
                 onChange={(e) => setFilterStatus(e.target.value)}
                 className="w-full shrink-0 sm:w-64"
                 classNames={{ trigger: "h-10 min-h-10 bg-white border border-[#ECEBF2]" }}
               >
-                <SelectItem key="all" value="all">Alle Termine</SelectItem>
-                <SelectItem key="blocked" value="blocked">Blockierte Zeiten</SelectItem>
-                <SelectItem key="Confirmed" value="Confirmed">Bestätigt</SelectItem>
-                <SelectItem key="Pending" value="Pending">Ausstehend</SelectItem>
-                <SelectItem key="Completed" value="Completed">Abgeschlossen</SelectItem>
-                <SelectItem key="Cancelled" value="Cancelled">Storniert</SelectItem>
-                <SelectItem key="NoShow" value="NoShow">Nicht erschienen</SelectItem>
+                <SelectItem key="all" value="all">{t.admin.calendarPage.allAppointments}</SelectItem>
+                <SelectItem key="blocked" value="blocked">{t.admin.calendarPage.blockedTimes}</SelectItem>
+                <SelectItem key="Confirmed" value="Confirmed">{t.admin.bookingStatus.confirmed}</SelectItem>
+                <SelectItem key="Pending" value="Pending">{t.admin.bookingStatus.pending}</SelectItem>
+                <SelectItem key="Completed" value="Completed">{t.admin.bookingStatus.completed}</SelectItem>
+                <SelectItem key="Cancelled" value="Cancelled">{t.admin.bookingStatus.cancelled}</SelectItem>
+                <SelectItem key="NoShow" value="NoShow">{t.admin.bookingStatus.noShow}</SelectItem>
               </Select>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-xs text-[#565A72]">
                 {Object.entries(statusLabels).map(([status, label]) => (
@@ -530,7 +537,7 @@ const handleCreateManualBooking = async () => {
                 ))}
                 <div className="flex items-center gap-1.5 whitespace-nowrap">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#6b7280]" />
-                  <span>Blockiert</span>
+                  <span>{t.admin.calendarPage.blocked}</span>
                 </div>
               </div>
             </div>
@@ -559,17 +566,17 @@ const handleCreateManualBooking = async () => {
                 date={date}
                 onNavigate={setDate}
                 messages={{
-                  next: "Nächster",
-                  previous: "Vorheriger",
-                  today: "Heute",
-                  month: "Monat",
-                  week: "Woche",
-                  day: "Tag",
-                  agenda: "Liste",
-                  date: "Datum",
-                  time: "Zeit",
-                  event: "Termin",
-                  noEventsInRange: "Keine Termine in diesem Zeitraum"
+                  next: t.admin.calendarPage.calNext,
+                  previous: t.admin.calendarPage.calPrevious,
+                  today: t.admin.calendarPage.calToday,
+                  month: t.admin.calendarPage.calMonth,
+                  week: t.admin.calendarPage.calWeek,
+                  day: t.admin.calendarPage.calDay,
+                  agenda: t.admin.calendarPage.calAgenda,
+                  date: t.admin.date,
+                  time: t.admin.time,
+                  event: t.admin.calendarPage.calEvent,
+                  noEventsInRange: t.admin.calendarPage.calNoEvents
                 }}
                 formats={{
                   dateFormat: 'DD',
@@ -579,7 +586,7 @@ const handleCreateManualBooking = async () => {
                   monthHeaderFormat: 'MMMM YYYY',
                   agendaHeaderFormat: ({ start, end }) => `${moment(start).format('DD.MM.YYYY')} - ${moment(end).format('DD.MM.YYYY')}`
                 }}
-                culture="de"
+                culture={lang}
               />
             </div>
           </CardBody>
@@ -597,7 +604,7 @@ const handleCreateManualBooking = async () => {
                         <User size={20} className="text-white" />
                       </div>
                       <div className="flex-1">
-                        <h2 className="text-lg font-bold text-[#1E1E1E]">Termindetails</h2>
+                        <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.appointmentDetails}</h2>
                         <p className="text-sm text-[#8A8A8A] flex items-center gap-1">
                           <Hash size={12} />{selectedEvent?.resource.bookingNumber}
                         </p>
@@ -612,7 +619,7 @@ const handleCreateManualBooking = async () => {
                       <div className="w-10 h-10 rounded-full bg-[#6b7280] flex items-center justify-center">
                         <Ban size={20} className="text-white" />
                       </div>
-                      <h2 className="text-lg font-bold text-[#1E1E1E]">Blockierte Zeit</h2>
+                      <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.blockedTime}</h2>
                     </div>
                   )}
                 </ModalHeader>
@@ -622,7 +629,7 @@ const handleCreateManualBooking = async () => {
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
                           <Scissors size={16} className="text-[#6355E4]" />
-                          <span className="font-semibold text-[#1E1E1E]">Service</span>
+                          <span className="font-semibold text-[#1E1E1E]">{t.admin.service}</span>
                         </div>
                         <div className="flex items-start justify-between">
                           <div>
@@ -639,7 +646,7 @@ const handleCreateManualBooking = async () => {
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <div className="flex items-center gap-2 mb-3">
                           <User size={16} className="text-[#6355E4]" />
-                          <span className="font-semibold text-[#1E1E1E]">Kunde</span>
+                          <span className="font-semibold text-[#1E1E1E]">{t.admin.customer}</span>
                         </div>
                         <div className="flex items-center gap-3 mb-3">
                           <div className="w-9 h-9 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
@@ -665,20 +672,20 @@ const handleCreateManualBooking = async () => {
                         <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                           <div className="flex items-center gap-2 mb-2">
                             <MessageCircle size={16} className="text-[#6355E4]" />
-                            <span className="font-semibold text-[#1E1E1E]">Notizen</span>
+                            <span className="font-semibold text-[#1E1E1E]">{t.admin.calendarPage.notes}</span>
                           </div>
                           <p className="text-sm text-[#1E1E1E] italic">"{selectedEvent.resource.customerNotes}"</p>
                         </div>
                       )}
 
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <p className="font-semibold text-[#1E1E1E] mb-3">Status aktualisieren</p>
+                        <p className="font-semibold text-[#1E1E1E] mb-3">{t.admin.calendarPage.updateStatus}</p>
                         <div className="flex flex-wrap gap-2">
                           {[
-                            { key: "Confirmed", label: "Bestätigt", color: statusColors.Confirmed },
-                            { key: "Completed", label: "Abgeschlossen", color: statusColors.Completed },
-                            { key: "Cancelled", label: "Stornieren", color: statusColors.Cancelled },
-                            { key: "NoShow", label: "Nicht erschienen", color: statusColors.NoShow },
+                            { key: "Confirmed", label: t.admin.bookingStatus.confirmed, color: statusColors.Confirmed },
+                            { key: "Completed", label: t.admin.bookingStatus.completed, color: statusColors.Completed },
+                            { key: "Cancelled", label: t.admin.calendarPage.cancelAction, color: statusColors.Cancelled },
+                            { key: "NoShow", label: t.admin.bookingStatus.noShow, color: statusColors.NoShow },
                           ].map(btn => (
                             <Button key={btn.key} size="sm"
                               style={{ backgroundColor: btn.color }}
@@ -701,7 +708,7 @@ const handleCreateManualBooking = async () => {
                         </span>
                       </div>
                       {selectedEvent?.resource.reason && (
-                        <p className="text-sm text-[#8A8A8A] px-1"><strong>Grund:</strong> {selectedEvent.resource.reason}</p>
+                        <p className="text-sm text-[#8A8A8A] px-1"><strong>{t.admin.calendarPage.reasonLabel}:</strong> {selectedEvent.resource.reason}</p>
                       )}
                     </div>
                   )}
@@ -712,7 +719,7 @@ const handleCreateManualBooking = async () => {
                   className="bg-white border border-[#ECEBF2]/40 text-[#1E1E1E] font-semibold" 
                   startContent={<X size={14} />}
                   onPress={onClose}>
-                    Schließen
+                    {t.close}
                   </Button>
                 </ModalFooter>
               </>
@@ -743,8 +750,8 @@ const handleCreateManualBooking = async () => {
                       <Ban size={16} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-base font-bold text-[#1E1E1E]">Zeitslot blockieren</h2>
-                      <p className="text-xs text-[#8A8A8A]">Zeiten als nicht verfügbar markieren</p>
+                      <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.calendarPage.blockSlot}</h2>
+                      <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.blockSlotDesc}</p>
                     </div>
                   </div>
                 </ModalHeader>
@@ -765,8 +772,8 @@ const handleCreateManualBooking = async () => {
                         size="sm"
                       />
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-[#1E1E1E]">Datumsbereich</p>
-                        <p className="text-xs text-[#8A8A8A]">Mehrere Tage auf einmal blockieren</p>
+                        <p className="text-sm font-semibold text-[#1E1E1E]">{t.admin.calendarPage.dateRange}</p>
+                        <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.dateRangeDesc}</p>
                       </div>
                       <CalendarRange size={18} className="text-[#8A8A8A]" />
                     </div>
@@ -775,7 +782,7 @@ const handleCreateManualBooking = async () => {
                     {!isRange ? (
                       <Input
                         type="date"
-                        label="Datum"
+                        label={t.admin.date}
                         isRequired
                         value={singleForm.blockDate}
                         onChange={(e) => setSingleForm(f => ({ ...f, blockDate: e.target.value }))}
@@ -786,7 +793,7 @@ const handleCreateManualBooking = async () => {
                       <div className="grid grid-cols-2 gap-3">
                         <Input
                           type="date"
-                          label="Von Datum"
+                          label={t.admin.calendarPage.fromDate}
                           isRequired
                           value={rangeForm.fromDate}
                           onChange={(e) => setRangeForm(f => ({ ...f, fromDate: e.target.value }))}
@@ -795,7 +802,7 @@ const handleCreateManualBooking = async () => {
                         />
                         <Input
                           type="date"
-                          label="Bis Datum"
+                          label={t.admin.calendarPage.toDate}
                           isRequired
                           value={rangeForm.toDate}
                           onChange={(e) => setRangeForm(f => ({ ...f, toDate: e.target.value }))}
@@ -809,7 +816,7 @@ const handleCreateManualBooking = async () => {
                     <div className="grid grid-cols-2 gap-3">
                       <Input
                         type="time"
-                        label="Von Uhrzeit"
+                        label={t.admin.calendarPage.fromTime}
                         isRequired
                         value={isRange ? rangeForm.startTime : singleForm.startTime}
                         onChange={(e) => isRange
@@ -820,7 +827,7 @@ const handleCreateManualBooking = async () => {
                       />
                       <Input
                         type="time"
-                        label="Bis Uhrzeit"
+                        label={t.admin.calendarPage.toTime}
                         isRequired
                         value={isRange ? rangeForm.endTime : singleForm.endTime}
                         onChange={(e) => isRange
@@ -833,8 +840,8 @@ const handleCreateManualBooking = async () => {
 
                     {/* Reason */}
                     <Input
-                      label="Grund (optional)"
-                      placeholder="z.B. Urlaub, Fortbildung…"
+                      label={t.admin.calendarPage.reasonOptional}
+                      placeholder={t.admin.calendarPage.reasonPlaceholder}
                       value={isRange ? rangeForm.reason : singleForm.reason}
                       onChange={(e) => isRange
                         ? setRangeForm(f => ({ ...f, reason: e.target.value }))
@@ -852,7 +859,7 @@ const handleCreateManualBooking = async () => {
                     isDisabled={submittingBlocked}
                     startContent={<X size={14} />}
                   >
-                    Abbrechen
+                    {t.cancel}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -860,7 +867,7 @@ const handleCreateManualBooking = async () => {
                     isLoading={submittingBlocked}
                     startContent={!submittingBlocked && <Ban size={15} />}
                   >
-                    Blockieren
+                    {t.admin.calendarPage.blockAction}
                   </Button>
                 </ModalFooter>
               </>
@@ -885,7 +892,7 @@ const handleCreateManualBooking = async () => {
                       <Plus size={18} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-[#1E1E1E]">Manuelle Buchung</h2>
+                      <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.manualBooking}</h2>
                       {selectedSlot && <p className="text-xs text-[#8A8A8A]">{moment(selectedSlot.start).format('DD.MM.YYYY')}</p>}
                     </div>
                   </div>
@@ -899,8 +906,8 @@ const handleCreateManualBooking = async () => {
         <CheckCircle size={20} className="text-white" />
       </div>
       <div>
-        <h3 className="text-lg font-bold text-[#1E1E1E]">Buchung erfolgreich!</h3>
-        <p className="text-xs text-[#8A8A8A] font-mono">Nr: {createdBooking.bookingNumber}</p>
+        <h3 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.bookingSuccess}</h3>
+        <p className="text-xs text-[#8A8A8A] font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
       </div>
     </div>
   </div>
@@ -910,7 +917,7 @@ const handleCreateManualBooking = async () => {
       <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
         <Scissors size={16} className="text-[#6355E4]" />
       </div>
-      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Service</span>
+      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.service}</span>
     </div>
     <div className="flex items-center justify-between">
       <p className="font-medium text-[#1E1E1E] text-base">{createdBooking.booking.serviceName}</p>
@@ -923,11 +930,11 @@ const handleCreateManualBooking = async () => {
       <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
         <CalendarIconLucide size={16} className="text-[#6355E4]" />
       </div>
-      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Datum & Zeit</span>
+      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.calendarPage.dateAndTime}</span>
     </div>
     <div className="space-y-2">
       <p className="text-[#1E1E1E] font-medium">
-        {new Date(createdBooking.booking.bookingDate).toLocaleDateString('de-DE', {
+        {new Date(createdBooking.booking.bookingDate).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US', {
           weekday: 'long',
           day: '2-digit',
           month: 'long',
@@ -937,7 +944,7 @@ const handleCreateManualBooking = async () => {
       <div className="flex items-center gap-2">
         <Clock size={16} className="text-[#8A8A8A]" />
         <p className="text-[#1E1E1E]">
-          {createdBooking.booking.startTime} – {createdBooking.booking.endTime} Uhr
+          {createdBooking.booking.startTime} – {createdBooking.booking.endTime} {t.admin.calendarPage.clockSuffix}
         </p>
       </div>
     </div>
@@ -948,7 +955,7 @@ const handleCreateManualBooking = async () => {
       <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
         <User size={16} className="text-[#6355E4]" />
       </div>
-      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Kunde</span>
+      <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.customer}</span>
     </div>
     <p className="text-[#1E1E1E] font-medium text-base">
       {createdBooking.customer.firstName} {createdBooking.customer.lastName}
@@ -961,7 +968,7 @@ const handleCreateManualBooking = async () => {
         <div className="w-7 h-7 rounded-lg bg-[#6355E4]/10 flex items-center justify-center">
           <User size={16} className="text-[#6355E4]" />
         </div>
-        <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">Fachkraft</span>
+        <span className="font-semibold text-[#1E1E1E] text-sm uppercase tracking-wide">{t.admin.calendarPage.specialist}</span>
       </div>
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-full bg-[#6355E4] flex items-center justify-center text-white font-bold text-sm">
@@ -978,11 +985,11 @@ const handleCreateManualBooking = async () => {
 
 {/* Step 1: Employee */}
 <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-  <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">1. Fachkraft wählen</p>
+  <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step1ChooseEmployee}</p>
   {loadingEmployees ? (
     <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
       <Spinner size="sm" />
-      <span className="text-sm text-[#8A8A8A]">Lade Mitarbeiter...</span>
+      <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingEmployees}</span>
     </div>
   ) : (
     <div className="grid grid-cols-2 gap-2">
@@ -1021,16 +1028,16 @@ const handleCreateManualBooking = async () => {
 
                     {/* Step 2: Service with integrated search */}
 <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-  <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">2. Service auswählen</p>
-  
+  <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step2ChooseService}</p>
+
   {!selectedEmployeeId ? (
     <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
-      Bitte zuerst eine Fachkraft auswählen
+      {t.admin.calendarPage.chooseEmployeeFirst}
     </div>
   ) : loadingEmployeeServices ? (
     <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
       <Spinner size="sm" />
-      <span className="text-sm text-[#8A8A8A]">Lade Services...</span>
+      <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingServices}</span>
     </div>
   ) : (
     <Popover placement="bottom" isOpen={isServicePopoverOpen} onOpenChange={setIsServicePopoverOpen}>
@@ -1041,17 +1048,17 @@ const handleCreateManualBooking = async () => {
   endContent={<Search size={18} className="text-[#8A8A8A]" />}
   isDisabled={!selectedEmployeeId}
 >
-  {bookingForm.serviceId ? 
-    (employeeServices.find(s => s.id === bookingForm.serviceId)?.name || 
-     services.find(s => s.id === bookingForm.serviceId)?.name || 
-     "Service auswählen...") 
-    : "Service suchen oder auswählen..."}
+  {bookingForm.serviceId ?
+    (employeeServices.find(s => s.id === bookingForm.serviceId)?.name ||
+     services.find(s => s.id === bookingForm.serviceId)?.name ||
+     t.admin.calendarPage.chooseServicePlaceholder)
+    : t.admin.calendarPage.searchOrChooseService}
 </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0">
         <div className="w-full">
           <Input
-            placeholder="Service suchen..."
+            placeholder={t.admin.calendarPage.searchServicePlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-b border-[#ECEBF2]/20"
@@ -1085,7 +1092,7 @@ const handleCreateManualBooking = async () => {
                         {formatPrice(service.price, service.currency)}
                       </span>
                       <span className="text-xs text-[#8A8A8A]">
-                        {service.durationMinutes} Min
+                        {service.durationMinutes} {t.admin.durationUnits.minShort}
                       </span>
                     </div>
                     {service.description && (
@@ -1097,7 +1104,7 @@ const handleCreateManualBooking = async () => {
                 ))
             ) : (
               <div className="p-4 text-center text-[#8A8A8A]">
-                Keine Services für diese Fachkraft gefunden
+                {t.admin.calendarPage.noServicesForEmployee}
               </div>
             )}
           </div>
@@ -1109,7 +1116,7 @@ const handleCreateManualBooking = async () => {
 
                       {/* Step 3: Date */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">3. Datum wählen</p>
+                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step3ChooseDate}</p>
                         <Input
                           type="date"
                           value={bookingForm.bookingDate}
@@ -1123,11 +1130,11 @@ const handleCreateManualBooking = async () => {
 
                       {/* Step 4: Time */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">4. Uhrzeit wählen</p>
+                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step4ChooseTime}</p>
                         {loadingSlots ? (
                           <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                             <Spinner size="sm" />
-                            <span className="text-sm text-[#8A8A8A]">Lade verfügbare Zeiten...</span>
+                            <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingSlots}</span>
                           </div>
                         ) : availableSlots.length > 0 ? (
                           <div className="grid grid-cols-4 gap-2">
@@ -1149,19 +1156,19 @@ const handleCreateManualBooking = async () => {
                         ) : (
                           <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
                             {bookingForm.serviceId
-                              ? (slotsMessage || "Keine verfügbaren Zeiten — prüfen Sie Öffnungszeiten (Einstellungen) und Arbeitszeiten des Mitarbeiters")
-                              : "Bitte zuerst Service und Datum wählen"}
+                              ? (slotsMessage || t.admin.calendarPage.noSlotsAvailable)
+                              : t.admin.calendarPage.chooseServiceAndDateFirst}
                           </div>
                         )}
                       </div>
 
                       {/* Step 5: Customer */}
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">5. Kundendaten</p>
+                        <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step5CustomerData}</p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <Input
-                            label="Vorname"
-                            placeholder="Max"
+                            label={t.admin.calendarPage.firstName}
+                            placeholder={t.admin.calendarPage.firstNamePlaceholder}
                             value={bookingForm.firstName}
                             onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
                             isRequired
@@ -1169,8 +1176,8 @@ const handleCreateManualBooking = async () => {
                             classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
-                            label="Nachname"
-                            placeholder="Mustermann"
+                            label={t.admin.calendarPage.lastName}
+                            placeholder={t.admin.calendarPage.lastNamePlaceholder}
                             value={bookingForm.lastName}
                             onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
                             isRequired
@@ -1178,7 +1185,7 @@ const handleCreateManualBooking = async () => {
                             classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
-                            label="E-Mail (optional)"
+                            label={t.admin.calendarPage.emailOptional}
                             type="email"
                             value={bookingForm.email}
                             onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
@@ -1186,7 +1193,7 @@ const handleCreateManualBooking = async () => {
                             classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                           />
                           <Input
-                            label="Telefon (optional)"
+                            label={t.admin.calendarPage.phoneOptional}
                             type="tel"
                             value={bookingForm.phone}
                             onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
@@ -1196,7 +1203,7 @@ const handleCreateManualBooking = async () => {
                         </div>
                         <div className="mt-3">
                           <Textarea
-                            label="Notizen (optional)"
+                            label={t.admin.calendarPage.notesOptionalField}
                             value={bookingForm.customerNotes}
                             onChange={(e) => setBookingForm({ ...bookingForm, customerNotes: e.target.value })}
                             isDisabled={submitting}
@@ -1211,7 +1218,7 @@ const handleCreateManualBooking = async () => {
                           <div>
                             <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
                             <p className="text-xs text-[#8A8A8A]">
-                              {selectedService.durationMinutes} Min
+                              {selectedService.durationMinutes} {t.admin.durationUnits.minShort}
                               {employees.find(e => e.id === selectedEmployeeId)?.name
                                 ? ` · ${employees.find(e => e.id === selectedEmployeeId)!.name}`
                                 : ''}
@@ -1231,7 +1238,7 @@ const handleCreateManualBooking = async () => {
                     startContent={<X size={14} />}
                     isDisabled={submitting}
                   >
-                    {success ? "Schließen" : "Abbrechen"}
+                    {success ? t.close : t.cancel}
                   </Button>
                   {!success && !createdBooking && (
                     <Button
@@ -1241,7 +1248,7 @@ const handleCreateManualBooking = async () => {
                       isDisabled={!bookingForm.serviceId || !bookingForm.bookingDate || !bookingForm.startTime || !bookingForm.firstName || !bookingForm.lastName}
                       endContent={<ChevronRight size={18} />}
                     >
-                      Buchung erstellen
+                      {t.admin.calendarPage.createBooking}
                     </Button>
                   )}
                 </ModalFooter>

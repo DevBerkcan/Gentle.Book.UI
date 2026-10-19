@@ -6,10 +6,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, Eye, EyeOff, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 function ResetPasswordForm() {
+  const { t } = useTranslation();
+  const s = t.admin.resetPasswordPage;
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
 
@@ -25,20 +28,20 @@ function ResetPasswordForm() {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setErrMsg('Kein Token gefunden. Bitte fordere einen neuen Reset-Link an.');
+      setErrMsg(s.errNoToken);
     }
-  }, [token]);
+  }, [token, s.errNoToken]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password.trim()) return;
     if (password.length < 6) {
-      setErrMsg('Das Passwort muss mindestens 6 Zeichen lang sein.');
+      setErrMsg(s.errPasswordTooShort);
       setStatus('error');
       return;
     }
     if (password !== confirm) {
-      setErrMsg('Die Passwörter stimmen nicht überein.');
+      setErrMsg(s.errPasswordMismatch);
       setStatus('error');
       return;
     }
@@ -56,11 +59,11 @@ function ResetPasswordForm() {
         setStatus('success');
       } else {
         setStatus('error');
-        setErrMsg(data?.message ?? 'Ein Fehler ist aufgetreten.');
+        setErrMsg(data?.message ?? s.errGeneric);
       }
     } catch {
       setStatus('error');
-      setErrMsg('Verbindungsfehler. Bitte versuche es erneut.');
+      setErrMsg(s.errConnection);
     }
   };
 
@@ -85,8 +88,8 @@ function ResetPasswordForm() {
             <div className="flex justify-center mb-0">
               <GentleBookMark size={48} />
             </div>
-            <h1 className="text-2xl font-bold text-white">Neues Passwort</h1>
-            <p className="text-white/40 text-sm mt-1">Wähle ein sicheres neues Passwort</p>
+            <h1 className="text-2xl font-bold text-white">{s.title}</h1>
+            <p className="text-white/40 text-sm mt-1">{s.subtitle}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -99,16 +102,16 @@ function ResetPasswordForm() {
                 <div className="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <CheckCircle size={32} className="text-emerald-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white mb-2">Passwort geändert!</h2>
+                <h2 className="text-lg font-bold text-white mb-2">{s.successTitle}</h2>
                 <p className="text-white/50 text-sm leading-relaxed mb-6">
-                  Dein Passwort wurde erfolgreich zurückgesetzt. Du kannst dich jetzt anmelden.
+                  {s.successDesc}
                 </p>
                 <Link
                   href="/admin/login"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
-                  Zum Login
+                  {s.goToLoginBtn}
                 </Link>
               </motion.div>
             ) : (status === 'error' && !token) ? (
@@ -120,16 +123,16 @@ function ResetPasswordForm() {
                 <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <XCircle size={32} className="text-red-400" />
                 </div>
-                <h2 className="text-lg font-bold text-white mb-2">Ungültiger Link</h2>
+                <h2 className="text-lg font-bold text-white mb-2">{s.invalidLinkTitle}</h2>
                 <p className="text-white/50 text-sm leading-relaxed mb-6">
-                  Dieser Reset-Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.
+                  {s.invalidLinkDesc}
                 </p>
                 <Link
                   href="/admin/forgot-password"
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white"
                   style={{ background: 'linear-gradient(135deg, #6355E4, #17A398)' }}
                 >
-                  Neuen Link anfordern
+                  {s.requestNewLinkBtn}
                 </Link>
               </motion.div>
             ) : (
@@ -139,7 +142,7 @@ function ResetPasswordForm() {
                   <Lock size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type={showPw ? 'text' : 'password'}
-                    placeholder="Neues Passwort (min. 6 Zeichen)"
+                    placeholder={s.newPasswordPlaceholder}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -159,7 +162,7 @@ function ResetPasswordForm() {
                   <Lock size={16} className="text-white/30 flex-shrink-0" />
                   <input
                     type={showConfirm ? 'text' : 'password'}
-                    placeholder="Passwort bestätigen"
+                    placeholder={s.confirmPasswordPlaceholder}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
                     required
@@ -191,7 +194,7 @@ function ResetPasswordForm() {
                       ))}
                     </div>
                     <p className="text-xs text-white/30">
-                      {password.length < 3 ? 'Zu kurz' : password.length < 6 ? 'Schwach' : password.length < 9 ? 'Mittel' : password.length < 12 ? 'Stark' : 'Sehr stark'}
+                      {password.length < 3 ? s.strengthTooShort : password.length < 6 ? s.strengthWeak : password.length < 9 ? s.strengthMedium : password.length < 12 ? s.strengthStrong : s.strengthVeryStrong}
                     </p>
                   </div>
                 )}
@@ -219,17 +222,17 @@ function ResetPasswordForm() {
                   {status === 'loading' ? (
                     <span className="flex items-center gap-2">
                       <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Wird gespeichert…
+                      {s.saving}
                     </span>
                   ) : (
-                    <><Lock size={15} /> Passwort speichern</>
+                    <><Lock size={15} /> {s.savePasswordBtn}</>
                   )}
                 </motion.button>
 
                 <div className="text-center">
                   <Link href="/admin/login"
                     className="text-sm text-white/40 hover:text-white/70 transition-colors flex items-center justify-center gap-1.5">
-                    <ArrowLeft size={13} /> Zurück zum Login
+                    <ArrowLeft size={13} /> {s.backToLogin}
                   </Link>
                 </div>
               </motion.form>

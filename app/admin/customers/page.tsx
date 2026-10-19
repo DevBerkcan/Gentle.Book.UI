@@ -40,7 +40,9 @@ import { CustomerLoyaltyPanel } from "@/components/admin/customers/CustomerLoyal
 import { CustomerLoyaltyCardModal } from "@/components/admin/customers/CustomerLoyaltyCardModal";
 import { useConfirm } from "@/components/ConfirmDialog";
 import moment from "moment";
+import "moment/locale/de";
 import { formatPrice } from "@/lib/utils/currency";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 const modalClassNames = {
   base: "bg-white border border-[#ECEBF2]/30 shadow-2xl",
@@ -57,6 +59,8 @@ type ModalMode = "create" | "edit" | "view";
 
 export default function CustomersPage() {
   const { isEmployee } = useAuth();
+  const { t, lang } = useTranslation();
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
 
@@ -105,11 +109,11 @@ export default function CustomersPage() {
       setTotalPages(response.totalPages);
       setTotalCount(response.totalCount);
     } catch (err: any) {
-      setError(err.message || "Fehler beim Laden der Kunden");
+      setError(err.message || t.admin.customersPage.loadError);
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm]);
+  }, [page, pageSize, searchTerm, t]);
 
   useEffect(() => {
     void loadCustomers();
@@ -173,7 +177,7 @@ export default function CustomersPage() {
 
   async function handleSubmit() {
     if (!formData.firstName || !formData.lastName) {
-      setModalError("Vor- und Nachname sind erforderlich");
+      setModalError(t.admin.customersPage.firstLastNameRequired);
       return;
     }
 
@@ -202,7 +206,7 @@ export default function CustomersPage() {
       await loadCustomers();
       handleClose();
     } catch (err: any) {
-      setModalError(err.response?.data?.message || err.message || "Fehler beim Speichern");
+      setModalError(err.response?.data?.message || err.message || t.admin.customersPage.saveError);
     } finally {
       setSubmitting(false);
     }
@@ -218,7 +222,7 @@ export default function CustomersPage() {
       onDeleteModalClose();
       setDeleteReason("");
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Fehler beim Löschen");
+      setError(err.response?.data?.message || err.message || t.admin.customersPage.deleteError);
     } finally {
       setDeleting(false);
     }
@@ -244,11 +248,11 @@ export default function CustomersPage() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "Confirmed": return "Bestätigt";
-      case "Pending": return "Ausstehend";
-      case "Completed": return "Abgeschlossen";
-      case "Cancelled": return "Storniert";
-      case "NoShow": return "Nicht erschienen";
+      case "Confirmed": return t.admin.bookingStatus.confirmed;
+      case "Pending": return t.admin.bookingStatus.pending;
+      case "Completed": return t.admin.bookingStatus.completed;
+      case "Cancelled": return t.admin.bookingStatus.cancelled;
+      case "NoShow": return t.admin.bookingStatus.noShow;
       default: return status;
     }
   };
@@ -264,7 +268,7 @@ export default function CustomersPage() {
             <div className="font-semibold text-[#1E1E1E] text-base flex items-center gap-1.5">
               {customer.fullName}
               {regularCustomerThreshold != null && customer.totalBookings >= regularCustomerThreshold && (
-                <span title="Stammkunde">🎉</span>
+                <span title={t.admin.customersPage.regularCustomerTitle}>🎉</span>
               )}
             </div>
             <div className="text-xs text-[#8A8A8A] mt-0.5">ID: {customer.id.slice(-8)}</div>
@@ -288,16 +292,16 @@ export default function CustomersPage() {
         <div className="flex items-center gap-2 text-sm text-[#8A8A8A]">
           <Calendar size={14} className="text-[#6355E4] shrink-0" />
           <span>
-            Letzter Besuch: {customer.lastVisit
-              ? moment(customer.lastVisit).format("DD.MM.YYYY")
-              : "Noch kein Besuch"}
+            {t.admin.customersPage.lastVisitLabel}{customer.lastVisit
+              ? new Date(customer.lastVisit).toLocaleDateString(dateLocale)
+              : t.admin.customersPage.noVisitYet}
           </span>
         </div>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
         <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
-          {customer.totalBookings} Buchungen
+          {fillTemplate(t.admin.customersPage.bookingsCountTemplate, { count: customer.totalBookings })}
         </Chip>
         <div className="flex gap-2">
           <Button
@@ -334,21 +338,21 @@ export default function CustomersPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">Kundenverwaltung</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">{t.admin.customersPage.title}</h1>
               {totalCount > 0 && (
                 <span className="bg-[#6355E4]/10 text-[#6355E4] text-sm font-semibold px-3 py-1 rounded-full">
                   {totalCount}
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#8A8A8A]">Kunden verwalten, suchen und bearbeiten</p>
+            <p className="text-sm text-[#8A8A8A]">{t.admin.customersPage.subtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
             startContent={<Plus size={18} />}
             onPress={openCreateModal}
           >
-            Neuer Kunde
+            {t.admin.customersPage.newCustomer}
           </Button>
         </div>
 
@@ -357,7 +361,7 @@ export default function CustomersPage() {
           <CardBody className="p-4">
             <div className="flex gap-2">
               <Input
-                placeholder="Kunden suchen (Name, E-Mail, Telefon)..."
+                placeholder={t.admin.customersPage.searchPlaceholder}
                 startContent={<Search size={18} className="text-[#8A8A8A]" />}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -372,7 +376,7 @@ export default function CustomersPage() {
                   loadCustomers();
                 }}
               >
-                Suchen
+                {t.admin.bookingsPage.searchLabel}
               </Button>
             </div>
           </CardBody>
@@ -395,7 +399,7 @@ export default function CustomersPage() {
             ) : customers.length === 0 ? (
               <div className="text-center py-16 text-[#8A8A8A]">
                 <UserIcon className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
-                <p className="font-medium">Keine Kunden gefunden</p>
+                <p className="font-medium">{t.admin.customersPage.noCustomersFound}</p>
                 {searchTerm && (
                   <Button
                     size="sm"
@@ -406,7 +410,7 @@ export default function CustomersPage() {
                       loadCustomers();
                     }}
                   >
-                    Suche zurücksetzen
+                    {t.admin.customersPage.resetSearch}
                   </Button>
                 )}
               </div>
@@ -417,11 +421,11 @@ export default function CustomersPage() {
                   <table className="w-full">
                     <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                       <tr>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Kunde</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Kontakt</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Buchungen</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Letzter Besuch</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Aktionen</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customer}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.contactHeader}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.bookings}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.lastVisitHeader}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -441,7 +445,7 @@ export default function CustomersPage() {
                                 <div className="font-semibold text-[#1E1E1E] text-sm flex items-center gap-1.5">
                                   {customer.fullName}
                                   {regularCustomerThreshold != null && customer.totalBookings >= regularCustomerThreshold && (
-                                    <span title="Stammkunde">🎉</span>
+                                    <span title={t.admin.customersPage.regularCustomerTitle}>🎉</span>
                                   )}
                                 </div>
                                 <div className="text-xs text-[#8A8A8A]">ID: {customer.id.slice(-8)}</div>
@@ -469,7 +473,7 @@ export default function CustomersPage() {
                           </td>
                           <td className="px-5 py-4 text-sm text-[#8A8A8A]">
                             {customer.lastVisit
-                              ? moment(customer.lastVisit).format("DD.MM.YYYY")
+                              ? new Date(customer.lastVisit).toLocaleDateString(dateLocale)
                               : "—"}
                           </td>
                           <td className="px-5 py-4">
@@ -514,7 +518,7 @@ export default function CustomersPage() {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
                     <div className="text-sm text-[#8A8A8A]">
-                      Seite {page} von {totalPages}
+                      {fillTemplate(t.admin.bookingsPage.pageOfTemplate, { page, total: totalPages })}
                     </div>
                     <div className="flex gap-2">
                       <Button
@@ -525,7 +529,7 @@ export default function CustomersPage() {
                         startContent={<ChevronLeft size={15} />}
                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                       >
-                        Zurück
+                        {t.back}
                       </Button>
                       <Button
                         size="sm"
@@ -535,7 +539,7 @@ export default function CustomersPage() {
                         endContent={<ChevronRight size={15} />}
                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
                       >
-                        Weiter
+                        {t.next}
                       </Button>
                     </div>
                   </div>
@@ -568,12 +572,12 @@ export default function CustomersPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">
-                      {modalMode === "edit" ? "Kunde bearbeiten" : "Neuen Kunde anlegen"}
+                      {modalMode === "edit" ? t.admin.customersPage.editCustomer : t.admin.customersPage.createCustomer}
                     </h2>
                     <p className="text-xs text-[#8A8A8A]">
                       {modalMode === "edit"
-                        ? "Kundendaten aktualisieren"
-                        : "Neuen Kunden zum System hinzufügen"}
+                        ? t.admin.customersPage.updateCustomerDataDesc
+                        : t.admin.customersPage.addNewCustomerDesc}
                     </p>
                   </div>
                 </div>
@@ -589,8 +593,8 @@ export default function CustomersPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <Input
-                      label="Vorname"
-                      placeholder="Max"
+                      label={t.admin.calendarPage.firstName}
+                      placeholder={t.admin.calendarPage.firstNamePlaceholder}
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       isRequired
@@ -598,8 +602,8 @@ export default function CustomersPage() {
                       classNames={inputClassNames}
                     />
                     <Input
-                      label="Nachname"
-                      placeholder="Mustermann"
+                      label={t.admin.calendarPage.lastName}
+                      placeholder={t.admin.calendarPage.lastNamePlaceholder}
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       isRequired
@@ -609,9 +613,9 @@ export default function CustomersPage() {
                   </div>
 
                   <Input
-                    label="E-Mail"
+                    label={t.admin.email}
                     type="email"
-                    placeholder="max@beispiel.de"
+                    placeholder={t.admin.customersPage.emailPlaceholder}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     isDisabled={submitting}
@@ -620,8 +624,8 @@ export default function CustomersPage() {
                   />
 
                   <Input
-                    label="Telefon"
-                    placeholder="+41 76 123 45 67"
+                    label={t.admin.phone}
+                    placeholder={t.admin.customersPage.phonePlaceholder}
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     isDisabled={submitting}
@@ -630,8 +634,8 @@ export default function CustomersPage() {
                   />
 
                   <Input
-                    label="Notizen (optional)"
-                    placeholder="Besondere Hinweise, Präferenzen..."
+                    label={t.admin.calendarPage.notesOptionalField}
+                    placeholder={t.admin.customersPage.notesPlaceholder}
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     isDisabled={submitting}
@@ -648,7 +652,7 @@ export default function CustomersPage() {
                   isDisabled={submitting}
                   startContent={<X size={14} />}
                 >
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -656,7 +660,7 @@ export default function CustomersPage() {
                   isLoading={submitting}
                   startContent={!submitting && <Save size={14} />}
                 >
-                  {modalMode === "edit" ? "Speichern" : "Anlegen"}
+                  {modalMode === "edit" ? t.save : t.admin.customersPage.createAction}
                 </Button>
               </ModalFooter>
             </>
@@ -681,9 +685,9 @@ export default function CustomersPage() {
                     <UserIcon size={18} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-[#1E1E1E]">Kundendetails</h2>
+                    <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.customersPage.customerDetails}</h2>
                     {selectedCustomer && (
-                      <p className="text-xs text-[#8A8A8A]">Kunde seit {moment(selectedCustomer.createdAt).format("MMMM YYYY")}</p>
+                      <p className="text-xs text-[#8A8A8A]">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: moment(selectedCustomer.createdAt).locale(lang).format("MMMM YYYY") })}</p>
                     )}
                   </div>
                 </div>
@@ -694,14 +698,14 @@ export default function CustomersPage() {
                   <div className="space-y-4">
                     {/* Basic Info */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Persönliche Daten</h3>
+                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.personalData}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <p className="text-xs text-[#8A8A8A]">Vorname</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.firstName}</p>
                           <p className="text-sm font-medium text-[#1E1E1E]">{selectedCustomer.firstName}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#8A8A8A]">Nachname</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.lastName}</p>
                           <p className="text-sm font-medium text-[#1E1E1E]">{selectedCustomer.lastName}</p>
                         </div>
                       </div>
@@ -709,7 +713,7 @@ export default function CustomersPage() {
 
                     {/* Contact Info */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Kontakt</h3>
+                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.contactHeader}</h3>
                       <div className="space-y-2">
                         {selectedCustomer.email && (
                           <div className="flex items-center gap-2">
@@ -732,28 +736,28 @@ export default function CustomersPage() {
 
                     {/* Statistics */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Statistiken</h3>
+                      <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.statistics}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">Buchungen gesamt</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.totalBookingsLabel}</p>
                           <p className="text-xl font-bold text-[#6355E4]">{selectedCustomer.totalBookings}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">Nicht erschienen</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.bookingStatus.noShow}</p>
                           <p className="text-xl font-bold text-red-500">{selectedCustomer.noShowCount}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">Letzter Besuch</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.lastVisitHeader}</p>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
                             {selectedCustomer.lastVisit
-                              ? moment(selectedCustomer.lastVisit).format("DD.MM.YYYY")
+                              ? new Date(selectedCustomer.lastVisit).toLocaleDateString(dateLocale)
                               : "—"}
                           </p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">Kunde seit</p>
+                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.customerSinceLabel}</p>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
-                            {moment(selectedCustomer.createdAt).format("DD.MM.YYYY")}
+                            {new Date(selectedCustomer.createdAt).toLocaleDateString(dateLocale)}
                           </p>
                         </div>
                       </div>
@@ -769,14 +773,14 @@ export default function CustomersPage() {
                         onClick={() => setShowLoyaltyCard(true)}
                         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#F6F5FA] text-[#6355E4] hover:bg-[#ECEBF2] transition-colors border border-[#ECEBF2]/40"
                       >
-                        🎉 Kundenkarte drucken
+                        {t.admin.customersPage.printLoyaltyCard}
                       </button>
                     )}
 
                     {/* Notes */}
                     {selectedCustomer.notes && (
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">Notizen</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.admin.calendarPage.notes}</h3>
                         <p className="text-sm text-[#1E1E1E] italic">"{selectedCustomer.notes}"</p>
                       </div>
                     )}
@@ -784,7 +788,7 @@ export default function CustomersPage() {
                     {/* Recent Bookings */}
                     {selectedCustomer.recentBookings.length > 0 && (
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">Letzte Buchungen</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.recentBookings}</h3>
                         <div className="space-y-2">
                           {selectedCustomer.recentBookings.map((booking) => (
                             <div
@@ -795,7 +799,7 @@ export default function CustomersPage() {
                                 <div>
                                   <p className="font-semibold text-[#1E1E1E] text-sm">{booking.serviceName}</p>
                                   <p className="text-xs text-[#8A8A8A] mt-1">
-                                    {moment(booking.bookingDate).format("DD.MM.YYYY")} · {booking.startTime} – {booking.endTime}
+                                    {new Date(booking.bookingDate).toLocaleDateString(dateLocale)} · {booking.startTime} – {booking.endTime}
                                   </p>
                                 </div>
                                 <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4">
@@ -827,7 +831,7 @@ export default function CustomersPage() {
                   startContent={<X size={14} />}
                   onPress={handleClose}
                 >
-                  Schließen
+                  {t.close}
                 </Button>
                 {selectedCustomer && (
                   <Button
@@ -838,7 +842,7 @@ export default function CustomersPage() {
                     }}
                   >
                     <Edit size={14} className="mr-2" />
-                    Bearbeiten
+                    {t.admin.edit}
                   </Button>
                 )}
               </ModalFooter>
@@ -867,7 +871,7 @@ export default function CustomersPage() {
                     <AlertTriangle size={20} className="text-white" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-[#1E1E1E]">Kunde löschen</h2>
+                    <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.customersPage.deleteCustomer}</h2>
                     <p className="text-xs text-[#8A8A8A]">
                       {selectedCustomer?.fullName}
                     </p>
@@ -883,7 +887,7 @@ export default function CustomersPage() {
                       <p className="text-sm text-red-700 flex items-start gap-2">
                         <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                         <span>
-                          <strong>Achtung:</strong> Das Löschen eines Kunden ist endgültig und kann nicht rückgängig gemacht werden.
+                          {t.admin.customersPage.deleteWarning}
                         </span>
                       </p>
                     </div>
@@ -896,7 +900,7 @@ export default function CustomersPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-[#1E1E1E]">{selectedCustomer.fullName}</p>
-                          <p className="text-xs text-[#8A8A8A]">Kunde seit {moment(selectedCustomer.createdAt).format("DD.MM.YYYY")}</p>
+                          <p className="text-xs text-[#8A8A8A]">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: new Date(selectedCustomer.createdAt).toLocaleDateString(dateLocale) })}</p>
                         </div>
                       </div>
 
@@ -905,18 +909,18 @@ export default function CustomersPage() {
                         <div className="bg-white p-3 rounded-lg">
                           <div className="flex items-center gap-2">
                             <CalendarDays size={14} className="text-[#6355E4] shrink-0" />
-                            <span className="text-xs text-[#8A8A8A]">Buchungen</span>
+                            <span className="text-xs text-[#8A8A8A]">{t.admin.bookings}</span>
                           </div>
                           <p className="text-xl font-bold text-[#1E1E1E]">{selectedCustomer.totalBookings}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="flex items-center gap-2">
                             <Clock size={14} className="text-[#6355E4] shrink-0" />
-                            <span className="text-xs text-[#8A8A8A]">Letzter Besuch</span>
+                            <span className="text-xs text-[#8A8A8A]">{t.admin.customersPage.lastVisitHeader}</span>
                           </div>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
                             {selectedCustomer.lastVisit
-                              ? moment(selectedCustomer.lastVisit).format("DD.MM.YYYY")
+                              ? new Date(selectedCustomer.lastVisit).toLocaleDateString(dateLocale)
                               : "—"}
                           </p>
                         </div>
@@ -929,8 +933,7 @@ export default function CustomersPage() {
                         <p className="text-sm text-amber-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
                           <span>
-                            <strong>Auswirkung:</strong> Dieser Kunde hat <strong>{selectedCustomer.totalBookings} Buchungen</strong>.
-                            Beim Löschen des Kunden werden auch alle zugehörigen Buchungen unwiderruflich gelöscht.
+                            {fillTemplate(t.admin.customersPage.impactWarningTemplate, { count: selectedCustomer.totalBookings })}
                           </span>
                         </p>
                       </div>
@@ -950,7 +953,7 @@ export default function CustomersPage() {
                   isDisabled={deleting}
                   startContent={<X size={14} />}
                 >
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-lg shadow-red-500/20"
@@ -958,7 +961,7 @@ export default function CustomersPage() {
                   isLoading={deleting}
                   startContent={!deleting && <Trash2 size={14} />}
                 >
-                  Endgültig löschen
+                  {t.admin.bookingsPage.deletePermanently}
                 </Button>
               </ModalFooter>
             </>

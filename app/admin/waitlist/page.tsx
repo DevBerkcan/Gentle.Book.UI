@@ -16,13 +16,18 @@ import {
   getWaitlist, deleteWaitlistEntry, markWaitlistNotified,
   type WaitlistEntry,
 } from '@/lib/api/waitlist';
+import { useTranslation } from '@/lib/i18n/LanguageContext';
+import type { Translations } from '@/lib/i18n/translations';
 
-const STATUS_LABEL: Record<string, string> = {
-  Pending:  'Wartend',
-  Notified: 'Benachrichtigt',
-  Booked:   'Gebucht',
-  Expired:  'Abgelaufen',
-};
+function getStatusLabel(t: Translations): Record<string, string> {
+  const s = t.admin.waitlistPage;
+  return {
+    Pending: s.statusPending,
+    Notified: s.statusNotified,
+    Booked: s.statusBooked,
+    Expired: s.statusExpired,
+  };
+}
 
 const STATUS_COLOR: Record<string, 'warning' | 'success' | 'primary' | 'default'> = {
   Pending:  'warning',
@@ -33,6 +38,10 @@ const STATUS_COLOR: Record<string, 'warning' | 'success' | 'primary' | 'default'
 
 export default function AdminWaitlistPage() {
   const { isEmployee } = useAuth();
+  const { t, lang } = useTranslation();
+  const s = t.admin.waitlistPage;
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
+  const STATUS_LABEL = getStatusLabel(t);
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
 
@@ -52,11 +61,11 @@ export default function AdminWaitlistPage() {
       });
       setEntries(data);
     } catch {
-      toast.error('Fehler beim Laden der Warteliste');
+      toast.error(s.loadError);
     } finally {
       setLoading(false);
     }
-  }, [filterStatus, filterDate]);
+  }, [filterStatus, filterDate, s.loadError]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -65,9 +74,9 @@ export default function AdminWaitlistPage() {
     try {
       await deleteWaitlistEntry(id);
       setEntries(e => e.filter(x => x.id !== id));
-      toast.success('Eintrag gelöscht');
+      toast.success(s.entryDeletedToast);
     } catch {
-      toast.error('Fehler beim Löschen');
+      toast.error(s.deleteErrorToast);
     } finally {
       setDeleting(null);
     }
@@ -77,9 +86,9 @@ export default function AdminWaitlistPage() {
     try {
       await markWaitlistNotified(id);
       setEntries(e => e.map(x => x.id === id ? { ...x, status: 'Notified', notifiedAt: new Date().toISOString() } : x));
-      toast.success('Als benachrichtigt markiert');
+      toast.success(s.markedNotifiedToast);
     } catch {
-      toast.error('Fehler');
+      toast.error(s.genericErrorToast);
     }
   };
 
@@ -107,8 +116,8 @@ export default function AdminWaitlistPage() {
             <ClipboardList size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-[#111318]">Warteliste</h1>
-            <p className="text-xs text-[#9CA3AF]">Kunden die auf einen freien Termin warten</p>
+            <h1 className="text-xl font-bold text-[#111318]">{t.admin.waitlist}</h1>
+            <p className="text-xs text-[#9CA3AF]">{s.pageSubtitle}</p>
           </div>
         </div>
         <Button
@@ -119,7 +128,7 @@ export default function AdminWaitlistPage() {
           onPress={load}
           isLoading={loading}
         >
-          Aktualisieren
+          {s.refreshBtn}
         </Button>
       </div>
 
@@ -128,13 +137,13 @@ export default function AdminWaitlistPage() {
         <Card className="border border-[#E5E7EB] shadow-sm">
           <CardBody className="p-4">
             <p className="text-2xl font-bold text-[#F59E0B]">{pending}</p>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">Wartend</p>
+            <p className="text-xs text-[#9CA3AF] mt-0.5">{s.statusPending}</p>
           </CardBody>
         </Card>
         <Card className="border border-[#E5E7EB] shadow-sm">
           <CardBody className="p-4">
             <p className="text-2xl font-bold text-[#6355E4]">{notified}</p>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">Benachrichtigt</p>
+            <p className="text-xs text-[#9CA3AF] mt-0.5">{s.statusNotified}</p>
           </CardBody>
         </Card>
       </div>
@@ -144,7 +153,7 @@ export default function AdminWaitlistPage() {
         <CardBody className="p-4">
           <div className="flex flex-wrap gap-3">
             <Input
-              placeholder="Name oder E-Mail suchen..."
+              placeholder={s.searchPlaceholder}
               value={search}
               onChange={e => setSearch(e.target.value)}
               startContent={<Search size={15} className="text-[#9CA3AF]" />}
@@ -156,11 +165,11 @@ export default function AdminWaitlistPage() {
               onChange={e => setFilterStatus(e.target.value)}
               className="border border-[#E5E7EB] bg-[#F7F7F8] rounded-xl px-3 py-2 text-sm text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25"
             >
-              <option value="">Alle Status</option>
-              <option value="Pending">Wartend</option>
-              <option value="Notified">Benachrichtigt</option>
-              <option value="Booked">Gebucht</option>
-              <option value="Expired">Abgelaufen</option>
+              <option value="">{s.allStatuses}</option>
+              <option value="Pending">{s.statusPending}</option>
+              <option value="Notified">{s.statusNotified}</option>
+              <option value="Booked">{s.statusBooked}</option>
+              <option value="Expired">{s.statusExpired}</option>
             </select>
             <Input
               type="date"
@@ -177,7 +186,7 @@ export default function AdminWaitlistPage() {
                 startContent={<X size={14} />}
                 onPress={() => { setFilterStatus(''); setFilterDate(''); setSearch(''); }}
               >
-                Zurücksetzen
+                {s.resetBtn}
               </Button>
             )}
           </div>
@@ -194,7 +203,7 @@ export default function AdminWaitlistPage() {
           ) : filtered.length === 0 ? (
             <div className="text-center py-16 text-[#9CA3AF]">
               <ClipboardList className="mx-auto mb-3 text-[#E5E7EB]" size={40} />
-              <p className="font-medium text-sm">Keine Einträge gefunden</p>
+              <p className="font-medium text-sm">{s.noEntriesFound}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
@@ -245,10 +254,10 @@ export default function AdminWaitlistPage() {
                       {entry.preferredDate && (
                         <span className="flex items-center gap-1">
                           <Calendar size={11} />
-                          {new Date(entry.preferredDate).toLocaleDateString('de-DE')}
+                          {new Date(entry.preferredDate).toLocaleDateString(dateLocale)}
                           {entry.preferredStartTime
-                            ? ` · ${entry.preferredStartTime}${entry.preferredEndTime ? `–${entry.preferredEndTime}` : ''} Uhr`
-                            : ' · flexibel'}
+                            ? ` · ${entry.preferredStartTime}${entry.preferredEndTime ? `–${entry.preferredEndTime}` : ''}${s.hourSuffix ? ` ${s.hourSuffix}` : ''}`
+                            : ` · ${s.flexible}`}
                         </span>
                       )}
                     </div>
@@ -258,10 +267,10 @@ export default function AdminWaitlistPage() {
                     )}
 
                     <p className="mt-1 text-[10px] text-[#D1D5DB]">
-                      Eingetragen: {new Date(entry.createdAt).toLocaleString('de-DE')}
-                      {entry.notifiedAt && ` · Benachrichtigt: ${new Date(entry.notifiedAt).toLocaleString('de-DE')}`}
+                      {s.enteredLabel} {new Date(entry.createdAt).toLocaleString(dateLocale)}
+                      {entry.notifiedAt && ` · ${s.notifiedLabel} ${new Date(entry.notifiedAt).toLocaleString(dateLocale)}`}
                       {entry.reservationExpiresAt && entry.status === 'Notified' &&
-                        ` · Reserviert bis: ${new Date(entry.reservationExpiresAt).toLocaleString('de-DE')}`}
+                        ` · ${s.reservedUntilLabel} ${new Date(entry.reservationExpiresAt).toLocaleString(dateLocale)}`}
                     </p>
                   </div>
 
@@ -275,7 +284,7 @@ export default function AdminWaitlistPage() {
                         startContent={<Bell size={12} />}
                         onPress={() => handleMarkNotified(entry.id)}
                       >
-                        Notiert
+                        {s.markNotifiedBtn}
                       </Button>
                     )}
                     <Button

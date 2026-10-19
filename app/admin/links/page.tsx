@@ -12,16 +12,19 @@ import { AddLinkForm } from "@/components/admin/links/AddLinkForm";
 import { LinksList } from "@/components/admin/links/LinksList";
 import { LivePreviewPanel } from "@/components/admin/links/LivePreviewPanel";
 import { MobilePreviewModal } from "@/components/admin/links/MobilePreviewModal";
-import { DEFAULT_CONFIG, CMS_TEMPLATE_PACKS, COLOR_PALETTES, INDUSTRY_PRESETS } from "@/components/admin/links/constants";
+import { DEFAULT_CONFIG, CMS_TEMPLATE_PACKS, COLOR_PALETTES, INDUSTRY_PRESETS, getIndustryPresetLabel } from "@/components/admin/links/constants";
 import type {
   BrandPreviewOverride, LinkItem, LinktreeConfig, PageTemplate, PlanTier, PreviewDevice, SaveStatus, Theme, ToastMessage,
 } from "@/components/admin/links/types";
 import type { DesignSuggestion } from "@/lib/api/designAssistant";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 let toastCounter = 0;
 
 export default function AdminLinksPage() {
   const { user, isEmployee } = useAuth();
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   const router = useRouter();
   useEffect(() => { if (isEmployee) router.replace('/admin/calendar'); }, [isEmployee, router]);
   const tenantSlug = (user as any)?.tenantSlug;
@@ -86,13 +89,13 @@ export default function AdminLinksPage() {
         });
         setPreviewKey((k) => k + 1);
         setSaveStatus("saved");
-        if (!silent) showToast("success", "Design gespeichert");
+        if (!silent) showToast("success", s.designSavedToast);
       } catch {
         setSaveStatus("error");
-        showToast("error", "Design konnte nicht gespeichert werden");
+        showToast("error", s.designSaveErrorToast);
       } finally { setDesignSaving(false); }
     }, 600);
-  }, [showToast]);
+  }, [showToast, s.designSavedToast, s.designSaveErrorToast]);
 
   useEffect(() => {
     if (saveStatus !== "saved") return;
@@ -111,14 +114,14 @@ export default function AdminLinksPage() {
     const newConfig: LinktreeConfig = { ...DEFAULT_CONFIG, ...config, ctaText: preset.ctaText, bgPattern: preset.bgPattern, buttonStyle: preset.buttonStyle };
     setTheme(preset.style); setPrimaryColor(preset.color); setConfig(newConfig);
     await saveDesign(preset.style, preset.color, newConfig, false);
-    showToast("success", `Vorlage „${preset.label}" angewendet ✓`);
+    showToast("success", fillTemplate(s.presetAppliedToast, { label: getIndustryPresetLabel(t, key) }));
   }
 
   async function applyCmsTemplate(pack: typeof CMS_TEMPLATE_PACKS[number]) {
     const next: LinktreeConfig = { ...DEFAULT_CONFIG, ...config, ...pack.config, colorScheme: pack.key };
     setTheme(pack.theme); setPrimaryColor(pack.primaryColor); setConfig(next);
     await saveDesign(pack.theme, pack.primaryColor, next, false);
-    showToast("success", `Paket „${pack.name}" angewendet`);
+    showToast("success", fillTemplate(s.packAppliedToast, { name: pack.name }));
   }
 
   function selectPageTemplate(key: PageTemplate) {
@@ -135,7 +138,7 @@ export default function AdminLinksPage() {
     setConfig(next);
     setPrimaryColor(brandColors.primary);
     saveDesign(theme, brandColors.primary, next, false);
-    showToast("success", "Markenfarben aus den Einstellungen übernommen");
+    showToast("success", s.brandColorsAppliedToast);
   }
 
   function applyColorScheme(palette: { key: string; primary: string; theme: Theme }) {
@@ -174,9 +177,9 @@ export default function AdminLinksPage() {
     try {
       const res = await api.get("/admin/links");
       setLinks(res.data);
-    } catch { showToast("error", "Fehler beim Laden der Links"); }
+    } catch { showToast("error", s.loadLinksErrorToast); }
     finally { setLoading(false); }
-  }, [showToast]);
+  }, [showToast, s.loadLinksErrorToast]);
 
   const loadTenantSettings = useCallback(() => {
     api.get("/tenant/settings").then((res) => {
@@ -199,9 +202,9 @@ export default function AdminLinksPage() {
     try {
       await api.put("/tenant/settings", { isChatbotEnabled: next });
       setChatbotEnabled(next);
-      showToast("success", next ? "Chat-Assistent aktiviert" : "Chat-Assistent deaktiviert");
+      showToast("success", next ? s.chatbotEnabledToast : s.chatbotDisabledToast);
     } catch (err: any) {
-      showToast("error", err.response?.data?.message || "Chat-Assistent konnte nicht umgeschaltet werden");
+      showToast("error", err.response?.data?.message || s.chatbotToggleErrorToast);
     } finally {
       setChatbotSaving(false);
     }
@@ -213,9 +216,9 @@ export default function AdminLinksPage() {
     setChatbotLimitSaving(true);
     try {
       await api.put("/tenant/settings", { chatbotMaxMessagesPerConversation: clamped });
-      showToast("success", "Nachrichtenlimit gespeichert");
+      showToast("success", s.messageLimitSavedToast);
     } catch (err: any) {
-      showToast("error", err.response?.data?.message || "Nachrichtenlimit konnte nicht gespeichert werden");
+      showToast("error", err.response?.data?.message || s.messageLimitErrorToast);
     } finally {
       setChatbotLimitSaving(false);
     }
@@ -227,9 +230,9 @@ export default function AdminLinksPage() {
     setChatbotVisitorLimitSaving(true);
     try {
       await api.put("/tenant/settings", { chatbotMaxMessagesPerVisitorPerDay: clamped });
-      showToast("success", "Tageslimit pro Besucher gespeichert");
+      showToast("success", s.visitorLimitSavedToast);
     } catch (err: any) {
-      showToast("error", err.response?.data?.message || "Tageslimit konnte nicht gespeichert werden");
+      showToast("error", err.response?.data?.message || s.visitorLimitErrorToast);
     } finally {
       setChatbotVisitorLimitSaving(false);
     }
@@ -269,18 +272,18 @@ export default function AdminLinksPage() {
       setLinks((prev) => [...prev, res.data]);
       setNewTitle(""); setNewUrl(""); setNewIcon("Instagram");
       setShowAddForm(false);
-      showToast("success", `„${newTitle.trim()}" hinzugefügt`);
-    } catch { showToast("error", "Fehler beim Anlegen des Links"); }
+      showToast("success", fillTemplate(s.linkAddedToast, { title: newTitle.trim() }));
+    } catch { showToast("error", s.createLinkErrorToast); }
     finally { setSaving(false); }
   }
 
   async function handleDelete(id: string, title: string) {
-    if (!confirm(`„${title}" wirklich löschen?`)) return;
+    if (!confirm(fillTemplate(s.confirmDeleteLinkTemplate, { title }))) return;
     try {
       await api.delete(`/admin/links/${id}`);
       setLinks((prev) => prev.filter((l) => l.id !== id));
-      showToast("success", `„${title}" gelöscht`);
-    } catch { showToast("error", "Fehler beim Löschen"); }
+      showToast("success", fillTemplate(s.linkDeletedToast, { title }));
+    } catch { showToast("error", s.deleteLinkErrorToast); }
   }
 
   function startEdit(link: LinkItem) {
@@ -295,8 +298,8 @@ export default function AdminLinksPage() {
       const res = await api.put(`/admin/links/${id}`, { title: editTitle.trim(), url: normalizedUrl, iconType: editIcon });
       setLinks((prev) => prev.map((l) => (l.id === id ? res.data : l)));
       setEditingId(null);
-      showToast("success", "Link gespeichert");
-    } catch { showToast("error", "Fehler beim Speichern"); }
+      showToast("success", s.linkSavedToast);
+    } catch { showToast("error", s.saveLinkErrorToast); }
     finally { setSaving(false); }
   }
 
@@ -304,8 +307,8 @@ export default function AdminLinksPage() {
     try {
       const res = await api.put(`/admin/links/${link.id}`, { isActive: !link.isActive });
       setLinks((prev) => prev.map((l) => (l.id === link.id ? res.data : l)));
-      showToast("success", link.isActive ? "Link deaktiviert" : "Link aktiviert");
-    } catch { showToast("error", "Fehler beim Aktualisieren"); }
+      showToast("success", link.isActive ? s.linkDeactivatedToast : s.linkActivatedToast);
+    } catch { showToast("error", s.updateLinkErrorToast); }
   }
 
   async function moveLink(index: number, direction: "up" | "down") {
@@ -315,7 +318,7 @@ export default function AdminLinksPage() {
     [newLinks[index], newLinks[swapIndex]] = [newLinks[swapIndex], newLinks[index]];
     setLinks(newLinks);
     try { await api.patch("/admin/links/reorder", newLinks.map((l) => l.id)); }
-    catch { showToast("error", "Fehler beim Sortieren"); }
+    catch { showToast("error", s.reorderErrorToast); }
   }
 
   const previewUrl = tenantSlug ? `/booking/${tenantSlug}` : null;
@@ -374,15 +377,15 @@ export default function AdminLinksPage() {
           <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#111318] flex items-center gap-1.5">
-                Chat-Assistent auf Buchungsseite
+                {s.chatbotCardTitle}
                 {tenantPlan !== "business" && (
                   <span className="text-[10px] font-bold uppercase tracking-wide text-white bg-[#6355E4] px-1.5 py-0.5 rounded">Agency</span>
                 )}
               </p>
               <p className="text-xs text-[#6B7280] mt-0.5">
                 {tenantPlan === "business"
-                  ? "Zeigt unten rechts auf deiner Buchungsseite einen Chat, in dem Kund:innen ihr Anliegen beschreiben und eine Serviceempfehlung erhalten — zusätzlich zum bestehenden Buchungsablauf, nicht als Ersatz."
-                  : "Ab dem Agency-Tarif verfügbar: ein Chat unten rechts auf deiner Buchungsseite empfiehlt Kund:innen anhand ihrer Beschreibung den passenden Service."}
+                  ? s.chatbotCardDescBusiness
+                  : s.chatbotCardDescLocked}
               </p>
             </div>
             <button
@@ -402,9 +405,9 @@ export default function AdminLinksPage() {
           {chatbotEnabled && (
             <div className="mt-3 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#111318]">Nachrichtenlimit pro Gespräch</p>
+                <p className="text-sm font-semibold text-[#111318]">{s.messagesPerConversationTitle}</p>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Wie oft darf eine Kundschaft in einem Chat eine Frage an die KI stellen, bevor der Chat auf direkten Kontakt verweist? (1–200)
+                  {s.messagesPerConversationDesc}
                 </p>
               </div>
               <input
@@ -423,10 +426,9 @@ export default function AdminLinksPage() {
           {chatbotEnabled && (
             <div className="mt-3 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-[#111318]">Fragen-Limit pro Besucher und Tag</p>
+                <p className="text-sm font-semibold text-[#111318]">{s.messagesPerVisitorTitle}</p>
                 <p className="text-xs text-[#6B7280] mt-0.5">
-                  Verhindert, dass eine einzelne Person durch mehrfaches Neuladen der Seite (neues Gespräch, Zähler oben zählt neu von vorn)
-                  allein euer gesamtes Chat-Budget für den Tag verbraucht — gilt über alle Gespräche derselben Person hinweg. (1–500)
+                  {s.messagesPerVisitorDesc}
                 </p>
               </div>
               <input

@@ -21,13 +21,9 @@ import {
 import { blockedTimeSlotsApi, BlockedTimeSlot, CreateBlockedTimeSlotDto, CreateBlockedDateRangeDto } from "@/lib/api/blockedTimeSlots";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useConfirm } from "@/components/ConfirmDialog";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
-const MONTHS = [
-  "Januar", "Februar", "März", "April", "Mai", "Juni",
-  "Juli", "August", "September", "Oktober", "November", "Dezember",
-];
 const PAGE_SIZE = 8;
 
 function getMiniCalDays(year: number, month: number): (number | null)[] {
@@ -60,6 +56,9 @@ const EMPTY_RANGE: CreateBlockedDateRangeDto = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function BlockedSlotsPage() {
+  const { t, lang } = useTranslation();
+  const s = t.admin.blockedSlotsPage;
+  const locale = lang === 'de' ? 'de-DE' : 'en-US';
   const { hasRole } = useAuth();
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']);
 
@@ -101,11 +100,11 @@ export default function BlockedSlotsPage() {
       const data = await blockedTimeSlotsApi.getAll(startDate, endDate, isAdmin);
       setSlots(data);
     } catch (e: any) {
-      setError(e.message || "Fehler beim Laden der blockierten Zeiten");
+      setError(e.message || s.loadErrorFallback);
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, s.loadErrorFallback]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setPage(1); }, [selDate]);
@@ -154,7 +153,7 @@ export default function BlockedSlotsPage() {
     try {
       if (modalMode === "edit" && editingSlot) {
         if (!singleForm.blockDate || !singleForm.startTime || !singleForm.endTime) {
-          setModalError("Bitte alle Pflichtfelder ausfüllen");
+          setModalError(s.fillRequiredFieldsError);
           setSubmitting(false);
           return;
         }
@@ -167,10 +166,10 @@ export default function BlockedSlotsPage() {
         });
 
         if (result.success && result.data) {
-          setSlots((prev) => prev.map((s) => (s.id === editingSlot.id ? result.data : s)));
+          setSlots((prev) => prev.map((sl) => (sl.id === editingSlot.id ? result.data : sl)));
           handleClose();
         } else {
-          setModalError(result.message || "Fehler beim Aktualisieren");
+          setModalError(result.message || s.updateErrorFallback);
         }
         return;
       }
@@ -178,7 +177,7 @@ export default function BlockedSlotsPage() {
       // Create
       if (isRange) {
         if (!rangeForm.fromDate || !rangeForm.toDate || !rangeForm.startTime || !rangeForm.endTime) {
-          setModalError("Bitte alle Pflichtfelder ausfüllen");
+          setModalError(s.fillRequiredFieldsError);
           setSubmitting(false);
           return;
         }
@@ -188,11 +187,11 @@ export default function BlockedSlotsPage() {
           await load();
           handleClose();
         } else {
-          setModalError(result.message || "Fehler beim Erstellen");
+          setModalError(result.message || s.createErrorFallback);
         }
       } else {
         if (!singleForm.blockDate || !singleForm.startTime || !singleForm.endTime) {
-          setModalError("Bitte alle Pflichtfelder ausfüllen");
+          setModalError(s.fillRequiredFieldsError);
           setSubmitting(false);
           return;
         }
@@ -202,11 +201,11 @@ export default function BlockedSlotsPage() {
           await load();
           handleClose();
         } else {
-          setModalError(result.message || "Fehler beim Erstellen");
+          setModalError(result.message || s.createErrorFallback);
         }
       }
     } catch (e: any) {
-      setModalError(e.message || "Ein Fehler ist aufgetreten");
+      setModalError(e.message || s.genericErrorFallback);
     } finally {
       setSubmitting(false);
     }
@@ -226,13 +225,13 @@ export default function BlockedSlotsPage() {
     try {
       const result = await blockedTimeSlotsApi.delete(selectedSlotForDelete.id);
       if (result.success) {
-        setSlots((prev) => prev.filter((s) => s.id !== selectedSlotForDelete.id));
+        setSlots((prev) => prev.filter((sl) => sl.id !== selectedSlotForDelete.id));
         onDeleteModalClose();
       } else {
-        setError(result.message || "Fehler beim Löschen");
+        setError(result.message || s.deleteErrorFallback);
       }
     } catch (e: any) {
-      setError(e.message || "Fehler beim Löschen");
+      setError(e.message || s.deleteErrorFallback);
     } finally {
       setDeleting(false);
       setSelectedSlotForDelete(null);
@@ -287,16 +286,16 @@ export default function BlockedSlotsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">
-              Abwesenheiten
+              {s.title}
             </h1>
-            <p className="text-sm text-[#8A8A8A]">Blockierte Zeitslots verwalten</p>
+            <p className="text-sm text-[#8A8A8A]">{s.subtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
             startContent={<Ban size={18} />}
             onPress={() => openCreate()}
           >
-            Zeitslot blockieren
+            {s.blockTimeSlotLabel}
           </Button>
         </div>
 
@@ -320,9 +319,9 @@ export default function BlockedSlotsPage() {
                       <AlertCircle size={20} className="text-white" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-bold text-[#1E1E1E]">Zeitslot löschen</h2>
+                      <h2 className="text-lg font-bold text-[#1E1E1E]">{s.deleteModalTitle}</h2>
                       <p className="text-xs text-[#8A8A8A]">
-                        {selectedSlotForDelete && new Date(selectedSlotForDelete.blockDate + "T00:00").toLocaleDateString("de-DE", {
+                        {selectedSlotForDelete && new Date(selectedSlotForDelete.blockDate + "T00:00").toLocaleDateString(locale, {
                           day: "2-digit", month: "long",
                         })}
                       </p>
@@ -338,7 +337,7 @@ export default function BlockedSlotsPage() {
                         <p className="text-sm text-red-700 flex items-start gap-2">
                           <AlertCircle size={16} className="shrink-0 mt-0.5" />
                           <span>
-                            <strong>Achtung:</strong> Dieser Zeitslot wird endgültig gelöscht.
+                            <strong>{s.deleteWarningBold}</strong>{s.deleteWarningText}
                           </span>
                         </p>
                       </div>
@@ -351,7 +350,7 @@ export default function BlockedSlotsPage() {
                           </div>
                           <div>
                             <p className="font-semibold text-[#1E1E1E]">
-                              {new Date(selectedSlotForDelete.blockDate + "T00:00").toLocaleDateString("de-DE", {
+                              {new Date(selectedSlotForDelete.blockDate + "T00:00").toLocaleDateString(locale, {
                                 weekday: "long", day: "2-digit", month: "long", year: "numeric",
                               })}
                             </p>
@@ -359,12 +358,12 @@ export default function BlockedSlotsPage() {
                               <Clock size={13} />
                               <span>
                                 {selectedSlotForDelete.startTime.slice(0, 5)} –{" "}
-                                {selectedSlotForDelete.endTime.slice(0, 5)} Uhr
+                                {selectedSlotForDelete.endTime.slice(0, 5)}{s.uhrSuffix}
                               </span>
                             </div>
                             {selectedSlotForDelete.reason && (
                               <p className="text-sm text-[#8A8A8A] mt-1 italic">
-                                „{selectedSlotForDelete.reason}"
+                                {s.reasonQuoteOpen}{selectedSlotForDelete.reason}{s.reasonQuoteClose}
                               </p>
                             )}
                           </div>
@@ -385,7 +384,7 @@ export default function BlockedSlotsPage() {
                     isDisabled={deleting}
                     startContent={<X size={14} />}
                   >
-                    Abbrechen
+                    {t.cancel}
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-lg shadow-red-500/20"
@@ -393,7 +392,7 @@ export default function BlockedSlotsPage() {
                     isLoading={deleting}
                     startContent={!deleting && <Trash2 size={14} />}
                   >
-                    Endgültig löschen
+                    {s.deletePermanentlyBtn}
                   </Button>
                 </ModalFooter>
               </>
@@ -408,7 +407,7 @@ export default function BlockedSlotsPage() {
               <ChevronLeft size={16} />
             </Button>
             <span className="text-base font-bold text-[#1E1E1E]">
-              {MONTHS[calMonth]} {calYear}
+              {s.monthNames[calMonth]} {calYear}
             </span>
             <Button isIconOnly variant="flat" className="bg-white/60 min-w-8 h-8" onPress={nextMonth}>
               <ChevronRight size={16} />
@@ -416,7 +415,7 @@ export default function BlockedSlotsPage() {
           </div>
           <CardBody className="p-4">
             <div className="grid grid-cols-7 mb-2">
-              {WEEKDAYS.map((d) => (
+              {s.weekdayShort.map((d) => (
                 <div
                   key={d}
                   className="text-center text-xs font-semibold text-[#8A8A8A] py-1"
@@ -437,7 +436,7 @@ export default function BlockedSlotsPage() {
                     key={ds}
                     onClick={() => setSelDate((prev) => (prev === ds ? null : ds))}
                     onDoubleClick={() => openCreate(ds)}
-                    title={isBlocked ? "Blockiert – Doppelklick zum Erstellen" : "Doppelklick zum Erstellen"}
+                    title={isBlocked ? s.blockedTooltip : s.doubleClickTooltip}
                     className={`relative flex flex-col items-center justify-center rounded-xl h-10 text-sm font-medium transition-all cursor-pointer
                       ${isSel
                         ? "bg-[#6355E4] text-white shadow-md"
@@ -459,9 +458,9 @@ export default function BlockedSlotsPage() {
             {selDate && (
               <div className="mt-3 pt-3 border-t border-[#ECEBF2]/20 flex items-center justify-between">
                 <p className="text-sm text-[#8A8A8A]">
-                  Filter:{" "}
+                  {s.filterLabel}{" "}
                   <span className="font-semibold text-[#6355E4]">
-                    {new Date(selDate + "T00:00").toLocaleDateString("de-DE", {
+                    {new Date(selDate + "T00:00").toLocaleDateString(locale, {
                       day: "2-digit", month: "long", year: "numeric",
                     })}
                   </span>
@@ -472,7 +471,7 @@ export default function BlockedSlotsPage() {
                   className="bg-[#F6F5FA] text-[#8A8A8A] text-xs"
                   onPress={() => setSelDate(null)}
                 >
-                  Aufheben
+                  {s.clearFilterBtn}
                 </Button>
               </div>
             )}
@@ -483,14 +482,15 @@ export default function BlockedSlotsPage() {
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold text-[#1E1E1E]">
             {selDate
-              ? `Blockierungen am ${new Date(selDate + "T00:00").toLocaleDateString("de-DE", {
-                day: "2-digit", month: "long",
-              })} (${filteredSlots.length})`
-              : `Alle Blockierungen (${slots.length})`}
+              ? fillTemplate(s.blockingsOnDateTemplate, {
+                date: new Date(selDate + "T00:00").toLocaleDateString(locale, { day: "2-digit", month: "long" }),
+                count: filteredSlots.length,
+              })
+              : fillTemplate(s.allBlockingsTemplate, { count: slots.length })}
           </h3>
           {totalPages > 1 && (
             <span className="text-xs text-[#8A8A8A]">
-              Seite {safePage} von {totalPages}
+              {fillTemplate(s.pageOfTemplate, { page: safePage, total: totalPages })}
             </span>
           )}
         </div>
@@ -513,11 +513,11 @@ export default function BlockedSlotsPage() {
             </div>
             <p className="text-[#8A8A8A] font-medium">
               {selDate
-                ? "Keine Blockierungen an diesem Tag"
-                : "Noch keine blockierten Zeiten"}
+                ? s.noBlockingsOnDay
+                : s.noBlockingsYet}
             </p>
             <p className="text-[#8A8A8A] text-sm mt-1">
-              Doppelklick auf einen Kalendertag oder Button oben
+              {s.emptyHint}
             </p>
           </div>
         ) : (
@@ -536,7 +536,7 @@ export default function BlockedSlotsPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-[#1E1E1E]">
-                            {new Date(slot.blockDate + "T00:00").toLocaleDateString("de-DE", {
+                            {new Date(slot.blockDate + "T00:00").toLocaleDateString(locale, {
                               weekday: "long", day: "2-digit",
                               month: "long", year: "numeric",
                             })}
@@ -545,12 +545,12 @@ export default function BlockedSlotsPage() {
                             <Clock size={13} />
                             <span>
                               {slot.startTime.slice(0, 5)} –{" "}
-                              {slot.endTime.slice(0, 5)} Uhr
+                              {slot.endTime.slice(0, 5)}{s.uhrSuffix}
                             </span>
                           </div>
                           {slot.reason && (
                             <p className="text-sm text-[#8A8A8A] mt-1 italic">
-                              „{slot.reason}"
+                              {s.reasonQuoteOpen}{slot.reason}{s.reasonQuoteClose}
                             </p>
                           )}
                         </div>
@@ -560,7 +560,7 @@ export default function BlockedSlotsPage() {
                           isIconOnly size="sm" variant="flat"
                           className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                           onPress={() => openEdit(slot)}
-                          title="Bearbeiten"
+                          title={s.editTooltip}
                         >
                           <Edit size={14} />
                         </Button>
@@ -568,7 +568,7 @@ export default function BlockedSlotsPage() {
                           isIconOnly size="sm" variant="flat"
                           className="bg-red-50 text-red-500 hover:bg-red-100"
                           onPress={() => handleDelete(slot)}
-                          title="Löschen"
+                          title={s.deleteTooltip}
                         >
                           <Trash2 size={15} />
                         </Button>
@@ -647,13 +647,13 @@ export default function BlockedSlotsPage() {
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">
                       {modalMode === "edit"
-                        ? "Zeitslot bearbeiten"
-                        : "Zeitslot blockieren"}
+                        ? s.editModalTitle
+                        : s.blockTimeSlotLabel}
                     </h2>
                     <p className="text-xs text-[#8A8A8A]">
                       {modalMode === "edit"
-                        ? "Datum, Zeit oder Grund anpassen"
-                        : "Zeiten als nicht verfügbar markieren"}
+                        ? s.editModalSubtitle
+                        : s.createModalSubtitle}
                     </p>
                   </div>
                 </div>
@@ -678,10 +678,10 @@ export default function BlockedSlotsPage() {
                       />
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-[#1E1E1E]">
-                          Datumsbereich
+                          {s.dateRangeLabel}
                         </p>
                         <p className="text-xs text-[#8A8A8A]">
-                          Mehrere Tage auf einmal blockieren
+                          {s.dateRangeDesc}
                         </p>
                       </div>
                       <CalendarRange size={18} className="text-[#8A8A8A]" />
@@ -692,7 +692,7 @@ export default function BlockedSlotsPage() {
                   {modalMode === "edit" || !isRange ? (
                     <Input
                       type="date"
-                      label="Datum"
+                      label={s.dateFieldLabel}
                       isRequired
                       isDisabled={submitting}
                       value={singleForm.blockDate}
@@ -705,7 +705,7 @@ export default function BlockedSlotsPage() {
                   ) : (
                     <div className="grid grid-cols-2 gap-3">
                       <Input
-                        type="date" label="Von Datum" isRequired isDisabled={submitting}
+                        type="date" label={s.fromDateLabel} isRequired isDisabled={submitting}
                         value={rangeForm.fromDate}
                         onChange={(e) =>
                           setRangeForm((f) => ({ ...f, fromDate: e.target.value }))
@@ -714,7 +714,7 @@ export default function BlockedSlotsPage() {
                         min={new Date().toISOString().split('T')[0]}
                       />
                       <Input
-                        type="date" label="Bis Datum" isRequired isDisabled={submitting}
+                        type="date" label={s.toDateLabel} isRequired isDisabled={submitting}
                         value={rangeForm.toDate}
                         onChange={(e) =>
                           setRangeForm((f) => ({ ...f, toDate: e.target.value }))
@@ -728,7 +728,7 @@ export default function BlockedSlotsPage() {
                   {/* Time fields */}
                   <div className="grid grid-cols-2 gap-3">
                     <Input
-                      type="time" label="Von Uhrzeit" isRequired isDisabled={submitting}
+                      type="time" label={s.fromTimeLabel} isRequired isDisabled={submitting}
                       value={
                         isRange && modalMode === "create"
                           ? rangeForm.startTime
@@ -742,7 +742,7 @@ export default function BlockedSlotsPage() {
                       classNames={INPUT_CLS}
                     />
                     <Input
-                      type="time" label="Bis Uhrzeit" isRequired isDisabled={submitting}
+                      type="time" label={s.toTimeLabel} isRequired isDisabled={submitting}
                       value={
                         isRange && modalMode === "create"
                           ? rangeForm.endTime
@@ -759,8 +759,8 @@ export default function BlockedSlotsPage() {
 
                   {/* Reason */}
                   <Input
-                    label="Grund (optional)"
-                    placeholder="z.B. Urlaub, Fortbildung…"
+                    label={s.reasonLabel}
+                    placeholder={s.reasonPlaceholder}
                     isDisabled={submitting}
                     value={
                       isRange && modalMode === "create"
@@ -785,7 +785,7 @@ export default function BlockedSlotsPage() {
                   isDisabled={submitting}
                   startContent={<X size={14} />}
                 >
-                  Abbrechen
+                  {t.cancel}
                 </Button>
                 <Button
                   className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -800,7 +800,7 @@ export default function BlockedSlotsPage() {
                     ))
                   }
                 >
-                  {modalMode === "edit" ? "Speichern" : "Blockieren"}
+                  {modalMode === "edit" ? t.save : s.blockBtn}
                 </Button>
               </ModalFooter>
             </>

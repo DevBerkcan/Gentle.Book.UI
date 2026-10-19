@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal";
 import { Button } from "@nextui-org/button";
 import { AlertTriangle, Trash2, Ban, X } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 type ConfirmVariant = "danger" | "warning" | "info";
 
@@ -47,9 +48,12 @@ const VARIANT_CFG: Record<ConfirmVariant, { iconBg: string; icon: React.ReactNod
 export function ConfirmDialog({
   isOpen, onClose, onConfirm,
   title, message,
-  confirmLabel = "Bestätigen", cancelLabel = "Abbrechen",
+  confirmLabel, cancelLabel,
   variant = "danger", loading = false,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t.confirm;
+  const resolvedCancelLabel = cancelLabel ?? t.cancel;
   const cfg = VARIANT_CFG[variant];
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="sm" placement="center" classNames={MODAL_CLASS}>
@@ -75,10 +79,10 @@ export function ConfirmDialog({
                 isDisabled={loading}
                 startContent={<X size={14} />}
               >
-                {cancelLabel}
+                {resolvedCancelLabel}
               </Button>
               <Button className={cfg.btnClass} onPress={onConfirm} isLoading={loading}>
-                {confirmLabel}
+                {resolvedConfirmLabel}
               </Button>
             </ModalFooter>
           </>

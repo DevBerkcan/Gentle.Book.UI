@@ -5,10 +5,11 @@
 
 import { LayoutGrid, Check } from "lucide-react";
 import { MagicCard } from "@/components/ui/magic-card";
-import { PAGE_TEMPLATES, PLAN_ORDER, PLAN_LABEL, TPL_VISUAL } from "./constants";
+import { PAGE_TEMPLATES, PLAN_ORDER, PLAN_LABEL, TPL_VISUAL, getTplDesc } from "./constants";
 import { SectionLabel } from "./shared";
 import { LockedItemHint } from "./LockedItemHint";
 import type { LinktreeConfig, PageTemplate, PlanTier } from "./types";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 export function PageTemplatePicker({
   config, tenantPlan, onSelect,
@@ -17,14 +18,16 @@ export function PageTemplatePicker({
   tenantPlan: PlanTier;
   onSelect: (key: PageTemplate) => void;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <div className="border-t border-[#F3F4F6] pt-5">
       <div className="flex items-center justify-between mb-3">
-        <SectionLabel icon={<LayoutGrid size={13} />} tip="Die Seitenvorlage bestimmt das Grundlayout deiner Buchungsseite (Header, Anordnung, Bildgröße). Sie wird automatisch mitgesetzt, wenn du oben ein fertiges Paket wählst — du kannst sie hier aber auch einzeln ändern.">
-          Seitenvorlage
+        <SectionLabel icon={<LayoutGrid size={13} />} tip={s.pageTemplateTip}>
+          {s.pageTemplateLabel}
         </SectionLabel>
         <span className="text-[10px] font-semibold text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded-full">
-          {PAGE_TEMPLATES.length} Designs
+          {fillTemplate(s.designsCountTemplate, { count: PAGE_TEMPLATES.length })}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2">
@@ -59,7 +62,7 @@ export function PageTemplatePicker({
                 </div>
                 <div className={`px-2 py-1.5 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
                   <p className="text-[10px] font-bold text-[#111318] leading-tight">{tpl.name}</p>
-                  <p className="text-[9px] text-[#9CA3AF] leading-tight truncate">{tpl.desc}</p>
+                  <p className="text-[9px] text-[#9CA3AF] leading-tight truncate">{getTplDesc(t, tpl.key)}</p>
                 </div>
               </MagicCard>
             </LockedItemHint>

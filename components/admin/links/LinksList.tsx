@@ -7,8 +7,9 @@ import {
   GripVertical, Calendar, Link2, Plus, ArrowUp, ArrowDown, Check, X,
   Edit2, Trash2, ExternalLink,
 } from "lucide-react";
-import { ICON_MAP, ICON_OPTIONS } from "./shared";
+import { ICON_MAP, getIconOptions } from "./shared";
 import type { LinkItem } from "./types";
+import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
 export function LinksList({
   ctaText, links, loading, showAddForm, onShowAddForm,
@@ -37,6 +38,9 @@ export function LinksList({
   handleToggleActive: (link: LinkItem) => void;
   moveLink: (index: number, direction: "up" | "down") => void;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
+  const ICON_OPTIONS = getIconOptions(t);
   return (
     <>
       {/* ── Fixed Booking Button ─────────────────────────────────────────── */}
@@ -48,10 +52,10 @@ export function LinksList({
             <Calendar size={15} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-[#111318] text-sm">{ctaText || "Termin buchen"}</p>
-            <p className="text-xs text-[#9CA3AF]">Immer erster Link · wird automatisch angeheftet</p>
+            <p className="font-semibold text-[#111318] text-sm">{ctaText || t.booking.bookAppointment}</p>
+            <p className="text-xs text-[#9CA3AF]">{s.fixedLinkHint}</p>
           </div>
-          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] px-2.5 py-1 rounded-lg font-semibold">Fest</span>
+          <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] px-2.5 py-1 rounded-lg font-semibold">{s.fixedBadge}</span>
         </div>
       </div>
 
@@ -59,17 +63,17 @@ export function LinksList({
       {loading ? (
         <div className="text-center py-16 text-[#9CA3AF]">
           <div className="inline-block w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin mb-3" />
-          <p className="text-sm">Lade Links…</p>
+          <p className="text-sm">{s.loadingLinks}</p>
         </div>
       ) : links.length === 0 && !showAddForm ? (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           className="text-center py-14 bg-white rounded-2xl border border-dashed border-[#E5E7EB]">
           <Link2 size={32} className="text-[#E5E7EB] mx-auto mb-3" />
-          <p className="text-[#111318] font-semibold text-sm">Noch keine Links</p>
-          <p className="text-sm text-[#9CA3AF] mt-1 mb-5">Füge Instagram, WhatsApp oder andere Links hinzu</p>
+          <p className="text-[#111318] font-semibold text-sm">{s.noLinksYetTitle}</p>
+          <p className="text-sm text-[#9CA3AF] mt-1 mb-5">{s.noLinksYetDesc}</p>
           <button onClick={onShowAddForm}
             className="inline-flex items-center gap-1.5 text-sm bg-[#6355E4] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#4338CA] transition-colors">
-            <Plus size={13} />Ersten Link hinzufügen
+            <Plus size={13} />{s.addFirstLinkBtn}
           </button>
         </motion.div>
       ) : (
@@ -90,22 +94,22 @@ export function LinksList({
                         className="flex-shrink-0 border border-[#E5E7EB] rounded-xl px-2 py-2 text-sm bg-white text-[#374151] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all">
                         {ICON_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>
-                      <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder="Titel" autoFocus
+                      <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} placeholder={s.titlePlaceholder} autoFocus
                         className={`flex-1 ${inputCls}`} />
                     </div>
-                    <input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder="https://..."
+                    <input value={editUrl} onChange={(e) => setEditUrl(e.target.value)} placeholder={s.urlPlaceholder}
                       onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(link.id)} className={inputCls} />
                     <div className="flex gap-2 justify-end">
                       <button onClick={() => setEditingId(null)}
                         className="px-4 py-2 text-sm rounded-xl bg-[#F3F4F6] text-[#374151] hover:bg-[#E5E7EB] font-medium transition-colors">
-                        Abbrechen
+                        {t.cancel}
                       </button>
                       <button onClick={() => handleSaveEdit(link.id)} disabled={saving}
                         className="px-4 py-2 text-sm rounded-xl bg-[#6355E4] text-white font-semibold hover:bg-[#4338CA] disabled:opacity-40 flex items-center gap-1.5 transition-colors">
                         {saving
                           ? <span className="inline-block w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                           : <Check size={13} />}
-                        Speichern
+                        {t.save}
                       </button>
                     </div>
                   </div>
@@ -135,7 +139,7 @@ export function LinksList({
                             ? "bg-[#D1FAE5] text-[#065F46] hover:bg-[#A7F3D0]"
                             : "bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB]"
                         }`}>
-                        {link.isActive ? "Aktiv" : "Aus"}
+                        {link.isActive ? s.activeLabel : s.offLabel}
                       </button>
                       <button onClick={() => startEdit(link)}
                         className="p-1.5 text-[#9CA3AF] hover:text-[#6355E4] hover:bg-[#EEEBFC] transition-all rounded-lg">
@@ -156,7 +160,7 @@ export function LinksList({
 
       {links.length > 0 && (
         <p className="text-xs text-center text-[#9CA3AF] mt-4">
-          {links.filter((l) => l.isActive).length} von {links.length} Links aktiv
+          {fillTemplate(s.activeLinksCountTemplate, { active: links.filter((l) => l.isActive).length, total: links.length })}
         </p>
       )}
     </>

@@ -5,9 +5,10 @@
 "use client";
 
 import { Pipette, Sparkles, Palette, Circle, Grid3x3, Minus, LayoutList, LayoutGrid, Wind, Smile, Zap } from "lucide-react";
-import { COLOR_PALETTES, INDUSTRY_PRESETS, THEMES } from "./constants";
+import { COLOR_PALETTES, INDUSTRY_PRESETS, THEMES, getIndustryPresetLabel } from "./constants";
 import { SectionLabel, OptionPill, Toggle } from "./shared";
 import type { LinktreeConfig, Theme } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function AppearanceOptions({
   config, theme, primaryColor, industryType, updateConfig, updateTheme, updateColor, applyColorScheme, applyPreset,
@@ -22,11 +23,13 @@ export function AppearanceOptions({
   applyColorScheme: (palette: typeof COLOR_PALETTES[number]) => void;
   applyPreset: (key: string) => void;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <>
       {/* ── Farbpalette ─────────────────────────────────────── */}
       <div className="border-t border-[#F3F4F6] pt-5">
-        <SectionLabel icon={<Pipette size={13} />}>Farbpalette</SectionLabel>
+        <SectionLabel icon={<Pipette size={13} />}>{s.colorPaletteLabel}</SectionLabel>
         <div className="grid grid-cols-4 gap-2">
           {COLOR_PALETTES.map((palette) => {
             const isActive = (config.colorScheme ?? "auto") === palette.key;
@@ -48,12 +51,12 @@ export function AppearanceOptions({
             );
           })}
         </div>
-        <p className="text-[10px] text-[#9CA3AF] mt-2">Oder wähle unten eine eigene Primärfarbe</p>
+        <p className="text-[10px] text-[#9CA3AF] mt-2">{s.colorPaletteHint}</p>
       </div>
 
       {/* ── Branchenvorlage ─────────────────────────────────── */}
       <div className="border-t border-[#F3F4F6] pt-5">
-        <SectionLabel icon={<Sparkles size={13} />}>Branchenvorlage</SectionLabel>
+        <SectionLabel icon={<Sparkles size={13} />}>{s.industryPresetLabel}</SectionLabel>
         <div className="grid grid-cols-3 gap-2">
           {Object.entries(INDUSTRY_PRESETS).map(([key, preset]) => {
             const isActive = key === industryType;
@@ -70,7 +73,7 @@ export function AppearanceOptions({
                   {preset.emoji}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold text-[#111318] leading-tight truncate">{preset.label}</p>
+                  <p className="text-[10px] font-semibold text-[#111318] leading-tight truncate">{getIndustryPresetLabel(t, key)}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <div className="w-2 h-2 rounded-full" style={{ background: preset.color }} />
                     <span className="text-[9px] text-[#9CA3AF] font-mono truncate">{preset.color}</span>
@@ -84,7 +87,7 @@ export function AppearanceOptions({
 
       {/* ── Hintergrund-Theme ────────────────────────────────── */}
       <div className="border-t border-[#F3F4F6] pt-5">
-        <SectionLabel icon={<Palette size={13} />}>Hintergrund-Theme</SectionLabel>
+        <SectionLabel icon={<Palette size={13} />}>{s.backgroundThemeLabel}</SectionLabel>
         <div className="grid grid-cols-5 gap-1.5">
           {THEMES.map((t) => {
             const bgPrev = t.value === "dark"
@@ -112,7 +115,7 @@ export function AppearanceOptions({
       {/* ── Primärfarbe ──────────────────────────────────────── */}
       <div>
         <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5 flex items-center gap-1.5">
-          <Pipette size={11} className="text-[#6355E4]" />Primärfarbe
+          <Pipette size={11} className="text-[#6355E4]" />{s.primaryColorLabel}
         </p>
         <div className="flex items-center gap-3">
           <input type="color" value={primaryColor} onChange={(e) => updateColor(e.target.value)}
@@ -130,14 +133,14 @@ export function AppearanceOptions({
 
       {/* ── Hintergrundmuster ────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Hintergrundmuster</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.backgroundPatternLabel}</p>
         <div className="flex gap-1.5 flex-wrap">
           {([
-            { v: "none", icon: <Minus size={13} />, label: "Keins" },
-            { v: "dots", icon: <Circle size={13} />, label: "Punkte" },
-            { v: "waves", icon: <span className="text-xs">〜</span>, label: "Wellen" },
-            { v: "grid", icon: <Grid3x3 size={13} />, label: "Raster" },
-            { v: "circles", icon: <Circle size={15} />, label: "Kreise" },
+            { v: "none", icon: <Minus size={13} />, label: s.patternNone },
+            { v: "dots", icon: <Circle size={13} />, label: s.patternDots },
+            { v: "waves", icon: <span className="text-xs">〜</span>, label: s.patternWaves },
+            { v: "grid", icon: <Grid3x3 size={13} />, label: s.patternGrid },
+            { v: "circles", icon: <Circle size={15} />, label: s.patternCircles },
           ] as const).map(({ v, icon, label }) => (
             <OptionPill key={v} active={config.bgPattern === v} onClick={() => updateConfig("bgPattern", v)}
               className="flex-col gap-0.5 px-3 py-2">
@@ -149,12 +152,12 @@ export function AppearanceOptions({
 
       {/* ── Button-Form ──────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Button-Form</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.buttonShapeLabel}</p>
         <div className="flex gap-2">
           {([
-            { v: "rounded", label: "Abgerundet", cls: "rounded-xl" },
-            { v: "pill", label: "Pill", cls: "rounded-full" },
-            { v: "square", label: "Eckig", cls: "rounded-none" },
+            { v: "rounded", label: s.buttonShapeRounded, cls: "rounded-xl" },
+            { v: "pill", label: s.buttonShapePill, cls: "rounded-full" },
+            { v: "square", label: s.buttonShapeSquare, cls: "rounded-none" },
           ] as const).map(({ v, label, cls }) => (
             <button key={v} onClick={() => updateConfig("buttonStyle", v)}
               className={`flex-1 flex flex-col items-center gap-2 py-3 border text-xs font-medium transition-all ${cls} ${
@@ -172,7 +175,7 @@ export function AppearanceOptions({
 
       {/* ── Schriftart ───────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Schriftart</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.fontFamilyLabel}</p>
         <div className="grid grid-cols-5 gap-1.5">
           {([
             { v: "inter", label: "Inter", font: "sans-serif" },
@@ -199,7 +202,7 @@ export function AppearanceOptions({
       {/* ── Button-Farbe ─────────────────────────────────────── */}
       <div>
         <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-          <Pipette size={11} className="text-[#6355E4]" />Button-Farbe <span className="text-[#9CA3AF] font-normal">(optional)</span>
+          <Pipette size={11} className="text-[#6355E4]" />{s.buttonColorLabel} <span className="text-[#9CA3AF] font-normal">{s.optionalSuffix}</span>
         </p>
         <div className="flex items-center gap-3">
           <input type="color" value={config.ctaColor ?? primaryColor} onChange={(e) => updateConfig("ctaColor", e.target.value)}
@@ -215,7 +218,7 @@ export function AppearanceOptions({
           {config.ctaColor && (
             <button onClick={() => updateConfig("ctaColor", undefined)}
               className="text-[10px] text-[#9CA3AF] hover:text-[#374151] underline transition-colors">
-              Reset
+              {s.resetBtn}
             </button>
           )}
         </div>
@@ -223,12 +226,12 @@ export function AppearanceOptions({
 
       {/* ── Avatar-Form ──────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Avatar-Form</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.avatarShapeLabel}</p>
         <div className="flex gap-2">
           {([
-            { v: "circle", label: "Kreis", r: "9999px" },
-            { v: "rounded", label: "Abgerundet", r: "12px" },
-            { v: "square", label: "Quadrat", r: "3px" },
+            { v: "circle", label: s.avatarShapeCircle, r: "9999px" },
+            { v: "rounded", label: s.avatarShapeRounded, r: "12px" },
+            { v: "square", label: s.avatarShapeSquare, r: "3px" },
           ] as const).map(({ v, label, r }) => (
             <button key={v} onClick={() => updateConfig("avatarShape", v)}
               className={`flex-1 flex flex-col items-center gap-2 py-3 border rounded-xl text-xs font-medium transition-all ${
@@ -246,7 +249,7 @@ export function AppearanceOptions({
 
       {/* ── Karten-Stil ──────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Link-Karten Stil</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.cardStyleLabel}</p>
         <div className="grid grid-cols-4 gap-1.5">
           {([
             { v: "filled", label: "Filled", cls: "bg-white shadow-sm border border-[#E5E7EB]" },
@@ -270,13 +273,13 @@ export function AppearanceOptions({
 
       {/* ── Layout ───────────────────────────────────────────── */}
       <div>
-        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">Layout</p>
+        <p className="text-[11px] font-semibold text-[#6B7280] mb-2.5">{s.layoutLabel}</p>
         <div className="flex gap-2">
           <OptionPill active={(config.layoutMode ?? "list") === "list"} onClick={() => updateConfig("layoutMode", "list")} className="flex-1 justify-center gap-2 flex items-center">
-            <LayoutList size={13} />Liste
+            <LayoutList size={13} />{s.layoutList}
           </OptionPill>
           <OptionPill active={(config.layoutMode ?? "list") === "grid"} onClick={() => updateConfig("layoutMode", "grid")} className="flex-1 justify-center gap-2 flex items-center">
-            <LayoutGrid size={13} />Grid (Bento)
+            <LayoutGrid size={13} />{s.layoutGrid}
           </OptionPill>
         </div>
       </div>
@@ -284,12 +287,12 @@ export function AppearanceOptions({
       {/* ── Animationsgeschwindigkeit ────────────────────────── */}
       <div>
         <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-          <Wind size={11} className="text-[#6355E4]" />Animationsgeschwindigkeit
+          <Wind size={11} className="text-[#6355E4]" />{s.animationSpeedLabel}
         </p>
         <div className="flex gap-1.5">
           {(["none", "slow", "normal", "fast"] as const).map((v) => (
             <OptionPill key={v} active={(config.animationSpeed ?? "normal") === v} onClick={() => updateConfig("animationSpeed", v)} className="flex-1 justify-center">
-              {v === "none" ? "Keine" : v === "slow" ? "Langsam" : v === "normal" ? "Normal" : "Schnell"}
+              {v === "none" ? s.speedNone : v === "slow" ? s.speedSlow : v === "normal" ? s.speedNormal : s.speedFast}
             </OptionPill>
           ))}
         </div>
@@ -300,15 +303,15 @@ export function AppearanceOptions({
         {[
           {
             icon: <Smile size={13} className="text-[#9CA3AF]" />,
-            label: "Willkommensnachricht",
-            hint: "Tagline unterhalb des Profilbilds",
+            label: s.welcomeToggleLabel,
+            hint: s.welcomeToggleHint,
             value: config.showWelcome ?? false,
             onToggle: () => updateConfig("showWelcome", !config.showWelcome),
           },
           {
             icon: <Zap size={13} className="text-[#9CA3AF]" />,
-            label: "Konfetti beim Buchen",
-            hint: "Kurze Feier-Animation beim CTA-Klick",
+            label: s.confettiToggleLabel,
+            hint: s.confettiToggleHint,
             value: config.confetti ?? false,
             onToggle: () => updateConfig("confetti", !config.confetti),
           },

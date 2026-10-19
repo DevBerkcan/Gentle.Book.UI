@@ -5,8 +5,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Loader2, AlertCircle, RotateCcw } from "lucide-react";
 import type { SaveStatus } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function SaveStatusChip({ status, onRetry }: { status: SaveStatus; onRetry: () => void }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   if (status === "idle") return null;
 
   return (
@@ -28,25 +31,25 @@ export function SaveStatusChip({ status, onRetry }: { status: SaveStatus; onRetr
         {status === "saving" && (
           <>
             <Loader2 size={13} className="animate-spin" />
-            Änderungen werden gespeichert …
+            {s.savingChangesLabel}
           </>
         )}
         {status === "saved" && (
           <>
             <Check size={13} />
-            Gespeichert
+            {s.savedLabel}
           </>
         )}
         {status === "error" && (
           <>
             <AlertCircle size={13} />
-            Änderungen konnten nicht gespeichert werden
+            {s.saveFailedLabel}
             <button
               onClick={onRetry}
               className="ml-1 inline-flex items-center gap-1 rounded-full bg-[#DC2626] px-2 py-0.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#B91C1C]"
             >
               <RotateCcw size={11} />
-              Erneut versuchen
+              {s.retryBtn}
             </button>
           </>
         )}

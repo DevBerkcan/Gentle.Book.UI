@@ -4,10 +4,11 @@
 "use client";
 
 import { Sparkles, Check } from "lucide-react";
-import { CMS_TEMPLATE_PACKS, PLAN_ORDER, PLAN_LABEL, TPL_VISUAL } from "./constants";
+import { CMS_TEMPLATE_PACKS, PLAN_ORDER, PLAN_LABEL, TPL_VISUAL, getPackDesc } from "./constants";
 import { SectionLabel, TipBanner } from "./shared";
 import { LockedItemHint } from "./LockedItemHint";
 import type { LinktreeConfig, PageTemplate, PlanTier } from "./types";
+import { useTranslation } from "@/lib/i18n/LanguageContext";
 
 export function TemplatePackPicker({
   config, tenantPlan, onSelect,
@@ -16,14 +17,15 @@ export function TemplatePackPicker({
   tenantPlan: PlanTier;
   onSelect: (pack: typeof CMS_TEMPLATE_PACKS[number]) => void;
 }) {
+  const { t } = useTranslation();
+  const s = t.admin.linksPage;
   return (
     <div>
-      <SectionLabel icon={<Sparkles size={13} />} tip="Ein Paket setzt in einem Klick Vorlage, Farben, Schrift, Button-Stil und Buchungsablauf passend zu deiner Branche. Danach kannst du unten in den erweiterten Optionen jedes Detail einzeln anpassen.">
-        Fertige Pakete
+      <SectionLabel icon={<Sparkles size={13} />} tip={s.readyMadePacksTip}>
+        {s.readyMadePacksLabel}
       </SectionLabel>
       <TipBanner>
-        <span className="font-semibold text-[#111318]">Schnellstart:</span> Wähle unten das Paket, das am besten zu deinem Salon oder Barbershop passt.
-        Für Barbershops empfehlen wir „Barbershop Classic", für Friseure & Beauty-Studios „Hair &amp; Beauty Elegant" oder „Salon Launch" — beide sind sofort ohne Zusatzkosten nutzbar.
+        <span className="font-semibold text-[#111318]">{s.quickstartBold}</span> {s.quickstartRest}
       </TipBanner>
       <div className="grid grid-cols-2 gap-2.5">
         {CMS_TEMPLATE_PACKS.map((pack) => {
@@ -55,14 +57,14 @@ export function TemplatePackPicker({
                 </div>
                 <div className={`px-3 py-2 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
                   <p className="text-xs font-semibold text-[#111318] leading-tight">{pack.name}</p>
-                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{pack.desc}</p>
+                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{getPackDesc(t, pack.key)}</p>
                 </div>
               </button>
             </LockedItemHint>
           );
         })}
       </div>
-      <p className="text-[10px] text-[#9CA3AF] mt-2">Komplettes Seiten-Design in einem Klick: Layout, Farben, Animation und CTA · gesperrte Pakete zeigen den benötigten Plan</p>
+      <p className="text-[10px] text-[#9CA3AF] mt-2">{s.packsFooterHint}</p>
     </div>
   );
 }
