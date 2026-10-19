@@ -16,6 +16,7 @@ import {
   getServices,
   getLocations,
   getAvailability,
+  getEmployeesByService,
   createBooking,
   type Service,
   type TimeSlot,
@@ -210,15 +211,49 @@ function BookingPageInner() {
   // Handoff from the chat assistant widget (components/booking/ChatbotWidget.tsx), which links
   // here as /book?serviceId=... after recommending a service — auto-selects it and skips
   // straight to the next step instead of making the customer pick it again from the list.
+  //
+  // The waitlist notification email (EmailService.SendWaitlistNotificationAsync) links here with
+  // the same serviceId param plus waitlistToken, date, time and employeeId — the slot is reserved
+  // server-side for exactly 15 minutes, so this pre-fills employee/date/time too and jumps
+  // straight to the contact step instead of dropping the customer on the current week's date
+  // picker with no indication of which slot (or that any slot) is reserved for them.
   useEffect(() => {
     if (services.length === 0 || selectedService) return;
-    const preselectServiceId = new URLSearchParams(window.location.search).get("serviceId");
+    const params = new URLSearchParams(window.location.search);
+    const preselectServiceId = params.get("serviceId");
     if (!preselectServiceId) return;
     const match = services.find((s) => s.id === preselectServiceId);
-    if (match) {
-      handleServiceSelect(match);
+    if (!match) return;
+
+    handleServiceSelect(match);
+
+    const token = params.get("waitlistToken");
+    const date = params.get("date");
+    const time = params.get("time");
+    const employeeId = params.get("employeeId");
+    if (!token || !date || !time) {
       setCurrentStep(2 + stepOffset);
+      return;
     }
+
+    (async () => {
+      try {
+        const employees = await getEmployeesByService(match.id, slug);
+        const employee = (employeeId && employees.find((e) => e.id === employeeId)) || employees[0];
+        if (!employee) { setCurrentStep(2 + stepOffset); return; }
+        setSelectedEmployee(employee);
+
+        const availability = await getAvailability(match.id, date, employee.id, slug, token);
+        setAvailableSlots(availability.availableSlots);
+        setSelectedDate(date);
+        setSelectedTime(time);
+        setCurrentStep(4 + stepOffset);
+      } catch {
+        // Reservation lookup failed (e.g. token already expired) — fall back to the normal
+        // flow with just the service pre-selected rather than leaving the page stuck.
+        setCurrentStep(2 + stepOffset);
+      }
+    })();
   }, [services, stepOffset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleEmployeeSelect = (employee: Employee) => {
@@ -507,6 +542,14 @@ function BookingPageInner() {
             )}
             {currentStep === 4 + stepOffset && selectedService && selectedDate && selectedTime && (
               <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                {waitlistToken && (
+                  <div
+                    style={{ borderRadius: getBorderRadius(buttonStyle) }}
+                    className="mb-4 bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-3"
+                  >
+                    {t.booking.waitlistReservedNotice}
+                  </div>
+                )}
                 <ContactForm
                   service={selectedService}
                   selectedDate={selectedDate}
