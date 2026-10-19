@@ -1,10 +1,57 @@
-import { test, expect, request as playwrightRequest } from '@playwright/test';
+import { test, expect, request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 
 // Pure API-level test (no browser UI) against the local backend directly — the double-booking
 // race is a database/transaction concern, not a frontend one, so this is the most direct way to
-// prove it. Uses the demo-professional dev tenant (see e2e/fixtures.ts); creates its own
-// category/service/employee via the real admin API so it doesn't depend on manual seeding.
+// prove it. Uses the demo-professional dev tenant (see e2e/fixtures.ts).
+//
+// Fixtures are named "E2E Shared ..." and reused across runs (find-or-create) rather than
+// created fresh every time: this suite was originally create-only, and five manual re-runs while
+// chasing a flaky result silently filled demo-professional's employee roster up to its
+// Professional-plan limit (10) with throwaway rows. Reusing one fixed category/service/employee
+// avoids that entirely and keeps repeated runs fast.
 const API = 'http://localhost:5067/api';
+
+async function findOrCreateCategory(api: APIRequestContext, auth: Record<string, string>) {
+  const listRes = await api.get(`${API}/admin/services/categories`, { headers: auth });
+  const existing = (await listRes.json()).find((c: any) => c.name === 'E2E Shared Category');
+  if (existing) return existing;
+
+  const res = await api.post(`${API}/admin/services/categories`, {
+    headers: auth, data: { name: 'E2E Shared Category', description: null, displayOrder: 0 },
+  });
+  expect(res.ok(), `category create failed: ${await res.text()}`).toBeTruthy();
+  return res.json();
+}
+
+async function findOrCreateService(api: APIRequestContext, auth: Record<string, string>, categoryId: string) {
+  const listRes = await api.get(`${API}/admin/services`, { headers: auth });
+  const existing = (await listRes.json()).find((s: any) => s.name === 'E2E Shared Service');
+  if (existing) return existing;
+
+  const res = await api.post(`${API}/admin/services`, {
+    headers: auth,
+    data: {
+      name: 'E2E Shared Service', description: null, durationMinutes: 30, bufferTimeMinutes: 0,
+      price: 10, displayOrder: 0, categoryId, currency: 'EUR', employeeIds: null,
+    },
+  });
+  expect(res.ok(), `service create failed: ${await res.text()}`).toBeTruthy();
+  return res.json();
+}
+
+async function findOrCreateEmployee(api: APIRequestContext, auth: Record<string, string>) {
+  const listRes = await api.get(`${API}/employees`, { headers: auth });
+  const list = await listRes.json();
+  const existing = (Array.isArray(list) ? list : list.data).find((e: any) => e.name === 'E2E Shared Employee');
+  if (existing) return existing;
+
+  const res = await api.post(`${API}/employees`, {
+    headers: auth,
+    data: { name: 'E2E Shared Employee', role: 'Stylist', specialty: null, username: null, password: null, location: null },
+  });
+  expect(res.ok(), `employee create failed: ${await res.text()}`).toBeTruthy();
+  return res.json();
+}
 
 test.describe('Booking double-booking prevention', () => {
   test('two simultaneous bookings for the same employee/slot — exactly one succeeds', async () => {
@@ -17,37 +64,17 @@ test.describe('Booking double-booking prevention', () => {
     const { token } = await loginRes.json();
     const auth = { Authorization: `Bearer ${token}` };
 
-    const catRes = await api.post(`${API}/admin/services/categories`, {
-      headers: auth,
-      data: { name: `E2E Category ${Date.now()}`, description: null, displayOrder: 0 },
-    });
-    expect(catRes.ok(), `category create failed: ${await catRes.text()}`).toBeTruthy();
-    const category = await catRes.json();
-
-    const svcRes = await api.post(`${API}/admin/services`, {
-      headers: auth,
-      data: {
-        name: `E2E Service ${Date.now()}`, description: null, durationMinutes: 30, bufferTimeMinutes: 0,
-        price: 10, displayOrder: 0, categoryId: category.id, currency: 'EUR', employeeIds: null,
-      },
-    });
-    expect(svcRes.ok(), `service create failed: ${await svcRes.text()}`).toBeTruthy();
-    const service = await svcRes.json();
-
-    const empRes = await api.post(`${API}/employees`, {
-      headers: auth,
-      data: { name: `E2E Employee ${Date.now()}`, role: 'Stylist', specialty: null, username: null, password: null, location: null },
-    });
-    expect(empRes.ok(), `employee create failed: ${await empRes.text()}`).toBeTruthy();
-    const employee = await empRes.json();
+    const category = await findOrCreateCategory(api, auth);
+    const service = await findOrCreateService(api, auth, category.id);
+    const employee = await findOrCreateEmployee(api, auth);
     const employeeId = employee.id ?? employee.data?.id;
 
-    // A fixed future slot, specific to this test run (random minute) so repeated runs don't
-    // collide with a previous run's leftover booking.
+    // A random future slot so repeated runs don't collide with a previous run's leftover booking
+    // (the shared employee/service fixtures are reused, but each run still needs a fresh slot).
     const date = new Date();
-    date.setDate(date.getDate() + 14);
+    date.setDate(date.getDate() + 14 + Math.floor(Math.random() * 40)); // stays under the 60-day max-advance-booking limit
     const bookingDate = date.toISOString().slice(0, 10);
-    const startTime = `${9 + (Math.floor(Math.random() * 6))}:00`;
+    const startTime = `${9 + Math.floor(Math.random() * 6)}:00`;
 
     const bookingPayload = (suffix: string) => ({
       serviceId: service.id,
