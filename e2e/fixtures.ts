@@ -88,3 +88,45 @@ export async function ensureSharedBookingFixtures(api: APIRequestContext) {
 
   return { token, auth, category, service, employeeId };
 }
+
+/**
+ * Find-or-create a location + category on demo-starter — a prerequisite the Services admin UI
+ * hard-requires (the "Standort" field is disabled until at least one BusinessLocation exists)
+ * but which none of the seeded demo tenants have out of the box. Idempotent, same pattern as
+ * ensureSharedBookingFixtures above.
+ */
+export async function ensureStarterLocationAndCategory(api: APIRequestContext) {
+  const loginRes = await api.post(`${API}/auth/login`, {
+    data: { tenantSlug: DEMO_TENANTS.starter, email: demoEmail(DEMO_TENANTS.starter), password: DEMO_PASSWORD },
+  });
+  expect(loginRes.ok(), `login failed: ${await loginRes.text()}`).toBeTruthy();
+  const { token } = await loginRes.json();
+  const auth = { Authorization: `Bearer ${token}` };
+
+  const locListRes = await api.get(`${API}/tenant/locations`, { headers: auth });
+  const locList = (await locListRes.json()).data;
+  let location = locList.find((l: any) => l.name === 'E2E CRUD Standort');
+  if (!location) {
+    const res = await api.post(`${API}/tenant/locations`, {
+      headers: auth,
+      data: {
+        name: 'E2E CRUD Standort', street: 'Teststrasse 1', postalCode: '10115', city: 'Berlin',
+        countryCode: 'DE', currency: 'EUR', timeZone: 'Europe/Berlin', isDefault: true, isActive: true,
+      },
+    });
+    expect(res.ok(), `location create failed: ${await res.text()}`).toBeTruthy();
+    location = await res.json();
+  }
+
+  const catListRes = await api.get(`${API}/admin/services/categories`, { headers: auth });
+  let category = (await catListRes.json()).find((c: any) => c.name === 'E2E CRUD Category');
+  if (!category) {
+    const res = await api.post(`${API}/admin/services/categories`, {
+      headers: auth, data: { name: 'E2E CRUD Category', description: null, displayOrder: 0 },
+    });
+    expect(res.ok(), `category create failed: ${await res.text()}`).toBeTruthy();
+    category = await res.json();
+  }
+
+  return { token, auth, location, category };
+}
