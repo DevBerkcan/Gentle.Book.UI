@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
@@ -75,6 +75,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/email-logs', label: 'E-Mail Logs',     icon: Mail },
     { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
     { href: '/superadmin/audit-log',  label: 'Audit-Log',       icon: ScrollText },
+    { href: '/superadmin/legal-documents', label: 'Rechtstexte', icon: Scale },
   ];
 
   return (

@@ -322,6 +322,17 @@ export const superAdminApi = {
     return data as { items: AuditLogItem[]; totalCount: number; page: number; pageSize: number };
   },
 
+  // ── Legal Documents (immutable archive, gates real Mollie checkout) ─
+  async getLegalDocuments() {
+    const { data } = await api.get('/superadmin/legal-documents');
+    return data as LegalDocumentItem[];
+  },
+
+  async createLegalDocument(dto: { type: string; version: string; language?: string; fullText: string }) {
+    const { data } = await api.post('/superadmin/legal-documents', dto);
+    return data as LegalDocumentItem;
+  },
+
   // ── At-risk subscriptions (cancelling / dunning) ────────────
   async getAtRiskSubscriptions() {
     const { data } = await api.get('/superadmin/at-risk-subscriptions');
@@ -390,6 +401,17 @@ export interface AuditLogItem {
   details?: string;
   ipAddress?: string;
   createdAt: string;
+}
+
+export interface LegalDocumentItem {
+  id: string;
+  type: string;
+  version: string;
+  language: string;
+  sha256Hash: string;
+  releasedAt: string;
+  releasedByUserId: string;
+  textLength: number;
 }
 
 export interface AtRiskCancellingItem {
