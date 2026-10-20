@@ -53,6 +53,7 @@ export default function PublicFinderPage() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [customerNotes, setCustomerNotes] = useState('');
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [creatingDraft, setCreatingDraft] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(null);
   const [draftExpiresAt, setDraftExpiresAt] = useState<string | null>(null);
@@ -132,6 +133,10 @@ export default function PublicFinderPage() {
     }
     if (!firstName || !lastName || !email || !phone) {
       setError('Bitte alle Kundendaten ausfuellen.');
+      return;
+    }
+    if (!privacyAccepted) {
+      setError('Bitte die Datenschutzerklaerung akzeptieren.');
       return;
     }
 
@@ -358,9 +363,25 @@ export default function PublicFinderPage() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm min-h-[80px]"
             />
 
+            <label className="inline-flex items-start gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={privacyAccepted}
+                onChange={(event) => setPrivacyAccepted(event.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                Ich habe die{' '}
+                <a href="/datenschutz" target="_blank" rel="noopener noreferrer" className="underline text-[#6355E4]">
+                  Datenschutzerklaerung
+                </a>{' '}
+                gelesen und bin mit der Verarbeitung meiner Daten einverstanden. *
+              </span>
+            </label>
+
             <button
               onClick={() => void createDraft()}
-              disabled={creatingDraft || !selectedRecommendation}
+              disabled={creatingDraft || !selectedRecommendation || !privacyAccepted}
               className="rounded-lg bg-[#17A398] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
               {creatingDraft ? 'Erstelle Entwurf...' : 'Buchungsentwurf erstellen'}
