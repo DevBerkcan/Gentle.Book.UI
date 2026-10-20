@@ -1,5 +1,5 @@
-import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ensureSharedBookingFixtures } from './fixtures';
+import { test, expect } from '@playwright/test';
+import { ensureSharedBookingFixtures, waitForEmail } from './fixtures';
 
 // Regression test for a bug found during this QA pass: the waitlist notification email links to
 // /booking/{slug}/book?waitlistToken=...&serviceId=...&date=...&time=...&employeeId=..., promising
@@ -11,18 +11,6 @@ import { ensureSharedBookingFixtures } from './fixtures';
 
 const API = 'http://localhost:5067/api';
 const SMTP4DEV = 'http://localhost:5080';
-
-async function waitForEmail(request: APIRequestContext, toEmail: string, subjectContains: string, timeoutMs = 15000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const res = await request.get(`${SMTP4DEV}/api/Messages?sortColumn=receivedDate&sortIsDescending=true&page=1&pageSize=20`);
-    const body = await res.json();
-    const match = body.results.find((m: any) => m.to?.[0]?.includes(toEmail) && m.subject?.includes(subjectContains));
-    if (match) return match.id as string;
-    await new Promise((r) => setTimeout(r, 1000));
-  }
-  throw new Error(`No email to ${toEmail} with subject containing "${subjectContains}" arrived within ${timeoutMs}ms`);
-}
 
 test.describe('Waitlist notify-on-cancel', () => {
   test('customer B gets the freed slot after customer A cancels, claim link pre-fills the reserved slot', async ({ page, request }) => {

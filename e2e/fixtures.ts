@@ -1,6 +1,20 @@
 import { type Page, type APIRequestContext, expect } from '@playwright/test';
 
 const API = 'http://localhost:5067/api';
+const SMTP4DEV = 'http://localhost:5080';
+
+/** Polls the local smtp4dev inbox for an email matching recipient + subject substring. */
+export async function waitForEmail(request: APIRequestContext, toEmail: string, subjectContains: string, timeoutMs = 15000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const res = await request.get(`${SMTP4DEV}/api/Messages?sortColumn=receivedDate&sortIsDescending=true&page=1&pageSize=20`);
+    const body = await res.json();
+    const match = body.results.find((m: any) => m.to?.[0]?.includes(toEmail) && m.subject?.includes(subjectContains));
+    if (match) return match.id as string;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  throw new Error(`No email to ${toEmail} with subject containing "${subjectContains}" arrived within ${timeoutMs}ms`);
+}
 
 // Dev-only demo tenants seeded by Program.cs (IsDevelopment() block) — never real customers.
 // One per plan tier. Password is the same fixed dev value for all four, intentionally.
