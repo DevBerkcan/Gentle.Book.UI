@@ -59,6 +59,7 @@ function getSettingsNavItems(t: Translations): SettingsNavItem[] {
     { id: 'section-loyalty', label: t.admin.customersPage.loyaltyPoints },
     { id: 'section-locations', label: s.locations },
     { id: 'section-billing', label: s.billingAddress },
+    { id: 'section-legal', label: s.legalLinks },
     { id: 'section-colors', label: s.colors },
     { id: 'section-booking', label: s.bookingSettings },
     { id: 'section-hours', label: s.openingHours },
@@ -117,6 +118,8 @@ interface TenantSettings {
   billingCountry?: string;
   vatId?: string;
   hasCompleteBillingProfile?: boolean;
+  privacyUrl?: string;
+  imprintUrl?: string;
 }
 
 // ── Shared UI primitives ──────────────────────────────────────────────────────
@@ -221,6 +224,8 @@ export default function AdminSettingsPage() {
     billingCity: '',
     billingCountry: '',
     vatId: '',
+    privacyUrl: '',
+    imprintUrl: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -929,6 +934,24 @@ export default function AdminSettingsPage() {
             <Field label={t.admin.settingsPage.vatIdLabel}>
               <input type="text" value={settings.vatId} onChange={(e) => set('vatId', e.target.value)}
                 placeholder={t.admin.settingsPage.vatIdPlaceholder} className={inputCls} />
+            </Field>
+          </SectionCard>
+
+          {/* ── Rechtliche Links (studiospezifisch) ── */}
+          <SectionCard
+            id="section-legal"
+            icon={<ShieldCheck size={15} className="text-white" />}
+            title={t.admin.settingsPage.legalLinks}
+            subtitle={t.admin.settingsPage.legalLinksDesc}
+            accentClass="bg-[#1F2937]"
+          >
+            <Field label={t.admin.settingsPage.privacyUrlLabel}>
+              <input type="url" value={settings.privacyUrl} onChange={(e) => set('privacyUrl', e.target.value)}
+                placeholder={t.admin.settingsPage.privacyUrlPlaceholder} pattern="https://.*" className={inputCls} />
+            </Field>
+            <Field label={t.admin.settingsPage.imprintUrlLabel}>
+              <input type="url" value={settings.imprintUrl} onChange={(e) => set('imprintUrl', e.target.value)}
+                placeholder={t.admin.settingsPage.imprintUrlPlaceholder} pattern="https://.*" className={inputCls} />
             </Field>
           </SectionCard>
 

@@ -79,6 +79,7 @@ function BookingPageInner() {
   const [tenantName, setTenantName] = useState<string>('');
   const [primaryColor, setPrimaryColor] = useState<string>('#6355E4');
   const [tenantAddress, setTenantAddress] = useState<string | null>(null);
+  const [tenantPrivacyUrl, setTenantPrivacyUrl] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string>('inter');
   const [buttonStyle, setButtonStyle] = useState<string>('rounded');
   const [bookingTheme, setBookingTheme] = useState<string>('light');
@@ -128,6 +129,7 @@ function BookingPageInner() {
         setTenantName(info.companyName ?? info.name ?? slug);
         if (info.primaryColor) setPrimaryColor(info.primaryColor);
         if (info.address) setTenantAddress(info.address);
+        if (info.privacyUrl) setTenantPrivacyUrl(info.privacyUrl);
         try {
           const cfg = typeof info.linktreeConfig === 'string'
             ? JSON.parse(info.linktreeConfig)
@@ -566,6 +568,7 @@ function BookingPageInner() {
                   submitting={submitting}
                   primaryColor={primaryColor}
                   tenantAddress={tenantAddress}
+                  tenantPrivacyUrl={tenantPrivacyUrl}
                 />
               </motion.div>
             )}

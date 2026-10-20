@@ -25,6 +25,11 @@ interface ContactFormProps {
   submitting: boolean;
   primaryColor?: string;
   tenantAddress?: string | null;
+  // Studio's own privacy policy (TenantSettings.PrivacyUrl) — falls back to GentleBook's generic
+  // page when the studio hasn't set one (LEGAL_AUDIT_2026-09-06.md: the booking form was linking
+  // every customer, for every studio, to GentleBook's own privacy text regardless of which salon
+  // they were actually booking with and consenting to share data with).
+  tenantPrivacyUrl?: string | null;
 }
 
 function lighten(hex: string, amount = 0.85) {
@@ -53,6 +58,7 @@ export function ContactForm({
   submitting,
   primaryColor = "#6355E4",
   tenantAddress,
+  tenantPrivacyUrl,
 }: ContactFormProps) {
   const { t, lang } = useTranslation();
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -299,7 +305,7 @@ export function ContactForm({
               <span className="text-sm text-[#6B6B6B] mt-0.5">
                 {t.booking.privacy}{" "}
                 <a
-                  href="/datenschutz"
+                  href={tenantPrivacyUrl || "/datenschutz"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline hover:opacity-70 transition-opacity"
