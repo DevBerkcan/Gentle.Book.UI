@@ -32,7 +32,8 @@ import {
   User as UserIcon,
   Clock,
   CalendarDays,
-  AlertTriangle
+  AlertTriangle,
+  Download
 } from "lucide-react";
 import { customersApi, CustomerListItem, CustomerDetail } from "@/lib/api/customers";
 import { adminApi } from "@/lib/api/admin";
@@ -228,6 +229,21 @@ export default function CustomersPage() {
     }
   }
 
+  async function handleExportCustomer(customer: CustomerListItem) {
+    try {
+      const data = await customersApi.export(customer.id);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `kunde-${customer.id}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || t.admin.customersPage.deleteError);
+    }
+  }
+
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       setPage(1);
@@ -315,6 +331,15 @@ export default function CustomersPage() {
             }}
           >
             <Edit size={14} />
+          </Button>
+          <Button
+            size="sm"
+            isIconOnly
+            variant="flat"
+            className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+            onPress={() => handleExportCustomer(customer)}
+          >
+            <Download size={14} />
           </Button>
           <Button
             size="sm"
@@ -489,6 +514,15 @@ export default function CustomersPage() {
                                 }}
                               >
                                 <Edit size={14} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                isIconOnly
+                                variant="flat"
+                                className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                                onPress={() => handleExportCustomer(customer)}
+                              >
+                                <Download size={14} />
                               </Button>
                               <Button
                                 size="sm"
@@ -961,7 +995,7 @@ export default function CustomersPage() {
                   isLoading={deleting}
                   startContent={!deleting && <Trash2 size={14} />}
                 >
-                  {t.admin.bookingsPage.deletePermanently}
+                  {t.admin.customersPage.anonymizeConfirmBtn}
                 </Button>
               </ModalFooter>
             </>

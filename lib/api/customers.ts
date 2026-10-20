@@ -116,9 +116,15 @@ export const customersApi = {
     return response.data;
   },
 
-  // Delete customer
+  // Delete customer (GDPR Art. 17 — anonymizes PII, keeps bookings for revenue/stats)
   delete: async (id: string): Promise<void> => {
     await api.delete(`/customers/${id}`);
+  },
+
+  // Export customer's own data (GDPR Art. 15 — full profile + complete booking history)
+  export: async (id: string): Promise<unknown> => {
+    const response = await api.get(`/customers/${id}/export`);
+    return response.data;
   },
 
   // Search customers (for dropdown)
