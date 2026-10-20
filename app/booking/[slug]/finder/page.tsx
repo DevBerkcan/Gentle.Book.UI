@@ -368,7 +368,11 @@ export default function PublicFinderPage() {
 
             {draftId && (
               <div className="rounded-lg border border-gray-200 p-3 space-y-3">
-                <p className="text-sm text-gray-700">Entwurf gueltig bis: {draftExpiresAt}</p>
+                <p className="text-sm text-gray-700">
+                  Entwurf gueltig bis: {draftExpiresAt && new Date(draftExpiresAt).toLocaleString('de-DE', {
+                    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+                  })} Uhr
+                </p>
                 <label className="inline-flex items-center gap-2 text-sm text-gray-700">
                   <input
                     type="checkbox"
