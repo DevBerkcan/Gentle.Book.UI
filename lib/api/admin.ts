@@ -112,6 +112,21 @@ export const adminApi = {
     return `${process.env.NEXT_PUBLIC_API_URL}/tenant/invoices/${id}/pdf`;
   },
 
+  // ── GDPR Art. 15/17 self-service ─────────────────────────────
+  exportTenantDataUrl() {
+    return `${process.env.NEXT_PUBLIC_API_URL}/tenant/data-requests/export`;
+  },
+
+  async requestDataDeletion() {
+    const { data } = await api.post('/tenant/data-requests/deletion', {});
+    return data as { id: string; status: string; requestedAt: string };
+  },
+
+  async getDataRequests() {
+    const { data } = await api.get('/tenant/data-requests');
+    return data as DataSubjectRequestItem[];
+  },
+
   async getDomain() {
     const { data } = await api.get('/tenant/domain');
     return data as TenantDomainInfo;
@@ -323,6 +338,15 @@ export interface TenantInvoiceItem {
   amount: number;
   currency: string;
   emailSent: boolean;
+}
+
+export interface DataSubjectRequestItem {
+  id: string;
+  type: 'Export' | 'Deletion';
+  status: 'Pending' | 'Completed' | 'Rejected';
+  requestedAt: string;
+  processedAt: string | null;
+  notes: string | null;
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────

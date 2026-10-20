@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale, ShieldAlert } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
@@ -47,6 +47,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
   const pathname = usePathname();
   const [pendingRequests, setPendingRequests] = useState(0);
   const [atRiskCount, setAtRiskCount] = useState(0);
+  const [pendingDataRequests, setPendingDataRequests] = useState(0);
 
   useEffect(() => {
     const refresh = () => {
@@ -55,6 +56,9 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
         .catch(() => {});
       superAdminApi.getAtRiskSubscriptions()
         .then(r => setAtRiskCount(r.totalAtRisk))
+        .catch(() => {});
+      superAdminApi.getDataRequests('Pending')
+        .then(r => setPendingDataRequests(r.length))
         .catch(() => {});
     };
     refresh();
@@ -76,6 +80,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/activity',   label: 'Aktivitäten',     icon: Activity },
     { href: '/superadmin/audit-log',  label: 'Audit-Log',       icon: ScrollText },
     { href: '/superadmin/legal-documents', label: 'Rechtstexte', icon: Scale },
+    { href: '/superadmin/data-requests', label: 'Datenanfragen', icon: ShieldAlert, badge: pendingDataRequests },
   ];
 
   return (

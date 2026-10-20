@@ -7,10 +7,10 @@ import { motion } from 'framer-motion';
 import {
   Clock, CheckCircle, XCircle, AlertTriangle,
   Check, MessageCircle, Mail, Zap, Users, Star, Shield,
-  BarChart2, Globe, ArrowRight, FileText, Download,
+  BarChart2, Globe, ArrowRight, FileText, Download, Trash2,
 } from 'lucide-react';
 import api from '@/lib/api/client';
-import { adminApi, TenantInvoiceItem } from '@/lib/api/admin';
+import { adminApi, TenantInvoiceItem, DataSubjectRequestItem } from '@/lib/api/admin';
 import { HelpTip } from '@/components/ui/help-tip';
 import { legalConfig, supportConfig } from '@/lib/config';
 import { useConfirm } from '@/components/ConfirmDialog';
@@ -194,12 +194,70 @@ export default function AdminSubscriptionPage() {
   const [invoicesLoading, setInvoicesLoading] = useState(true);
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState<string | null>(null);
 
+  // GDPR Art. 15/17 self-service (LEGAL_AUDIT_2026-09-06.md: "Ein Supportlink ist kein
+  // umgesetzter Datenexport") — real export + a reviewed deletion-request flow instead.
+  const [dataRequests, setDataRequests] = useState<DataSubjectRequestItem[]>([]);
+  const [exportingData, setExportingData] = useState(false);
+  const [requestingDeletion, setRequestingDeletion] = useState(false);
+  const [dataRequestError, setDataRequestError] = useState('');
+
   useEffect(() => {
     adminApi.getInvoices()
       .then(res => setInvoices(res.items))
       .catch(() => setInvoices([]))
       .finally(() => setInvoicesLoading(false));
   }, []);
+
+  useEffect(() => {
+    adminApi.getDataRequests().then(setDataRequests).catch(() => setDataRequests([]));
+  }, []);
+
+  async function handleExportData() {
+    setExportingData(true);
+    setDataRequestError('');
+    try {
+      const token = getAccessToken();
+      const res = await fetch(adminApi.exportTenantDataUrl(), {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error('Export fehlgeschlagen');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'gentlebook-export.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      adminApi.getDataRequests().then(setDataRequests).catch(() => {});
+    } catch {
+      setDataRequestError(s.dataExportFailed);
+    } finally {
+      setExportingData(false);
+    }
+  }
+
+  async function handleRequestDeletion() {
+    if (requestingDeletion) return;
+    const ok = await confirm({
+      title: s.dataDeletionConfirmTitle,
+      message: s.dataDeletionConfirmMessage,
+      confirmLabel: s.dataDeletionConfirmLabel,
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setRequestingDeletion(true);
+    setDataRequestError('');
+    try {
+      await adminApi.requestDataDeletion();
+      const res = await adminApi.getDataRequests();
+      setDataRequests(res);
+    } catch (err: any) {
+      setDataRequestError(err.response?.data?.message || s.dataDeletionRequestFailed);
+    } finally {
+      setRequestingDeletion(false);
+    }
+  }
 
   async function downloadInvoicePdf(inv: TenantInvoiceItem) {
     setDownloadingInvoiceId(inv.id);
@@ -606,6 +664,66 @@ export default function AdminSubscriptionPage() {
           )}
         </motion.div>
       )}
+
+      {/* GDPR Art. 15/17 self-service: real data export + a reviewed deletion request */}
+      <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-gray-200 p-6">
+        <h2 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+          <Shield size={18} className="text-[#6355E4]" />
+          {s.dataRightsTitle}
+        </h2>
+        <p className="text-sm text-gray-500 mb-4">{s.dataRightsDesc}</p>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handleExportData}
+            disabled={exportingData}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:border-[#6355E4] hover:text-[#6355E4] text-sm font-medium disabled:opacity-50 transition-colors"
+          >
+            {exportingData
+              ? <span className="w-3.5 h-3.5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              : <Download size={15} />}
+            {s.dataExportBtn}
+          </button>
+
+          {(() => {
+            const pendingDeletion = dataRequests.find(r => r.type === 'Deletion' && r.status === 'Pending');
+            const canRequestDeletion = sub?.status === 'Cancelled' || sub?.status === 'Expired';
+            if (pendingDeletion) {
+              return <p className="text-sm text-amber-600 self-center">{s.dataDeletionPending}</p>;
+            }
+            if (!canRequestDeletion) {
+              return <p className="text-sm text-gray-400 self-center">{s.dataDeletionRequiresCancellation}</p>;
+            }
+            return (
+              <button
+                onClick={handleRequestDeletion}
+                disabled={requestingDeletion}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium disabled:opacity-50 transition-colors"
+              >
+                {requestingDeletion
+                  ? <span className="w-3.5 h-3.5 border-2 border-red-200 border-t-red-600 rounded-full animate-spin" />
+                  : <Trash2 size={15} />}
+                {s.dataDeletionBtn}
+              </button>
+            );
+          })()}
+        </div>
+
+        {dataRequestError && <p className="text-sm text-red-600 mt-3">{dataRequestError}</p>}
+
+        {dataRequests.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-100 space-y-1.5">
+            {dataRequests.map(r => (
+              <p key={r.id} className="text-xs text-gray-400">
+                {new Date(r.requestedAt).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                {' · '}{r.type === 'Export' ? s.dataRequestTypeExport : s.dataRequestTypeDeletion}
+                {' · '}{r.status === 'Pending' ? s.dataRequestStatusPending : r.status === 'Completed' ? s.dataRequestStatusCompleted : s.dataRequestStatusRejected}
+                {r.notes ? ` — ${r.notes}` : ''}
+              </p>
+            ))}
+          </div>
+        )}
+      </motion.div>
 
       {/* Plan Change Success Banner */}
       {planChangeSuccess && (

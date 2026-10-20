@@ -333,6 +333,22 @@ export const superAdminApi = {
     return data as LegalDocumentItem;
   },
 
+  // ── GDPR data-subject requests (Art. 15/17) ─────────────────
+  async getDataRequests(status: string = 'Pending') {
+    const { data } = await api.get('/superadmin/data-requests', { params: { status } });
+    return data as SuperAdminDataRequestItem[];
+  },
+
+  async approveDataRequest(id: string) {
+    const { data } = await api.post(`/superadmin/data-requests/${id}/approve`, {});
+    return data as { message: string };
+  },
+
+  async rejectDataRequest(id: string, reason: string) {
+    const { data } = await api.post(`/superadmin/data-requests/${id}/reject`, { reason });
+    return data as { message: string };
+  },
+
   // ── At-risk subscriptions (cancelling / dunning) ────────────
   async getAtRiskSubscriptions() {
     const { data } = await api.get('/superadmin/at-risk-subscriptions');
@@ -412,6 +428,18 @@ export interface LegalDocumentItem {
   releasedAt: string;
   releasedByUserId: string;
   textLength: number;
+}
+
+export interface SuperAdminDataRequestItem {
+  id: string;
+  tenantId: string;
+  tenantName: string | null;
+  tenantSlug: string | null;
+  type: 'Export' | 'Deletion';
+  status: 'Pending' | 'Completed' | 'Rejected';
+  requestedAt: string;
+  processedAt: string | null;
+  notes: string | null;
 }
 
 export interface AtRiskCancellingItem {
