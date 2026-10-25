@@ -909,26 +909,26 @@ export default function AdminSettingsPage() {
             )}
             <Field label={t.admin.settingsPage.legalCompanyName}>
               <input type="text" value={settings.legalCompanyName} onChange={(e) => set('legalCompanyName', e.target.value)}
-                placeholder={t.admin.settingsPage.legalNamePlaceholder} required className={inputCls} />
+                placeholder={t.admin.settingsPage.legalNamePlaceholder} className={inputCls} />
             </Field>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t.admin.settingsPage.streetAddress}>
                 <input type="text" value={settings.billingStreet} onChange={(e) => set('billingStreet', e.target.value)}
-                  placeholder={t.admin.settingsPage.billingStreetPlaceholder} required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingStreetPlaceholder} className={inputCls} />
               </Field>
               <Field label={t.admin.settingsPage.postalCode}>
                 <input type="text" value={settings.billingZipCode} onChange={(e) => set('billingZipCode', e.target.value)}
-                  placeholder={t.admin.settingsPage.billingZipPlaceholder} required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingZipPlaceholder} className={inputCls} />
               </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t.admin.settingsPage.city}>
                 <input type="text" value={settings.billingCity} onChange={(e) => set('billingCity', e.target.value)}
-                  placeholder={t.admin.settingsPage.billingCityPlaceholder} required className={inputCls} />
+                  placeholder={t.admin.settingsPage.billingCityPlaceholder} className={inputCls} />
               </Field>
               <Field label={t.admin.settingsPage.countryIsoCode}>
                 <input type="text" value={settings.billingCountry} onChange={(e) => set('billingCountry', e.target.value.toUpperCase())}
-                  placeholder={t.admin.settingsPage.countryIsoPlaceholder} maxLength={2} required className={inputCls} />
+                  placeholder={t.admin.settingsPage.countryIsoPlaceholder} maxLength={2} className={inputCls} />
               </Field>
             </div>
             <Field label={t.admin.settingsPage.vatIdLabel}>

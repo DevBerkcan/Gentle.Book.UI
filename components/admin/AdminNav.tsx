@@ -29,6 +29,7 @@ export function AdminNav() {
   const [logoUrl, setLogoUrl]         = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [industryType, setIndustryType] = useState<string | null>(null);
+  const [plan, setPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (isTenantAdmin) {
@@ -38,8 +39,17 @@ export function AdminNav() {
         if (d?.companyName) setCompanyName(d.companyName);
         if (d?.industryType) setIndustryType(d.industryType);
       }).catch(() => {});
+      api.get("/tenant/subscription").then((res) => {
+        setPlan(res.data?.plan ?? null);
+      }).catch(() => {});
     }
   }, [isTenantAdmin]);
+
+  // Mirrors Configuration/AiFinderPlanGate.cs — the backend already rejects Trial/Starter at
+  // the API level, but the nav link was shown to every plan regardless, so a trial tenant could
+  // navigate straight into a feature they can't actually use.
+  const AI_FINDER_PLANS = ["Professional", "Agency"];
+  const showAiFinder = plan != null && AI_FINDER_PLANS.includes(plan);
 
   // Mirrors Configuration/IntakeFormIndustryGate.cs — "Formulare" only makes sense for
   // industries that actually do a consultation before treatment.
@@ -112,7 +122,7 @@ export function AdminNav() {
     label: t.admin.administration,
     items: [
       { href: "/admin/inbox",        label: t.admin.inbox,        icon: Inbox },
-      { href: "/admin/ai-service-finder", label: t.admin.aiServiceFinder, icon: Bot },
+      ...(showAiFinder ? [{ href: "/admin/ai-service-finder", label: t.admin.aiServiceFinder, icon: Bot }] : []),
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
       ...(showIntakeForm ? [{ href: "/admin/intake-form", label: t.admin.intakeForm, icon: IntakeIcon }] : []),
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
