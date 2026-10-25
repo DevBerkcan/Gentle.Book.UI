@@ -76,6 +76,12 @@ function BookingPageInner() {
   const { lang, setLang, t } = useTranslation();
   const [waitlistToken, setWaitlistToken] = useState<string | undefined>();
   const [currentStep, setCurrentStep] = useState(1);
+  // Switching steps (service → employee → date/time → contact) never reset scroll position —
+  // on mobile, if the previous step had been scrolled down, the new step's heading could land
+  // underneath the sticky header instead of at the top of the viewport.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
   const [tenantName, setTenantName] = useState<string>('');
   const [primaryColor, setPrimaryColor] = useState<string>('#6355E4');
   const [tenantAddress, setTenantAddress] = useState<string | null>(null);
