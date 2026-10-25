@@ -120,7 +120,10 @@ export default function EmployeesPage() {
   const [modalErr, setModalErr] = useState<string | null>(null);
   const [resetPassword, setResetPassword] = useState<boolean>(false);
 
-  // Photo + Tagline (nur beim Bearbeiten eines bestehenden Mitarbeiters editierbar)
+  // Photo + Tagline. Tagline stays edit-only (AI suggestion needs an existing employee to
+  // reason about). Photo can now also be picked while *creating* a new employee — the file
+  // itself is only staged locally (no employee id exists yet to upload against) and gets
+  // uploaded right after creation succeeds, inside handleSubmit.
   const [editPhotoUrl, setEditPhotoUrl] = useState<string | null>(null);
   const [editTagline, setEditTagline] = useState("");
   const [photoUploading, setPhotoUploading] = useState(false);
@@ -128,6 +131,8 @@ export default function EmployeesPage() {
   const [taglineSaving, setTaglineSaving] = useState(false);
   const [suggestingTagline, setSuggestingTagline] = useState(false);
   const editFileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingPhotoFile, setPendingPhotoFile] = useState<File | null>(null);
+  const [pendingPhotoPreviewUrl, setPendingPhotoPreviewUrl] = useState<string | null>(null);
   const [deleteReason, setDeleteReason] = useState("");
   const { isOpen: isDeleteModalOpen, onOpen: onDeleteModalOpen, onClose: onDeleteModalClose } = useDisclosure();
   const [deleting, setDeleting] = useState(false);
@@ -175,6 +180,8 @@ export default function EmployeesPage() {
     setShowPassword(false);
     setEditPhotoUrl(null);
     setEditTagline("");
+    setPendingPhotoFile(null);
+    setPendingPhotoPreviewUrl(null);
     onOpen();
   }
 
@@ -193,12 +200,24 @@ export default function EmployeesPage() {
     setShowNewPassword(false);
     setEditPhotoUrl(emp.photoUrl ?? null);
     setEditTagline(emp.tagline ?? "");
+    setPendingPhotoFile(null);
+    setPendingPhotoPreviewUrl(null);
     onOpen();
   }
 
   async function handleEditPhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !editing) return;
+    if (!file) return;
+
+    // No employee id exists yet while creating — stage the file and a local preview, then
+    // actually upload it right after the employee is created (see handleSubmit).
+    if (!editing) {
+      setPendingPhotoFile(file);
+      setPendingPhotoPreviewUrl(URL.createObjectURL(file));
+      if (editFileInputRef.current) editFileInputRef.current.value = "";
+      return;
+    }
+
     setPhotoUploading(true); setModalErr(null);
     try {
       const res = await uploadEmployeePhoto(editing.id, file);
@@ -294,7 +313,16 @@ export default function EmployeesPage() {
         if (form.password?.trim()) {
           payload.password = form.password.trim();
         }
-        await createEmployee(payload);
+        const created = await createEmployee(payload);
+        if (pendingPhotoFile) {
+          try {
+            await uploadEmployeePhoto(created.id, pendingPhotoFile);
+          } catch (photoErr: any) {
+            // The employee itself was created successfully — don't block/reopen the modal over
+            // a photo-only failure, just surface it so the admin knows to retry via "Bearbeiten".
+            toast.error(photoErr.response?.data?.message || s.uploadError);
+          }
+        }
       }
 
       await load();
@@ -898,20 +926,24 @@ export default function EmployeesPage() {
                     </div>
                   )}
 
-                  {editing && (
+                  {(() => {
+                    const displayPhotoUrl = editing ? editPhotoUrl : pendingPhotoPreviewUrl;
+                    const displayName = editing ? editing.name : (form.name || '?');
+                    return (
                     <div className="p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30 space-y-3">
                       <div className="flex items-center gap-4">
-                        {editPhotoUrl ? (
+                        {displayPhotoUrl ? (
                           <Image
-                            src={editPhotoUrl.startsWith('http') ? editPhotoUrl : `${apiOrigin}${editPhotoUrl}`}
-                            alt={editing.name}
+                            src={displayPhotoUrl.startsWith('http') || displayPhotoUrl.startsWith('blob:') ? displayPhotoUrl : `${apiOrigin}${displayPhotoUrl}`}
+                            alt={displayName}
                             width={56}
                             height={56}
+                            unoptimized={displayPhotoUrl.startsWith('blob:')}
                             className="w-14 h-14 rounded-xl object-cover shrink-0"
                           />
                         ) : (
-                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(editing.name)}`}>
-                            {initials(editing.name)}
+                          <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 ${avatarBg(displayName)}`}>
+                            {initials(displayName)}
                           </div>
                         )}
                         <div className="flex flex-col gap-1.5">
@@ -933,7 +965,7 @@ export default function EmployeesPage() {
                           >
                             {s.uploadPhoto}
                           </Button>
-                          {editPhotoUrl && (
+                          {displayPhotoUrl && (
                             <Button
                               size="sm"
                               variant="flat"
@@ -941,13 +973,14 @@ export default function EmployeesPage() {
                               isDisabled={photoUploading || photoDeleting}
                               isLoading={photoDeleting}
                               startContent={!photoDeleting && <Trash2 size={13} />}
-                              onPress={handleEditPhotoDelete}
+                              onPress={editing ? handleEditPhotoDelete : () => { setPendingPhotoFile(null); setPendingPhotoPreviewUrl(null); }}
                             >
                               {t.admin.delete}
                             </Button>
                           )}
                         </div>
                       </div>
+                      {editing && (
                       <div className="flex gap-2 items-end">
                         <Input
                           label={s.taglineLabel}
@@ -980,9 +1013,11 @@ export default function EmployeesPage() {
                           {t.save}
                         </Button>
                       </div>
+                      )}
                       <p className="text-[10px] text-[#8A8A8A]">{s.photoTaglineHint}</p>
                     </div>
-                  )}
+                    );
+                  })()}
 
                   <Input
                     label={t.admin.name}
