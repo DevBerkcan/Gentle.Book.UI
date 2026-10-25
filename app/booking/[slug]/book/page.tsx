@@ -78,9 +78,13 @@ function BookingPageInner() {
   const [currentStep, setCurrentStep] = useState(1);
   // Switching steps (service → employee → date/time → contact) never reset scroll position —
   // on mobile, if the previous step had been scrolled down, the new step's heading could land
-  // underneath the sticky header instead of at the top of the viewport.
+  // underneath the sticky header instead of at the top of the viewport. A leftover error from
+  // an earlier step (e.g. a failed availability reload) also used to follow the customer all
+  // the way to the contact step, since `error` is a single page-wide state with nothing
+  // step-scoped about when it gets cleared — reset it here too.
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setError(null);
   }, [currentStep]);
   const [tenantName, setTenantName] = useState<string>('');
   const [primaryColor, setPrimaryColor] = useState<string>('#6355E4');
@@ -203,6 +207,7 @@ function BookingPageInner() {
       const data = await getAvailability(selectedService.id, date, empId, slug, waitlistToken);
       setAvailableSlots(data.availableSlots);
       setNoSlotsMessage(data.message ?? null);
+      setError(null); // clear a stale availability error from an earlier failed attempt
       BookingEvents.dateSelected(date);
     } catch {
       setError(t.booking.errorLoadAvailability);
