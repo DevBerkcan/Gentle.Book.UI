@@ -122,7 +122,8 @@ function StatCard({
 
 export default function AdminDashboardPage() {
   const { user, isTenantAdmin, isEmployee } = useAuth();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
   const router = useRouter();
 
   // Redirect employees to their own dashboard — no admin API calls for them
@@ -217,7 +218,7 @@ export default function AdminDashboardPage() {
   const revenueGrowth = revenueLast > 0
     ? ((revenueThis - revenueLast) / revenueLast) * 100 : 0;
 
-  const todayDate = new Date().toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long" });
+  const todayDate = new Date().toLocaleDateString(dateLocale, { weekday: "long", day: "2-digit", month: "long" });
   const statusMap = getStatusMap(t);
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -595,7 +596,7 @@ export default function AdminDashboardPage() {
                       { label: t.admin.service,  value: nextBooking.serviceName },
                       { label: t.admin.customer, value: nextBooking.customerName },
                       { label: t.admin.time,     value: `${nextBooking.startTime} – ${nextBooking.endTime}` },
-                      { label: t.admin.date,     value: new Date(nextBooking.date).toLocaleDateString("de-DE") },
+                      { label: t.admin.date,     value: new Date(nextBooking.date).toLocaleDateString(dateLocale) },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex items-center justify-between gap-3">
                         <span className="text-xs text-[#9CA3AF] flex-shrink-0">{label}</span>

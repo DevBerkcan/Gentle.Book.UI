@@ -21,7 +21,8 @@ interface AdminNote {
 export default function AdminInboxPage() {
   const { isEmployee, isAuthenticated } = useAuth();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
 
   useEffect(() => {
     if (isEmployee) router.replace("/admin/calendar");
@@ -66,7 +67,7 @@ export default function AdminInboxPage() {
   const unreadCount = notes.filter((n) => !n.isRead).length;
 
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("de-DE", {
+    new Date(iso).toLocaleDateString(dateLocale, {
       day: "2-digit", month: "short", year: "numeric",
       hour: "2-digit", minute: "2-digit",
     });

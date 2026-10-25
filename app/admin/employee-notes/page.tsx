@@ -20,7 +20,8 @@ interface SentNote {
 export default function EmployeeNotesPage() {
   const { isEmployee, isTenantAdmin } = useAuth();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const dateLocale = lang === 'de' ? 'de-DE' : 'en-US';
 
   // TenantAdmin should use the inbox instead
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function EmployeeNotesPage() {
   };
 
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("de-DE", {
+    new Date(iso).toLocaleDateString(dateLocale, {
       day: "2-digit", month: "short", year: "numeric",
       hour: "2-digit", minute: "2-digit",
     });

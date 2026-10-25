@@ -52,7 +52,11 @@ export function DateTimePicker({
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     const day = today.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
+    // Sunday is hardcoded closed below (isSunday), and every other day of "this" week would
+    // already be in the past by the time it's Sunday — so starting on the just-ended Mon-Sun
+    // week opened the picker on a week with zero selectable days. Jump straight to next
+    // Monday instead; every other weekday still starts on this week as before.
+    const diff = day === 0 ? 1 : 1 - day;
     const monday = new Date(today);
     monday.setDate(today.getDate() + diff);
     return monday;
