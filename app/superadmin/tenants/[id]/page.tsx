@@ -15,7 +15,7 @@ import { superAdminApi, UpdateTenantSettingsPayload, TenantStats, TenantBillingS
 import { useConfirm } from '@/components/ConfirmDialog';
 import { usePrompt } from '@/components/PromptDialog';
 import { resolveLogoUrl } from '@/lib/utils/logo';
-import { setAccessToken } from '@/lib/auth/storage';
+import { setAccessToken, setAuthUser } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC, Sparkles } from 'lucide-react';
 
 type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats' | 'domain';
@@ -255,6 +255,20 @@ export default function TenantDetailPage() {
     try {
       const result = await superAdminApi.impersonate(id);
       setAccessToken(result.access_token);
+      // AuthContext hydrates `user` (and from it isTenantAdmin/plan-gated nav items) purely from
+      // this cached object on a fresh page load — never updating it here left the new tab reading
+      // whatever role/tenant was cached from this browser's last *real* admin login, which could
+      // be stale (wrong tenant, or even a plain Employee session), hiding Agency-only nav items
+      // even though the impersonation token itself was for the right, correctly-plan'd tenant.
+      setAuthUser(JSON.stringify({
+        id: result.user_id,
+        email: result.user_email,
+        name: result.user_email,
+        role: 'TenantAdmin',
+        tenantId: id,
+        tenantSlug: result.tenant_slug,
+        tenantName: result.tenant_name,
+      }));
       localStorage.setItem('tenant_slug', result.tenant_slug);
       localStorage.setItem('impersonating', 'true');
       localStorage.setItem('impersonating_from', window.location.href);
@@ -1113,7 +1127,7 @@ export default function TenantDetailPage() {
                         employees: '–',
                         color: '#6b7280',
                         bg: '#f3f4f6',
-                        features: ['14 Tage kostenlos', 'Alle Features', 'Kein Kredit nötig'],
+                        features: ['14 Tage kostenlos', 'Alle Features außer KI', 'Kein Kredit nötig'],
                       },
                       {
                         value: 'Starter',
