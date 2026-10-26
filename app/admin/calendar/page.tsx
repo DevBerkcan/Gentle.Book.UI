@@ -655,16 +655,20 @@ const handleCreateManualBooking = async () => {
                           <p className="font-medium text-[#1E1E1E]">{selectedEvent.resource.customerName}</p>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          <a href={`mailto:${selectedEvent.resource.customerEmail}`}
-                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
-                            <Mail size={14} className="text-[#6355E4]" />
-                            <span className="truncate text-[#1E1E1E]">{selectedEvent.resource.customerEmail}</span>
-                          </a>
-                          <a href={`tel:${selectedEvent.resource.customerPhone}`}
-                            className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
-                            <Phone size={14} className="text-[#6355E4]" />
-                            <span className="text-[#1E1E1E]">{selectedEvent.resource.customerPhone}</span>
-                          </a>
+                          {selectedEvent.resource.customerEmail && (
+                            <a href={`mailto:${selectedEvent.resource.customerEmail}`}
+                              className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
+                              <Mail size={14} className="text-[#6355E4]" />
+                              <span className="truncate text-[#1E1E1E]">{selectedEvent.resource.customerEmail}</span>
+                            </a>
+                          )}
+                          {selectedEvent.resource.customerPhone && (
+                            <a href={`tel:${selectedEvent.resource.customerPhone}`}
+                              className="flex items-center gap-2 p-2 bg-white rounded-lg hover:bg-[#ECEBF2]/10 transition-colors text-sm">
+                              <Phone size={14} className="text-[#6355E4]" />
+                              <span className="text-[#1E1E1E]">{selectedEvent.resource.customerPhone}</span>
+                            </a>
+                          )}
                         </div>
                       </div>
 

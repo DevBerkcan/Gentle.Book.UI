@@ -16,6 +16,12 @@ const nextConfig = {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     minimumCacheTTL: 31536000, // 1 Jahr
+    // Employee photos, tenant logos etc. are served from the API's own domain
+    // (gentlebook.runasp.net), not this Next.js app's domain — without this,
+    // next/image silently refuses to render them (unconfigured host).
+    remotePatterns: [
+      { protocol: "https", hostname: "gentlebook.runasp.net" },
+    ],
   },
 
   // Headers für Varnish-Optimierung

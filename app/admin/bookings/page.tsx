@@ -346,7 +346,7 @@ export default function AdminBookingsPage() {
       await loadBookings();
       onStatusModalClose();
     } catch (err: any) {
-      toast.error(t.admin.bookingsPage.updateErrorPrefix + err.message);
+      toast.error(t.admin.bookingsPage.updateErrorPrefix + (err.response?.data?.message || err.message));
     } finally {
       setUpdating(false);
     }
