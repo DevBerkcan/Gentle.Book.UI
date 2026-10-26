@@ -85,7 +85,7 @@ export default function EmployeeNotesPage() {
             <MessageSquare size={24} className="text-[#6355E4]" />
             {t.admin.noteToAdmin}
           </h1>
-          <p className="text-sm text-[#6B7280] mt-1">{t.admin.noteSentDesc}</p>
+          <p className="text-sm text-[#6B7280] mt-1">{t.admin.notePageDesc}</p>
         </div>
 
         {/* Compose */}

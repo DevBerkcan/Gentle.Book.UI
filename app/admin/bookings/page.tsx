@@ -532,6 +532,20 @@ export default function AdminBookingsPage() {
     }
   }
 
+  // Mirrors AdminService.IsValidStatusTransition exactly — the dropdown previously offered
+  // every status regardless of the booking's current one, so picking an invalid transition
+  // (e.g. Completed -> Pending) looked like it silently failed to save instead of being
+  // rejected up front.
+  const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
+    Pending: ["Pending", "Confirmed", "Cancelled"],
+    Confirmed: ["Confirmed", "Completed", "Cancelled", "NoShow"],
+    Cancelled: ["Cancelled", "Confirmed"],
+    Completed: ["Completed"],
+    NoShow: ["NoShow"],
+  };
+  const isStatusSelectable = (currentStatus: string, targetStatus: string) =>
+    (VALID_STATUS_TRANSITIONS[currentStatus] ?? [targetStatus]).includes(targetStatus);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Confirmed": return "success";
@@ -1182,6 +1196,8 @@ export default function AdminBookingsPage() {
                       selectedKeys={[newStatus]}
                       onChange={(e) => setNewStatus(e.target.value)}
                       isRequired
+                      disabledKeys={["Pending", "Confirmed", "Completed", "NoShow", "Cancelled"]
+                        .filter((s) => !isStatusSelectable(selectedBooking.status, s))}
                       classNames={{
                         trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
                         label: "text-[#8A8A8A]",
@@ -1193,6 +1209,9 @@ export default function AdminBookingsPage() {
                       <SelectItem key="NoShow" value="NoShow">{t.admin.bookingStatus.noShow}</SelectItem>
                       <SelectItem key="Cancelled" value="Cancelled">{t.admin.bookingStatus.cancelled}</SelectItem>
                     </Select>
+                    {(selectedBooking.status === "Completed" || selectedBooking.status === "NoShow") && (
+                      <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.statusTerminalHint}</p>
+                    )}
 
                     <Textarea
                       label={t.admin.bookingsPage.adminNotesOptional}

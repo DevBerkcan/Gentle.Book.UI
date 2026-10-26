@@ -182,11 +182,13 @@ export default function EmployeeDashboardPage() {
     : user?.name ?? s.staffFallbackName;
 
   const activeToday = todayBookings.filter(b => b.status !== 'Cancelled' && b.status !== 'NoShow');
-  const nextBooking = activeToday.find(b => {
-    const now = new Date();
-    const start = new Date(`${b.bookingDate}T${b.startTime}`);
-    return start >= now;
-  }) ?? activeToday[0] ?? null;
+  // Only Pending/Confirmed bookings whose start time hasn't passed yet count as "next" — the
+  // previous `?? activeToday[0]` fallback picked the day's FIRST active booking once all of
+  // them had already started, which could be (and, once fully past, always ends up being) an
+  // already-Completed one from earlier that day.
+  const nextBooking = todayBookings
+    .filter(b => (b.status === 'Pending' || b.status === 'Confirmed') && new Date(`${b.bookingDate}T${b.startTime}`) > new Date())
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))[0] ?? null;
 
   const completedToday = todayBookings.filter(b => b.status === 'Completed').length;
   const cancelledToday = todayBookings.filter(b => b.status === 'Cancelled').length;
