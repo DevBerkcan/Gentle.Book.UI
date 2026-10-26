@@ -413,6 +413,8 @@ export interface BookingListItem {
   currency: string;
   customerNotes: string | null;
   createdAt: string;
+  redeemedVoucherCode?: string | null;
+  voucherDiscountAmount?: number | null;
 }
 
 export interface PagedResponse<T> {
@@ -509,6 +511,8 @@ export interface ManualBookingResponse {
     endTime: string;
     price: number;
     currency: string;
+    redeemedVoucherCode?: string | null;
+    voucherDiscountAmount?: number | null;
   };
   customer: {
     firstName: string;
@@ -790,4 +794,9 @@ export async function trackLinkClick(data: {
 export function getBookingsExportUrl(): string {
   const base = process.env.NEXT_PUBLIC_API_URL ?? '';
   return `${base}/bookings/export/csv`;
+}
+
+export function getVoucherPdfUrl(voucherId: string): string {
+  const base = process.env.NEXT_PUBLIC_API_URL ?? '';
+  return `${base}/admin/vouchers/${voucherId}/pdf`;
 }

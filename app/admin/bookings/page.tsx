@@ -778,6 +778,22 @@ export default function AdminBookingsPage() {
                             {formatPrice(selectedBookingDetails.price, selectedBookingDetails.currency)}
                           </p>
                         </div>
+                        {selectedBookingDetails.redeemedVoucherCode && (
+                          <div className="mt-3 pt-3 border-t border-[#ECEBF2]/40 space-y-1.5">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: selectedBookingDetails.redeemedVoucherCode })}</span>
+                              <span className="font-semibold text-[#059669]">
+                                -{formatPrice(selectedBookingDetails.voucherDiscountAmount ?? 0, selectedBookingDetails.currency)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold text-[#1E1E1E]">{t.admin.bookingsPage.amountDueOnSite}</span>
+                              <span className="font-bold text-[#1E1E1E]">
+                                {formatPrice(Math.max(0, selectedBookingDetails.price - (selectedBookingDetails.voucherDiscountAmount ?? 0)), selectedBookingDetails.currency)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       {/* Customer Info */}
@@ -1333,6 +1349,22 @@ export default function AdminBookingsPage() {
                           <p className="font-medium text-[#1E1E1E] text-base">{createdBooking.booking.serviceName}</p>
                           <p className="text-xl font-bold text-[#6355E4]">{formatPrice(createdBooking.booking.price, createdBooking.booking.currency)}</p>
                         </div>
+                        {createdBooking.booking.redeemedVoucherCode && (
+                          <div className="mt-3 pt-3 border-t border-[#ECEBF2]/40 space-y-1.5">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: createdBooking.booking.redeemedVoucherCode })}</span>
+                              <span className="font-semibold text-[#059669]">
+                                -{formatPrice(createdBooking.booking.voucherDiscountAmount ?? 0, createdBooking.booking.currency)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold text-[#1E1E1E]">{t.admin.bookingsPage.amountDueOnSite}</span>
+                              <span className="font-bold text-[#1E1E1E]">
+                                {formatPrice(Math.max(0, createdBooking.booking.price - (createdBooking.booking.voucherDiscountAmount ?? 0)), createdBooking.booking.currency)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
                       <div className="p-5 border-b-2 border-[#ECEBF2]/20">

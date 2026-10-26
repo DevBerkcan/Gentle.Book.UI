@@ -2,9 +2,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Ticket, TrendingUp, AlertTriangle, Plus, X, Loader2, Search, Ban } from "lucide-react";
-import { adminApi, type AdminVoucher } from "@/lib/api/admin";
+import { Ticket, TrendingUp, AlertTriangle, Plus, X, Loader2, Search, Ban, Download } from "lucide-react";
+import { adminApi, getVoucherPdfUrl, type AdminVoucher } from "@/lib/api/admin";
 import { customersApi, type CustomerListItem } from "@/lib/api/customers";
+import { getAccessToken } from "@/lib/auth/storage";
 import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
 
@@ -112,6 +113,29 @@ export default function AdminVouchersPage() {
     try {
       await adminApi.cancelVoucher(voucher.id);
       await load();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleDownloadPdf(voucher: AdminVoucher) {
+    setBusyId(voucher.id);
+    try {
+      const token = typeof window !== 'undefined' ? getAccessToken() : null;
+      const res = await fetch(getVoucherPdfUrl(voucher.id), {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error(s.pdfDownloadFailed);
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `gutschein-${voucher.code}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch {
+      alert(s.pdfDownloadFailed);
     } finally {
       setBusyId(null);
     }
@@ -298,15 +322,24 @@ export default function AdminVouchersPage() {
                           : fillTemplate(s.sessionsRemainingTemplate, { remaining: v.remainingSessions ?? 0, initial: v.initialSessions ?? 0 })}
                       </p>
                     </div>
-                    {v.status === "Active" && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
                       <button
-                        onClick={() => handleCancel(v)}
+                        onClick={() => handleDownloadPdf(v)}
                         disabled={busyId === v.id}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#991B1B] hover:bg-[#FEE2E2] px-2.5 py-1.5 rounded-lg disabled:opacity-50"
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-[#6355E4] hover:bg-[#EEEBFC] px-2.5 py-1.5 rounded-lg disabled:opacity-50"
                       >
-                        <Ban size={12} /> {s.cancelBtn}
+                        <Download size={12} /> {s.downloadPdfBtn}
                       </button>
-                    )}
+                      {v.status === "Active" && (
+                        <button
+                          onClick={() => handleCancel(v)}
+                          disabled={busyId === v.id}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-[#991B1B] hover:bg-[#FEE2E2] px-2.5 py-1.5 rounded-lg disabled:opacity-50"
+                        >
+                          <Ban size={12} /> {s.cancelBtn}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
