@@ -34,6 +34,7 @@ export default function TenantDetailPage() {
   const [trialActivationError, setTrialActivationError] = useState('');
   const [changingPlan, setChangingPlan] = useState(false);
   const [planChanged, setPlanChanged] = useState(false);
+  const [planChangeError, setPlanChangeError] = useState<string | null>(null);
   const [selectedPlan, setSelectedPlan] = useState('');
   const [resendingWelcome, setResendingWelcome] = useState(false);
   const [welcomeResent, setWelcomeResent] = useState(false);
@@ -168,13 +169,16 @@ export default function TenantDetailPage() {
       negotiatedMonthlyPrice = parsed;
     }
     setChangingPlan(true);
+    setPlanChangeError(null);
     try {
       await superAdminApi.changePlan(id, selectedPlan, { negotiatedMonthlyPrice });
       const data = await superAdminApi.getTenant(id);
       setTenant(data);
       setPlanChanged(true);
       setTimeout(() => setPlanChanged(false), 3000);
-    } catch { /* silent fail */ } finally {
+    } catch (e: any) {
+      setPlanChangeError(e.response?.data?.message || e.message || 'Plan-Änderung fehlgeschlagen.');
+    } finally {
       setChangingPlan(false);
     }
   };
@@ -1194,6 +1198,9 @@ export default function TenantDetailPage() {
                   </button>
                   {planChanged && (
                     <p className="text-xs text-green-600 mt-2">Plan erfolgreich geändert.</p>
+                  )}
+                  {planChangeError && (
+                    <p className="text-xs text-red-600 mt-2">{planChangeError}</p>
                   )}
                 </div>
 
