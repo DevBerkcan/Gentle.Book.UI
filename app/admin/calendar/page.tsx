@@ -23,6 +23,8 @@ import { CalendarRange, X } from "lucide-react";
 import { adminApi, BookingListItem, Service, CreateManualBookingDto, ManualBookingResponse } from "@/lib/api/admin";
 import { bookingApi, TimeSlot, Employee, getAvailability } from "@/lib/api/booking";
 import { blockedTimeSlotsApi, BlockedTimeSlot, CreateBlockedTimeSlotDto, CreateBlockedDateRangeDto } from "@/lib/api/blockedTimeSlots";
+import { isStatusTransitionAllowed } from "@/lib/utils/bookingStatusTransitions";
+import { toast } from "sonner";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
@@ -288,8 +290,8 @@ const loadServicesForEmployee = useCallback(async (employeeId: string) => {
           : event
       ));
       setIsBookingModalOpen(false);
-    } catch (error) {
-      void error;
+    } catch (error: any) {
+      toast.error(t.admin.bookingsPage.updateErrorPrefix + (error.response?.data?.message || error.message));
     } finally {
       setUpdating(false);
     }
@@ -696,11 +698,15 @@ const handleCreateManualBooking = async () => {
                               className="text-white font-semibold text-xs"
                               onPress={() => handleStatusUpdate(btn.key)}
                               isLoading={updating}
-                              isDisabled={selectedEvent.resource.status === btn.key}>
+                              isDisabled={selectedEvent.resource.status === btn.key
+                                || !isStatusTransitionAllowed(selectedEvent.resource.status, btn.key)}>
                               {btn.label}
                             </Button>
                           ))}
                         </div>
+                        {(selectedEvent.resource.status === "Completed" || selectedEvent.resource.status === "NoShow") && (
+                          <p className="text-xs text-[#8A8A8A] mt-2">{t.admin.bookingsPage.statusTerminalHint}</p>
+                        )}
                       </div>
                     </div>
                   ) : (

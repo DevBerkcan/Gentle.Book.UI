@@ -28,6 +28,7 @@ import {
   getServicesByEmployee,
   checkEmailConflict
 } from "@/lib/api/admin";
+import { isStatusTransitionAllowed } from "@/lib/utils/bookingStatusTransitions";
 import { IntakeFormAnswersPanel } from "@/components/admin/bookings/IntakeFormAnswersPanel";
 import { getAvailability, getEmployees, type TimeSlot, type Employee } from "@/lib/api/booking";
 import { useAuth } from "@/lib/contexts/AuthContext";
@@ -531,20 +532,6 @@ export default function AdminBookingsPage() {
       setExportLoading(false);
     }
   }
-
-  // Mirrors AdminService.IsValidStatusTransition exactly — the dropdown previously offered
-  // every status regardless of the booking's current one, so picking an invalid transition
-  // (e.g. Completed -> Pending) looked like it silently failed to save instead of being
-  // rejected up front.
-  const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
-    Pending: ["Pending", "Confirmed", "Cancelled"],
-    Confirmed: ["Confirmed", "Completed", "Cancelled", "NoShow"],
-    Cancelled: ["Cancelled", "Confirmed"],
-    Completed: ["Completed"],
-    NoShow: ["NoShow"],
-  };
-  const isStatusSelectable = (currentStatus: string, targetStatus: string) =>
-    (VALID_STATUS_TRANSITIONS[currentStatus] ?? [targetStatus]).includes(targetStatus);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1197,7 +1184,7 @@ export default function AdminBookingsPage() {
                       onChange={(e) => setNewStatus(e.target.value)}
                       isRequired
                       disabledKeys={["Pending", "Confirmed", "Completed", "NoShow", "Cancelled"]
-                        .filter((s) => !isStatusSelectable(selectedBooking.status, s))}
+                        .filter((s) => !isStatusTransitionAllowed(selectedBooking.status, s))}
                       classNames={{
                         trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
                         label: "text-[#8A8A8A]",
