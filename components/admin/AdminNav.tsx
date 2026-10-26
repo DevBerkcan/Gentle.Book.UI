@@ -68,13 +68,13 @@ export function AdminNav() {
   // nav-gated page here already hid itself correctly on an invalid plan (the page calls the API
   // and shows an inline upsell), but these links themselves were shown unconditionally, letting
   // a tenant on a plan without the feature navigate straight into an upsell screen.
-  const ANALYTICS_PLANS = ["Professional", "Agency"];
+  const ANALYTICS_PLANS = ["Trial", "Professional", "Agency"];
   const showAnalytics = plan != null && ANALYTICS_PLANS.includes(plan);
 
   // Mirrors Configuration/AgencyFeatureGate.cs (used by AdminReviewsController,
   // AdminVoucherController, TenantController's api-keys endpoints, and — combined with the
   // industry check below — AdminIntakeFormController).
-  const isAgencyPlan = plan === "Agency";
+  const isAgencyPlan = plan === "Agency" || plan === "Trial";
   const showReviews = isAgencyPlan;
   const showVouchers = isAgencyPlan;
   const showApiKeys = isAgencyPlan;

@@ -270,7 +270,7 @@ export default function AdminSettingsPage() {
   // enforces this server-side) — the invite button here was shown to every plan regardless,
   // so a non-Agency tenant could click it and only find out it's blocked after the fact.
   const [plan, setPlan] = useState<string | null>(null);
-  const isAgencyPlan = plan === 'Agency';
+  const isAgencyPlan = plan === 'Agency' || plan === 'Trial';
 
   useEffect(() => {
     loadSettings();

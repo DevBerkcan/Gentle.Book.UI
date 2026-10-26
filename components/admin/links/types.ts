@@ -14,7 +14,7 @@ export type SpacingLevel = "tight" | "normal" | "airy";
 export type MotionIntensity = "off" | "subtle" | "strong";
 export type StartFocus = "logo" | "cta" | "links";
 export type PreviewDevice = "mobile" | "tablet" | "desktop";
-export type PlanTier = "starter" | "pro" | "business";
+export type PlanTier = "trial" | "starter" | "pro" | "business";
 export type PageTemplate =
   | "classic" | "soft" | "hero" | "neon" | "magazine" | "split" | "corporate"
   | "organic" | "tattoo" | "barbershop" | "beauty" | "clinic" | "fitness"

@@ -532,6 +532,7 @@ export default function AdminSubscriptionPage() {
             {sub.isInTrial && (
               <div className="text-right">
                 <p className="text-xs text-gray-500">{s.trialEndsLabel}</p>
+                <p className="text-sm text-gray-600 mt-1">{s.trialFeatureScope}</p>
                 <p className="font-semibold text-gray-800">
                   {new Date(sub.trialEndsAt).toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })}
                 </p>

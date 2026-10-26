@@ -254,7 +254,8 @@ export default function AdminLinksPage() {
     }
     api.get("/tenant/subscription").then((res) => {
       const plan = res.data?.data?.plan?.toLowerCase() ?? "starter";
-      if (plan.includes("agency")) setTenantPlan("business");
+      if (plan === "trial") setTenantPlan("trial");
+      else if (plan.includes("agency")) setTenantPlan("business");
       else if (plan.includes("pro"))  setTenantPlan("pro");
       else                            setTenantPlan("starter");
     }).catch(() => {});
