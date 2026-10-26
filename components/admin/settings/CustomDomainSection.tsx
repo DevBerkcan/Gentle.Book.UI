@@ -10,6 +10,7 @@ import { Globe2, CheckCircle2, Clock, XCircle, Loader2, Unlink, Lock } from "luc
 import { adminApi, type TenantDomainInfo } from "@/lib/api/admin";
 import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
@@ -35,6 +36,7 @@ export function CustomDomainSection() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [locked, setLocked] = useState<{ message: string; currentPlan?: string; requiredPlan?: string } | null>(null);
+  const { confirm, dialog } = useConfirm();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -70,7 +72,8 @@ export function CustomDomainSection() {
   }
 
   async function handleRemove() {
-    if (!confirm(s.cdsRemoveConfirm)) return;
+    const ok = await confirm({ title: s.cdsRemove, message: s.cdsRemoveConfirm, variant: "danger" });
+    if (!ok) return;
     setSaving(true);
     try {
       await adminApi.removeDomain();
@@ -180,6 +183,7 @@ export function CustomDomainSection() {
           )}
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

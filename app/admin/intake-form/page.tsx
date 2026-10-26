@@ -7,6 +7,7 @@ import { adminApi, type IntakeFormField, type IntakeFormFieldType, type IntakeFo
 import { getAdminCategories, type AdminServiceCategory } from "@/lib/api/admin-services";
 import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 function getFieldTypeLabel(t: Translations): Record<IntakeFormFieldType, string> {
   const s = t.admin.intakeFormPage;
@@ -57,6 +58,8 @@ export default function AdminIntakeFormPage() {
   const [newConditionalOnFieldId, setNewConditionalOnFieldId] = useState<string>("");
   const [newConditionalOnValue, setNewConditionalOnValue] = useState("");
   const [adding, setAdding] = useState(false);
+  const [addFieldError, setAddFieldError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
   const [applyingTemplate, setApplyingTemplate] = useState<string | null>(null);
@@ -93,19 +96,25 @@ export default function AdminIntakeFormPage() {
   function resetNewFieldForm() {
     setNewLabel(""); setNewOptions(""); setNewRequired(false); setNewType("Text");
     setNewFormType("Anamnese"); setNewCategoryId(""); setNewConditionalOnFieldId(""); setNewConditionalOnValue("");
+    setAddFieldError(null);
   }
 
   async function handleAdd() {
     if (!newLabel.trim()) return;
+    setAddFieldError(null);
+    const needsOptions = newType === "MultipleChoice" || newType === "Checkboxes";
+    const options = needsOptions ? newOptions.split(",").map((s) => s.trim()).filter(Boolean) : [];
+    if (needsOptions && options.length < 2) {
+      setAddFieldError(s.optionsRequiredError);
+      return;
+    }
     setAdding(true);
     try {
       await adminApi.createIntakeFormField({
         label: newLabel.trim(),
         fieldType: newType,
         formType: newFormType,
-        optionsJson: newType === "MultipleChoice" || newType === "Checkboxes"
-          ? JSON.stringify(newOptions.split(",").map((s) => s.trim()).filter(Boolean))
-          : null,
+        optionsJson: needsOptions ? JSON.stringify(options) : null,
         categoryId: newCategoryId || null,
         conditionalOnFieldId: newConditionalOnFieldId || null,
         conditionalOnValue: newConditionalOnFieldId ? newConditionalOnValue : null,
@@ -113,8 +122,9 @@ export default function AdminIntakeFormPage() {
       });
       resetNewFieldForm();
       await load();
-    } catch {
+    } catch (err: any) {
       // keep form filled so the admin can retry
+      setAddFieldError(err.response?.data?.message || err.message || s.addFieldError);
     } finally {
       setAdding(false);
     }
@@ -135,7 +145,8 @@ export default function AdminIntakeFormPage() {
   }
 
   async function handleDelete(field: IntakeFormField) {
-    if (!confirm(fillTemplate(s.deleteConfirmTemplate, { label: field.label }))) return;
+    const ok = await confirm({ title: t.admin.delete, message: fillTemplate(s.deleteConfirmTemplate, { label: field.label }), variant: "danger" });
+    if (!ok) return;
     setBusyId(field.id);
     try {
       await adminApi.deleteIntakeFormField(field.id);
@@ -378,6 +389,8 @@ export default function AdminIntakeFormPage() {
             />
           )}
 
+          {addFieldError && <p className="text-xs text-[#991B1B] bg-[#FEE2E2] border border-[#FECACA] rounded-lg px-3 py-2">{addFieldError}</p>}
+
           {categories.length > 0 && (
             <select value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)} className={inputCls}>
               <option value="">{s.appliesAllCategoriesOption}</option>
@@ -414,6 +427,7 @@ export default function AdminIntakeFormPage() {
           </button>
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { customersApi, type CustomerListItem } from "@/lib/api/customers";
 import { getAccessToken } from "@/lib/auth/storage";
 import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 const inputCls =
   "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
@@ -46,6 +47,7 @@ export default function AdminVouchersPage() {
   const [issuing, setIssuing] = useState(false);
   const [issueError, setIssueError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
 
   useEffect(() => { load(); }, []);
 
@@ -108,7 +110,8 @@ export default function AdminVouchersPage() {
   }
 
   async function handleCancel(voucher: AdminVoucher) {
-    if (!confirm(fillTemplate(s.confirmCancelTemplate, { code: voucher.code }))) return;
+    const ok = await confirm({ title: s.cancelBtn, message: fillTemplate(s.confirmCancelTemplate, { code: voucher.code }), variant: "danger" });
+    if (!ok) return;
     setBusyId(voucher.id);
     try {
       await adminApi.cancelVoucher(voucher.id);
@@ -347,6 +350,7 @@ export default function AdminVouchersPage() {
           )}
         </div>
       </div>
+      {dialog}
     </div>
   );
 }
