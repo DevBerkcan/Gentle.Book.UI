@@ -136,17 +136,17 @@ export function EmployeeSelector({
                       <Image
                         src={emp.photoUrl.startsWith('http') ? emp.photoUrl : `${apiOrigin}${emp.photoUrl}`}
                         alt={emp.name}
-                        width={48}
-                        height={48}
-                        className="flex-shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover"
-                        style={isSelected ? { boxShadow: `0 0 0 2px ${primaryColor}` } : undefined}
+                        width={112}
+                        height={136}
+                        className="flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-full object-cover"
+                        style={isSelected ? { boxShadow: `0 0 0 3px white, 0 0 0 5px ${primaryColor}` } : { boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}
                       />
                     ) : (
                       <div
-                        className="flex-shrink-0 p-2 sm:p-3 rounded-xl transition-colors"
+                        className="flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-full flex items-center justify-center transition-colors"
                         style={{ backgroundColor: isSelected ? primaryColor : `${primaryColor}1A` }}
                       >
-                        <User className={isSelected ? "text-white" : ""} size={20} style={!isSelected ? { color: primaryColor } : {}} />
+                        <User className={isSelected ? "text-white" : ""} size={32} style={!isSelected ? { color: primaryColor } : {}} />
                       </div>
                     )}
 
