@@ -64,10 +64,27 @@ export function AdminNav() {
   const AI_FINDER_PLANS = ["Professional", "Agency"];
   const showAiFinder = plan != null && AI_FINDER_PLANS.includes(plan);
 
-  // Mirrors Configuration/IntakeFormIndustryGate.cs — "Formulare" only makes sense for
-  // industries that actually do a consultation before treatment.
+  // Mirrors TrackingController.RequireAnalyticsPlanAsync (PlanLimits.HasAnalytics) — every other
+  // nav-gated page here already hid itself correctly on an invalid plan (the page calls the API
+  // and shows an inline upsell), but these links themselves were shown unconditionally, letting
+  // a tenant on a plan without the feature navigate straight into an upsell screen.
+  const ANALYTICS_PLANS = ["Professional", "Agency"];
+  const showAnalytics = plan != null && ANALYTICS_PLANS.includes(plan);
+
+  // Mirrors Configuration/AgencyFeatureGate.cs (used by AdminReviewsController,
+  // AdminVoucherController, TenantController's api-keys endpoints, and — combined with the
+  // industry check below — AdminIntakeFormController).
+  const isAgencyPlan = plan === "Agency";
+  const showReviews = isAgencyPlan;
+  const showVouchers = isAgencyPlan;
+  const showApiKeys = isAgencyPlan;
+
+  // Mirrors Configuration/IntakeFormIndustryGate.cs ("Formulare" only makes sense for industries
+  // that actually do a consultation before treatment) AND AgencyFeatureGate — the backend
+  // requires both, per the sales page ("Digitale Anamnesebögen (branchenabhängig)" is listed
+  // under Agency only).
   const INTAKE_FORM_INDUSTRIES = ["Beauty", "Hairdresser", "Nail", "Barbershop", "Tattoo", "Massage"];
-  const showIntakeForm = industryType == null || INTAKE_FORM_INDUSTRIES.includes(industryType);
+  const showIntakeForm = isAgencyPlan && (industryType == null || INTAKE_FORM_INDUSTRIES.includes(industryType));
 
   useEffect(() => {
     setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "true");
@@ -125,11 +142,11 @@ export function AdminNav() {
     {
       label: t.admin.analytics,
       items: [
-        { href: "/admin/tracking", label: t.admin.tracking, icon: BarChart3 },
-        { href: "/admin/reviews",  label: t.admin.reviews,  icon: Star },
+        ...(showAnalytics ? [{ href: "/admin/tracking", label: t.admin.tracking, icon: BarChart3 }] : []),
+        ...(showReviews   ? [{ href: "/admin/reviews",  label: t.admin.reviews,  icon: Star }]       : []),
       ],
     },
-  ];
+  ].filter(group => group.items.length > 0);
 
   const ADMIN_GROUP = {
     label: t.admin.administration,
@@ -139,11 +156,11 @@ export function AdminNav() {
       { href: "/admin/links",        label: t.admin.myLinks,      icon: Link2 },
       ...(showIntakeForm ? [{ href: "/admin/intake-form", label: t.admin.intakeForm, icon: IntakeIcon }] : []),
       { href: "/admin/settings",     label: t.admin.settings,     icon: Settings },
-      { href: "/admin/api-keys",     label: t.admin.apiAccess,    icon: KeyRound },
+      ...(showApiKeys ? [{ href: "/admin/api-keys", label: t.admin.apiAccess, icon: KeyRound }] : []),
       { href: "/admin/subscription", label: t.admin.subscription, icon: CreditCard },
       // Gutscheine sind tenant-weites Guthaben, bewusst TenantAdmin/SuperAdmin only — nicht für
       // LocationAdmin (siehe AdminVoucherController). Nur anzeigen wenn nicht LocationAdmin.
-      ...(!isLocationAdmin ? [{ href: "/admin/vouchers", label: t.admin.vouchers, icon: Ticket }] : []),
+      ...(showVouchers && !isLocationAdmin ? [{ href: "/admin/vouchers", label: t.admin.vouchers, icon: Ticket }] : []),
     ],
   };
 

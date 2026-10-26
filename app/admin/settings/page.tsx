@@ -266,11 +266,18 @@ export default function AdminSettingsPage() {
   const [logoError, setLogoError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Mirrors Configuration/AgencyFeatureGate.cs (TenantController.InviteLocationAdmin already
+  // enforces this server-side) — the invite button here was shown to every plan regardless,
+  // so a non-Agency tenant could click it and only find out it's blocked after the fact.
+  const [plan, setPlan] = useState<string | null>(null);
+  const isAgencyPlan = plan === 'Agency';
+
   useEffect(() => {
     loadSettings();
     loadBusinessHours();
     loadLocations();
     loadLocationAdmins();
+    api.get('/tenant/subscription').then((res) => setPlan(res.data?.plan ?? null)).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -768,14 +775,16 @@ export default function AdminSettingsPage() {
                           ))}
                         </div>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => handleInviteLocationAdmin(location)}
-                        disabled={invitingLocationId === location.id}
-                        className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-[#6355E4] hover:text-[#4338CA] disabled:opacity-50"
-                      >
-                        <UserPlus size={11} /> {invitingLocationId === location.id ? t.admin.settingsPage.inviting : t.admin.settingsPage.inviteLocationAdmin}
-                      </button>
+                      {isAgencyPlan && (
+                        <button
+                          type="button"
+                          onClick={() => handleInviteLocationAdmin(location)}
+                          disabled={invitingLocationId === location.id}
+                          className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-[#6355E4] hover:text-[#4338CA] disabled:opacity-50"
+                        >
+                          <UserPlus size={11} /> {invitingLocationId === location.id ? t.admin.settingsPage.inviting : t.admin.settingsPage.inviteLocationAdmin}
+                        </button>
+                      )}
                     </div>
                     <div className="flex shrink-0 gap-1">
                       <button type="button" onClick={() => openEditLocation(location)}
