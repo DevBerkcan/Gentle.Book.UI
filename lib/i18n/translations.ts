@@ -419,6 +419,7 @@ export const translations = {
       customersPage: {
         loadError: "Fehler beim Laden der Kunden",
         firstLastNameRequired: "Vor- und Nachname sind erforderlich",
+        emailInvalid: "Bitte eine gültige E-Mail-Adresse angeben.",
         saveError: "Fehler beim Speichern",
         deleteError: "Fehler beim Löschen",
         regularCustomerTitle: "Stammkunde",
@@ -438,7 +439,7 @@ export const translations = {
         updateCustomerDataDesc: "Kundendaten aktualisieren",
         addNewCustomerDesc: "Neuen Kunden zum System hinzufügen",
         emailPlaceholder: "max@beispiel.de",
-        phonePlaceholder: "+41 76 123 45 67",
+        phonePlaceholder: "+49 151 23456789",
         notesPlaceholder: "Besondere Hinweise, Präferenzen...",
         createAction: "Anlegen",
         customerDetails: "Kundendetails",
@@ -2208,6 +2209,7 @@ export const translations = {
       customersPage: {
         loadError: "Error loading customers",
         firstLastNameRequired: "First and last name are required",
+        emailInvalid: "Please enter a valid email address.",
         saveError: "Error saving",
         deleteError: "Error deleting",
         regularCustomerTitle: "Regular customer",
@@ -2227,7 +2229,7 @@ export const translations = {
         updateCustomerDataDesc: "Update customer data",
         addNewCustomerDesc: "Add a new customer to the system",
         emailPlaceholder: "max@example.com",
-        phonePlaceholder: "+41 76 123 45 67",
+        phonePlaceholder: "+49 151 23456789",
         notesPlaceholder: "Special notes, preferences...",
         createAction: "Create",
         customerDetails: "Customer details",

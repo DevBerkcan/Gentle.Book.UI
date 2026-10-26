@@ -182,6 +182,11 @@ export default function CustomersPage() {
       return;
     }
 
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      setModalError(t.admin.customersPage.emailInvalid);
+      return;
+    }
+
     setSubmitting(true);
     setModalError(null);
 
@@ -324,6 +329,7 @@ export default function CustomersPage() {
             size="sm"
             isIconOnly
             variant="flat"
+            aria-label={`${t.admin.edit}: ${customer.fullName}`}
             className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
             onPress={async () => {
               const details = await customersApi.getById(customer.id);
@@ -336,6 +342,7 @@ export default function CustomersPage() {
             size="sm"
             isIconOnly
             variant="flat"
+            aria-label={`${t.admin.export}: ${customer.fullName}`}
             className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
             onPress={() => handleExportCustomer(customer)}
           >
@@ -345,6 +352,7 @@ export default function CustomersPage() {
             size="sm"
             isIconOnly
             variant="flat"
+            aria-label={`${t.admin.delete}: ${customer.fullName}`}
             className="bg-red-50 text-red-500 hover:bg-red-100"
             onPress={() => openDeleteModal(customer)}
           >
@@ -507,6 +515,7 @@ export default function CustomersPage() {
                                 size="sm"
                                 isIconOnly
                                 variant="flat"
+                                aria-label={`${t.admin.edit}: ${customer.fullName}`}
                                 className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                 onPress={async () => {
                                   const details = await customersApi.getById(customer.id);
@@ -519,6 +528,7 @@ export default function CustomersPage() {
                                 size="sm"
                                 isIconOnly
                                 variant="flat"
+                                aria-label={`${t.admin.export}: ${customer.fullName}`}
                                 className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                 onPress={() => handleExportCustomer(customer)}
                               >
@@ -528,6 +538,7 @@ export default function CustomersPage() {
                                 size="sm"
                                 isIconOnly
                                 variant="flat"
+                                aria-label={`${t.admin.delete}: ${customer.fullName}`}
                                 className="bg-red-50 text-red-500 hover:bg-red-100"
                                 onPress={() => openDeleteModal(customer)}
                               >

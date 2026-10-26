@@ -1579,7 +1579,7 @@ function ServiceModals({
                                 )}
 
                                 <Input
-                                    label={`${t.admin.name} *`}
+                                    label={t.admin.name}
                                     placeholder={s.servicePlaceholderName}
                                     value={serviceForm.name || ""}
                                     onChange={(e) => setServiceForm({ ...serviceForm, name: e.target.value })}
@@ -1599,7 +1599,7 @@ function ServiceModals({
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <Input
-                                        label={`${s.durationMinutesLabel} *`}
+                                        label={s.durationMinutesLabel}
                                         type="number"
                                         min={5}
                                         value={serviceForm.durationMinutes?.toString() || "30"}
@@ -1623,7 +1623,7 @@ function ServiceModals({
                                 </div>
 
                                 <Select
-                                    label={`${s.locationLabel} *`}
+                                    label={s.locationLabel}
                                     selectedKeys={serviceForm.locationId ? [serviceForm.locationId] : []}
                                     onSelectionChange={(keys) => {
                                         const locationId = Array.from(keys)[0]?.toString() || "";
@@ -1664,7 +1664,7 @@ function ServiceModals({
                                         />
                                     </button>
                                     <Input
-                                        label={`${t.admin.price}*`}
+                                        label={t.admin.price}
                                         type="number"
                                         min={0}
                                         step={0.01}
@@ -1710,7 +1710,7 @@ function ServiceModals({
 
                                 {/* Kategorie Select */}
                                 <Select
-                                    label={`${s.category} *`}
+                                    label={s.category}
                                     placeholder={s.categoryPlaceholder}
                                     selectedKeys={serviceForm.categoryId ? [serviceForm.categoryId] : []}
                                     onChange={(e) => {
@@ -1882,7 +1882,7 @@ function CategoryModals({
                                 )}
 
                                 <Input
-                                    label={`${t.admin.name} *`}
+                                    label={t.admin.name}
                                     placeholder={s.categoryPlaceholderName}
                                     value={categoryForm.name || ""}
                                     onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
