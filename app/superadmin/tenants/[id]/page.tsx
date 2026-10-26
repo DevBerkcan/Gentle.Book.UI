@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useRef } from 'react';
 import { superAdminApi, UpdateTenantSettingsPayload, TenantStats, TenantBillingStatus, InvoiceItem, TenantAiUsageDetail } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { usePrompt } from '@/components/PromptDialog';
 import { resolveLogoUrl } from '@/lib/utils/logo';
 import { setAccessToken } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC, Sparkles } from 'lucide-react';
@@ -59,6 +60,7 @@ export default function TenantDetailPage() {
   const [impersonating, setImpersonating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { confirm, dialog } = useConfirm();
+  const { prompt, dialog: promptDialog } = usePrompt();
 
   // New user form
   const [newUser, setNewUser] = useState({ email: '', password: '', firstName: '', lastName: '' });
@@ -150,10 +152,16 @@ export default function TenantDetailPage() {
     // monthly price before switching this tenant onto it.
     let negotiatedMonthlyPrice: number | undefined;
     if (selectedPlan === 'Agency') {
-      const raw = window.prompt(`Individuellen Monatspreis für "${tenant?.companyName || tenant?.name}" (Agency) festlegen (€):`);
+      const raw = await prompt({
+        title: 'Individueller Monatspreis',
+        message: `Agency-Preis für "${tenant?.companyName || tenant?.name}" festlegen.`,
+        label: 'Monatspreis',
+        placeholder: '99.00',
+        inputType: 'number',
+      });
       if (raw === null) return;
       const parsed = Number(raw.replace(',', '.'));
-      if (!raw.trim() || Number.isNaN(parsed) || parsed <= 0) {
+      if (Number.isNaN(parsed) || parsed <= 0) {
         alert('Bitte einen gültigen Preis eingeben.');
         return;
       }
@@ -1403,6 +1411,7 @@ export default function TenantDetailPage() {
       </div>
 
       {dialog}
+      {promptDialog}
     </div>
   );
 }

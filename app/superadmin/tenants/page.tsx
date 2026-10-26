@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { superAdminApi, TenantListItem } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
+import { usePrompt } from '@/components/PromptDialog';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -213,6 +214,7 @@ export default function TenantsPage() {
   const [changingPlan, setChangingPlan] = useState<string | null>(null);
   const [error, setError] = useState('');
   const { confirm, dialog } = useConfirm();
+  const { prompt, dialog: promptDialog } = usePrompt();
 
   useEffect(() => { load(); }, []);
 
@@ -286,10 +288,16 @@ export default function TenantsPage() {
     // monthly price before switching a tenant onto it.
     let negotiatedMonthlyPrice: number | undefined;
     if (plan === 'Agency') {
-      const raw = window.prompt(`Individuellen Monatspreis für ${t.name} (Agency) festlegen (€):`);
+      const raw = await prompt({
+        title: 'Individueller Monatspreis',
+        message: `Agency-Preis für "${t.name}" festlegen.`,
+        label: 'Monatspreis',
+        placeholder: '99.00',
+        inputType: 'number',
+      });
       if (raw === null) return;
       const parsed = Number(raw.replace(',', '.'));
-      if (!raw.trim() || Number.isNaN(parsed) || parsed <= 0) {
+      if (Number.isNaN(parsed) || parsed <= 0) {
         alert('Bitte einen gültigen Preis eingeben.');
         return;
       }
@@ -779,6 +787,7 @@ export default function TenantsPage() {
         </div>
       )}
       {dialog}
+      {promptDialog}
     </div>
   );
 }
