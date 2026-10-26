@@ -41,7 +41,7 @@ export function AdminNav() {
         if (d?.industryType) setIndustryType(d.industryType);
       }).catch(() => {});
       api.get("/tenant/subscription").then((res) => {
-        setPlan(res.data?.plan ?? null);
+        setPlan(res.data?.data?.plan ?? null);
       }).catch(() => {});
     }
   }, [isTenantAdmin]);

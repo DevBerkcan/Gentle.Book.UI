@@ -277,7 +277,7 @@ export default function AdminSettingsPage() {
     loadBusinessHours();
     loadLocations();
     loadLocationAdmins();
-    api.get('/tenant/subscription').then((res) => setPlan(res.data?.plan ?? null)).catch(() => {});
+    api.get('/tenant/subscription').then((res) => setPlan(res.data?.data?.plan ?? null)).catch(() => {});
   }, []);
 
   useEffect(() => {
