@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { legalConfig } from "@/lib/config";
-import api from "@/lib/api/client";
+import api, { apiOrigin } from "@/lib/api/client";
 import { resolveLogoUrl } from "@/lib/utils/logo";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
 
@@ -30,6 +30,7 @@ export function AdminNav() {
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [industryType, setIndustryType] = useState<string | null>(null);
   const [plan, setPlan] = useState<string | null>(null);
+  const [employeePhotoUrl, setEmployeePhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isTenantAdmin) {
@@ -44,6 +45,18 @@ export function AdminNav() {
       }).catch(() => {});
     }
   }, [isTenantAdmin]);
+
+  useEffect(() => {
+    if (isEmployee && user?.id) {
+      api.get(`/employees/${user.id}`).then((res) => {
+        setEmployeePhotoUrl(res.data?.photoUrl ?? null);
+      }).catch(() => {});
+    }
+  }, [isEmployee, user?.id]);
+
+  const avatarPhotoUrl = employeePhotoUrl
+    ? (employeePhotoUrl.startsWith('http') ? employeePhotoUrl : `${apiOrigin}${employeePhotoUrl}`)
+    : null;
 
   // Mirrors Configuration/AiFinderPlanGate.cs — the backend already rejects Trial/Starter at
   // the API level, but the nav link was shown to every plan regardless, so a trial tenant could
@@ -219,12 +232,23 @@ export function AdminNav() {
       <div className="px-3 py-4 border-t border-white/8">
         {isCollapsed ? (
           <div className="flex flex-col items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30"
-              title={displayName}
-            >
-              {initials}
-            </div>
+            {avatarPhotoUrl ? (
+              <Image
+                src={avatarPhotoUrl}
+                alt={displayName}
+                width={32}
+                height={32}
+                title={displayName}
+                className="w-8 h-8 rounded-xl object-cover flex-shrink-0 shadow-md shadow-[#6355E4]/30"
+              />
+            ) : (
+              <div
+                className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30"
+                title={displayName}
+              >
+                {initials}
+              </div>
+            )}
             <button
               onClick={() => setLang(lang === "de" ? "en" : "de")}
               className="text-[10px] font-bold text-white/40 hover:text-white transition-colors"
@@ -255,9 +279,19 @@ export function AdminNav() {
               <NotificationBell dark />
             </div>
             <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30">
-                {initials}
-              </div>
+              {avatarPhotoUrl ? (
+                <Image
+                  src={avatarPhotoUrl}
+                  alt={displayName}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-xl object-cover flex-shrink-0 shadow-md shadow-[#6355E4]/30"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#6355E4] to-[#17A398] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md shadow-[#6355E4]/30">
+                  {initials}
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-semibold truncate">{displayName}</p>
                 <p className="text-white/40 text-xs truncate">{displayRole}</p>
