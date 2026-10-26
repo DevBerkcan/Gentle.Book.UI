@@ -225,7 +225,7 @@ export function ContactForm({
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
-              label={`${t.booking.firstName}*`}
+              label={t.booking.firstName}
               placeholder={lang === "en" ? "John" : "Max"}
               value={customerInfo.firstName}
               onValueChange={(v) => onCustomerInfoChange({ ...customerInfo, firstName: v })}
@@ -241,7 +241,7 @@ export function ContactForm({
               style={!showError("firstName") ? { "--tw-border-opacity": "1", borderColor: primaryColor } as any : {}}
             />
             <Input
-              label={`${t.booking.lastName}*`}
+              label={t.booking.lastName}
               placeholder={lang === "en" ? "Smith" : "Mustermann"}
               value={customerInfo.lastName}
               onValueChange={(v) => onCustomerInfoChange({ ...customerInfo, lastName: v })}
@@ -260,7 +260,7 @@ export function ContactForm({
 
           <Input
             type="email"
-            label={`${t.booking.email}*`}
+            label={t.booking.email}
             placeholder={lang === "en" ? "john.smith@example.com" : "max.mustermann@example.com"}
             value={customerInfo.email}
             onValueChange={(v) => onCustomerInfoChange({ ...customerInfo, email: v })}
@@ -278,8 +278,8 @@ export function ContactForm({
 
           <Input
             type="tel"
-            label={`${t.booking.phone}*`}
-            placeholder="+41 123 456789"
+            label={t.booking.phone}
+            placeholder="+49 151 23456789"
             value={customerInfo.phone}
             onValueChange={(v) => onCustomerInfoChange({ ...customerInfo, phone: v })}
             onBlur={() => handleBlur("phone")}
