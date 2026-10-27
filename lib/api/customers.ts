@@ -9,6 +9,7 @@ export interface CustomerListItem {
   totalBookings: number;
   lastVisit: string | null;
   createdAt: string;
+  loyaltyPoints: number;
 }
 
 export interface CustomerDetail {
@@ -26,6 +27,7 @@ export interface CustomerDetail {
   fullName: string;
   employeeId: string | null;
   recentBookings: CustomerBookingItem[];
+  loyaltyPoints: number;
 }
 
 export interface CustomerBookingItem {

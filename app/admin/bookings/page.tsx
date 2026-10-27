@@ -58,6 +58,7 @@ export default function AdminBookingsPage() {
   const isAdmin = hasRole(['Admin', 'Owner', 'TenantAdmin']) || isTenantAdmin;
 
   const [bookings, setBookings] = useState<BookingListItem[]>([]);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
@@ -199,8 +200,12 @@ export default function AdminBookingsPage() {
       setTotalPages(response.totalPages);
       setCurrentPage(response.page);
       setTotalCount(response.totalCount);
-    } catch (err) {
-      /* silent */
+      setSessionExpired(false);
+    } catch (err: any) {
+      // A 401 here is an expired session, not "no bookings" — the global axios
+      // interceptor also redirects, but only after a 2.5s toast; show this immediately
+      // instead of the misleading empty-state while that's pending.
+      if (err?.response?.status === 401) setSessionExpired(true);
     } finally {
       setLoading(false);
     }
@@ -1053,6 +1058,14 @@ export default function AdminBookingsPage() {
             {loading ? (
               <div className="flex items-center justify-center py-16">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#6355E4]" />
+              </div>
+            ) : sessionExpired ? (
+              <div className="text-center py-16 text-[#8A8A8A]">
+                <p className="font-medium text-[#1E1E1E]">{t.admin.bookingsPage.sessionExpiredTitle}</p>
+                <p className="text-sm mt-1">{t.admin.bookingsPage.sessionExpiredDesc}</p>
+                <Button size="sm" className="mt-3 bg-[#6355E4] text-white" onPress={() => { window.location.href = '/admin/login'; }}>
+                  {t.admin.bookingsPage.sessionExpiredLoginBtn}
+                </Button>
               </div>
             ) : bookings.length === 0 ? (
               <div className="text-center py-16 text-[#8A8A8A]">

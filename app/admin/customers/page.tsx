@@ -78,11 +78,15 @@ export default function CustomersPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [deleteReason, setDeleteReason] = useState("");
   const [regularCustomerThreshold, setRegularCustomerThreshold] = useState<number | null>(null);
+  const [loyaltyAvailable, setLoyaltyAvailable] = useState(false);
   const [showLoyaltyCard, setShowLoyaltyCard] = useState(false);
 
   useEffect(() => {
     adminApi.getLoyaltySettings()
-      .then((s) => setRegularCustomerThreshold(s.rewardEveryNVisits > 0 ? s.rewardEveryNVisits : null))
+      .then((s) => {
+        setRegularCustomerThreshold(s.rewardEveryNVisits > 0 ? s.rewardEveryNVisits : null);
+        setLoyaltyAvailable(true);
+      })
       .catch(() => {});
   }, []);
 
@@ -321,9 +325,16 @@ export default function CustomersPage() {
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
-        <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
-          {fillTemplate(t.admin.customersPage.bookingsCountTemplate, { count: customer.totalBookings })}
-        </Chip>
+        <div className="flex items-center gap-1.5">
+          <Chip size="sm" variant="flat" className="bg-[#6355E4]/10 text-[#6355E4]">
+            {fillTemplate(t.admin.customersPage.bookingsCountTemplate, { count: customer.totalBookings })}
+          </Chip>
+          {loyaltyAvailable && (
+            <Chip size="sm" variant="flat" className="bg-[#F6F5FA] text-[#6355E4]">
+              {fillTemplate(t.admin.customersPage.pointsUnitTemplate, { points: customer.loyaltyPoints })}
+            </Chip>
+          )}
+        </div>
         <div className="flex gap-2">
           <Button
             size="sm"
@@ -458,6 +469,9 @@ export default function CustomersPage() {
                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.contactHeader}</th>
                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.bookings}</th>
                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.lastVisitHeader}</th>
+                        {loyaltyAvailable && (
+                          <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.loyaltyPoints}</th>
+                        )}
                         <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
                       </tr>
                     </thead>
@@ -509,6 +523,13 @@ export default function CustomersPage() {
                               ? new Date(customer.lastVisit).toLocaleDateString(dateLocale)
                               : "—"}
                           </td>
+                          {loyaltyAvailable && (
+                            <td className="px-5 py-4">
+                              <Chip size="sm" variant="flat" className="bg-[#F6F5FA] text-[#6355E4]">
+                                {fillTemplate(t.admin.customersPage.pointsUnitTemplate, { points: customer.loyaltyPoints })}
+                              </Chip>
+                            </td>
+                          )}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                               <Button

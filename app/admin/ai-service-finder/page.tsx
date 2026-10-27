@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { ChevronDown, HelpCircle, Info } from 'lucide-react';
+import { ChevronDown, HelpCircle, Info, Users } from 'lucide-react';
 import {
   aiFinderApi,
   type FinderGuidance,
@@ -75,45 +75,50 @@ export default function AiServiceFinderAdminPage() {
   const [submittingBudgetRequest, setSubmittingBudgetRequest] = useState(false);
   const [budgetRequestError, setBudgetRequestError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  // Shared by the initial mount effect and every save handler below — found during live
+  // pre-launch testing: a question/rule/guidance edit could report success while the textarea
+  // kept showing the pre-edit JSON (nothing re-fetched after saving), so there was no way to
+  // tell an actual persistence problem apart from "just needs a page reload to show up" without
+  // a full browser refresh. Re-fetching immediately after save surfaces the true server state
+  // right away instead.
+  async function reloadData(activeRef?: { current: boolean }) {
+    try {
+      setLoading(true);
+      const [overviewData, profileData, settingsData, questionData, ruleData, guidanceData] = await Promise.all([
+        aiFinderApi.getOverview(),
+        aiFinderApi.getIndustryProfiles(),
+        aiFinderApi.getIndustrySettings(),
+        aiFinderApi.getQuestions(),
+        aiFinderApi.getRules(),
+        aiFinderApi.getGuidance(),
+      ]);
 
-    async function load() {
-      try {
-        setLoading(true);
-        const [overviewData, profileData, settingsData, questionData, ruleData, guidanceData] = await Promise.all([
-          aiFinderApi.getOverview(),
-          aiFinderApi.getIndustryProfiles(),
-          aiFinderApi.getIndustrySettings(),
-          aiFinderApi.getQuestions(),
-          aiFinderApi.getRules(),
-          aiFinderApi.getGuidance(),
-        ]);
+      if (activeRef && !activeRef.current) return;
+      setOverview(overviewData);
+      setProfiles(profileData);
+      setSettings(settingsData);
+      setQuestions(questionData);
+      setRules(ruleData);
+      setGuidance(guidanceData);
 
-        if (!active) return;
-        setOverview(overviewData);
-        setProfiles(profileData);
-        setSettings(settingsData);
-        setQuestions(questionData);
-        setRules(ruleData);
-        setGuidance(guidanceData);
-
-        setQuestionsJson(pretty(questionData));
-        setRulesJson(pretty(ruleData));
-        setGuidanceJson(pretty(guidanceData));
-      } catch (e: any) {
-        const msg = e.response?.data?.message || s.loadError;
-        if (active) setError(msg);
-      } finally {
-        if (active) setLoading(false);
-      }
+      setQuestionsJson(pretty(questionData));
+      setRulesJson(pretty(ruleData));
+      setGuidanceJson(pretty(guidanceData));
+    } catch (e: any) {
+      const msg = e.response?.data?.message || s.loadError;
+      if (!activeRef || activeRef.current) setError(msg);
+    } finally {
+      if (!activeRef || activeRef.current) setLoading(false);
     }
+  }
 
-    void load();
-
+  useEffect(() => {
+    const activeRef = { current: true };
+    void reloadData(activeRef);
     return () => {
-      active = false;
+      activeRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const selectedProfile = useMemo(
@@ -160,6 +165,7 @@ export default function AiServiceFinderAdminPage() {
         enabledCapabilities: settings.enabledCapabilities,
       });
       setMessage(s.profileSavedMsg);
+      await reloadData();
     } catch (e: any) {
       setError(e.response?.data?.message || s.saveFailedError);
     } finally {
@@ -187,6 +193,7 @@ export default function AiServiceFinderAdminPage() {
         })),
       });
       setMessage(s.questionsSavedMsg);
+      await reloadData();
     } catch (e: any) {
       setError(e.response?.data?.message || s.questionsSaveError);
     } finally {
@@ -213,6 +220,7 @@ export default function AiServiceFinderAdminPage() {
         })),
       });
       setMessage(s.rulesSavedMsg);
+      await reloadData();
     } catch (e: any) {
       setError(e.response?.data?.message || s.rulesSaveError);
     } finally {
@@ -240,6 +248,7 @@ export default function AiServiceFinderAdminPage() {
         })),
       });
       setMessage(s.guidanceSavedMsg);
+      await reloadData();
     } catch (e: any) {
       setError(e.response?.data?.message || s.guidanceSaveError);
     } finally {
@@ -307,6 +316,19 @@ export default function AiServiceFinderAdminPage() {
         </button>
         {guideOpen && (
           <div className="px-4 pb-4 text-sm text-gray-600 space-y-3">
+            <div className="rounded-lg border border-[#E5E7EB] bg-white p-3 space-y-2">
+              <p className="flex items-center gap-1.5 font-semibold text-[#14162B]">
+                <Users size={14} className="text-[#6355E4]" />
+                {s.guideCustomerViewHeading}
+              </p>
+              <p>{s.guideCustomerViewIntro}</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>{s.guideCustomerViewStep1}</li>
+                <li>{s.guideCustomerViewStep2}</li>
+                <li>{s.guideCustomerViewStep3}</li>
+              </ul>
+              <p className="text-gray-500">{s.guideCustomerViewNote}</p>
+            </div>
             <p>
               {s.guideIntroPre}<strong>{s.guideIntroBold}</strong>{s.guideIntroPost}
             </p>
@@ -319,7 +341,7 @@ export default function AiServiceFinderAdminPage() {
               <li>{s.guideStep6Pre}<strong>{s.guideStep6Bold}</strong>{s.guideStep6Post}</li>
             </ol>
             <p className="text-gray-500">
-              {s.guideFooterPre}<strong>{s.guideFooterBold}</strong>{s.guideFooterMid}
+              {s.guideFooterPre}<strong>{s.guideFooterBold}</strong>{s.guideFooterAgencyNote}{s.guideFooterMid}
               {' '}<Info size={12} className="inline align-text-bottom text-gray-400" />{s.guideFooterPost}
             </p>
           </div>

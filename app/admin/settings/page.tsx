@@ -228,6 +228,7 @@ export default function AdminSettingsPage() {
     imprintUrl: '',
   });
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
@@ -293,7 +294,11 @@ export default function AdminSettingsPage() {
       const res = await api.get('/tenant/settings');
       const data = res.data?.data ?? res.data;
       if (data) setSettings(data);
-    } catch {}
+    } catch (err: any) {
+      // A 401 here is an expired session, not "no settings" — without this, the page below
+      // just renders the full form with every field blank, with no indication why.
+      if (err?.response?.status === 401) setSessionExpired(true);
+    }
     finally { setLoading(false); }
   }
 
@@ -517,6 +522,23 @@ export default function AdminSettingsPage() {
     return (
       <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center">
         <div className="w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (sessionExpired) {
+    return (
+      <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center p-6">
+        <div className="text-center">
+          <p className="font-medium text-[#111318]">{t.admin.bookingsPage.sessionExpiredTitle}</p>
+          <p className="text-sm text-[#6B7280] mt-1">{t.admin.bookingsPage.sessionExpiredDesc}</p>
+          <button
+            className="mt-4 px-4 py-2 rounded-lg bg-[#6355E4] text-white text-sm font-medium"
+            onClick={() => { window.location.href = '/admin/login'; }}
+          >
+            {t.admin.bookingsPage.sessionExpiredLoginBtn}
+          </button>
+        </div>
       </div>
     );
   }
