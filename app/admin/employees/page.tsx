@@ -162,9 +162,23 @@ export default function EmployeesPage() {
 
   const { confirm, dialog } = useConfirm();
 
+  // Found during live pre-launch testing: the Gesamt/Aktiv/Inaktiv stats tile was computed from
+  // `employees`, which only ever holds the toggle-filtered set — with "Inaktive anzeigen" off
+  // (the default), inactive employees are never even fetched, so the tile always showed 0
+  // Inaktiv regardless of how many actually exist. Counts are now always based on the complete
+  // list, independent of what "Inaktive anzeigen" is currently showing.
+  const [allEmployeesCount, setAllEmployeesCount] = useState({ total: 0, active: 0 });
+
   const load = useCallback(async () => {
     setLoading(true); setError(null);
-    try { setEmployees(await getEmployees(!showInactive)); }
+    try {
+      const [filtered, all] = await Promise.all([
+        getEmployees(!showInactive),
+        getEmployees(false),
+      ]);
+      setEmployees(filtered);
+      setAllEmployeesCount({ total: all.length, active: all.filter(e => e.isActive).length });
+    }
     catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   }, [showInactive]);
@@ -489,8 +503,8 @@ export default function EmployeesPage() {
     }
   }
 
-  const activeCount = employees.filter(e => e.isActive).length;
-  const inactiveCount = employees.length - activeCount;
+  const activeCount = allEmployeesCount.active;
+  const inactiveCount = allEmployeesCount.total - allEmployeesCount.active;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white p-4 sm:p-6 lg:p-8">
@@ -745,7 +759,7 @@ export default function EmployeesPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: s.statTotal, value: employees.length, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
+            { label: s.statTotal, value: allEmployeesCount.total, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
             { label: t.admin.active, value: activeCount, cls: "text-[#6355E4]", glow: "#6355E4" },
             { label: t.admin.inactive, value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#ECEBF2" },
           ].map(({ label, value, cls, glow }) => (
