@@ -590,6 +590,11 @@ export default function AdminBookingsPage() {
         <div>
           <div className="font-mono text-xs font-semibold text-[#8A8A8A]">{booking.bookingNumber}</div>
           <div className="font-semibold text-[#1E1E1E] mt-0.5">{booking.customerName}</div>
+          {booking.bookingContactName && (
+            <div className="text-xs text-[#8A8A8A] italic">
+              {fillTemplate(t.admin.bookingsPage.bookedAsTemplate, { name: booking.bookingContactName })}
+            </div>
+          )}
         </div>
         <Chip color={getStatusColor(booking.status)} size="sm" variant="flat">
           {getStatusLabel(booking.status)}
@@ -1104,6 +1109,11 @@ export default function AdminBookingsPage() {
                           </td>
                           <td className="px-5 py-4">
                             <div className="font-semibold text-[#1E1E1E] text-sm">{booking.customerName}</div>
+                            {booking.bookingContactName && (
+                              <div className="text-xs text-[#8A8A8A] italic">
+                                {fillTemplate(t.admin.bookingsPage.bookedAsTemplate, { name: booking.bookingContactName })}
+                              </div>
+                            )}
                             {booking.customerEmail
                               ? <div className="text-xs text-[#8A8A8A] break-all">{booking.customerEmail}</div>
                               : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full w-fit mt-0.5"><Mail size={10} />{t.admin.bookingsPage.noEmail}</div>

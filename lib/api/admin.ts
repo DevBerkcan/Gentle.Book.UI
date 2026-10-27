@@ -415,6 +415,7 @@ export interface BookingListItem {
   createdAt: string;
   redeemedVoucherCode?: string | null;
   voucherDiscountAmount?: number | null;
+  bookingContactName?: string | null;
 }
 
 export interface PagedResponse<T> {
