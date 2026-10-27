@@ -61,12 +61,13 @@ export default function SuperAdminDashboard() {
   const [pendingAiBudgetRequests, setPendingAiBudgetRequests] = useState<Awaited<ReturnType<typeof superAdminApi.getAiBudgetRequests>>['items']>([]);
   const [loading,        setLoading]        = useState(true);
   const [loadError,      setLoadError]      = useState<string | null>(null);
+  const [planPrices,     setPlanPrices]     = useState<Record<string, number>>({});
 
   async function load() {
     setLoading(true);
     setLoadError(null);
     try {
-      const [s, t, a, ov, req, risk, ai, aiBudgetReq] = await Promise.all([
+      const [s, t, a, ov, req, risk, ai, aiBudgetReq, pricing] = await Promise.all([
         superAdminApi.getStats(),
         superAdminApi.getTenants(1, 100),
         superAdminApi.getActivity(20),
@@ -75,6 +76,7 @@ export default function SuperAdminDashboard() {
         superAdminApi.getAtRiskSubscriptions().catch(() => ({ cancelling: [], dunning: [], aiCostRisk: [], totalAtRisk: 0 })),
         superAdminApi.getAiUsage().catch(() => null),
         superAdminApi.getAiBudgetRequests('Pending').catch(() => ({ items: [], pendingCount: 0 })),
+        superAdminApi.getPlanPricing().catch(() => []),
       ]);
       setStats(s);
       setTenants(t.items);
@@ -84,6 +86,7 @@ export default function SuperAdminDashboard() {
       setDunning(risk.dunning);
       setAiUsage(ai);
       setPendingAiBudgetRequests(aiBudgetReq.items);
+      setPlanPrices(Object.fromEntries(pricing.map((p) => [p.plan, p.monthlyPrice])));
     } catch (err: any) {
       setLoadError(err.response?.data?.message || err.message || 'Daten konnten nicht geladen werden');
     }
@@ -101,8 +104,14 @@ export default function SuperAdminDashboard() {
     Professional: tenants.filter(t => t.subscription?.plan === 'Professional' && !t.subscription?.isInTrial).length,
     Agency:       tenants.filter(t => t.subscription?.plan === 'Agency' && !t.subscription?.isInTrial).length,
   };
-  const getPlanPriceLabel = (displayName: string) => {
-    const price = stats?.planDistribution?.find(p => p.plan === displayName)?.monthlyPrice;
+  // Found during further live pre-launch testing: deriving this from stats.planDistribution
+  // (built server-side from only the plans with an active subscriber right now) meant it could
+  // go missing entirely, and still left this page as the only one of four not calling the
+  // canonical pricing endpoint directly like the others (tenants list, tenant detail,
+  // subscription requests) already do. Fetched directly here too now, for one single source of
+  // truth across all four.
+  const getPlanPriceLabel = (planEnumName: string) => {
+    const price = planPrices[planEnumName];
     return price != null ? `€${price}` : 'Preis unbekannt';
   };
 
@@ -286,7 +295,7 @@ export default function SuperAdminDashboard() {
             // editor (e.g. Starter set to 1€) never showed up here — unlike every other price
             // display on this page, which already reads stats.planDistribution's live value.
             { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: `Starter (${getPlanPriceLabel('Starter')})` },
-            { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: `Pro (${getPlanPriceLabel('Pro')})` },
+            { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: `Pro (${getPlanPriceLabel('Professional')})` },
             { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Agency (auf Anfrage)' },
           ].map(({ plan, count, color, bg, label }) => (
             <div

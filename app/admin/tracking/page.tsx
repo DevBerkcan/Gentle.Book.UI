@@ -7,8 +7,8 @@ import { useAuth } from "@/lib/contexts/AuthContext";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import {
-  TrendingUp, Users, BarChart3, MousePointerClick,
-  Calendar, Instagram, MapPin, MessageCircle, FileText, Shield,
+  TrendingUp, Users, BarChart3,
+  Calendar,
   Clock, Eye, DollarSign, AlertTriangle,
 } from "lucide-react";
 import { HelpTip } from "@/components/ui/help-tip";
@@ -16,7 +16,6 @@ import {
   getTrackingStatistics, getRevenueStatistics, getStatistics,
   type SimplifiedTrackingStatistics, type RevenueStatistics, type DashboardStatistics,
 } from "@/lib/api/admin";
-import { socialLinks, footerLinks } from "@/lib/config";
 import { formatPrice } from "@/lib/utils/currency";
 import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 
@@ -28,16 +27,6 @@ import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 // accent:     #6355E4   accent-bg: #EEEBFC   accent-bdr: #C7D2FE
 // success:    #059669   error: #EF4444   warning: #D97706
 // ─────────────────────────────────────────────────────────────────────────────
-
-const getIconForLink = (linkName: string) => {
-  if (linkName.includes("Online buchen")) return Calendar;
-  if (linkName.includes("Instagram"))    return Instagram;
-  if (linkName.includes("Route"))        return MapPin;
-  if (linkName.includes("WhatsApp"))     return MessageCircle;
-  if (linkName.includes("Impressum"))    return FileText;
-  if (linkName.includes("Datenschutz"))  return Shield;
-  return MousePointerClick;
-};
 
 // ── Small reusable stat tile ──────────────────────────────────────────────────
 function OverviewTile({
@@ -221,23 +210,8 @@ export default function TrackingPage() {
 
   // ── Derived values ────────────────────────────────────────────────────────
 
-  const expectedLinks = [
-    ...socialLinks.map((l) => l.label),
-    ...footerLinks.map((l) => `Footer: ${l.label}`),
-  ];
-
-  const allLinkStats = expectedLinks
-    .map((linkName) => {
-      const found = stats.linkClicks.find((l) => l.linkName === linkName);
-      return { linkName, clickCount: found?.clickCount || 0, percentage: found?.percentage || 0 };
-    })
-    .sort((a, b) => b.clickCount - a.clickCount);
-
   const bookingConversion = stats.totalPageViews > 0
     ? (stats.totalBookings / stats.totalPageViews) * 100 : 0;
-  const clickThroughRate = stats.totalPageViews > 0
-    ? (stats.totalLinkClicks / stats.totalPageViews) * 100 : 0;
-  const topLink    = stats.linkClicks.slice().sort((a, b) => b.clickCount - a.clickCount)[0] ?? null;
   const topService = dashboardStats?.popularServices?.[0] ?? null;
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -255,7 +229,7 @@ export default function TrackingPage() {
         {/* ── Conversion Insights ───────────────────────────────────────── */}
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
           <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-3">{s.conversionLabel}</p>
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 gap-3 mb-4">
             {/* Booking conversion */}
             <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
               <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-xl bg-[#059669]" />
@@ -264,24 +238,11 @@ export default function TrackingPage() {
               </div>
               <p className="text-2xl font-bold text-[#111318]">{bookingConversion.toFixed(1)}%</p>
             </div>
-            {/* CTR */}
-            <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
-              <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-xl bg-[#D97706]" />
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#D97706] mb-1">
-                <BarChart3 size={11} />{s.ctrLabel}
-              </div>
-              <p className="text-2xl font-bold text-[#111318]">{clickThroughRate.toFixed(1)}%</p>
-            </div>
           </div>
 
           {/* Highlight rows */}
           <div className="space-y-2">
             {[
-              {
-                label: s.mostClickedLinkLabel,
-                value: topLink ? fillTemplate(s.clicksTemplate, { name: topLink.linkName, count: topLink.clickCount }) : s.noClicksYet,
-                icon: <MousePointerClick size={14} className="text-[#6355E4]" />,
-              },
               {
                 label: s.topServiceLabel,
                 value: topService ? fillTemplate(s.bookingsTemplate, { name: topService.serviceName, count: topService.bookingCount }) : s.noDataYet,
@@ -308,13 +269,6 @@ export default function TrackingPage() {
             icon={Eye}
             accent="#6355E4"
             helpText={s.totalPageViewsHelp}
-          />
-          <OverviewTile
-            label={s.totalClicksLabel}
-            value={stats.totalLinkClicks}
-            icon={MousePointerClick}
-            accent="#8B5CF6"
-            helpText={s.totalClicksHelp}
           />
           <OverviewTile
             label={s.totalBookingsLabel}
@@ -385,74 +339,6 @@ export default function TrackingPage() {
           />
         </div>
 
-        {/* ── Link Click Stats ──────────────────────────────────────────── */}
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#F3F4F6]">
-            <div className="w-8 h-8 rounded-xl bg-[#EEEBFC] flex items-center justify-center">
-              <MousePointerClick size={15} className="text-[#6355E4]" />
-            </div>
-            <div>
-              <p className="font-semibold text-sm text-[#111318]">{s.clicksByLinkTitle}</p>
-              <p className="text-[11px] text-[#9CA3AF]">{s.clicksByLinkSubtitle}</p>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="p-5">
-            {allLinkStats.filter((l) => l.clickCount > 0).length === 0 ? (
-              <div className="text-center py-12">
-                <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <MousePointerClick size={20} className="text-[#D1D5DB]" />
-                </div>
-                <p className="text-sm font-medium text-[#374151]">{s.noClicksYetTitle}</p>
-                <p className="text-xs text-[#9CA3AF] mt-1">{s.noClicksYetDesc}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {allLinkStats
-                  .filter((l) => l.clickCount > 0)
-                  .map((link) => {
-                    const Icon = getIconForLink(link.linkName);
-                    const isFooter = link.linkName.startsWith("Footer: ");
-                    const displayName = link.linkName.replace("Footer: ", "");
-                    return (
-                      <div key={link.linkName} className="space-y-2">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-7 h-7 rounded-lg bg-[#EEEBFC] flex items-center justify-center flex-shrink-0">
-                              <Icon size={13} className="text-[#6355E4]" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-[#111318] truncate">{displayName}</span>
-                                {isFooter && (
-                                  <span className="text-[9px] font-semibold text-[#9CA3AF] bg-[#F3F4F6] px-1.5 py-0.5 rounded-full uppercase tracking-wide flex-shrink-0">
-                                    {s.footerBadge}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(s.clicksCountTemplate, { count: link.clickCount })}</p>
-                            </div>
-                          </div>
-                          <span className="text-base font-bold text-[#111318] tabular-nums flex-shrink-0">
-                            {link.percentage.toFixed(1)}%
-                          </span>
-                        </div>
-                        {/* Progress bar */}
-                        <div className="w-full bg-[#F3F4F6] rounded-full h-1.5">
-                          <div
-                            className="h-1.5 rounded-full bg-[#6355E4] transition-all duration-700"
-                            style={{ width: `${link.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
