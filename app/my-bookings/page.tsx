@@ -13,6 +13,7 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure
 import { Calendar, Mail, AlertCircle, X, CheckCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { requestMyBookingsLink, getMyBookings, getMyLoyaltyPoints, cancelBooking, type BookingResponse } from "@/lib/api/booking";
+import { formatPrice } from "@/lib/utils/currency";
 
 function MyBookingsContent() {
   const searchParams = useSearchParams();
@@ -65,11 +66,11 @@ function MyBookingsContent() {
   }
 
   async function handleCancel() {
-    if (!selectedBooking) return;
+    if (!selectedBooking || !token) return;
 
     setCancelling(true);
     try {
-      await cancelBooking(selectedBooking.id);
+      await cancelBooking(selectedBooking.id, token);
       setBookings((prev) =>
         prev.map((b) =>
           b.id === selectedBooking.id ? { ...b, status: "Cancelled" } : b
@@ -283,7 +284,7 @@ function MyBookingsContent() {
                         <div>
                           <div className="text-sm text-[#8A8A8A] mb-1">Preis</div>
                           <div className="font-semibold text-[#ECEBF2]">
-                            ab {booking.booking.price.toFixed(2)} {booking.booking.currency ?? 'CHF'}
+                            {formatPrice(booking.booking.price, booking.booking.currency ?? 'EUR')}
                           </div>
                         </div>
                       </div>

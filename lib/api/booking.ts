@@ -301,13 +301,16 @@ export async function getMyLoyaltyPoints(token: string): Promise<{ tenantName: s
   return res.json();
 }
 
+/** Cancel a booking from the /my-bookings portal — token is the same magic-link token used to
+ * load the list (getMyBookings), not a Bearer JWT. The old DELETE /bookings/{id} required staff
+ * auth the portal never has, so every cancellation from there silently 401'd. */
 export async function cancelBooking(
   bookingId: string,
+  token: string,
   reason?: string
 ): Promise<{ success: boolean; message: string }> {
-  const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
+  const res = await fetch(`${API_BASE_URL}/bookings/my/${bookingId}?token=${encodeURIComponent(token)}`, {
     method: "DELETE",
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       reason: reason || "Vom Kunden storniert",
