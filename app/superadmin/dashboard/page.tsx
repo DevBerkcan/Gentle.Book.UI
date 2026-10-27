@@ -101,6 +101,10 @@ export default function SuperAdminDashboard() {
     Professional: tenants.filter(t => t.subscription?.plan === 'Professional' && !t.subscription?.isInTrial).length,
     Agency:       tenants.filter(t => t.subscription?.plan === 'Agency' && !t.subscription?.isInTrial).length,
   };
+  const getPlanPriceLabel = (displayName: string) => {
+    const price = stats?.planDistribution?.find(p => p.plan === displayName)?.monthlyPrice;
+    return price != null ? `€${price}` : 'Preis unbekannt';
+  };
 
   const recentTenants = [...tenants]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -277,8 +281,12 @@ export default function SuperAdminDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { plan: 'Trial',        count: planCounts.Trial,        color: '#6b7280', bg: '#f3f4f6', label: 'Im Trial' },
-            { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: 'Starter (€29)' },
-            { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: 'Pro (€59)' },
+            // Found during live pre-launch testing: these two prices were hardcoded to the
+            // code-level defaults (29/59), so a SuperAdmin test-override via the plan-pricing
+            // editor (e.g. Starter set to 1€) never showed up here — unlike every other price
+            // display on this page, which already reads stats.planDistribution's live value.
+            { plan: 'Starter',      count: planCounts.Starter,      color: '#3b82f6', bg: '#eff6ff', label: `Starter (${getPlanPriceLabel('Starter')})` },
+            { plan: 'Professional', count: planCounts.Professional, color: '#8b5cf6', bg: '#f5f3ff', label: `Pro (${getPlanPriceLabel('Pro')})` },
             { plan: 'Agency',       count: planCounts.Agency,       color: '#f59e0b', bg: '#fffbeb', label: 'Agency (auf Anfrage)' },
           ].map(({ plan, count, color, bg, label }) => (
             <div

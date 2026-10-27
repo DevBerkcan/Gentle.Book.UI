@@ -127,13 +127,14 @@ const PLAN_STYLES: Record<string, { cls: string; label: string }> = {
 };
 
 function PlanQuickChange({
-  tenantId, currentPlan, isInTrial, isChanging, onChange,
+  tenantId, currentPlan, isInTrial, isChanging, onChange, planPrices,
 }: {
   tenantId: string;
   currentPlan?: string;
   isInTrial?: boolean;
   isChanging: boolean;
   onChange: (plan: string) => void;
+  planPrices: Record<string, number>;
 }) {
   const plan = isInTrial ? 'Trial' : (currentPlan ?? 'Trial');
   const style = PLAN_STYLES[plan] ?? PLAN_STYLES['Trial'];
@@ -152,8 +153,8 @@ function PlanQuickChange({
           title="Plan ändern"
         >
           <option value="Trial">Trial</option>
-          <option value="Starter">Starter (€29)</option>
-          <option value="Professional">Pro (€59)</option>
+          <option value="Starter">Starter{planPrices.Starter != null ? ` (€${planPrices.Starter})` : ''}</option>
+          <option value="Professional">Pro{planPrices.Professional != null ? ` (€${planPrices.Professional})` : ''}</option>
           <option value="Agency">Agency (auf Anfrage)</option>
         </select>
       )}
@@ -215,14 +216,22 @@ export default function TenantsPage() {
   const [error, setError] = useState('');
   const { confirm, dialog } = useConfirm();
   const { prompt, dialog: promptDialog } = usePrompt();
+  // Found during live pre-launch testing: the "Plan ändern" dropdown's (€29)/(€59) hints were
+  // hardcoded to the code-level defaults, so a SuperAdmin price override (e.g. a test price of
+  // 1€) never showed up here, unlike every other price display that already reads this live.
+  const [planPrices, setPlanPrices] = useState<Record<string, number>>({});
 
   useEffect(() => { load(); }, []);
 
   async function load() {
     setLoading(true);
     try {
-      const res = await superAdminApi.getTenants();
+      const [res, pricing] = await Promise.all([
+        superAdminApi.getTenants(),
+        superAdminApi.getPlanPricing().catch(() => []),
+      ]);
       setTenants(res.items);
+      setPlanPrices(Object.fromEntries(pricing.map(p => [p.plan, p.monthlyPrice])));
     } catch { setError('Laden fehlgeschlagen'); }
     setLoading(false);
   }
@@ -700,6 +709,7 @@ export default function TenantsPage() {
                       isInTrial={t.subscription?.isInTrial}
                       isChanging={changingPlan === t.id}
                       onChange={(plan) => handleChangePlan(t, plan)}
+                      planPrices={planPrices}
                     />
                   </td>
 

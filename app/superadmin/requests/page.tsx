@@ -17,12 +17,6 @@ const PLAN_COLORS: Record<string, string> = {
   Agency: 'bg-amber-50 text-amber-700 border-amber-200',
 };
 
-const PLAN_PRICES: Record<string, string> = {
-  Starter: '€29',
-  Professional: '€59',
-  Agency: 'Preis auf Anfrage',
-};
-
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: any }> = {
   Pending:   { label: 'Offen',       color: 'bg-amber-50 text-amber-700',  icon: Clock },
   Offered:   { label: 'Angebot gesendet', color: 'bg-blue-50 text-blue-700', icon: Send },
@@ -51,6 +45,11 @@ export default function SubscriptionRequestsPage() {
   const [offerError, setOfferError] = useState('');
   const [offerAiCost, setOfferAiCost] = useState<{ cost: number; requests: number } | null>(null);
   const [avgAgencyAiCost, setAvgAgencyAiCost] = useState<number | null>(null);
+  // Found during live pre-launch testing: the PLAN_PRICES constant below was hardcoded to the
+  // code-level defaults, so a SuperAdmin price override (e.g. a test price of 1€) never showed
+  // up on this review page — a SuperAdmin could approve a request thinking it costs €29/€59
+  // when the actual configured price is something else entirely.
+  const [planPrices, setPlanPrices] = useState<Record<string, number>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -66,6 +65,11 @@ export default function SubscriptionRequestsPage() {
   }, [activeTab]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    superAdminApi.getPlanPricing()
+      .then((pricing) => setPlanPrices(Object.fromEntries(pricing.map((p) => [p.plan, p.monthlyPrice]))))
+      .catch(() => {});
+  }, []);
 
   const handleActivate = async (item: SubscriptionRequestItem) => {
     if (item.requestedPlan === 'Agency') {
@@ -230,7 +234,7 @@ export default function SubscriptionRequestsPage() {
 
                   <div className="mt-2 flex items-center gap-3 flex-wrap">
                     <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${PLAN_COLORS[item.requestedPlan] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                      {item.requestedPlan} — {PLAN_PRICES[item.requestedPlan] ?? ''}{item.requestedPlan === 'Agency' ? '' : '/Mo'}
+                      {item.requestedPlan} — {item.requestedPlan === 'Agency' ? 'Preis auf Anfrage' : (planPrices[item.requestedPlan] != null ? `€${planPrices[item.requestedPlan]}/Mo` : '')}
                     </span>
                     <a
                       href={`mailto:${item.contactEmail}`}

@@ -60,6 +60,10 @@ export default function TenantDetailPage() {
   const [domainUpdating, setDomainUpdating] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  // Found during live pre-launch testing: the "Plan wechseln" cards' €29/€59 prices were
+  // hardcoded to the code-level defaults, so a SuperAdmin price override (e.g. a test price of
+  // 1€) never showed up here.
+  const [planPrices, setPlanPrices] = useState<Record<string, number>>({});
   const { confirm, dialog } = useConfirm();
   const { prompt, dialog: promptDialog } = usePrompt();
 
@@ -114,6 +118,12 @@ export default function TenantDetailPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    superAdminApi.getPlanPricing()
+      .then((pricing) => setPlanPrices(Object.fromEntries(pricing.map((p) => [p.plan, p.monthlyPrice]))))
+      .catch(() => {});
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -1132,7 +1142,7 @@ export default function TenantDetailPage() {
                       {
                         value: 'Starter',
                         label: 'Starter',
-                        price: '€29/Monat',
+                        price: planPrices.Starter != null ? `€${planPrices.Starter}/Monat` : '€29/Monat',
                         employees: '2 Mitarb.',
                         color: '#3b82f6',
                         bg: '#eff6ff',
@@ -1141,7 +1151,7 @@ export default function TenantDetailPage() {
                       {
                         value: 'Professional',
                         label: 'Professional',
-                        price: '€59/Monat',
+                        price: planPrices.Professional != null ? `€${planPrices.Professional}/Monat` : '€59/Monat',
                         employees: '10 Mitarb.',
                         color: '#8b5cf6',
                         bg: '#f5f3ff',
