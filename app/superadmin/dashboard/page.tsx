@@ -98,11 +98,15 @@ export default function SuperAdminDashboard() {
   const expiringSoon = tenants.filter(
     t => t.subscription?.isInTrial && (t.subscription.trialDaysRemaining ?? 99) <= 7
   );
+  // Found during live pre-launch testing: these per-plan tiles counted by plan name alone, with
+  // no check on subscription status at all — unlike "Aktive Abos" (stats.activeSubscriptions,
+  // which does filter by status) — so a cancelled/purged tenant still showing "Agency" as its
+  // last-set plan kept counting here indefinitely.
   const planCounts = {
     Trial:        tenants.filter(t => t.subscription?.isInTrial).length,
-    Starter:      tenants.filter(t => t.subscription?.plan === 'Starter' && !t.subscription?.isInTrial).length,
-    Professional: tenants.filter(t => t.subscription?.plan === 'Professional' && !t.subscription?.isInTrial).length,
-    Agency:       tenants.filter(t => t.subscription?.plan === 'Agency' && !t.subscription?.isInTrial).length,
+    Starter:      tenants.filter(t => t.subscription?.plan === 'Starter' && t.subscription?.status === 'Active' && !t.subscription?.isInTrial).length,
+    Professional: tenants.filter(t => t.subscription?.plan === 'Professional' && t.subscription?.status === 'Active' && !t.subscription?.isInTrial).length,
+    Agency:       tenants.filter(t => t.subscription?.plan === 'Agency' && t.subscription?.status === 'Active' && !t.subscription?.isInTrial).length,
   };
   // Found during further live pre-launch testing: deriving this from stats.planDistribution
   // (built server-side from only the plans with an active subscriber right now) meant it could
@@ -119,8 +123,11 @@ export default function SuperAdminDashboard() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  const statCards: { label: string; value: number; icon: React.ReactNode; accent: string; bg: string; help: string; suffix?: string }[] = stats ? [
-    { label: 'MRR',               value: stats.mrr ?? 0,           icon: <TrendingUp size={18} />, accent: '#16a34a', bg: '#f0fdf4', suffix: ' €', help: 'Monatlich wiederkehrender Umsatz: Summe der Monatspreise aller aktiven Abos' },
+  const statCards: { label: string; value: number; icon: React.ReactNode; accent: string; bg: string; help: string; suffix?: string; formatFn?: (n: number) => string }[] = stats ? [
+    // Found during live pre-launch testing: AnimatedNumber rounds to a whole number whenever no
+    // formatFn is given — fine for the other cards (plain counts), but MRR is a Euro amount that
+    // can genuinely be sub-1 (e.g. a 0.01€ test price), and was displaying as a flat "0 €".
+    { label: 'MRR',               value: stats.mrr ?? 0,           icon: <TrendingUp size={18} />, accent: '#16a34a', bg: '#f0fdf4', suffix: ' €', formatFn: (n: number) => n.toFixed(2), help: 'Monatlich wiederkehrender Umsatz: Summe der Monatspreise aller aktiven Abos' },
     { label: 'Systeme gesamt',    value: stats.totalTenants,       icon: <Building2 size={18} />, accent: '#3b82f6', bg: '#eff6ff', help: 'Alle registrierten Buchungssysteme auf der Plattform (aktiv + inaktiv)' },
     { label: 'Aktiv',             value: stats.activeTenants,      icon: <CheckCircle size={18} />, accent: '#22c55e', bg: '#f0fdf4', help: 'Systeme die aktuell aktiv sind und von Kunden genutzt werden können' },
     { label: 'Im Trial',          value: stats.trialTenants,       icon: <Clock size={18} />, accent: '#eab308', bg: '#fefce8', help: 'Systeme die sich noch in der kostenlosen 14-Tage-Testphase befinden' },
@@ -189,14 +196,14 @@ export default function SuperAdminDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-7 gap-3">
-          {statCards.map(({ label, value, icon, accent, bg, help, suffix }) => (
+          {statCards.map(({ label, value, icon, accent, bg, help, suffix, formatFn }) => (
             <GlowingEffect key={label} glowColor={accent} spread={45}>
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-[1] hover:-translate-y-0.5 transition-all duration-200">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3" style={{ background: bg }}>
                   <span style={{ color: accent }}>{icon}</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 leading-none">
-                  <AnimatedNumber value={value} duration={1.4} />{suffix ?? ''}
+                  <AnimatedNumber value={value} duration={1.4} formatFn={formatFn} />{suffix ?? ''}
                 </p>
                 <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
                   {label}
