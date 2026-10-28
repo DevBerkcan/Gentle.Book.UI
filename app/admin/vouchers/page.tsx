@@ -11,7 +11,7 @@ import type { Translations } from "@/lib/i18n/translations";
 import { useConfirm } from "@/components/ConfirmDialog";
 
 const inputCls =
-  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
+  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 function getStatusLabel(t: Translations): Record<AdminVoucher["status"], { label: string; color: string; bg: string }> {
   const s = t.admin.vouchersPage;
@@ -169,7 +169,7 @@ export default function AdminVouchersPage() {
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
-            <p className="text-xs text-[#9CA3AF] mb-3">
+            <p className="text-xs text-gb-textMuted mb-3">
               {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
@@ -255,7 +255,7 @@ export default function AdminVouchersPage() {
               />
               {selectedCustomer && (
                 <button onClick={() => { setSelectedCustomer(null); setCustomerQuery(""); }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#111318]">
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gb-textMuted hover:text-[#111318]">
                   <X size={14} />
                 </button>
               )}
@@ -264,7 +264,7 @@ export default function AdminVouchersPage() {
                   {customerResults.map((c) => (
                     <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerResults([]); }}
                       className="w-full text-left px-3 py-2 text-sm hover:bg-[#F7F7F8]">
-                      {c.fullName} {c.email && <span className="text-[#9CA3AF]">· {c.email}</span>}
+                      {c.fullName} {c.email && <span className="text-gb-textMuted">· {c.email}</span>}
                     </button>
                   ))}
                 </div>
@@ -317,7 +317,7 @@ export default function AdminVouchersPage() {
                           {statusInfo.label}
                         </span>
                       </div>
-                      <p className="text-xs text-[#9CA3AF]">
+                      <p className="text-xs text-gb-textMuted">
                         {v.customerName ?? s.noCustomerAssigned} · {v.type === "MonetaryValue"
                           ? fillTemplate(s.monetaryRemainingTemplate, { remaining: v.remainingAmount?.toFixed(2) ?? '0.00', initial: v.initialAmount?.toFixed(2) ?? '0.00' })
                           : v.type === "PercentageDiscount"

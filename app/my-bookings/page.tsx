@@ -116,7 +116,7 @@ function MyBookingsContent() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-[#14162B] mb-3">Meine Buchungen</h1>
-          <p className="text-[#8A8A8A]">
+          <p className="text-gb-textSecondary">
             {token
               ? "Ihre Termine im Überblick"
               : "Gib deine E-Mail-Adresse ein — wir senden dir einen sicheren Zugriffslink"}
@@ -132,7 +132,7 @@ function MyBookingsContent() {
                   placeholder="deine-email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  startContent={<Mail size={18} className="text-[#8A8A8A]" />}
+                  startContent={<Mail size={18} className="text-gb-textSecondary" />}
                   isRequired
                   classNames={{
                     input: "text-[#14162B]",
@@ -149,7 +149,7 @@ function MyBookingsContent() {
                   Link anfordern
                 </Button>
               </form>
-              <p className="text-xs text-[#8A8A8A] mt-3">
+              <p className="text-xs text-gb-textSecondary mt-3">
                 Zum Schutz deiner Daten senden wir dir einen Link per E-Mail, über den du deine
                 Termine ansehen und stornieren kannst. Der Link ist 1 Stunde gültig.
               </p>
@@ -162,7 +162,7 @@ function MyBookingsContent() {
             <CardBody className="p-8 text-center">
               <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
               <h3 className="text-xl font-semibold text-[#14162B] mb-2">Prüfe dein Postfach</h3>
-              <p className="text-[#8A8A8A]">
+              <p className="text-gb-textSecondary">
                 Wenn Buchungen zu <strong>{email}</strong> existieren, haben wir dir soeben einen
                 Zugriffslink gesendet. Der Link ist 1 Stunde gültig.
               </p>
@@ -216,7 +216,7 @@ function MyBookingsContent() {
                   <h3 className="text-xl font-semibold text-[#14162B] mb-2">
                     Keine Buchungen gefunden
                   </h3>
-                  <p className="text-[#8A8A8A]">
+                  <p className="text-gb-textSecondary">
                     Für diese E-Mail-Adresse wurden keine Termine gefunden.
                   </p>
                 </CardBody>
@@ -242,7 +242,7 @@ function MyBookingsContent() {
                               {getStatusLabel(booking.status)}
                             </Chip>
                           </div>
-                          <div className="text-sm text-[#8A8A8A]">
+                          <div className="text-sm text-gb-textSecondary">
                             Buchungsnummer: {booking.bookingNumber}
                           </div>
                         </div>
@@ -263,7 +263,7 @@ function MyBookingsContent() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F6F5FA] p-4 rounded-lg border border-[#ECEBF2]/30">
                         <div>
-                          <div className="text-sm text-[#8A8A8A] mb-1">Datum</div>
+                          <div className="text-sm text-gb-textSecondary mb-1">Datum</div>
                           <div className="font-semibold text-[#14162B]">
                             {new Date(booking.booking.bookingDate).toLocaleDateString('de-DE', {
                               weekday: 'long',
@@ -275,14 +275,14 @@ function MyBookingsContent() {
                         </div>
 
                         <div>
-                          <div className="text-sm text-[#8A8A8A] mb-1">Uhrzeit</div>
+                          <div className="text-sm text-gb-textSecondary mb-1">Uhrzeit</div>
                           <div className="font-semibold text-[#14162B]">
                             {booking.booking.startTime} - {booking.booking.endTime} Uhr
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-sm text-[#8A8A8A] mb-1">Preis</div>
+                          <div className="text-sm text-gb-textSecondary mb-1">Preis</div>
                           <div className="font-semibold text-[#ECEBF2]">
                             {formatPrice(booking.booking.price, booking.booking.currency ?? 'EUR')}
                           </div>
@@ -333,11 +333,11 @@ function MyBookingsContent() {
                   <div className="font-semibold text-[#14162B] mb-2">
                     {selectedBooking.booking.serviceName}
                   </div>
-                  <div className="text-sm text-[#8A8A8A]">
+                  <div className="text-sm text-gb-textSecondary">
                     {new Date(selectedBooking.booking.bookingDate).toLocaleDateString('de-DE')} •{' '}
                     {selectedBooking.booking.startTime} - {selectedBooking.booking.endTime}
                   </div>
-                  <div className="text-sm text-[#8A8A8A] mt-2">
+                  <div className="text-sm text-gb-textSecondary mt-2">
                     Buchungsnummer: {selectedBooking.bookingNumber}
                   </div>
                 </div>
@@ -349,7 +349,7 @@ function MyBookingsContent() {
               color="default" 
               variant="light" 
               onPress={onClose}
-              className="text-[#8A8A8A]"
+              className="text-gb-textSecondary"
             >
               Abbrechen
             </Button>

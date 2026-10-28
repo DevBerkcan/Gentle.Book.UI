@@ -82,7 +82,7 @@ export default function AdminReviewsPage() {
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
-            <p className="text-xs text-[#9CA3AF] mb-3">
+            <p className="text-xs text-gb-textMuted mb-3">
               {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
@@ -130,18 +130,18 @@ export default function AdminReviewsPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statTotal}</p>
+            <p className="text-[11px] font-semibold text-gb-textMuted uppercase tracking-widest mb-2">{s.statTotal}</p>
             <p className="text-2xl font-bold text-[#111318]">{reviews.length}</p>
           </div>
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statAverageRating}</p>
+            <p className="text-[11px] font-semibold text-gb-textMuted uppercase tracking-widest mb-2">{s.statAverageRating}</p>
             <div className="flex items-center gap-2">
               <p className="text-2xl font-bold text-[#111318]">{averageRating}</p>
               <Star size={16} className="text-amber-400" fill="currentColor" />
             </div>
           </div>
           <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-            <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-2">{s.statPublished}</p>
+            <p className="text-[11px] font-semibold text-gb-textMuted uppercase tracking-widest mb-2">{s.statPublished}</p>
             <p className="text-2xl font-bold text-[#111318]">{publishedCount}</p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function AdminReviewsPage() {
                 <MessageSquareOff size={20} className="text-[#D1D5DB]" />
               </div>
               <p className="text-sm font-medium text-[#374151]">{s.noReviewsYet}</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">{s.noReviewsYetDesc}</p>
+              <p className="text-xs text-gb-textMuted mt-1">{s.noReviewsYetDesc}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
@@ -162,12 +162,12 @@ export default function AdminReviewsPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-3 mb-1.5">
                       <StarRow rating={review.rating} />
-                      <span className="text-xs text-[#9CA3AF]">
+                      <span className="text-xs text-gb-textMuted">
                         {new Date(review.createdAt).toLocaleDateString(dateLocale)}
                       </span>
                     </div>
                     <p className="text-sm font-semibold text-[#111318]">
-                      {review.customerName} <span className="text-[#9CA3AF] font-normal">· {review.serviceName}</span>
+                      {review.customerName} <span className="text-gb-textMuted font-normal">· {review.serviceName}</span>
                     </p>
                     {review.comment && (
                       <p className="text-sm text-[#6B7280] mt-1.5">{review.comment}</p>

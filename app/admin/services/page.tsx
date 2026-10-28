@@ -551,7 +551,7 @@ export default function AdminServicesPage() {
                     </div>
                     <div>
                         <div className="font-semibold text-[#1E1E1E] text-base">{service.name}</div>
-                        <div className="text-xs text-[#8A8A8A] mt-0.5">{service.categoryName}</div>
+                        <div className="text-xs text-gb-textSecondary mt-0.5">{service.categoryName}</div>
                     </div>
                 </div>
                 <Chip
@@ -565,7 +565,7 @@ export default function AdminServicesPage() {
 
             <div className="space-y-2 mb-3">
                 {service.description && (
-                    <p className="text-sm text-[#8A8A8A] line-clamp-2">{service.description}</p>
+                    <p className="text-sm text-gb-textSecondary line-clamp-2">{service.description}</p>
                 )}
                 <div className="flex flex-wrap gap-2 mt-2">
                     <span className="flex items-center gap-1 text-xs bg-[#F6F5FA] px-3 py-1.5 rounded-full">
@@ -596,7 +596,7 @@ export default function AdminServicesPage() {
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
-                <div className="text-xs text-[#8A8A8A]">
+                <div className="text-xs text-gb-textSecondary">
                     {fillTemplate(s.displayOrderTemplate, { order: service.displayOrder })}
                 </div>
                 <div className="flex gap-2">
@@ -646,7 +646,7 @@ export default function AdminServicesPage() {
                         </div>
                         <div>
                             <div className="font-semibold text-[#1E1E1E] text-base">{category.name}</div>
-                            <div className="text-xs text-[#8A8A8A] mt-0.5">
+                            <div className="text-xs text-gb-textSecondary mt-0.5">
                                 {category.services.length} Services
                             </div>
                         </div>
@@ -661,11 +661,11 @@ export default function AdminServicesPage() {
                 </div>
 
                 {category.description && (
-                    <p className="text-sm text-[#8A8A8A] mb-3 line-clamp-2">{category.description}</p>
+                    <p className="text-sm text-gb-textSecondary mb-3 line-clamp-2">{category.description}</p>
                 )}
 
                 <div className="flex items-center justify-between pt-3 border-t border-[#ECEBF2]/20">
-                    <div className="text-xs text-[#8A8A8A]">
+                    <div className="text-xs text-gb-textSecondary">
                         {fillTemplate(s.displayOrderTemplate, { order: category.displayOrder })}
                     </div>
                     <div className="flex gap-2">
@@ -711,7 +711,7 @@ export default function AdminServicesPage() {
             <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] via-[#F6F5FA] to-white flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 text-[#ECEBF2] animate-spin mx-auto mb-4" />
-                    <p className="text-[#8A8A8A]">{s.loadingData}</p>
+                    <p className="text-gb-textSecondary">{s.loadingData}</p>
                 </div>
             </div>
         );
@@ -728,7 +728,7 @@ export default function AdminServicesPage() {
                                 href="/admin"
                                 className="p-2 hover:bg-[#ECEBF2]/20 rounded-lg transition-colors lg:hidden"
                             >
-                                <ArrowLeft size={20} className="text-[#8A8A8A]" />
+                                <ArrowLeft size={20} className="text-gb-textSecondary" />
                             </Link>
                             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E]">{s.pageTitle}</h1>
                             {totalCount > 0 && viewMode !== "assignments" && (
@@ -737,7 +737,7 @@ export default function AdminServicesPage() {
                                 </span>
                             )}
                         </div>
-                        <p className="text-sm text-[#8A8A8A]">{s.pageSubtitle}</p>
+                        <p className="text-sm text-gb-textSecondary">{s.pageSubtitle}</p>
                     </div>
                     {viewMode === "services" && (
                         <Button
@@ -764,7 +764,7 @@ export default function AdminServicesPage() {
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "services"
                             ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
+                            : "bg-white text-gb-textSecondary border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("services");
@@ -777,7 +777,7 @@ export default function AdminServicesPage() {
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "categories"
                             ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
+                            : "bg-white text-gb-textSecondary border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("categories");
@@ -790,7 +790,7 @@ export default function AdminServicesPage() {
                     <Button
                         className={`flex-1 py-6 font-medium transition-all ${viewMode === "assignments"
                             ? "bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white shadow-lg shadow-[#6355E4]/20"
-                            : "bg-white text-[#8A8A8A] border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
+                            : "bg-white text-gb-textSecondary border border-[#ECEBF2]/30 hover:bg-[#F6F5FA]"
                             }`}
                         onPress={() => {
                             setViewMode("assignments");
@@ -838,7 +838,7 @@ export default function AdminServicesPage() {
                                         ? s.searchServicesPlaceholder
                                         : s.searchCategoriesPlaceholder
                                     }
-                                    startContent={<Search size={18} className="text-[#8A8A8A]" />}
+                                    startContent={<Search size={18} className="text-gb-textSecondary" />}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     onKeyDown={handleSearchKeyDown}
@@ -889,7 +889,7 @@ export default function AdminServicesPage() {
                         ) : viewMode === "services" ? (
                             // Services View
                             services.length === 0 ? (
-                                <div className="text-center py-16 text-[#8A8A8A]">
+                                <div className="text-center py-16 text-gb-textSecondary">
                                     <Scissors className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                     <p className="font-medium">{s.noServicesFound}</p>
                                     {searchTerm && (
@@ -913,12 +913,12 @@ export default function AdminServicesPage() {
                                         <table className="w-full">
                                             <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.service}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Details</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.category}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.employees}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.status}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.service}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">Details</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{s.category}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.employees}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.status}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.actions}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -936,7 +936,7 @@ export default function AdminServicesPage() {
                                                                 </div>
                                                                 <div>
                                                                     <div className="font-semibold text-[#1E1E1E] text-sm">{service.name}</div>
-                                                                    <div className="text-xs text-[#8A8A8A]">ID: {service.id.slice(-8)}</div>
+                                                                    <div className="text-xs text-gb-textSecondary">ID: {service.id.slice(-8)}</div>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -950,12 +950,12 @@ export default function AdminServicesPage() {
                                                                     <DollarSign size={10} className="text-[#6355E4]" />
                                                                     {formatPrice(service.price, service.currency)}
                                                                 </span>
-                                                                <span className="text-xs text-[#8A8A8A]">
+                                                                <span className="text-xs text-gb-textSecondary">
                                                                     #{service.displayOrder}
                                                                 </span>
                                                             </div>
                                                             {service.description && (
-                                                                <p className="text-xs text-[#8A8A8A] mt-1 line-clamp-1 max-w-[200px]">
+                                                                <p className="text-xs text-gb-textSecondary mt-1 line-clamp-1 max-w-[200px]">
                                                                     {service.description}
                                                                 </p>
                                                             )}
@@ -985,7 +985,7 @@ export default function AdminServicesPage() {
                                                                     )}
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-xs text-[#8A8A8A]">—</span>
+                                                                <span className="text-xs text-gb-textSecondary">—</span>
                                                             )}
                                                         </td>
                                                         <td className="px-5 py-4">
@@ -1051,7 +1051,7 @@ export default function AdminServicesPage() {
                         ) : viewMode === "categories" ? (
                             // Categories View
                             categories.length === 0 ? (
-                                <div className="text-center py-16 text-[#8A8A8A]">
+                                <div className="text-center py-16 text-gb-textSecondary">
                                     <Tag className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                     <p className="font-medium">{s.noCategoriesFound}</p>
                                     {searchTerm && (
@@ -1075,12 +1075,12 @@ export default function AdminServicesPage() {
                                         <table className="w-full">
                                             <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                                                 <tr>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.category}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.description}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">Services</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{s.order}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.status}</th>
-                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{s.category}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.description}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">Services</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{s.order}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.status}</th>
+                                                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.actions}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -1104,7 +1104,7 @@ export default function AdminServicesPage() {
                                                                 </div>
                                                             </td>
                                                             <td className="px-5 py-4">
-                                                                <p className="text-sm text-[#8A8A8A] line-clamp-1 max-w-[250px]">
+                                                                <p className="text-sm text-gb-textSecondary line-clamp-1 max-w-[250px]">
                                                                     {category.description || "—"}
                                                                 </p>
                                                             </td>
@@ -1113,7 +1113,7 @@ export default function AdminServicesPage() {
                                                                     {category.services.length}
                                                                 </Chip>
                                                             </td>
-                                                            <td className="px-5 py-4 text-sm text-[#8A8A8A]">
+                                                            <td className="px-5 py-4 text-sm text-gb-textSecondary">
                                                                 {category.displayOrder}
                                                             </td>
                                                             <td className="px-5 py-4">
@@ -1169,7 +1169,7 @@ export default function AdminServicesPage() {
                             // Assignments View
                             <div className="p-6">
                                 {employees.length === 0 ? (
-                                    <div className="text-center py-16 text-[#8A8A8A]">
+                                    <div className="text-center py-16 text-gb-textSecondary">
                                         <Users className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                                         <p className="font-medium">{s.noEmployeesFound}</p>
                                     </div>
@@ -1185,7 +1185,7 @@ export default function AdminServicesPage() {
                                                             </div>
                                                             <div>
                                                                 <h3 className="font-bold text-[#1E1E1E] text-lg">{employee.name}</h3>
-                                                                <p className="text-sm text-[#8A8A8A]">{employee.role}</p>
+                                                                <p className="text-sm text-gb-textSecondary">{employee.role}</p>
                                                                 {employee.specialty && (
                                                                     <p className="text-xs text-[#6355E4] mt-1">{employee.specialty}</p>
                                                                 )}
@@ -1197,7 +1197,7 @@ export default function AdminServicesPage() {
                                                     </div>
 
                                                     <div className="mb-4">
-                                                        <p className="text-xs text-[#8A8A8A] mb-2">{s.assignedServicesLabel}</p>
+                                                        <p className="text-xs text-gb-textSecondary mb-2">{s.assignedServicesLabel}</p>
                                                         <div className="flex flex-wrap gap-2">
                                                             {services
                                                                 .filter(svc => svc.assignedEmployees?.some(emp => emp.id === employee.id))
@@ -1218,7 +1218,7 @@ export default function AdminServicesPage() {
                                                                 </Chip>
                                                             )}
                                                             {employee.serviceCount === 0 && (
-                                                                <p className="text-xs text-[#8A8A8A]">{s.noServicesAssigned}</p>
+                                                                <p className="text-xs text-gb-textSecondary">{s.noServicesAssigned}</p>
                                                             )}
                                                         </div>
                                                     </div>
@@ -1248,7 +1248,7 @@ export default function AdminServicesPage() {
                         {/* Pagination - Only for services and categories */}
                         {viewMode !== "assignments" && totalPages > 1 && (
                             <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
-                                <div className="text-sm text-[#8A8A8A]">
+                                <div className="text-sm text-gb-textSecondary">
                                     {fillTemplate(s.paginationPageTemplate, { page, totalPages })}
                                 </div>
                                 <div className="flex gap-2">
@@ -1300,7 +1300,7 @@ export default function AdminServicesPage() {
                                         <div>
                                             <h2 className="text-lg font-bold text-[#1E1E1E]">{s.assignServicesBtn}</h2>
                                             {selectedEmployee && (
-                                                <p className="text-xs text-[#8A8A8A]">
+                                                <p className="text-xs text-gb-textSecondary">
                                                     {selectedEmployee.name} · {selectedEmployee.role}
                                                 </p>
                                             )}
@@ -1423,7 +1423,7 @@ export default function AdminServicesPage() {
                                         isIconOnly
                                         size="sm"
                                         variant="light"
-                                        className="text-[#8A8A8A]"
+                                        className="text-gb-textSecondary"
                                         onPress={closeServicesGuide}
                                         aria-label={s.closeGuideAria}
                                     >
@@ -1572,7 +1572,7 @@ function ServiceModals({
                                     <h2 className="text-base font-bold text-[#1E1E1E]">
                                         {modalMode === "edit" ? s.serviceModalEditTitle : s.serviceModalCreateTitle}
                                     </h2>
-                                    <p className="text-xs text-[#8A8A8A]">
+                                    <p className="text-xs text-gb-textSecondary">
                                         {modalMode === "edit"
                                             ? s.serviceModalEditSubtitle
                                             : s.serviceModalCreateSubtitle}
@@ -1617,7 +1617,7 @@ function ServiceModals({
                                         onChange={(e) => setServiceForm({ ...serviceForm, durationMinutes: parseInt(e.target.value) })}
                                         isRequired
                                         isDisabled={submitting}
-                                        endContent={<Clock size={16} className="text-[#8A8A8A]" />}
+                                        endContent={<Clock size={16} className="text-gb-textSecondary" />}
                                         classNames={inputClassNames}
                                     />
                                     <Input
@@ -1683,7 +1683,7 @@ function ServiceModals({
                                         onChange={(e) => setServiceForm({ ...serviceForm, price: parseFloat(e.target.value) })}
                                         isRequired
                                         isDisabled={submitting}
-                                        startContent={<span className="text-sm font-semibold text-[#8A8A8A]">{selectedCurrencySymbol}</span>}
+                                        startContent={<span className="text-sm font-semibold text-gb-textSecondary">{selectedCurrencySymbol}</span>}
                                         classNames={inputClassNames}
                                     />
                                 </div>
@@ -1700,7 +1700,7 @@ function ServiceModals({
                                         </div>
                                         <button
                                             type="button"
-                                            className="text-[#8A8A8A] hover:text-[#1E1E1E]"
+                                            className="text-gb-textSecondary hover:text-[#1E1E1E]"
                                             onClick={() => setShowCurrencyInfo(false)}
                                             aria-label={s.closeCurrencyInfoAria}
                                         >
@@ -1734,7 +1734,7 @@ function ServiceModals({
                                     isDisabled={submitting}
                                     classNames={{
                                         trigger: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
-                                        label: "text-[#8A8A8A]",
+                                        label: "text-gb-textSecondary",
                                         value: "text-[#1E1E1E]",
                                     }}
                                 >
@@ -1771,7 +1771,7 @@ function ServiceModals({
                                     isDisabled={submitting}
                                     renderValue={(items) => {
                                         if (items.length === 0) {
-                                            return <span className="text-[#8A8A8A]">{s.pleaseSelect}</span>;
+                                            return <span className="text-gb-textSecondary">{s.pleaseSelect}</span>;
                                         }
 
                                         return (
@@ -1786,7 +1786,7 @@ function ServiceModals({
                                     }}
                                     classNames={{
                                         trigger: "bg-[#F6F5FA] border border-[#ECEBF2]/30 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
-                                        label: "text-[#8A8A8A]",
+                                        label: "text-gb-textSecondary",
                                         value: "text-[#1E1E1E]",
                                     }}
                                 >
@@ -1875,7 +1875,7 @@ function CategoryModals({
                                     <h2 className="text-base font-bold text-[#1E1E1E]">
                                         {modalMode === "edit-category" ? s.categoryModalEditTitle : s.categoryModalCreateTitle}
                                     </h2>
-                                    <p className="text-xs text-[#8A8A8A]">
+                                    <p className="text-xs text-gb-textSecondary">
                                         {modalMode === "edit-category"
                                             ? s.categoryModalEditSubtitle
                                             : s.categoryModalCreateSubtitle}
@@ -2015,7 +2015,7 @@ function ViewModals({
                                     <h2 className="text-lg font-bold text-[#1E1E1E]">
                                         {isService ? s.serviceDetailsTitle : s.categoryDetailsTitle}
                                     </h2>
-                                    <p className="text-xs text-[#8A8A8A]">
+                                    <p className="text-xs text-gb-textSecondary">
                                         {isService ? (selectedItem as AdminService).name : (selectedItem as AdminServiceCategory).name}
                                     </p>
                                 </div>
@@ -2081,15 +2081,15 @@ function ServiceViewContent({ service, categories, employees, tenantCurrency }: 
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.basicDataTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.name}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.name}</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{service.name}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">{s.locationLabel}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.locationLabel}</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{service.locationName || s.defaultLocationFallback}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.status}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.status}</p>
                         <Chip
                             size="sm"
                             variant="flat"
@@ -2114,15 +2114,15 @@ function ServiceViewContent({ service, categories, employees, tenantCurrency }: 
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.serviceDetailsSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{s.durationMinutesLabel}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.durationMinutesLabel}</p>
                         <p className="text-base font-bold text-[#6355E4]">{service.durationMinutes} {t.admin.durationUnits.minShort}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.price}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.price}</p>
                         <p className="text-base font-bold text-[#6355E4]">{formatPrice(service.price, service.currency)}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{s.order}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.order}</p>
                         <p className="text-sm font-semibold text-[#1E1E1E]">{service.displayOrder}</p>
                     </div>
                 </div>
@@ -2132,11 +2132,11 @@ function ServiceViewContent({ service, categories, employees, tenantCurrency }: 
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.assignmentSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{s.category}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.category}</p>
                         <p className="text-sm font-semibold text-[#1E1E1E]">{category?.name || "—"}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.employees}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.employees}</p>
                         <div className="flex flex-wrap gap-1 mt-1">
                             {service.assignedEmployees && service.assignedEmployees.length > 0 ? (
                                 service.assignedEmployees.map(emp => (
@@ -2168,11 +2168,11 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.basicDataTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.name}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.name}</p>
                         <p className="text-sm font-medium text-[#1E1E1E]">{category.name}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.status}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.status}</p>
                         <Chip
                             size="sm"
                             variant="flat"
@@ -2197,11 +2197,11 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                 <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{s.categoryDetailsSectionTitle}</h3>
                 <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{s.order}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.order}</p>
                         <p className="text-base font-bold text-[#1E1E1E]">{category.displayOrder}</p>
                     </div>
                     <div className="bg-white p-3 rounded-lg">
-                        <p className="text-xs text-[#8A8A8A]">{s.servicesInCategoryTitle}</p>
+                        <p className="text-xs text-gb-textSecondary">{s.servicesInCategoryTitle}</p>
                         <p className="text-base font-bold text-[#6355E4]">{categoryServices.length}</p>
                     </div>
                 </div>
@@ -2217,7 +2217,7 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <p className="font-semibold text-[#1E1E1E] text-sm">{service.name}</p>
-                                        <p className="text-xs text-[#8A8A8A] mt-1">
+                                        <p className="text-xs text-gb-textSecondary mt-1">
                                             {service.durationMinutes} {t.admin.durationUnits.minShort} · {formatPrice(service.price, service.currency)}
                                         </p>
                                     </div>
@@ -2232,7 +2232,7 @@ function CategoryViewContent({ category, services, tenantCurrency }: { category:
                             </div>
                         ))}
                         {categoryServices.length > 5 && (
-                            <p className="text-xs text-[#8A8A8A] text-center mt-2">
+                            <p className="text-xs text-gb-textSecondary text-center mt-2">
                                 {fillTemplate(s.moreServicesInCategoryTemplate, { count: categoryServices.length - 5 })}
                             </p>
                         )}
@@ -2297,13 +2297,13 @@ function AssignmentModalContent({
                     placeholder={s.searchServicesDurchsuchen}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    startContent={<Search size={18} className="text-[#8A8A8A]" />}
+                    startContent={<Search size={18} className="text-gb-textSecondary" />}
                     classNames={inputClassNames}
                 />
             </div>
 
             <div className="flex justify-between items-center mb-4">
-                <p className="text-sm text-[#8A8A8A]">
+                <p className="text-sm text-gb-textSecondary">
                     {fillTemplate(s.selectedOfTotalTemplate, { selected: selectedServices.size, total: filteredServices.length })}
                 </p>
                 <div className="flex gap-2">
@@ -2353,7 +2353,7 @@ function AssignmentModalContent({
                                     <h4 className="font-semibold text-[#1E1E1E] text-sm">
                                         {service.name}
                                     </h4>
-                                    <p className="text-xs text-[#8A8A8A]">
+                                    <p className="text-xs text-gb-textSecondary">
                                         {service.categoryName} · {service.durationMinutes} {t.admin.durationUnits.minShort} · {formatPrice(service.price, service.currency)}
                                     </p>
                                 </div>
@@ -2436,7 +2436,7 @@ function DeleteModal({
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-bold text-[#1E1E1E]">{title}</h2>
-                                    <p className="text-xs text-[#8A8A8A]">{name}</p>
+                                    <p className="text-xs text-gb-textSecondary">{name}</p>
                                 </div>
                             </div>
                         </ModalHeader>
@@ -2461,7 +2461,7 @@ function DeleteModal({
                                         </div>
                                         <div>
                                             <p className="font-semibold text-[#1E1E1E]">{name}</p>
-                                            <p className="text-xs text-[#8A8A8A]">
+                                            <p className="text-xs text-gb-textSecondary">
                                                 {isService ? t.admin.service : s.category}
                                             </p>
                                         </div>

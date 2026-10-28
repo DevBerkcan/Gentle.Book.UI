@@ -51,7 +51,7 @@ export function CustomerLoyaltyPanel({ customerId }: { customerId: string }) {
 
   if (loading) {
     return (
-      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20 flex items-center gap-2 text-xs text-[#8A8A8A]">
+      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20 flex items-center gap-2 text-xs text-gb-textSecondary">
         <Loader2 size={13} className="animate-spin" /> {t.admin.customersPage.loadingLoyaltyPoints}
       </div>
     );
@@ -101,7 +101,7 @@ export function CustomerLoyaltyPanel({ customerId }: { customerId: string }) {
         <div className="space-y-1 mt-3 max-h-32 overflow-y-auto">
           {history.map((h) => (
             <div key={h.id} className="flex items-center justify-between text-xs bg-white rounded-lg px-2.5 py-1.5">
-              <span className="text-[#8A8A8A]">
+              <span className="text-gb-textSecondary">
                 {new Date(h.createdAt).toLocaleDateString(lang === 'de' ? 'de-DE' : 'en-US')} · {h.reason === "booking_completed" ? t.admin.customersPage.reasonBookingCompleted : h.reason === "manual_redemption" ? t.admin.customersPage.reasonManualAdjustment : h.reason}
               </span>
               <span className={h.points >= 0 ? "text-[#065F46] font-semibold" : "text-[#991B1B] font-semibold"}>

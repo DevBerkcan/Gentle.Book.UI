@@ -39,7 +39,7 @@ export function Field({ label, description, error, htmlFor, children }: FieldPro
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-xs font-semibold text-[#6B7280]">{label}</label>
       {child}
-      {description && <p id={descId} className="text-[10px] text-[#9CA3AF] leading-snug">{description}</p>}
+      {description && <p id={descId} className="text-[10px] text-gb-textMuted leading-snug">{description}</p>}
       {error && <p id={errorId} className="text-[10px] text-[#D64550] leading-snug">{error}</p>}
     </div>
   );

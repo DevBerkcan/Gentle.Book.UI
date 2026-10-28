@@ -111,9 +111,9 @@ export default function AdminInboxPage() {
           </div>
         ) : notes.length === 0 ? (
           <div className="bg-white rounded-2xl border border-[#E5E7EB] p-12 text-center">
-            <Inbox size={40} className="text-[#9CA3AF] mx-auto mb-3" />
+            <Inbox size={40} className="text-gb-textMuted mx-auto mb-3" />
             <p className="text-sm font-medium text-[#374151]">{t.admin.noteNoMessages}</p>
-            <p className="text-xs text-[#9CA3AF] mt-1">{t.admin.noteNoMessagesDesc}</p>
+            <p className="text-xs text-gb-textMuted mt-1">{t.admin.noteNoMessagesDesc}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -131,7 +131,7 @@ export default function AdminInboxPage() {
                   {/* Read indicator */}
                   <div className="flex-shrink-0 mt-0.5">
                     {note.isRead
-                      ? <CheckCircle size={16} className="text-[#9CA3AF]" />
+                      ? <CheckCircle size={16} className="text-gb-textMuted" />
                       : <Circle size={16} className="text-[#6355E4] fill-[#6355E4]" />
                     }
                   </div>
@@ -144,7 +144,7 @@ export default function AdminInboxPage() {
                       </span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         note.isRead
-                          ? "bg-[#F3F4F6] text-[#9CA3AF]"
+                          ? "bg-[#F3F4F6] text-gb-textMuted"
                           : "bg-[#EEEBFC] text-[#6355E4]"
                       }`}>
                         {note.isRead ? t.admin.noteRead : t.admin.noteUnread}
@@ -156,7 +156,7 @@ export default function AdminInboxPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1 text-xs text-[#9CA3AF] flex-shrink-0">
+                  <div className="flex items-center gap-1 text-xs text-gb-textMuted flex-shrink-0">
                     <Clock size={11} />
                     {formatDate(note.createdAt)}
                   </div>

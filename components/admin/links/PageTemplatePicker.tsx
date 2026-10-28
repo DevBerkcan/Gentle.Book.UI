@@ -26,7 +26,7 @@ export function PageTemplatePicker({
         <SectionLabel icon={<LayoutGrid size={13} />} tip={s.pageTemplateTip}>
           {s.pageTemplateLabel}
         </SectionLabel>
-        <span className="text-[10px] font-semibold text-[#9CA3AF] bg-[#F3F4F6] px-2 py-0.5 rounded-full">
+        <span className="text-[10px] font-semibold text-gb-textMuted bg-[#F3F4F6] px-2 py-0.5 rounded-full">
           {fillTemplate(s.designsCountTemplate, { count: PAGE_TEMPLATES.length })}
         </span>
       </div>
@@ -62,7 +62,7 @@ export function PageTemplatePicker({
                 </div>
                 <div className={`px-2 py-1.5 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
                   <p className="text-[10px] font-bold text-[#111318] leading-tight">{tpl.name}</p>
-                  <p className="text-[9px] text-[#9CA3AF] leading-tight truncate">{getTplDesc(t, tpl.key)}</p>
+                  <p className="text-[9px] text-gb-textMuted leading-tight truncate">{getTplDesc(t, tpl.key)}</p>
                 </div>
               </MagicCard>
             </LockedItemHint>

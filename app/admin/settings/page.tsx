@@ -149,7 +149,7 @@ function SectionCard({
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{title}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{subtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{subtitle}</p>
         </div>
       </div>
       <div className="px-1 space-y-4">{children}</div>
@@ -158,7 +158,7 @@ function SectionCard({
 }
 
 const inputCls =
-  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all';
+  'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all';
 
 const selectCls =
   'w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all appearance-none';
@@ -607,7 +607,7 @@ export default function AdminSettingsPage() {
                       : <><Trash2 size={13} />{t.admin.settingsPage.deleteLogo}</>}
                   </button>
                 )}
-                <p className="text-[10px] text-[#9CA3AF]">{t.admin.settingsPage.logoFileHint}</p>
+                <p className="text-[10px] text-gb-textMuted">{t.admin.settingsPage.logoFileHint}</p>
                 {logoError && <p className="text-[11px] text-[#991B1B]">{logoError}</p>}
               </div>
             </div>
@@ -683,7 +683,7 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field label={t.admin.settingsPage.website} htmlFor="settings-website">
                 <div className="relative">
-                  <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                  <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gb-textMuted pointer-events-none" />
                   <input id="settings-website" type="url" value={settings.website} onChange={(e) => set('website', e.target.value)}
                     placeholder={t.admin.settingsPage.websitePlaceholder} className={`${inputCls} pl-8`} />
                 </div>
@@ -804,7 +804,7 @@ export default function AdminSettingsPage() {
                       </button>
                       {!location.isDefault && (
                         <button type="button" onClick={() => removeLocation(location)}
-                          className="rounded-lg p-2 text-[#9CA3AF] hover:bg-[#FEF2F2] hover:text-[#DC2626]"
+                          className="rounded-lg p-2 text-gb-textMuted hover:bg-[#FEF2F2] hover:text-[#DC2626]"
                           aria-label={fillTemplate(t.admin.settingsPage.deleteAriaLabelTemplate, { name: location.name })}>
                           <Trash2 size={14} />
                         </button>
@@ -814,7 +814,7 @@ export default function AdminSettingsPage() {
                 </div>
               ))}
               {locations.length === 0 && (
-                <div className="rounded-xl border border-dashed border-[#D1D5DB] p-5 text-center text-xs text-[#9CA3AF]">
+                <div className="rounded-xl border border-dashed border-[#D1D5DB] p-5 text-center text-xs text-gb-textMuted">
                   {t.admin.settingsPage.noLocationsYet}
                 </div>
               )}
@@ -1122,7 +1122,7 @@ export default function AdminSettingsPage() {
                     </label>
 
                     {/* Day name */}
-                    <span className={`text-sm font-medium w-24 flex-shrink-0 ${bh.isOpen ? 'text-[#111318]' : 'text-[#9CA3AF]'}`}>
+                    <span className={`text-sm font-medium w-24 flex-shrink-0 ${bh.isOpen ? 'text-[#111318]' : 'text-gb-textMuted'}`}>
                       {day.label}
                     </span>
 
@@ -1134,7 +1134,7 @@ export default function AdminSettingsPage() {
                           onChange={(e) => updateBh(day.value, 'openTime', e.target.value)}
                           className="text-sm border border-[#E5E7EB] rounded-lg px-2.5 py-1.5 text-[#111318] bg-white focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all"
                         />
-                        <span className="text-[#9CA3AF] text-xs">–</span>
+                        <span className="text-gb-textMuted text-xs">–</span>
                         <input
                           type="time"
                           value={bh.closeTime}
@@ -1143,7 +1143,7 @@ export default function AdminSettingsPage() {
                         />
                       </div>
                     ) : (
-                      <span className="text-xs text-[#9CA3AF]">{t.admin.settingsPage.closed}</span>
+                      <span className="text-xs text-gb-textMuted">{t.admin.settingsPage.closed}</span>
                     )}
                   </div>
                 );

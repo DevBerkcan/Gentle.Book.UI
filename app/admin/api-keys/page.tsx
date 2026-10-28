@@ -113,7 +113,7 @@ export default function ApiKeysPage() {
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{t.admin.apiAccess}</h2>
           {upgradeInfo.currentPlan && (
-            <p className="text-xs text-[#9CA3AF] mb-3">
+            <p className="text-xs text-gb-textMuted mb-3">
               {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}

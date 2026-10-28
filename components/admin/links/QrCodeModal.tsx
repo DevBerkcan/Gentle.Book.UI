@@ -47,11 +47,11 @@ export function QrCodeModal({
               <div className="flex items-center justify-between w-full">
                 <div>
                   <p className="font-semibold text-[#111318] text-base">{s.qrCodeTitle}</p>
-                  <p className="text-xs text-[#9CA3AF] mt-0.5">{s.qrCodeSubtitle}</p>
+                  <p className="text-xs text-gb-textMuted mt-0.5">{s.qrCodeSubtitle}</p>
                 </div>
                 <button onClick={onClose}
                   aria-label={t.close}
-                  className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
+                  className="text-gb-textMuted hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
                   <X size={17} />
                 </button>
               </div>

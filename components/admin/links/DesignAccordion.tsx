@@ -69,12 +69,12 @@ export function DesignAccordion({
           <div className="text-left">
             <p className="font-semibold text-[#111318] text-sm leading-tight">{s.pageDesignTitle}</p>
             {!designOpen && (
-              <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.pageDesignSubtitle}</p>
+              <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.pageDesignSubtitle}</p>
             )}
           </div>
           {designSaving && <Loader2 size={12} className="animate-spin text-[#6355E4] ml-1" />}
         </div>
-        <ChevronDown size={15} className={`text-[#9CA3AF] transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={15} className={`text-gb-textMuted transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
       </button>
 
       <AnimatePresence>

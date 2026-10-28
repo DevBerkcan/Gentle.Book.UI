@@ -64,7 +64,7 @@ export function LivePreviewPanel({
             ] as const).map(({ v, icon: Icon }) => (
               <button key={v} onClick={() => setPreviewDevice(v)} title={PREVIEW_DEVICE_STYLE[v].label}
                 className={`p-1.5 rounded-lg transition-all ${
-                  previewDevice === v ? "bg-[#EEEBFC] text-[#6355E4]" : "text-[#9CA3AF] hover:text-[#374151]"
+                  previewDevice === v ? "bg-[#EEEBFC] text-[#6355E4]" : "text-gb-textMuted hover:text-[#374151]"
                 }`}>
                 <Icon size={13} />
               </button>
@@ -80,7 +80,7 @@ export function LivePreviewPanel({
       <div className="flex-1 rounded-2xl overflow-hidden bg-white shadow-xl border border-[#E5E7EB] flex flex-col">
         <div className="flex-shrink-0 h-9 bg-[#F3F4F6] border-b border-[#E5E7EB] flex items-center px-3 gap-2">
           <div className="flex-1 bg-white rounded-md h-5 flex items-center px-2 border border-[#E5E7EB]">
-            <p className="text-[10px] text-[#9CA3AF] truncate font-mono">
+            <p className="text-[10px] text-gb-textMuted truncate font-mono">
               {typeof window !== "undefined" ? window.location.origin : ""}{previewUrl}
             </p>
           </div>

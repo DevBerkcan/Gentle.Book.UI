@@ -38,9 +38,9 @@ export function AdvancedDesignOptions({
         <span className="flex items-center gap-2 text-xs font-semibold text-[#374151]">
           <SlidersHorizontal size={13} className="text-[#6355E4]" />
           {s.advancedDesignOptionsLabel}
-          <span className="text-[10px] font-normal text-[#9CA3AF]">{s.advancedDesignOptionsSubtitle}</span>
+          <span className="text-[10px] font-normal text-gb-textMuted">{s.advancedDesignOptionsSubtitle}</span>
         </span>
-        <ChevronDown size={14} className={`text-[#9CA3AF] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown size={14} className={`text-gb-textMuted transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (

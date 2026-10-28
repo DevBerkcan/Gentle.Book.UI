@@ -91,7 +91,7 @@ export default function ReviewPage() {
               <AlertTriangle size={28} className="text-red-500" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Ungültiger Link</h1>
-            <p className="text-[#8A8A8A] mb-6 text-sm">{errorMessage}</p>
+            <p className="text-gb-textSecondary mb-6 text-sm">{errorMessage}</p>
             <a href={supportConfig.mailto('Problem mit Bewertungslink')}
               className="inline-block bg-[#14162B] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
               Support kontaktieren
@@ -108,7 +108,7 @@ export default function ReviewPage() {
               <CheckCircle size={28} className="text-gray-400" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Bereits bewertet</h1>
-            <p className="text-[#8A8A8A] text-sm">Du hast diesen Termin bereits bewertet. Vielen Dank!</p>
+            <p className="text-gb-textSecondary text-sm">Du hast diesen Termin bereits bewertet. Vielen Dank!</p>
           </motion.div>
         )}
 
@@ -124,7 +124,7 @@ export default function ReviewPage() {
               <h1 className="text-2xl font-bold text-white">Vielen Dank!</h1>
             </div>
             <div className="p-6 text-center">
-              <p className="text-[#8A8A8A] text-sm">Deine Bewertung wurde erfolgreich übermittelt.</p>
+              <p className="text-gb-textSecondary text-sm">Deine Bewertung wurde erfolgreich übermittelt.</p>
             </div>
           </motion.div>
         )}
@@ -169,7 +169,7 @@ export default function ReviewPage() {
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Möchtest du uns noch etwas mitteilen? (optional)"
                 rows={3}
-                className="w-full bg-[#F6F5FA] rounded-2xl p-3.5 text-sm text-[#14162B] placeholder:text-[#8A8A8A] outline-none focus:ring-2 focus:ring-[#D8D7E2] resize-none mb-5"
+                className="w-full bg-[#F6F5FA] rounded-2xl p-3.5 text-sm text-[#14162B] placeholder:text-gb-textSecondary outline-none focus:ring-2 focus:ring-[#D8D7E2] resize-none mb-5"
               />
 
               <motion.button

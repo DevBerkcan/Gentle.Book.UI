@@ -116,7 +116,7 @@ export function ContactForm({
       <div className="space-y-6 pb-28">
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.contactData}</h2>
-          <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step4of4}</p>
+          <p className="text-sm sm:text-base text-gb-textSecondary">{t.booking.step4of4}</p>
         </div>
 
         {/* Booking summary */}
@@ -131,9 +131,9 @@ export function ContactForm({
               <Calendar className="text-white" size={18} />
             </div>
             <div>
-              <p className="text-xs text-[#8A8A8A]">{t.booking.dateTime}</p>
+              <p className="text-xs text-gb-textSecondary">{t.booking.dateTime}</p>
               <p className="font-semibold text-[#14162B] text-sm">{formatDate(selectedDate)}</p>
-              <p className="flex items-center gap-1 text-[#8A8A8A] text-xs mt-0.5">
+              <p className="flex items-center gap-1 text-gb-textSecondary text-xs mt-0.5">
                 <Clock size={12} />
                 {formatTimeRange(selectedTime, service.durationMinutes)}
               </p>
@@ -145,12 +145,12 @@ export function ContactForm({
               <Sparkles className="text-white" size={18} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-[#8A8A8A]">{t.booking.treatmentLabel}</p>
+              <p className="text-xs text-gb-textSecondary">{t.booking.treatmentLabel}</p>
               <p className="font-semibold text-[#14162B] text-sm">{service.name}</p>
-              <p className="text-[#8A8A8A] text-xs">{service.durationMinutes} {t.booking.minutes}</p>
+              <p className="text-gb-textSecondary text-xs">{service.durationMinutes} {t.booking.minutes}</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-xs text-[#8A8A8A]">{t.admin.price}</p>
+              <p className="text-xs text-gb-textSecondary">{t.admin.price}</p>
               <p className="text-base font-bold" style={{ color: primaryColor }}>{formatPrice(service.price, service.currency)}</p>
             </div>
           </div>
@@ -161,9 +161,9 @@ export function ContactForm({
                 <User className="text-white" size={18} />
               </div>
               <div>
-                <p className="text-xs text-[#8A8A8A]">{t.booking.specialist}</p>
+                <p className="text-xs text-gb-textSecondary">{t.booking.specialist}</p>
                 <p className="font-semibold text-[#14162B] text-sm">{selectedEmployee.name}</p>
-                <p className="text-[#8A8A8A] text-xs">
+                <p className="text-gb-textSecondary text-xs">
                   {selectedEmployee.role}
                   {selectedEmployee.specialty && ` • ${selectedEmployee.specialty}`}
                 </p>
@@ -177,7 +177,7 @@ export function ContactForm({
                 <MapPin className="text-white" size={18} />
               </div>
               <div>
-                <p className="text-xs text-[#8A8A8A]">{t.booking.location}</p>
+                <p className="text-xs text-gb-textSecondary">{t.booking.location}</p>
                 {locationLine1 && (
                   <p className="font-semibold text-[#14162B] text-sm">{locationLine1}</p>
                 )}
@@ -192,7 +192,7 @@ export function ContactForm({
             <span className="font-medium text-[#14162B] text-sm">{t.booking.totalAmount}</span>
             <div className="text-right">
               <p className="text-lg font-bold" style={{ color: primaryColor }}>{formatPrice(service.price, service.currency)}</p>
-              <p className="text-xs text-[#8A8A8A]">{t.booking.inclVat}</p>
+              <p className="text-xs text-gb-textSecondary">{t.booking.inclVat}</p>
             </div>
           </div>
         </motion.div>
@@ -236,7 +236,7 @@ export function ContactForm({
               classNames={{
                 input: "text-[#14162B]",
                 inputWrapper: ["border-2", showError("firstName") ? "border-red-500" : ""],
-                label: "text-[#8A8A8A] font-medium",
+                label: "text-gb-textSecondary font-medium",
               }}
               style={!showError("firstName") ? { "--tw-border-opacity": "1", borderColor: primaryColor } as any : {}}
             />
@@ -252,7 +252,7 @@ export function ContactForm({
               classNames={{
                 input: "text-[#14162B]",
                 inputWrapper: ["border-2", showError("lastName") ? "border-red-500" : ""],
-                label: "text-[#8A8A8A] font-medium",
+                label: "text-gb-textSecondary font-medium",
               }}
               style={!showError("lastName") ? { borderColor: primaryColor } as any : {}}
             />
@@ -271,7 +271,7 @@ export function ContactForm({
             classNames={{
               input: "text-[#14162B]",
               inputWrapper: ["border-2", showError("email") ? "border-red-500" : ""],
-              label: "text-[#8A8A8A] font-medium",
+              label: "text-gb-textSecondary font-medium",
             }}
             style={!showError("email") ? { borderColor: primaryColor } as any : {}}
           />
@@ -289,7 +289,7 @@ export function ContactForm({
             classNames={{
               input: "text-[#14162B]",
               inputWrapper: ["border-2", showError("phone") ? "border-red-500" : ""],
-              label: "text-[#8A8A8A] font-medium",
+              label: "text-gb-textSecondary font-medium",
             }}
             style={!showError("phone") ? { borderColor: primaryColor } as any : {}}
           />
@@ -351,7 +351,7 @@ export function ContactForm({
           </button>
 
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#8A8A8A]">{t.booking.totalAmount}</p>
+            <p className="text-xs text-gb-textSecondary">{t.booking.totalAmount}</p>
             <p className="font-bold text-[#14162B] text-sm">{formatPrice(service.price, service.currency)}</p>
           </div>
 

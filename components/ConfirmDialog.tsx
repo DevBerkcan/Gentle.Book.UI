@@ -69,7 +69,7 @@ export function ConfirmDialog({
               </div>
             </ModalHeader>
             <ModalBody className="py-4">
-              <p className="text-sm text-[#8A8A8A] leading-relaxed">{message}</p>
+              <p className="text-sm text-gb-textSecondary leading-relaxed">{message}</p>
             </ModalBody>
             <ModalFooter className="gap-2">
               <Button

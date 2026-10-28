@@ -57,14 +57,14 @@ export function TemplatePackPicker({
                 </div>
                 <div className={`px-3 py-2 ${isActive ? "bg-[#EEEBFC]" : "bg-white"} transition-colors`}>
                   <p className="text-xs font-semibold text-[#111318] leading-tight">{pack.name}</p>
-                  <p className="mt-0.5 text-[10px] leading-snug text-[#9CA3AF]">{getPackDesc(t, pack.key)}</p>
+                  <p className="mt-0.5 text-[10px] leading-snug text-gb-textMuted">{getPackDesc(t, pack.key)}</p>
                 </div>
               </button>
             </LockedItemHint>
           );
         })}
       </div>
-      <p className="text-[10px] text-[#9CA3AF] mt-2">{s.packsFooterHint}</p>
+      <p className="text-[10px] text-gb-textMuted mt-2">{s.packsFooterHint}</p>
     </div>
   );
 }

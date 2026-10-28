@@ -85,14 +85,14 @@ function RevenuePeriodCard({
         <div className="space-y-2.5">
           {Object.entries(revenueByCurrency ?? {}).map(([currency, value]) => (
             <div key={currency} className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[#9CA3AF]">{currency}</span>
+              <span className="text-xs font-medium text-gb-textMuted">{currency}</span>
               <span className="text-lg font-bold text-[#111318] tabular-nums">
                 <AnimatedNumber value={value} formatFn={(n) => formatPrice(n, currency)} />
               </span>
             </div>
           ))}
           <div className="pt-1 border-t border-[#F3F4F6] flex items-center justify-between">
-            <span className="text-[10px] text-[#9CA3AF] uppercase tracking-wide">{t.admin.trackingPage.bookingsLabel}</span>
+            <span className="text-[10px] text-gb-textMuted uppercase tracking-wide">{t.admin.trackingPage.bookingsLabel}</span>
             <span className="text-sm font-bold text-[#374151] tabular-nums">
               <AnimatedNumber value={bookings} />
             </span>
@@ -167,7 +167,7 @@ export default function TrackingPage() {
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{s.upgradeTitle}</h2>
           {upgradeInfo.currentPlan && (
-            <p className="text-xs text-[#9CA3AF] mb-3">
+            <p className="text-xs text-gb-textMuted mb-3">
               {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
@@ -228,7 +228,7 @@ export default function TrackingPage() {
 
         {/* ── Conversion Insights ───────────────────────────────────────── */}
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5">
-          <p className="text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest mb-3">{s.conversionLabel}</p>
+          <p className="text-[11px] font-semibold text-gb-textMuted uppercase tracking-widest mb-3">{s.conversionLabel}</p>
           <div className="grid grid-cols-1 gap-3 mb-4">
             {/* Booking conversion */}
             <div className="relative overflow-hidden rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
@@ -253,7 +253,7 @@ export default function TrackingPage() {
                 className="flex items-center justify-between gap-3 rounded-xl border border-[#F3F4F6] bg-[#F7F7F8] px-3.5 py-2.5">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-[#111318]">{label}</p>
-                  <p className="text-[11px] text-[#9CA3AF] truncate">{value}</p>
+                  <p className="text-[11px] text-gb-textMuted truncate">{value}</p>
                 </div>
                 {icon}
               </div>

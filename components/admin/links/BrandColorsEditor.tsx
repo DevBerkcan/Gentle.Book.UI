@@ -27,7 +27,7 @@ export function BrandColorsEditor({
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-[#111318]">{s.brandColorsFromSettingsTitle}</p>
-            <p className="text-[10px] text-[#9CA3AF] truncate">
+            <p className="text-[10px] text-gb-textMuted truncate">
               {s.brandColorsFromSettingsDescPre}{" "}
               <a href="/admin/settings" className="underline hover:text-[#6355E4]">{s.editLink}</a>
             </p>
@@ -41,7 +41,7 @@ export function BrandColorsEditor({
           {s.applyBtn}
         </button>
       </div>
-      <p className="text-[10px] text-[#9CA3AF] mt-1.5">
+      <p className="text-[10px] text-gb-textMuted mt-1.5">
         {s.brandColorsApplyHint}
       </p>
     </div>

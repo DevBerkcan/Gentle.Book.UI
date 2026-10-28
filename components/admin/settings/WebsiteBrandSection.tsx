@@ -19,7 +19,7 @@ import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
 
 const inputCls =
-  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
+  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 function getStatusLabel(t: Translations): Record<string, string> {
   const s = t.admin.settingsPage;
@@ -139,7 +139,7 @@ export function WebsiteBrandSection() {
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{t.admin.settingsPage.companyWebsite}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.wbsSubtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.wbsSubtitle}</p>
         </div>
       </div>
 
@@ -151,13 +151,13 @@ export function WebsiteBrandSection() {
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
+          <div className="flex items-center gap-2 text-xs text-gb-textMuted"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
         ) : (
           <>
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-[#6B7280]">{s.wbsUrlLabel}</label>
               <div className="relative">
-                <Globe2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+                <Globe2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gb-textMuted pointer-events-none" />
                 <input
                   type="url"
                   value={urlInput}
@@ -186,10 +186,10 @@ export function WebsiteBrandSection() {
               {settings?.websiteUrl ? (
                 <span className="inline-flex items-center gap-1.5 text-[#065F46]"><CheckCircle2 size={13} /> {s.wbsConnected}</span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-[#9CA3AF]"><XCircle size={13} /> {s.wbsNotConnected}</span>
+                <span className="inline-flex items-center gap-1.5 text-gb-textMuted"><XCircle size={13} /> {s.wbsNotConnected}</span>
               )}
               {settings?.lastAnalysisOn && (
-                <span className="text-[#9CA3AF]">{fillTemplate(s.wbsLastAnalysisTemplate, { date: new Date(settings.lastAnalysisOn).toLocaleString(dateLocale) })}</span>
+                <span className="text-gb-textMuted">{fillTemplate(s.wbsLastAnalysisTemplate, { date: new Date(settings.lastAnalysisOn).toLocaleString(dateLocale) })}</span>
               )}
               {statusKey && (
                 <span className="text-[#6355E4] inline-flex items-center gap-1">

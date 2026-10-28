@@ -96,7 +96,7 @@ export default function CancelBookingPage() {
               <AlertTriangle size={28} className="text-red-500" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Ungültiger Link</h1>
-            <p className="text-[#8A8A8A] mb-6 text-sm">{errorMessage}</p>
+            <p className="text-gb-textSecondary mb-6 text-sm">{errorMessage}</p>
             <a href={supportConfig.mailto("Problem mit Stornierungslink")}
               className="inline-block bg-[#14162B] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
               Support kontaktieren
@@ -114,7 +114,7 @@ export default function CancelBookingPage() {
               <XCircle size={28} className="text-gray-400" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Bereits storniert</h1>
-            <p className="text-[#8A8A8A] text-sm">Diese Buchung wurde bereits storniert.</p>
+            <p className="text-gb-textSecondary text-sm">Diese Buchung wurde bereits storniert.</p>
           </motion.div>
         )}
 
@@ -135,8 +135,8 @@ export default function CancelBookingPage() {
               )}
             </div>
             <div className="p-6 text-center">
-              <p className="text-[#8A8A8A] text-sm mb-1">Deine Buchung wurde erfolgreich storniert.</p>
-              <p className="text-xs text-[#8A8A8A]">Du erhältst eine Bestätigungs-E-Mail.</p>
+              <p className="text-gb-textSecondary text-sm mb-1">Deine Buchung wurde erfolgreich storniert.</p>
+              <p className="text-xs text-gb-textSecondary">Du erhältst eine Bestätigungs-E-Mail.</p>
             </div>
           </motion.div>
         )}
@@ -160,7 +160,7 @@ export default function CancelBookingPage() {
               {preview && (
                 <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-3 mb-5">
                   {preview.bookingNumber && (
-                    <motion.p variants={slideUp} className="text-xs text-[#8A8A8A] text-center">
+                    <motion.p variants={slideUp} className="text-xs text-gb-textSecondary text-center">
                       Buchungsnummer: <span className="font-semibold text-[#14162B]">{preview.bookingNumber}</span>
                     </motion.p>
                   )}
@@ -171,7 +171,7 @@ export default function CancelBookingPage() {
                         <CheckCircle size={14} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-xs text-[#8A8A8A]">Leistung</p>
+                        <p className="text-xs text-gb-textSecondary">Leistung</p>
                         <p className="font-semibold text-[#14162B] text-sm">{preview.serviceName}</p>
                       </div>
                     </motion.div>
@@ -183,7 +183,7 @@ export default function CancelBookingPage() {
                         <Calendar size={14} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-xs text-[#8A8A8A]">Datum</p>
+                        <p className="text-xs text-gb-textSecondary">Datum</p>
                         <p className="font-semibold text-[#14162B] text-sm">{preview.bookingDate}</p>
                       </div>
                     </motion.div>
@@ -195,7 +195,7 @@ export default function CancelBookingPage() {
                         <Clock size={14} className="text-white" />
                       </div>
                       <div>
-                        <p className="text-xs text-[#8A8A8A]">Uhrzeit</p>
+                        <p className="text-xs text-gb-textSecondary">Uhrzeit</p>
                         <p className="font-semibold text-[#14162B] text-sm">{preview.startTime} – {preview.endTime} Uhr</p>
                       </div>
                     </motion.div>
@@ -222,7 +222,7 @@ export default function CancelBookingPage() {
                 </motion.button>
                 <button
                   onClick={() => window.history.back()}
-                  className="w-full flex items-center justify-center gap-1.5 text-sm text-[#8A8A8A] hover:text-[#14162B] transition-colors py-2"
+                  className="w-full flex items-center justify-center gap-1.5 text-sm text-gb-textSecondary hover:text-[#14162B] transition-colors py-2"
                 >
                   <ArrowLeft size={14} /> Abbrechen
                 </button>

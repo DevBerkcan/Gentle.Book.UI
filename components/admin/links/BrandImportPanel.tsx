@@ -23,7 +23,7 @@ import { useTranslation, fillTemplate } from "@/lib/i18n/LanguageContext";
 import type { Translations } from "@/lib/i18n/translations";
 
 const inputCls =
-  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
+  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 function getStatusLabel(t: Translations): Record<string, string> {
   const s = t.admin.settingsPage;
@@ -254,7 +254,7 @@ export function BrandImportPanel({
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{s.brandImportTitle}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.brandImportSubtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.brandImportSubtitle}</p>
         </div>
       </div>
 
@@ -355,7 +355,7 @@ export function BrandImportPanel({
                     <span className="w-4 h-4 rounded-full border border-[#E5E7EB]" style={{ backgroundColor: p.theme.accent }} />
                   </div>
                   <p className="text-xs font-semibold text-[#111318]">{p.name}</p>
-                  <p className="text-[10px] text-[#9CA3AF] leading-snug mt-0.5">{p.reason}</p>
+                  <p className="text-[10px] text-gb-textMuted leading-snug mt-0.5">{p.reason}</p>
                 </button>
               ))}
             </div>
@@ -375,7 +375,7 @@ export function BrandImportPanel({
 
             {logoCandidates.length > 0 && (
               <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">{s.logoCandidatesLabel}</p>
+                <p className="text-[10px] font-semibold text-gb-textMuted uppercase tracking-wide">{s.logoCandidatesLabel}</p>
                 <div className="flex flex-wrap gap-2">
                   {logoCandidates.map((asset) => (
                     <button
@@ -448,11 +448,11 @@ export function BrandImportPanel({
             </div>
 
             {detectedServices.length === 0 ? (
-              <p className="text-[11px] text-[#9CA3AF]">{s.noServicesDetected}</p>
+              <p className="text-[11px] text-gb-textMuted">{s.noServicesDetected}</p>
             ) : (
               <>
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-semibold text-[#9CA3AF] uppercase tracking-wide">{fillTemplate(s.selectedOfTotalTemplate, { selected: selectedServiceCount, total: detectedServices.length })}</p>
+                  <p className="text-[10px] font-semibold text-gb-textMuted uppercase tracking-wide">{fillTemplate(s.selectedOfTotalTemplate, { selected: selectedServiceCount, total: detectedServices.length })}</p>
                   <button
                     type="button"
                     onClick={() => setDeselectedServiceNames((prev) => prev.size === 0 ? new Set(detectedServices.map((svc) => svc.name)) : new Set())}
@@ -477,7 +477,7 @@ export function BrandImportPanel({
                           })}
                         />
                         <span className="flex-1 truncate">{svc.name}</span>
-                        {price && <span className="text-[#9CA3AF] flex-shrink-0">{price}</span>}
+                        {price && <span className="text-gb-textMuted flex-shrink-0">{price}</span>}
                       </label>
                     );
                   })}
@@ -509,13 +509,13 @@ export function BrandImportPanel({
             </div>
 
             {detectedSocialLinks.length === 0 ? (
-              <p className="text-[11px] text-[#9CA3AF]">{s.noSocialLinksDetected}</p>
+              <p className="text-[11px] text-gb-textMuted">{s.noSocialLinksDetected}</p>
             ) : (
               <>
                 <div className="space-y-1">
                   {detectedSocialLinks.map((link) => (
                     <p key={link} className="text-[11px] text-[#374151] truncate flex items-center gap-1.5">
-                      <ExternalLink size={10} className="text-[#9CA3AF] flex-shrink-0" /> {link}
+                      <ExternalLink size={10} className="text-gb-textMuted flex-shrink-0" /> {link}
                     </p>
                   ))}
                 </div>

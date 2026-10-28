@@ -61,7 +61,7 @@ function PromptDialog({
               </div>
             </ModalHeader>
             <ModalBody className="py-4 space-y-3">
-              {message && <p className="text-sm text-[#8A8A8A] leading-relaxed">{message}</p>}
+              {message && <p className="text-sm text-gb-textSecondary leading-relaxed">{message}</p>}
               <Input
                 autoFocus
                 type={inputType}
@@ -70,11 +70,11 @@ function PromptDialog({
                 value={value}
                 onValueChange={setValue}
                 onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
-                startContent={inputType === "number" ? <Euro size={14} className="text-[#8A8A8A]" /> : undefined}
+                startContent={inputType === "number" ? <Euro size={14} className="text-gb-textSecondary" /> : undefined}
                 classNames={{
                   input: "text-[#14162B]",
                   inputWrapper: "border-2 border-[#ECEBF2]",
-                  label: "text-[#8A8A8A] font-medium",
+                  label: "text-gb-textSecondary font-medium",
                 }}
               />
             </ModalBody>

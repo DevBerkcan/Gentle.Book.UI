@@ -40,7 +40,7 @@ export function AddLinkForm({
             <p className="font-semibold text-[#111318] text-sm">{s.newLinkTitle}</p>
             <button onClick={onClose}
               aria-label={t.close}
-              className="text-[#9CA3AF] hover:text-[#374151] p-1 hover:bg-[#F3F4F6] rounded-lg transition-colors">
+              className="text-gb-textMuted hover:text-[#374151] p-1 hover:bg-[#F3F4F6] rounded-lg transition-colors">
               <X size={15} />
             </button>
           </div>

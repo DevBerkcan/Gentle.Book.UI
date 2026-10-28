@@ -25,7 +25,7 @@ export function IntakeFormAnswersPanel({ bookingId }: { bookingId: string }) {
 
   if (loading) {
     return (
-      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20 flex items-center gap-2 text-xs text-[#8A8A8A]">
+      <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20 flex items-center gap-2 text-xs text-gb-textSecondary">
         <Loader2 size={13} className="animate-spin" /> {t.admin.bookingsPage.loadingForm}
       </div>
     );
@@ -41,7 +41,7 @@ export function IntakeFormAnswersPanel({ bookingId }: { bookingId: string }) {
       <div className="space-y-2">
         {answers.map((a, i) => (
           <div key={i} className="bg-white p-3 rounded-lg">
-            <p className="text-xs text-[#8A8A8A]">{a.label}</p>
+            <p className="text-xs text-gb-textSecondary">{a.label}</p>
             <p className="text-sm font-medium text-[#1E1E1E]">{a.value}</p>
           </div>
         ))}

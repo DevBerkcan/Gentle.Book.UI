@@ -11,7 +11,7 @@ export default function NotFound() {
 
         <div className="text-7xl font-bold text-[#ECEBF2]/60 mb-2 tracking-tight">404</div>
         <h1 className="text-2xl font-bold text-[#1E1E1E] mb-2">Seite nicht gefunden</h1>
-        <p className="text-[#8A8A8A] text-sm mb-8">
+        <p className="text-gb-textSecondary text-sm mb-8">
           Die gesuchte Seite existiert nicht oder wurde verschoben.
         </p>
 

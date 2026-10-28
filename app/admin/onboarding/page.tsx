@@ -147,7 +147,7 @@ export default function OnboardingPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-[#1E1E1E]">{s.headerTitle}</h1>
-          <p className="text-[#8A8A8A] text-sm mt-1">
+          <p className="text-gb-textSecondary text-sm mt-1">
             {fillTemplate(s.stepOfTemplate, { current: Math.min(step + 1, 5), desc: STEPS[step]?.desc ?? '' })}
           </p>
         </div>
@@ -339,7 +339,7 @@ export default function OnboardingPage() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#1E1E1E] mb-2">{s.congratsTitle}</h3>
-                    <p className="text-[#8A8A8A] text-sm leading-relaxed">
+                    <p className="text-gb-textSecondary text-sm leading-relaxed">
                       {s.congratsDesc}
                     </p>
                   </div>

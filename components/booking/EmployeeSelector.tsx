@@ -99,7 +99,7 @@ export function EmployeeSelector({
   if (employees.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-[#8A8A8A] mb-4">{t.booking.noEmployeesAvailable}</p>
+        <p className="text-gb-textSecondary mb-4">{t.booking.noEmployeesAvailable}</p>
         <button onClick={onBack} className="transition-colors underline" style={{ color: primaryColor }}>
           {t.booking.chooseOtherService}
         </button>
@@ -112,7 +112,7 @@ export function EmployeeSelector({
       <div className={`space-y-6 px-4 sm:px-0 ${selectedEmployee ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseEmployee}</h2>
-          <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step2of4}</p>
+          <p className="text-sm sm:text-base text-gb-textSecondary">{t.booking.step2of4}</p>
           {selectedService && (
             <p className="text-xs mt-1" style={{ color: primaryColor }}>{t.booking.for}: {selectedService.name}</p>
           )}
@@ -154,7 +154,7 @@ export function EmployeeSelector({
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words pr-1">{emp.name}</h4>
-                          <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 break-words">{emp.role}</p>
+                          <p className="text-xs sm:text-sm text-gb-textSecondary mt-1 break-words">{emp.role}</p>
                           {emp.tagline && (
                             <p className="text-xs italic mt-0.5 break-words" style={{ color: primaryColor }}>"{emp.tagline}"</p>
                           )}
@@ -166,7 +166,7 @@ export function EmployeeSelector({
                                   <MapPin size={14} className="text-white" />
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-xs font-medium text-[#8A8A8A]">{t.booking.location}</p>
+                                  <p className="text-xs font-medium text-gb-textSecondary">{t.booking.location}</p>
                                   <p className="text-sm font-bold text-[#14162B]">{emp.location}</p>
                                 </div>
                               </div>
@@ -178,8 +178,8 @@ export function EmployeeSelector({
                                   <MapPin size={14} className="text-white" />
                                 </div>
                                 <div>
-                                  <p className="text-xs font-medium text-[#8A8A8A]">{t.booking.location}</p>
-                                  <p className="text-sm text-[#8A8A8A]">{t.booking.locationOnRequest}</p>
+                                  <p className="text-xs font-medium text-gb-textSecondary">{t.booking.location}</p>
+                                  <p className="text-sm text-gb-textSecondary">{t.booking.locationOnRequest}</p>
                                 </div>
                               </div>
                             </div>
@@ -242,9 +242,9 @@ export function EmployeeSelector({
                   <CheckCircle className="text-white" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-[#8A8A8A]">{t.booking.selected}</p>
+                  <p className="text-xs text-gb-textSecondary">{t.booking.selected}</p>
                   <p className="font-bold text-[#14162B] text-sm truncate">{selectedEmployee.name}</p>
-                  <p className="text-xs text-[#8A8A8A] truncate">{selectedEmployee.role}</p>
+                  <p className="text-xs text-gb-textSecondary truncate">{selectedEmployee.role}</p>
                 </div>
               </div>
 

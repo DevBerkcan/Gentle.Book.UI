@@ -129,7 +129,7 @@ export default function IntakeFormPage() {
               <AlertTriangle size={28} className="text-red-500" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Ungültiger Link</h1>
-            <p className="text-[#8A8A8A] mb-6 text-sm">{errorMessage}</p>
+            <p className="text-gb-textSecondary mb-6 text-sm">{errorMessage}</p>
             <a href={supportConfig.mailto('Problem mit Formular-Link')}
               className="inline-block bg-[#14162B] text-white px-6 py-3 rounded-xl font-medium text-sm hover:bg-[#333] transition-colors">
               Support kontaktieren
@@ -146,7 +146,7 @@ export default function IntakeFormPage() {
               <CheckCircle size={28} className="text-gray-400" />
             </div>
             <h1 className="text-xl font-bold text-[#14162B] mb-2">Bereits ausgefüllt</h1>
-            <p className="text-[#8A8A8A] text-sm">Du hast dieses Formular für diesen Termin bereits übermittelt.</p>
+            <p className="text-gb-textSecondary text-sm">Du hast dieses Formular für diesen Termin bereits übermittelt.</p>
           </motion.div>
         )}
 
@@ -162,7 +162,7 @@ export default function IntakeFormPage() {
               <h1 className="text-2xl font-bold text-white">Vielen Dank!</h1>
             </div>
             <div className="p-6 text-center">
-              <p className="text-[#8A8A8A] text-sm">Dein Formular wurde erfolgreich übermittelt.</p>
+              <p className="text-gb-textSecondary text-sm">Dein Formular wurde erfolgreich übermittelt.</p>
             </div>
           </motion.div>
         )}
@@ -184,7 +184,7 @@ export default function IntakeFormPage() {
               {fieldsByFormType.map((group) => (
                 <div key={group.type} className="space-y-4">
                   {showSectionHeaders && (
-                    <p className="text-[11px] font-semibold text-[#8A8A8A] uppercase tracking-widest">{FORM_TYPE_LABEL[group.type]}</p>
+                    <p className="text-[11px] font-semibold text-gb-textSecondary uppercase tracking-widest">{FORM_TYPE_LABEL[group.type]}</p>
                   )}
                   {group.fields.map((field) => {
                     const options: string[] = (field.fieldType === 'MultipleChoice' || field.fieldType === 'Checkboxes') && field.optionsJson

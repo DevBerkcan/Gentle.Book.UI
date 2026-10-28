@@ -33,7 +33,7 @@ function getFormTypeLabel(t: Translations): Record<IntakeFormType, string> {
 const FORM_TYPE_ORDER: IntakeFormType[] = ["Anamnese", "Einverstaendnis", "Fragebogen", "Nachsorge"];
 
 const inputCls =
-  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
+  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 export default function AdminIntakeFormPage() {
   const { t } = useTranslation();
@@ -200,7 +200,7 @@ export default function AdminIntakeFormPage() {
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{s.title}</h2>
           {upgradeInfo.currentPlan && (
-            <p className="text-xs text-[#9CA3AF] mb-3">
+            <p className="text-xs text-gb-textMuted mb-3">
               {s.currentPlanLabel} <span className="font-semibold text-[#6B7280]">{upgradeInfo.currentPlan}</span>
             </p>
           )}
@@ -221,7 +221,7 @@ export default function AdminIntakeFormPage() {
       <div className="min-h-screen bg-[#F7F7F8] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-8 text-center max-w-md">
           <div className="w-12 h-12 bg-[#F3F4F6] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Ban size={20} className="text-[#9CA3AF]" />
+            <Ban size={20} className="text-gb-textMuted" />
           </div>
           <h2 className="text-lg font-bold text-[#111318] mb-2">{s.title}</h2>
           <p className="text-sm text-[#6B7280]">{industryBlocked}</p>
@@ -274,7 +274,7 @@ export default function AdminIntakeFormPage() {
         {showTemplates && (
           <div className="bg-white rounded-2xl border border-[#C7D2FE] shadow-sm p-5 space-y-3">
             <p className="text-sm font-semibold text-[#111318]">{s.applyTemplateTitle}</p>
-            <p className="text-xs text-[#9CA3AF]">{s.applyTemplateDesc}</p>
+            <p className="text-xs text-gb-textMuted">{s.applyTemplateDesc}</p>
             {categories.length > 0 && (
               <select value={templateCategoryId} onChange={(e) => setTemplateCategoryId(e.target.value)} className={inputCls}>
                 <option value="">{s.allCategoriesOption}</option>
@@ -290,7 +290,7 @@ export default function AdminIntakeFormPage() {
                   className="text-left rounded-xl border border-[#E5E7EB] p-3 hover:border-[#A5B4FC] hover:bg-[#F8F7FF] disabled:opacity-50 transition-colors"
                 >
                   <p className="text-sm font-semibold text-[#111318]">{tpl.label}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(s.fieldCountTemplate, { count: tpl.fieldCount })}</p>
+                  <p className="text-[11px] text-gb-textMuted">{fillTemplate(s.fieldCountTemplate, { count: tpl.fieldCount })}</p>
                 </button>
               ))}
             </div>
@@ -304,13 +304,13 @@ export default function AdminIntakeFormPage() {
                 <ClipboardList size={20} className="text-[#D1D5DB]" />
               </div>
               <p className="text-sm font-medium text-[#374151]">{s.noFieldsYetTitle}</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">{s.noFieldsYetDesc}</p>
+              <p className="text-xs text-gb-textMuted mt-1">{s.noFieldsYetDesc}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F3F4F6]">
               {fieldsByFormType.map((group) => (
                 <div key={group.type}>
-                  <p className="px-4 pt-3 pb-1 text-[11px] font-semibold text-[#9CA3AF] uppercase tracking-widest">{FORM_TYPE_LABEL[group.type]}</p>
+                  <p className="px-4 pt-3 pb-1 text-[11px] font-semibold text-gb-textMuted uppercase tracking-widest">{FORM_TYPE_LABEL[group.type]}</p>
                   {group.fields.map((field) => {
                     const idx = sortedFields.indexOf(field);
                     return (
@@ -318,12 +318,12 @@ export default function AdminIntakeFormPage() {
                         <div className="flex flex-col gap-0.5">
                           <button onClick={() => handleMove(field, -1)} disabled={idx === 0 || busyId === field.id}
                             aria-label={fillTemplate(s.moveUpAriaTemplate, { label: field.label })}
-                            className="text-[#9CA3AF] hover:text-[#6355E4] disabled:opacity-30">
+                            className="text-gb-textMuted hover:text-[#6355E4] disabled:opacity-30">
                             <ArrowUp size={13} />
                           </button>
                           <button onClick={() => handleMove(field, 1)} disabled={idx === sortedFields.length - 1 || busyId === field.id}
                             aria-label={fillTemplate(s.moveDownAriaTemplate, { label: field.label })}
-                            className="text-[#9CA3AF] hover:text-[#6355E4] disabled:opacity-30">
+                            className="text-gb-textMuted hover:text-[#6355E4] disabled:opacity-30">
                             <ArrowDown size={13} />
                           </button>
                         </div>
@@ -331,7 +331,7 @@ export default function AdminIntakeFormPage() {
                           <p className="text-sm font-semibold text-[#111318] truncate">
                             {field.label} {field.isRequired && <span className="text-[#991B1B]">*</span>}
                           </p>
-                          <p className="text-[11px] text-[#9CA3AF]">
+                          <p className="text-[11px] text-gb-textMuted">
                             {FIELD_TYPE_LABEL[field.fieldType]}
                             {field.categoryId && (
                               <>{fillTemplate(s.onlyCategoryTemplate, { name: categories.find((c) => c.id === field.categoryId)?.name ?? s.categoryFallback })}</>
@@ -357,7 +357,7 @@ export default function AdminIntakeFormPage() {
                           onClick={() => handleDelete(field)}
                           disabled={busyId === field.id}
                           aria-label={fillTemplate(s.deleteFieldAriaTemplate, { label: field.label })}
-                          className="text-[#9CA3AF] hover:text-[#991B1B] disabled:opacity-50"
+                          className="text-gb-textMuted hover:text-[#991B1B] disabled:opacity-50"
                         >
                           {busyId === field.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
                         </button>

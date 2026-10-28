@@ -288,7 +288,7 @@ export default function BlockedSlotsPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">
               {s.title}
             </h1>
-            <p className="text-sm text-[#8A8A8A]">{s.subtitle}</p>
+            <p className="text-sm text-gb-textSecondary">{s.subtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -320,7 +320,7 @@ export default function BlockedSlotsPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-[#1E1E1E]">{s.deleteModalTitle}</h2>
-                      <p className="text-xs text-[#8A8A8A]">
+                      <p className="text-xs text-gb-textSecondary">
                         {selectedSlotForDelete && new Date(selectedSlotForDelete.blockDate + "T00:00").toLocaleDateString(locale, {
                           day: "2-digit", month: "long",
                         })}
@@ -354,7 +354,7 @@ export default function BlockedSlotsPage() {
                                 weekday: "long", day: "2-digit", month: "long", year: "numeric",
                               })}
                             </p>
-                            <div className="flex items-center gap-1.5 mt-1 text-sm text-[#8A8A8A]">
+                            <div className="flex items-center gap-1.5 mt-1 text-sm text-gb-textSecondary">
                               <Clock size={13} />
                               <span>
                                 {selectedSlotForDelete.startTime.slice(0, 5)} –{" "}
@@ -362,7 +362,7 @@ export default function BlockedSlotsPage() {
                               </span>
                             </div>
                             {selectedSlotForDelete.reason && (
-                              <p className="text-sm text-[#8A8A8A] mt-1 italic">
+                              <p className="text-sm text-gb-textSecondary mt-1 italic">
                                 {s.reasonQuoteOpen}{selectedSlotForDelete.reason}{s.reasonQuoteClose}
                               </p>
                             )}
@@ -418,7 +418,7 @@ export default function BlockedSlotsPage() {
               {s.weekdayShort.map((d) => (
                 <div
                   key={d}
-                  className="text-center text-xs font-semibold text-[#8A8A8A] py-1"
+                  className="text-center text-xs font-semibold text-gb-textSecondary py-1"
                 >
                   {d}
                 </div>
@@ -457,7 +457,7 @@ export default function BlockedSlotsPage() {
             </div>
             {selDate && (
               <div className="mt-3 pt-3 border-t border-[#ECEBF2]/20 flex items-center justify-between">
-                <p className="text-sm text-[#8A8A8A]">
+                <p className="text-sm text-gb-textSecondary">
                   {s.filterLabel}{" "}
                   <span className="font-semibold text-[#6355E4]">
                     {new Date(selDate + "T00:00").toLocaleDateString(locale, {
@@ -468,7 +468,7 @@ export default function BlockedSlotsPage() {
                 <Button
                   size="sm"
                   variant="flat"
-                  className="bg-[#F6F5FA] text-[#8A8A8A] text-xs"
+                  className="bg-[#F6F5FA] text-gb-textSecondary text-xs"
                   onPress={() => setSelDate(null)}
                 >
                   {s.clearFilterBtn}
@@ -489,7 +489,7 @@ export default function BlockedSlotsPage() {
               : fillTemplate(s.allBlockingsTemplate, { count: slots.length })}
           </h3>
           {totalPages > 1 && (
-            <span className="text-xs text-[#8A8A8A]">
+            <span className="text-xs text-gb-textSecondary">
               {fillTemplate(s.pageOfTemplate, { page: safePage, total: totalPages })}
             </span>
           )}
@@ -511,12 +511,12 @@ export default function BlockedSlotsPage() {
             <div className="w-16 h-16 bg-[#F6F5FA] rounded-full flex items-center justify-center mx-auto mb-4">
               <Ban size={28} className="text-[#ECEBF2]" />
             </div>
-            <p className="text-[#8A8A8A] font-medium">
+            <p className="text-gb-textSecondary font-medium">
               {selDate
                 ? s.noBlockingsOnDay
                 : s.noBlockingsYet}
             </p>
-            <p className="text-[#8A8A8A] text-sm mt-1">
+            <p className="text-gb-textSecondary text-sm mt-1">
               {s.emptyHint}
             </p>
           </div>
@@ -541,7 +541,7 @@ export default function BlockedSlotsPage() {
                               month: "long", year: "numeric",
                             })}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-1 text-sm text-[#8A8A8A]">
+                          <div className="flex items-center gap-1.5 mt-1 text-sm text-gb-textSecondary">
                             <Clock size={13} />
                             <span>
                               {slot.startTime.slice(0, 5)} –{" "}
@@ -549,7 +549,7 @@ export default function BlockedSlotsPage() {
                             </span>
                           </div>
                           {slot.reason && (
-                            <p className="text-sm text-[#8A8A8A] mt-1 italic">
+                            <p className="text-sm text-gb-textSecondary mt-1 italic">
                               {s.reasonQuoteOpen}{slot.reason}{s.reasonQuoteClose}
                             </p>
                           )}
@@ -650,7 +650,7 @@ export default function BlockedSlotsPage() {
                         ? s.editModalTitle
                         : s.blockTimeSlotLabel}
                     </h2>
-                    <p className="text-xs text-[#8A8A8A]">
+                    <p className="text-xs text-gb-textSecondary">
                       {modalMode === "edit"
                         ? s.editModalSubtitle
                         : s.createModalSubtitle}
@@ -680,11 +680,11 @@ export default function BlockedSlotsPage() {
                         <p className="text-sm font-semibold text-[#1E1E1E]">
                           {s.dateRangeLabel}
                         </p>
-                        <p className="text-xs text-[#8A8A8A]">
+                        <p className="text-xs text-gb-textSecondary">
                           {s.dateRangeDesc}
                         </p>
                       </div>
-                      <CalendarRange size={18} className="text-[#8A8A8A]" />
+                      <CalendarRange size={18} className="text-gb-textSecondary" />
                     </div>
                   )}
 

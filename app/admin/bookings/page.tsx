@@ -575,7 +575,7 @@ export default function AdminBookingsPage() {
   const inputClassNames = {
     input: "text-[#1E1E1E]",
     inputWrapper: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
-    label: "text-[#8A8A8A]",
+    label: "text-gb-textSecondary",
   };
 
   const selectedService = services.find(s => s.id === bookingForm.serviceId);
@@ -588,10 +588,10 @@ export default function AdminBookingsPage() {
     <div className="bg-white border border-[#ECEBF2]/30 rounded-xl p-4 mb-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
       <div className="flex justify-between items-start mb-3">
         <div>
-          <div className="font-mono text-xs font-semibold text-[#8A8A8A]">{booking.bookingNumber}</div>
+          <div className="font-mono text-xs font-semibold text-gb-textSecondary">{booking.bookingNumber}</div>
           <div className="font-semibold text-[#1E1E1E] mt-0.5">{booking.customerName}</div>
           {booking.bookingContactName && (
-            <div className="text-xs text-[#8A8A8A] italic">
+            <div className="text-xs text-gb-textSecondary italic">
               {fillTemplate(t.admin.bookingsPage.bookedAsTemplate, { name: booking.bookingContactName })}
             </div>
           )}
@@ -600,7 +600,7 @@ export default function AdminBookingsPage() {
           {getStatusLabel(booking.status)}
         </Chip>
       </div>
-      <div className="text-sm text-[#8A8A8A] space-y-1 mb-3">
+      <div className="text-sm text-gb-textSecondary space-y-1 mb-3">
         <div>{new Date(booking.bookingDate).toLocaleDateString(dateLocale)} · {booking.startTime} – {booking.endTime}</div>
         <div>{booking.serviceName}</div>
         {booking.customerEmail
@@ -648,7 +648,7 @@ export default function AdminBookingsPage() {
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#8A8A8A]">
+            <p className="text-sm text-gb-textSecondary">
               {isAdmin ? t.admin.bookingsPage.subtitleAdmin : t.admin.bookingsPage.subtitleOwn}
             </p>
           </div>
@@ -685,7 +685,7 @@ export default function AdminBookingsPage() {
                 <Input
                   label={t.admin.bookingsPage.searchLabel}
                   placeholder={t.admin.bookingsPage.searchPlaceholder}
-                  startContent={<Search size={16} className="text-[#8A8A8A]" />}
+                  startContent={<Search size={16} className="text-gb-textSecondary" />}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
@@ -706,7 +706,7 @@ export default function AdminBookingsPage() {
                 onChange={(e) => handleFilterChange("status", e.target.value)}
                 classNames={{
                   trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
-                  label: "text-[#8A8A8A]",
+                  label: "text-gb-textSecondary",
                 }}
               >
                 {statusOptions.map((option) => (
@@ -722,7 +722,7 @@ export default function AdminBookingsPage() {
 
             {hasActiveFilters && (
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#ECEBF2]/20">
-                <span className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.activeFiltersLabel}</span>
+                <span className="text-xs text-gb-textSecondary">{t.admin.bookingsPage.activeFiltersLabel}</span>
                 {filter.searchTerm && (
                   <span className="text-xs bg-[#6355E4]/10 text-[#6355E4] px-2 py-0.5 rounded-full font-medium">
                     "{filter.searchTerm}"
@@ -763,7 +763,7 @@ export default function AdminBookingsPage() {
                         {isEditMode ? t.admin.bookingsPage.editBooking : t.admin.bookingsPage.bookingDetails}
                       </h2>
                       {selectedBookingDetails && (
-                        <p className="text-xs text-[#8A8A8A]">
+                        <p className="text-xs text-gb-textSecondary">
                           {selectedBookingDetails.bookingNumber}
                         </p>
                       )}
@@ -782,7 +782,7 @@ export default function AdminBookingsPage() {
                             <p className="font-medium text-[#1E1E1E]">{selectedBookingDetails.serviceName}</p>
                             <div className="flex items-center gap-2 mt-1">
                               <Clock size={13} className="text-[#6355E4]" />
-                              <p className="text-xs text-[#8A8A8A]">
+                              <p className="text-xs text-gb-textSecondary">
                                 {selectedBookingDetails.startTime} – {selectedBookingDetails.endTime}
                               </p>
                             </div>
@@ -794,7 +794,7 @@ export default function AdminBookingsPage() {
                         {selectedBookingDetails.redeemedVoucherCode && (
                           <div className="mt-3 pt-3 border-t border-[#ECEBF2]/40 space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: selectedBookingDetails.redeemedVoucherCode })}</span>
+                              <span className="text-gb-textSecondary">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: selectedBookingDetails.redeemedVoucherCode })}</span>
                               <span className="font-semibold text-[#059669]">
                                 -{formatPrice(selectedBookingDetails.voucherDiscountAmount ?? 0, selectedBookingDetails.currency)}
                               </span>
@@ -864,13 +864,13 @@ export default function AdminBookingsPage() {
                         <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.bookingsPage.timestamps}</h3>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.createdOn}</p>
+                            <p className="text-xs text-gb-textSecondary">{t.admin.bookingsPage.createdOn}</p>
                             <p className="text-sm font-semibold text-[#1E1E1E]">
                               {moment(selectedBookingDetails.createdAt).format("DD.MM.YYYY HH:mm")}
                             </p>
                           </div>
                           <div className="bg-white p-3 rounded-lg">
-                            <p className="text-xs text-[#8A8A8A]">{t.admin.date}</p>
+                            <p className="text-xs text-gb-textSecondary">{t.admin.date}</p>
                             <p className="text-sm font-semibold text-[#1E1E1E]">
                               {moment(selectedBookingDetails.bookingDate).format("DD.MM.YYYY")}
                             </p>
@@ -963,7 +963,7 @@ export default function AdminBookingsPage() {
 
                       <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                         <p className="text-sm text-[#1E1E1E] font-medium mb-3">{t.admin.bookingsPage.whatHappensNow}</p>
-                        <ul className="text-sm text-[#8A8A8A] space-y-3">
+                        <ul className="text-sm text-gb-textSecondary space-y-3">
                           <li className="flex items-start gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6355E4] mt-1.5"></span>
                             <span>
@@ -1022,7 +1022,7 @@ export default function AdminBookingsPage() {
           <div className="flex gap-2">
             <Input
               placeholder={t.admin.bookingsPage.searchLabel + "..."}
-              startContent={<Search size={16} className="text-[#8A8A8A]" />}
+              startContent={<Search size={16} className="text-gb-textSecondary" />}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleSearchKeyDown}
@@ -1068,7 +1068,7 @@ export default function AdminBookingsPage() {
                 <div className="animate-spin rounded-full h-10 w-10 border-b-4 border-[#6355E4]" />
               </div>
             ) : sessionExpired ? (
-              <div className="text-center py-16 text-[#8A8A8A]">
+              <div className="text-center py-16 text-gb-textSecondary">
                 <p className="font-medium text-[#1E1E1E]">{t.admin.bookingsPage.sessionExpiredTitle}</p>
                 <p className="text-sm mt-1">{t.admin.bookingsPage.sessionExpiredDesc}</p>
                 <Button size="sm" className="mt-3 bg-[#6355E4] text-white" onPress={() => { window.location.href = '/admin/login'; }}>
@@ -1076,7 +1076,7 @@ export default function AdminBookingsPage() {
                 </Button>
               </div>
             ) : bookings.length === 0 ? (
-              <div className="text-center py-16 text-[#8A8A8A]">
+              <div className="text-center py-16 text-gb-textSecondary">
                 <Calendar className="mx-auto mb-4 text-[#ECEBF2]" size={40} />
                 <p className="font-medium">{t.admin.bookingsPage.noBookingsFound}</p>
                 {hasActiveFilters && (
@@ -1093,7 +1093,7 @@ export default function AdminBookingsPage() {
                     <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                       <tr>
                         {[t.admin.bookingsPage.bookingNumberHeader, t.admin.calendarPage.dateAndTime, t.admin.customer, t.admin.service, t.admin.status, t.admin.price, t.admin.actions].map(h => (
-                          <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{h}</th>
+                          <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1103,30 +1103,30 @@ export default function AdminBookingsPage() {
                           onClick={() => openBookingDetails(booking)}
                           className={`hover:bg-[#F6F5FA]/60 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#F6F5FA]/20"}`}>
                           <td className="px-5 py-4">
-                            <div className="font-mono text-xs text-[#8A8A8A]">{booking.bookingNumber}</div>
-                            <div className="text-xs text-[#8A8A8A] mt-0.5">{new Date(booking.createdAt).toLocaleDateString(dateLocale)}</div>
+                            <div className="font-mono text-xs text-gb-textSecondary">{booking.bookingNumber}</div>
+                            <div className="text-xs text-gb-textSecondary mt-0.5">{new Date(booking.createdAt).toLocaleDateString(dateLocale)}</div>
                           </td>
                           <td className="px-5 py-4">
                             <div className="font-semibold text-[#1E1E1E] text-sm">{new Date(booking.bookingDate).toLocaleDateString(dateLocale)}</div>
-                            <div className="text-xs text-[#8A8A8A]">{booking.startTime} – {booking.endTime}</div>
+                            <div className="text-xs text-gb-textSecondary">{booking.startTime} – {booking.endTime}</div>
                           </td>
                           <td className="px-5 py-4">
                             <div className="font-semibold text-[#1E1E1E] text-sm">{booking.customerName}</div>
                             {booking.bookingContactName && (
-                              <div className="text-xs text-[#8A8A8A] italic">
+                              <div className="text-xs text-gb-textSecondary italic">
                                 {fillTemplate(t.admin.bookingsPage.bookedAsTemplate, { name: booking.bookingContactName })}
                               </div>
                             )}
                             {booking.customerEmail
-                              ? <div className="text-xs text-[#8A8A8A] break-all">{booking.customerEmail}</div>
+                              ? <div className="text-xs text-gb-textSecondary break-all">{booking.customerEmail}</div>
                               : <div className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full w-fit mt-0.5"><Mail size={10} />{t.admin.bookingsPage.noEmail}</div>
                             }
-                            <div className="text-xs text-[#8A8A8A]">{booking.customerPhone}</div>
+                            <div className="text-xs text-gb-textSecondary">{booking.customerPhone}</div>
                           </td>
                           <td className="px-5 py-4">
                             <div className="text-sm text-[#1E1E1E]">{booking.serviceName}</div>
                             {booking.customerNotes && (
-                              <div className="text-xs text-[#8A8A8A] mt-1 max-w-xs truncate">💬 {booking.customerNotes}</div>
+                              <div className="text-xs text-gb-textSecondary mt-1 max-w-xs truncate">💬 {booking.customerNotes}</div>
                             )}
                           </td>
                           <td className="px-5 py-4">
@@ -1172,7 +1172,7 @@ export default function AdminBookingsPage() {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
-                    <div className="text-sm text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.pageOfTemplate, { page: currentPage, total: totalPages })}</div>
+                    <div className="text-sm text-gb-textSecondary">{fillTemplate(t.admin.bookingsPage.pageOfTemplate, { page: currentPage, total: totalPages })}</div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="flat" isDisabled={currentPage === 1}
                         onPress={() => handlePageChange(currentPage - 1)}
@@ -1207,7 +1207,7 @@ export default function AdminBookingsPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.calendarPage.updateStatus}</h2>
-                    <p className="text-xs text-[#8A8A8A]">{selectedBooking?.bookingNumber}</p>
+                    <p className="text-xs text-gb-textSecondary">{selectedBooking?.bookingNumber}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1216,8 +1216,8 @@ export default function AdminBookingsPage() {
                   <div className="space-y-4">
                     <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
-                      <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
-                      <div className="text-xs text-[#8A8A8A]">
+                      <div className="text-xs text-gb-textSecondary mt-1">{selectedBooking.serviceName}</div>
+                      <div className="text-xs text-gb-textSecondary">
                         {new Date(selectedBooking.bookingDate).toLocaleDateString(dateLocale)} · {selectedBooking.startTime}
                       </div>
                     </div>
@@ -1231,7 +1231,7 @@ export default function AdminBookingsPage() {
                         .filter((s) => !isStatusTransitionAllowed(selectedBooking.status, s))}
                       classNames={{
                         trigger: "bg-white border border-[#ECEBF2]/40 hover:border-[#6355E4]",
-                        label: "text-[#8A8A8A]",
+                        label: "text-gb-textSecondary",
                       }}
                     >
                       <SelectItem key="Pending" value="Pending">{t.admin.bookingStatus.pending}</SelectItem>
@@ -1241,7 +1241,7 @@ export default function AdminBookingsPage() {
                       <SelectItem key="Cancelled" value="Cancelled">{t.admin.bookingStatus.cancelled}</SelectItem>
                     </Select>
                     {(selectedBooking.status === "Completed" || selectedBooking.status === "NoShow") && (
-                      <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.statusTerminalHint}</p>
+                      <p className="text-xs text-gb-textSecondary">{t.admin.bookingsPage.statusTerminalHint}</p>
                     )}
 
                     <Textarea
@@ -1286,7 +1286,7 @@ export default function AdminBookingsPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.bookingsPage.deleteBooking}</h2>
-                    <p className="text-xs text-[#8A8A8A]">{selectedBooking?.bookingNumber}</p>
+                    <p className="text-xs text-gb-textSecondary">{selectedBooking?.bookingNumber}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1301,8 +1301,8 @@ export default function AdminBookingsPage() {
 
                     <div className="bg-[#F6F5FA] p-4 rounded-xl border border-[#ECEBF2]/30">
                       <div className="font-semibold text-[#1E1E1E] text-sm">{selectedBooking.customerName}</div>
-                      <div className="text-xs text-[#8A8A8A] mt-1">{selectedBooking.serviceName}</div>
-                      <div className="text-xs text-[#8A8A8A]">
+                      <div className="text-xs text-gb-textSecondary mt-1">{selectedBooking.serviceName}</div>
+                      <div className="text-xs text-gb-textSecondary">
                         {new Date(selectedBooking.bookingDate).toLocaleDateString(dateLocale)} · {selectedBooking.startTime} – {selectedBooking.endTime}
                       </div>
                     </div>
@@ -1346,7 +1346,7 @@ export default function AdminBookingsPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.manualBooking}</h2>
-                    <p className="text-xs text-[#8A8A8A]">{t.admin.bookingsPage.manualBookingDesc}</p>
+                    <p className="text-xs text-gb-textSecondary">{t.admin.bookingsPage.manualBookingDesc}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1361,7 +1361,7 @@ export default function AdminBookingsPage() {
                           </div>
                           <div>
                             <h3 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.bookingSuccess}</h3>
-                            <p className="text-xs text-[#8A8A8A] font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
+                            <p className="text-xs text-gb-textSecondary font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
                           </div>
                         </div>
                       </div>
@@ -1380,7 +1380,7 @@ export default function AdminBookingsPage() {
                         {createdBooking.booking.redeemedVoucherCode && (
                           <div className="mt-3 pt-3 border-t border-[#ECEBF2]/40 space-y-1.5">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-[#8A8A8A]">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: createdBooking.booking.redeemedVoucherCode })}</span>
+                              <span className="text-gb-textSecondary">{fillTemplate(t.admin.bookingsPage.voucherAppliedTemplate, { code: createdBooking.booking.redeemedVoucherCode })}</span>
                               <span className="font-semibold text-[#059669]">
                                 -{formatPrice(createdBooking.booking.voucherDiscountAmount ?? 0, createdBooking.booking.currency)}
                               </span>
@@ -1412,7 +1412,7 @@ export default function AdminBookingsPage() {
                             })}
                           </p>
                           <div className="flex items-center gap-2">
-                            <Clock size={16} className="text-[#8A8A8A]" />
+                            <Clock size={16} className="text-gb-textSecondary" />
                             <p className="text-[#1E1E1E]">
                               {createdBooking.booking.startTime} – {createdBooking.booking.endTime} {t.admin.calendarPage.clockSuffix}
                             </p>
@@ -1460,7 +1460,7 @@ export default function AdminBookingsPage() {
                       {loadingEmployees ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingEmployees}</span>
+                          <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingEmployees}</span>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-2">
@@ -1482,7 +1482,7 @@ export default function AdminBookingsPage() {
                                 </div>
                                 <div>
                                   <p className="font-semibold text-[#1E1E1E] text-sm">{emp.name}</p>
-                                  <p className="text-[10px] text-[#8A8A8A]">{emp.role}</p>
+                                  <p className="text-[10px] text-gb-textSecondary">{emp.role}</p>
                                 </div>
                               </div>
                             </button>
@@ -1496,13 +1496,13 @@ export default function AdminBookingsPage() {
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step2ChooseService}</p>
 
                       {!selectedEmployeeId ? (
-                        <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
+                        <div className="p-3 bg-white rounded-lg text-center text-sm text-gb-textSecondary">
                           {t.admin.calendarPage.chooseEmployeeFirst}
                         </div>
                       ) : loadingEmployeeServices ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingServices}</span>
+                          <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingServices}</span>
                         </div>
                       ) : (
                         <Popover placement="bottom" isOpen={isServicePopoverOpen} onOpenChange={setIsServicePopoverOpen}>
@@ -1510,7 +1510,7 @@ export default function AdminBookingsPage() {
                             <Button
                               variant="flat"
                               className="w-full justify-start bg-white border border-[#ECEBF2]/30 text-[#1E1E1E] h-12"
-                              endContent={<Search size={18} className="text-[#8A8A8A]" />}
+                              endContent={<Search size={18} className="text-gb-textSecondary" />}
                               isDisabled={!selectedEmployeeId}
                             >
                               {bookingForm.serviceId ?
@@ -1527,7 +1527,7 @@ export default function AdminBookingsPage() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="border-b border-[#ECEBF2]/20"
-                                startContent={<Search size={18} className="text-[#8A8A8A]" />}
+                                startContent={<Search size={18} className="text-gb-textSecondary" />}
                                 classNames={{
                                   inputWrapper: "bg-transparent shadow-none",
                                   base: "p-3"
@@ -1557,19 +1557,19 @@ export default function AdminBookingsPage() {
                                           <span className="text-xs text-[#6355E4] font-semibold">
                                             {formatPrice(service.price, service.currency)}
                                           </span>
-                                          <span className="text-xs text-[#8A8A8A]">
+                                          <span className="text-xs text-gb-textSecondary">
                                             {service.durationMinutes} {t.admin.durationUnits.minShort}
                                           </span>
                                         </div>
                                         {service.description && (
-                                          <div className="text-xs text-[#8A8A8A] mt-1 line-clamp-2">
+                                          <div className="text-xs text-gb-textSecondary mt-1 line-clamp-2">
                                             {service.description}
                                           </div>
                                         )}
                                       </button>
                                     ))
                                 ) : (
-                                  <div className="p-4 text-center text-[#8A8A8A]">
+                                  <div className="p-4 text-center text-gb-textSecondary">
                                     {t.admin.calendarPage.noServicesForEmployee}
                                   </div>
                                 )}
@@ -1600,7 +1600,7 @@ export default function AdminBookingsPage() {
                       {loadingSlots ? (
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
-                          <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingSlots}</span>
+                          <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingSlots}</span>
                         </div>
                       ) : availableSlots.length > 0 ? (
                         <div className="grid grid-cols-4 gap-2">
@@ -1620,7 +1620,7 @@ export default function AdminBookingsPage() {
                           ))}
                         </div>
                       ) : (
-                        <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
+                        <div className="p-3 bg-white rounded-lg text-center text-sm text-gb-textSecondary">
                           {bookingForm.serviceId
                             ? (slotsMessage || t.admin.calendarPage.noSlotsAvailable)
                             : t.admin.calendarPage.chooseServiceAndDateFirst}
@@ -1692,7 +1692,7 @@ export default function AdminBookingsPage() {
                       <div className="bg-[#6355E4]/5 border border-[#6355E4]/20 p-3 rounded-xl flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
-                          <p className="text-xs text-[#8A8A8A]">
+                          <p className="text-xs text-gb-textSecondary">
                             {selectedService.durationMinutes} {t.admin.durationUnits.minShort}
                             {employees.find(e => e.id === selectedEmployeeId)?.name
                               ? ` · ${employees.find(e => e.id === selectedEmployeeId)!.name}`

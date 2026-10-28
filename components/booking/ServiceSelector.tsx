@@ -118,7 +118,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
       <div className="text-center py-12 px-4">
         <Sparkles size={40} className="mx-auto mb-4" style={{ color: primaryColor }} />
         <h2 className="text-xl font-bold text-[#14162B] mb-2">{t.booking.noServicesTitle}</h2>
-        <p className="text-[#8A8A8A] mb-6">{t.booking.noServicesDesc}</p>
+        <p className="text-gb-textSecondary mb-6">{t.booking.noServicesDesc}</p>
         <a href="javascript:history.back()" className="inline-block text-sm text-[#17A398] underline">
           {t.booking.backToProfile}
         </a>
@@ -150,10 +150,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-[#14162B] text-sm">{service.name}</h4>
                   {service.description && (
-                    <p className="text-xs text-[#8A8A8A] mt-0.5 line-clamp-1">{service.description}</p>
+                    <p className="text-xs text-gb-textSecondary mt-0.5 line-clamp-1">{service.description}</p>
                   )}
                   <div className="flex items-center gap-3 mt-1.5">
-                    <span className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                    <span className="flex items-center gap-1 text-xs text-gb-textSecondary">
                       <Clock size={12} />
                       {service.durationMinutes} {t.booking.minutes}
                     </span>
@@ -200,10 +200,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words pr-1">{service.name}</h4>
                   {service.description && (
-                    <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 line-clamp-2 break-words">{service.description}</p>
+                    <p className="text-xs sm:text-sm text-gb-textSecondary mt-1 line-clamp-2 break-words">{service.description}</p>
                   )}
                   <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-2">
-                    <span className="flex items-center gap-1 text-xs sm:text-sm text-[#8A8A8A] whitespace-nowrap">
+                    <span className="flex items-center gap-1 text-xs sm:text-sm text-gb-textSecondary whitespace-nowrap">
                       <Clock size={14} />
                       {service.durationMinutes} {t.booking.minutes}
                     </span>
@@ -235,7 +235,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
       <div className={`space-y-6 px-4 sm:px-0 ${selectedService ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseService}</h2>
-          <p className="text-sm sm:text-base text-[#8A8A8A]">{t.booking.step1of4}</p>
+          <p className="text-sm sm:text-base text-gb-textSecondary">{t.booking.step1of4}</p>
         </div>
 
         {/* Search Bar */}
@@ -248,10 +248,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
               setShowSearchResults(true);
               if (expandedId) setExpandedId(null);
             }}
-            startContent={<Search size={18} className="text-[#8A8A8A]" />}
+            startContent={<Search size={18} className="text-gb-textSecondary" />}
             endContent={
               searchTerm ? (
-                <button onClick={clearSearch} className="text-[#8A8A8A] hover:text-[#14162B] transition-colors">
+                <button onClick={clearSearch} className="text-gb-textSecondary hover:text-[#14162B] transition-colors">
                   <X size={16} />
                 </button>
               ) : null
@@ -275,7 +275,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
             >
               {searchResults.length > 0 ? (
                 <>
-                  <p className="text-sm text-[#8A8A8A]">
+                  <p className="text-sm text-gb-textSecondary">
                     {searchResults.length} {searchResults.length === 1 ? t.booking.servicesFound_one : t.booking.servicesFound_other}
                   </p>
                   <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
@@ -284,7 +284,7 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                 </>
               ) : (
                 <div className="text-center py-8 rounded-xl" style={{ backgroundColor: lightBg }}>
-                  <p className="text-sm text-[#8A8A8A]">{t.booking.noSearchResults} &quot;{searchTerm}&quot;</p>
+                  <p className="text-sm text-gb-textSecondary">{t.booking.noSearchResults} &quot;{searchTerm}&quot;</p>
                 </div>
               )}
             </motion.div>
@@ -309,10 +309,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                         {category.id === "default" ? t.booking.allServices : category.name}
                       </h3>
                       {category.description && (
-                        <p className="text-xs sm:text-sm text-[#8A8A8A] truncate">{category.description}</p>
+                        <p className="text-xs sm:text-sm text-gb-textSecondary truncate">{category.description}</p>
                       )}
                     </div>
-                    {isExpanded ? <ChevronUp size={18} className="flex-shrink-0 text-[#8A8A8A]" /> : <ChevronDown size={18} className="flex-shrink-0 text-[#8A8A8A]" />}
+                    {isExpanded ? <ChevronUp size={18} className="flex-shrink-0 text-gb-textSecondary" /> : <ChevronDown size={18} className="flex-shrink-0 text-gb-textSecondary" />}
                   </button>
 
                   {isExpanded && (
@@ -320,10 +320,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                       {isLoading ? (
                         <div className="flex items-center justify-center py-8">
                           <Loader2 className="w-6 h-6 animate-spin" style={{ color: primaryColor }} />
-                          <span className="ml-2 text-sm text-[#8A8A8A]">{t.booking.loadingServices}</span>
+                          <span className="ml-2 text-sm text-gb-textSecondary">{t.booking.loadingServices}</span>
                         </div>
                       ) : category.services.length === 0 ? (
-                        <p className="text-center py-4 text-sm text-[#8A8A8A]">{t.booking.noServicesInCategory}</p>
+                        <p className="text-center py-4 text-sm text-gb-textSecondary">{t.booking.noServicesInCategory}</p>
                       ) : (
                         <div className="flex flex-col gap-2 sm:gap-3">
                           {category.services.map((service) => <ServiceCardLarge key={service.id} service={service} />)}
@@ -355,10 +355,10 @@ export function ServiceSelector({ services: fallbackServices, selectedService, o
                   <CheckCircle className="text-white" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-[#8A8A8A]">{t.booking.selectedTreatment}</p>
+                  <p className="text-xs text-gb-textSecondary">{t.booking.selectedTreatment}</p>
                   <p className="font-bold text-[#14162B] text-sm truncate">{selectedService.name}</p>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-[#8A8A8A]">
+                    <span className="text-xs text-gb-textSecondary">
                       <Clock size={10} className="inline mr-0.5" />
                       {selectedService.durationMinutes} {t.booking.minutes}
                     </span>

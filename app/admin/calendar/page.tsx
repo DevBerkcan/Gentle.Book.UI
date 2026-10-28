@@ -470,7 +470,7 @@ const handleCreateManualBooking = async () => {
       <div className="min-h-screen bg-gradient-to-br from-[#F6F5FA] to-white flex items-center justify-center">
         <div className="text-center">
           <Spinner size="lg" />
-          <p className="mt-4 text-[#8A8A8A]">{t.admin.calendarPage.calendarLoading}</p>
+          <p className="mt-4 text-gb-textSecondary">{t.admin.calendarPage.calendarLoading}</p>
         </div>
       </div>
     );
@@ -483,7 +483,7 @@ const handleCreateManualBooking = async () => {
         <div className="mb-3 flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-2xl font-bold leading-tight text-[#1E1E1E] sm:text-[28px]">{t.admin.calendar}</h1>
-            <p className="mt-0.5 flex items-center gap-2 text-xs text-[#8A8A8A] sm:text-sm">
+            <p className="mt-0.5 flex items-center gap-2 text-xs text-gb-textSecondary sm:text-sm">
               {t.admin.calendarPage.subtitle}
             </p>
           </div>
@@ -607,7 +607,7 @@ const handleCreateManualBooking = async () => {
                       </div>
                       <div className="flex-1">
                         <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.appointmentDetails}</h2>
-                        <p className="text-sm text-[#8A8A8A] flex items-center gap-1">
+                        <p className="text-sm text-gb-textSecondary flex items-center gap-1">
                           <Hash size={12} />{selectedEvent?.resource.bookingNumber}
                         </p>
                       </div>
@@ -636,7 +636,7 @@ const handleCreateManualBooking = async () => {
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="font-medium text-[#1E1E1E]">{selectedEvent.resource.serviceName}</p>
-                            <p className="text-sm text-[#8A8A8A] flex items-center gap-1 mt-1">
+                            <p className="text-sm text-gb-textSecondary flex items-center gap-1 mt-1">
                               <Clock size={13} />
                               {moment(selectedEvent.start).format('DD.MM.YYYY')} · {moment(selectedEvent.start).format('HH:mm')} – {moment(selectedEvent.end).format('HH:mm')}
                             </p>
@@ -705,7 +705,7 @@ const handleCreateManualBooking = async () => {
                           ))}
                         </div>
                         {(selectedEvent.resource.status === "Completed" || selectedEvent.resource.status === "NoShow") && (
-                          <p className="text-xs text-[#8A8A8A] mt-2">{t.admin.bookingsPage.statusTerminalHint}</p>
+                          <p className="text-xs text-gb-textSecondary mt-2">{t.admin.bookingsPage.statusTerminalHint}</p>
                         )}
                       </div>
                     </div>
@@ -718,7 +718,7 @@ const handleCreateManualBooking = async () => {
                         </span>
                       </div>
                       {selectedEvent?.resource.reason && (
-                        <p className="text-sm text-[#8A8A8A] px-1"><strong>{t.admin.calendarPage.reasonLabel}:</strong> {selectedEvent.resource.reason}</p>
+                        <p className="text-sm text-gb-textSecondary px-1"><strong>{t.admin.calendarPage.reasonLabel}:</strong> {selectedEvent.resource.reason}</p>
                       )}
                     </div>
                   )}
@@ -761,7 +761,7 @@ const handleCreateManualBooking = async () => {
                     </div>
                     <div>
                       <h2 className="text-base font-bold text-[#1E1E1E]">{t.admin.calendarPage.blockSlot}</h2>
-                      <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.blockSlotDesc}</p>
+                      <p className="text-xs text-gb-textSecondary">{t.admin.calendarPage.blockSlotDesc}</p>
                     </div>
                   </div>
                 </ModalHeader>
@@ -783,9 +783,9 @@ const handleCreateManualBooking = async () => {
                       />
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-[#1E1E1E]">{t.admin.calendarPage.dateRange}</p>
-                        <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.dateRangeDesc}</p>
+                        <p className="text-xs text-gb-textSecondary">{t.admin.calendarPage.dateRangeDesc}</p>
                       </div>
-                      <CalendarRange size={18} className="text-[#8A8A8A]" />
+                      <CalendarRange size={18} className="text-gb-textSecondary" />
                     </div>
 
                     {/* Date(s) */}
@@ -903,7 +903,7 @@ const handleCreateManualBooking = async () => {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.manualBooking}</h2>
-                      {selectedSlot && <p className="text-xs text-[#8A8A8A]">{moment(selectedSlot.start).format('DD.MM.YYYY')}</p>}
+                      {selectedSlot && <p className="text-xs text-gb-textSecondary">{moment(selectedSlot.start).format('DD.MM.YYYY')}</p>}
                     </div>
                   </div>
                 </ModalHeader>
@@ -917,7 +917,7 @@ const handleCreateManualBooking = async () => {
       </div>
       <div>
         <h3 className="text-lg font-bold text-[#1E1E1E]">{t.admin.calendarPage.bookingSuccess}</h3>
-        <p className="text-xs text-[#8A8A8A] font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
+        <p className="text-xs text-gb-textSecondary font-mono">{t.admin.calendarPage.numberLabel}: {createdBooking.bookingNumber}</p>
       </div>
     </div>
   </div>
@@ -952,7 +952,7 @@ const handleCreateManualBooking = async () => {
         })}
       </p>
       <div className="flex items-center gap-2">
-        <Clock size={16} className="text-[#8A8A8A]" />
+        <Clock size={16} className="text-gb-textSecondary" />
         <p className="text-[#1E1E1E]">
           {createdBooking.booking.startTime} – {createdBooking.booking.endTime} {t.admin.calendarPage.clockSuffix}
         </p>
@@ -999,7 +999,7 @@ const handleCreateManualBooking = async () => {
   {loadingEmployees ? (
     <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
       <Spinner size="sm" />
-      <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingEmployees}</span>
+      <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingEmployees}</span>
     </div>
   ) : (
     <div className="grid grid-cols-2 gap-2">
@@ -1027,7 +1027,7 @@ const handleCreateManualBooking = async () => {
             </div>
             <div>
               <p className="font-semibold text-[#1E1E1E] text-sm">{emp.name}</p>
-              <p className="text-[10px] text-[#8A8A8A]">{emp.role}</p>
+              <p className="text-[10px] text-gb-textSecondary">{emp.role}</p>
             </div>
           </div>
         </button>
@@ -1041,13 +1041,13 @@ const handleCreateManualBooking = async () => {
   <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step2ChooseService}</p>
 
   {!selectedEmployeeId ? (
-    <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
+    <div className="p-3 bg-white rounded-lg text-center text-sm text-gb-textSecondary">
       {t.admin.calendarPage.chooseEmployeeFirst}
     </div>
   ) : loadingEmployeeServices ? (
     <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
       <Spinner size="sm" />
-      <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingServices}</span>
+      <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingServices}</span>
     </div>
   ) : (
     <Popover placement="bottom" isOpen={isServicePopoverOpen} onOpenChange={setIsServicePopoverOpen}>
@@ -1055,7 +1055,7 @@ const handleCreateManualBooking = async () => {
 <Button
   variant="flat"
   className="w-full justify-start bg-white border border-[#ECEBF2]/30 text-[#1E1E1E] h-12"
-  endContent={<Search size={18} className="text-[#8A8A8A]" />}
+  endContent={<Search size={18} className="text-gb-textSecondary" />}
   isDisabled={!selectedEmployeeId}
 >
   {bookingForm.serviceId ?
@@ -1072,7 +1072,7 @@ const handleCreateManualBooking = async () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border-b border-[#ECEBF2]/20"
-            startContent={<Search size={18} className="text-[#8A8A8A]" />}
+            startContent={<Search size={18} className="text-gb-textSecondary" />}
             classNames={{
               inputWrapper: "bg-transparent shadow-none",
               base: "p-3"
@@ -1101,19 +1101,19 @@ const handleCreateManualBooking = async () => {
                       <span className="text-xs text-[#6355E4] font-semibold">
                         {formatPrice(service.price, service.currency)}
                       </span>
-                      <span className="text-xs text-[#8A8A8A]">
+                      <span className="text-xs text-gb-textSecondary">
                         {service.durationMinutes} {t.admin.durationUnits.minShort}
                       </span>
                     </div>
                     {service.description && (
-                      <div className="text-xs text-[#8A8A8A] mt-1 line-clamp-2">
+                      <div className="text-xs text-gb-textSecondary mt-1 line-clamp-2">
                         {service.description}
                       </div>
                     )}
                   </button>
                 ))
             ) : (
-              <div className="p-4 text-center text-[#8A8A8A]">
+              <div className="p-4 text-center text-gb-textSecondary">
                 {t.admin.calendarPage.noServicesForEmployee}
               </div>
             )}
@@ -1144,7 +1144,7 @@ const handleCreateManualBooking = async () => {
                         {loadingSlots ? (
                           <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                             <Spinner size="sm" />
-                            <span className="text-sm text-[#8A8A8A]">{t.admin.calendarPage.loadingSlots}</span>
+                            <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingSlots}</span>
                           </div>
                         ) : availableSlots.length > 0 ? (
                           <div className="grid grid-cols-4 gap-2">
@@ -1164,7 +1164,7 @@ const handleCreateManualBooking = async () => {
                             ))}
                           </div>
                         ) : (
-                          <div className="p-3 bg-white rounded-lg text-center text-sm text-[#8A8A8A]">
+                          <div className="p-3 bg-white rounded-lg text-center text-sm text-gb-textSecondary">
                             {bookingForm.serviceId
                               ? (slotsMessage || t.admin.calendarPage.noSlotsAvailable)
                               : t.admin.calendarPage.chooseServiceAndDateFirst}
@@ -1227,7 +1227,7 @@ const handleCreateManualBooking = async () => {
                         <div className="bg-[#6355E4]/5 border border-[#6355E4]/20 p-3 rounded-xl flex items-center justify-between">
                           <div>
                             <p className="font-semibold text-[#1E1E1E] text-sm">{selectedService.name}</p>
-                            <p className="text-xs text-[#8A8A8A]">
+                            <p className="text-xs text-gb-textSecondary">
                               {selectedService.durationMinutes} {t.admin.durationUnits.minShort}
                               {employees.find(e => e.id === selectedEmployeeId)?.name
                                 ? ` · ${employees.find(e => e.id === selectedEmployeeId)!.name}`

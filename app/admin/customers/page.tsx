@@ -296,25 +296,25 @@ export default function CustomersPage() {
                 <span title={t.admin.customersPage.regularCustomerTitle}>🎉</span>
               )}
             </div>
-            <div className="text-xs text-[#8A8A8A] mt-0.5">ID: {customer.id.slice(-8)}</div>
+            <div className="text-xs text-gb-textSecondary mt-0.5">ID: {customer.id.slice(-8)}</div>
           </div>
         </div>
       </div>
 
       <div className="space-y-2 mb-3">
         {customer.email && (
-          <div className="flex items-center gap-2 text-sm text-[#8A8A8A]">
+          <div className="flex items-center gap-2 text-sm text-gb-textSecondary">
             <Mail size={14} className="text-[#6355E4] shrink-0" />
             <span className="truncate">{customer.email}</span>
           </div>
         )}
         {customer.phone && (
-          <div className="flex items-center gap-2 text-sm text-[#8A8A8A]">
+          <div className="flex items-center gap-2 text-sm text-gb-textSecondary">
             <Phone size={14} className="text-[#6355E4] shrink-0" />
             <span>{customer.phone}</span>
           </div>
         )}
-        <div className="flex items-center gap-2 text-sm text-[#8A8A8A]">
+        <div className="flex items-center gap-2 text-sm text-gb-textSecondary">
           <Calendar size={14} className="text-[#6355E4] shrink-0" />
           <span>
             {t.admin.customersPage.lastVisitLabel}{customer.lastVisit
@@ -389,7 +389,7 @@ export default function CustomersPage() {
                 </span>
               )}
             </div>
-            <p className="text-sm text-[#8A8A8A]">{t.admin.customersPage.subtitle}</p>
+            <p className="text-sm text-gb-textSecondary">{t.admin.customersPage.subtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -406,7 +406,7 @@ export default function CustomersPage() {
             <div className="flex gap-2">
               <Input
                 placeholder={t.admin.customersPage.searchPlaceholder}
-                startContent={<Search size={18} className="text-[#8A8A8A]" />}
+                startContent={<Search size={18} className="text-gb-textSecondary" />}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
@@ -441,7 +441,7 @@ export default function CustomersPage() {
                 <Spinner size="lg" />
               </div>
             ) : customers.length === 0 ? (
-              <div className="text-center py-16 text-[#8A8A8A]">
+              <div className="text-center py-16 text-gb-textSecondary">
                 <UserIcon className="mx-auto mb-4 text-[#ECEBF2]" size={48} />
                 <p className="font-medium">{t.admin.customersPage.noCustomersFound}</p>
                 {searchTerm && (
@@ -465,14 +465,14 @@ export default function CustomersPage() {
                   <table className="w-full">
                     <thead className="bg-[#F6F5FA] border-b border-[#ECEBF2]/30">
                       <tr>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customer}</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.contactHeader}</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.bookings}</th>
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.lastVisitHeader}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.customer}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.customersPage.contactHeader}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.bookings}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.customersPage.lastVisitHeader}</th>
                         {loyaltyAvailable && (
-                          <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.customersPage.loyaltyPoints}</th>
+                          <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.customersPage.loyaltyPoints}</th>
                         )}
-                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide">{t.admin.actions}</th>
+                        <th className="px-5 py-3.5 text-left text-xs font-semibold text-gb-textSecondary uppercase tracking-wide">{t.admin.actions}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#ECEBF2]/10">
@@ -495,19 +495,19 @@ export default function CustomersPage() {
                                     <span title={t.admin.customersPage.regularCustomerTitle}>🎉</span>
                                   )}
                                 </div>
-                                <div className="text-xs text-[#8A8A8A]">ID: {customer.id.slice(-8)}</div>
+                                <div className="text-xs text-gb-textSecondary">ID: {customer.id.slice(-8)}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-5 py-4">
                             {customer.email && (
-                              <div className="flex items-center gap-1 text-xs text-[#8A8A8A] mb-1">
+                              <div className="flex items-center gap-1 text-xs text-gb-textSecondary mb-1">
                                 <Mail size={12} className="shrink-0" />
                                 <span className="truncate max-w-[200px]">{customer.email}</span>
                               </div>
                             )}
                             {customer.phone && (
-                              <div className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                              <div className="flex items-center gap-1 text-xs text-gb-textSecondary">
                                 <Phone size={12} className="shrink-0" />
                                 <span>{customer.phone}</span>
                               </div>
@@ -518,7 +518,7 @@ export default function CustomersPage() {
                               {customer.totalBookings}
                             </Chip>
                           </td>
-                          <td className="px-5 py-4 text-sm text-[#8A8A8A]">
+                          <td className="px-5 py-4 text-sm text-gb-textSecondary">
                             {customer.lastVisit
                               ? new Date(customer.lastVisit).toLocaleDateString(dateLocale)
                               : "—"}
@@ -583,7 +583,7 @@ export default function CustomersPage() {
                 {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between px-5 py-4 border-t border-[#ECEBF2]/20">
-                    <div className="text-sm text-[#8A8A8A]">
+                    <div className="text-sm text-gb-textSecondary">
                       {fillTemplate(t.admin.bookingsPage.pageOfTemplate, { page, total: totalPages })}
                     </div>
                     <div className="flex gap-2">
@@ -640,7 +640,7 @@ export default function CustomersPage() {
                     <h2 className="text-base font-bold text-[#1E1E1E]">
                       {modalMode === "edit" ? t.admin.customersPage.editCustomer : t.admin.customersPage.createCustomer}
                     </h2>
-                    <p className="text-xs text-[#8A8A8A]">
+                    <p className="text-xs text-gb-textSecondary">
                       {modalMode === "edit"
                         ? t.admin.customersPage.updateCustomerDataDesc
                         : t.admin.customersPage.addNewCustomerDesc}
@@ -686,7 +686,7 @@ export default function CustomersPage() {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     isDisabled={submitting}
                     classNames={inputClassNames}
-                    startContent={<Mail size={16} className="text-[#8A8A8A]" />}
+                    startContent={<Mail size={16} className="text-gb-textSecondary" />}
                   />
 
                   <Input
@@ -696,7 +696,7 @@ export default function CustomersPage() {
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     isDisabled={submitting}
                     classNames={inputClassNames}
-                    startContent={<Phone size={16} className="text-[#8A8A8A]" />}
+                    startContent={<Phone size={16} className="text-gb-textSecondary" />}
                   />
 
                   <Input
@@ -753,7 +753,7 @@ export default function CustomersPage() {
                   <div>
                     <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.customersPage.customerDetails}</h2>
                     {selectedCustomer && (
-                      <p className="text-xs text-[#8A8A8A]">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: moment(selectedCustomer.createdAt).locale(lang).format("MMMM YYYY") })}</p>
+                      <p className="text-xs text-gb-textSecondary">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: moment(selectedCustomer.createdAt).locale(lang).format("MMMM YYYY") })}</p>
                     )}
                   </div>
                 </div>
@@ -767,11 +767,11 @@ export default function CustomersPage() {
                       <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.personalData}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.firstName}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.calendarPage.firstName}</p>
                           <p className="text-sm font-medium text-[#1E1E1E]">{selectedCustomer.firstName}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.calendarPage.lastName}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.calendarPage.lastName}</p>
                           <p className="text-sm font-medium text-[#1E1E1E]">{selectedCustomer.lastName}</p>
                         </div>
                       </div>
@@ -805,15 +805,15 @@ export default function CustomersPage() {
                       <h3 className="font-semibold text-[#1E1E1E] text-sm mb-3">{t.admin.customersPage.statistics}</h3>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.totalBookingsLabel}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.customersPage.totalBookingsLabel}</p>
                           <p className="text-xl font-bold text-[#6355E4]">{selectedCustomer.totalBookings}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.bookingStatus.noShow}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.bookingStatus.noShow}</p>
                           <p className="text-xl font-bold text-red-500">{selectedCustomer.noShowCount}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.lastVisitHeader}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.customersPage.lastVisitHeader}</p>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
                             {selectedCustomer.lastVisit
                               ? new Date(selectedCustomer.lastVisit).toLocaleDateString(dateLocale)
@@ -821,7 +821,7 @@ export default function CustomersPage() {
                           </p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
-                          <p className="text-xs text-[#8A8A8A]">{t.admin.customersPage.customerSinceLabel}</p>
+                          <p className="text-xs text-gb-textSecondary">{t.admin.customersPage.customerSinceLabel}</p>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
                             {new Date(selectedCustomer.createdAt).toLocaleDateString(dateLocale)}
                           </p>
@@ -864,7 +864,7 @@ export default function CustomersPage() {
                               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                                 <div>
                                   <p className="font-semibold text-[#1E1E1E] text-sm">{booking.serviceName}</p>
-                                  <p className="text-xs text-[#8A8A8A] mt-1">
+                                  <p className="text-xs text-gb-textSecondary mt-1">
                                     {new Date(booking.bookingDate).toLocaleDateString(dateLocale)} · {booking.startTime} – {booking.endTime}
                                   </p>
                                 </div>
@@ -938,7 +938,7 @@ export default function CustomersPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-[#1E1E1E]">{t.admin.customersPage.deleteCustomer}</h2>
-                    <p className="text-xs text-[#8A8A8A]">
+                    <p className="text-xs text-gb-textSecondary">
                       {selectedCustomer?.fullName}
                     </p>
                   </div>
@@ -966,7 +966,7 @@ export default function CustomersPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-[#1E1E1E]">{selectedCustomer.fullName}</p>
-                          <p className="text-xs text-[#8A8A8A]">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: new Date(selectedCustomer.createdAt).toLocaleDateString(dateLocale) })}</p>
+                          <p className="text-xs text-gb-textSecondary">{fillTemplate(t.admin.customersPage.customerSinceTemplate, { date: new Date(selectedCustomer.createdAt).toLocaleDateString(dateLocale) })}</p>
                         </div>
                       </div>
 
@@ -975,14 +975,14 @@ export default function CustomersPage() {
                         <div className="bg-white p-3 rounded-lg">
                           <div className="flex items-center gap-2">
                             <CalendarDays size={14} className="text-[#6355E4] shrink-0" />
-                            <span className="text-xs text-[#8A8A8A]">{t.admin.bookings}</span>
+                            <span className="text-xs text-gb-textSecondary">{t.admin.bookings}</span>
                           </div>
                           <p className="text-xl font-bold text-[#1E1E1E]">{selectedCustomer.totalBookings}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg">
                           <div className="flex items-center gap-2">
                             <Clock size={14} className="text-[#6355E4] shrink-0" />
-                            <span className="text-xs text-[#8A8A8A]">{t.admin.customersPage.lastVisitHeader}</span>
+                            <span className="text-xs text-gb-textSecondary">{t.admin.customersPage.lastVisitHeader}</span>
                           </div>
                           <p className="text-sm font-semibold text-[#1E1E1E]">
                             {selectedCustomer.lastVisit

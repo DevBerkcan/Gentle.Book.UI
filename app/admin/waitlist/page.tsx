@@ -117,7 +117,7 @@ export default function AdminWaitlistPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[#111318]">{t.admin.waitlist}</h1>
-            <p className="text-xs text-[#9CA3AF]">{s.pageSubtitle}</p>
+            <p className="text-xs text-gb-textMuted">{s.pageSubtitle}</p>
           </div>
         </div>
         <Button
@@ -137,13 +137,13 @@ export default function AdminWaitlistPage() {
         <Card className="border border-[#E5E7EB] shadow-sm">
           <CardBody className="p-4">
             <p className="text-2xl font-bold text-[#F59E0B]">{pending}</p>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">{s.statusPending}</p>
+            <p className="text-xs text-gb-textMuted mt-0.5">{s.statusPending}</p>
           </CardBody>
         </Card>
         <Card className="border border-[#E5E7EB] shadow-sm">
           <CardBody className="p-4">
             <p className="text-2xl font-bold text-[#6355E4]">{notified}</p>
-            <p className="text-xs text-[#9CA3AF] mt-0.5">{s.statusNotified}</p>
+            <p className="text-xs text-gb-textMuted mt-0.5">{s.statusNotified}</p>
           </CardBody>
         </Card>
       </div>
@@ -156,7 +156,7 @@ export default function AdminWaitlistPage() {
               placeholder={s.searchPlaceholder}
               value={search}
               onChange={e => setSearch(e.target.value)}
-              startContent={<Search size={15} className="text-[#9CA3AF]" />}
+              startContent={<Search size={15} className="text-gb-textMuted" />}
               classNames={{ inputWrapper: 'bg-[#F7F7F8] border border-[#E5E7EB]' }}
               className="flex-1 min-w-[180px]"
             />
@@ -201,7 +201,7 @@ export default function AdminWaitlistPage() {
               <div className="w-8 h-8 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-[#9CA3AF]">
+            <div className="text-center py-16 text-gb-textMuted">
               <ClipboardList className="mx-auto mb-3 text-[#E5E7EB]" size={40} />
               <p className="font-medium text-sm">{s.noEntriesFound}</p>
             </div>
@@ -263,7 +263,7 @@ export default function AdminWaitlistPage() {
                     </div>
 
                     {entry.notes && (
-                      <p className="mt-1.5 text-xs text-[#9CA3AF] italic">"{entry.notes}"</p>
+                      <p className="mt-1.5 text-xs text-gb-textMuted italic">"{entry.notes}"</p>
                     )}
 
                     <p className="mt-1 text-[10px] text-[#D1D5DB]">

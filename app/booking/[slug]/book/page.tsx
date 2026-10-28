@@ -438,7 +438,7 @@ function BookingPageInner() {
                           ? "text-white"
                           : currentStep === step
                           ? "text-white ring-4 ring-opacity-20"
-                          : isDark ? "bg-white/10 text-white/40" : "text-[#8A8A8A]"
+                          : isDark ? "bg-white/10 text-white/40" : "text-gb-textSecondary"
                       }`}
                       style={currentStep >= step
                         ? { backgroundColor: primaryColor }

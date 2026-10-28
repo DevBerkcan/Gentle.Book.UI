@@ -98,7 +98,7 @@ export function DateTimePicker({
   if (!selectedEmployee) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#8A8A8A]">{t.booking.noEmployeeSelected}</p>
+        <p className="text-gb-textSecondary">{t.booking.noEmployeeSelected}</p>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export function DateTimePicker({
       <div className={`space-y-6 ${canProceed ? "pb-28" : "pb-4"}`}>
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{t.booking.chooseDatetime}</h2>
-          <p className="text-sm sm:text-base text-[#8A8A8A]">
+          <p className="text-sm sm:text-base text-gb-textSecondary">
             {t.booking.step3of4} • {service.name} • {selectedEmployee.name}
           </p>
         </div>
@@ -177,7 +177,7 @@ export function DateTimePicker({
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderColor: primaryColor }} />
               </div>
             ) : availableSlots.length === 0 ? (
-              <div className="text-center py-8 rounded-xl text-[#8A8A8A] text-sm" style={{ backgroundColor: lightBg }}>
+              <div className="text-center py-8 rounded-xl text-gb-textSecondary text-sm" style={{ backgroundColor: lightBg }}>
                 {lang === "de" ? (noSlotsMessage ?? t.booking.noTimesAvailable) : t.booking.noTimesAvailable}
               </div>
             ) : (
@@ -236,12 +236,12 @@ export function DateTimePicker({
                   <CheckCircle className="text-white" size={18} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-[#8A8A8A]">{t.booking.selected}</p>
+                  <p className="text-xs text-gb-textSecondary">{t.booking.selected}</p>
                   <p className="font-bold text-[#14162B] text-sm truncate">
                     {new Date(selectedDate! + "T00:00:00").toLocaleDateString(locale, { day: "2-digit", month: "2-digit" })}{" "}
                     {lang === "en" ? "at" : "um"} {selectedTime}
                   </p>
-                  <div className="flex items-center gap-1 text-xs text-[#8A8A8A]">
+                  <div className="flex items-center gap-1 text-xs text-gb-textSecondary">
                     <Clock size={10} />
                     {service.durationMinutes} {t.booking.minutes}
                   </div>

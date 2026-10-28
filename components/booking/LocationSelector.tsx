@@ -28,7 +28,7 @@ export function LocationSelector({
     <div className="space-y-6 px-4 sm:px-0">
       <div className="text-center">
         <h2 className="text-xl sm:text-2xl font-bold text-[#14162B] mb-2">{title}</h2>
-        <p className="text-sm sm:text-base text-[#8A8A8A]">{subtitle}</p>
+        <p className="text-sm sm:text-base text-gb-textSecondary">{subtitle}</p>
       </div>
 
       <div className="flex flex-col gap-2 sm:gap-3">
@@ -53,7 +53,7 @@ export function LocationSelector({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-[#14162B] text-sm sm:text-base break-words">{loc.name}</h4>
-                    <p className="text-xs sm:text-sm text-[#8A8A8A] mt-1 break-words">
+                    <p className="text-xs sm:text-sm text-gb-textSecondary mt-1 break-words">
                       {[loc.street, [loc.postalCode, loc.city].filter(Boolean).join(" ")].filter(Boolean).join(", ")}
                     </p>
                   </div>

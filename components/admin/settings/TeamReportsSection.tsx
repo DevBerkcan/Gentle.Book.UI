@@ -66,7 +66,7 @@ export function TeamReportsSection() {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl overflow-hidden">
-        <div className="flex items-center gap-2 text-xs text-[#9CA3AF] px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
+        <div className="flex items-center gap-2 text-xs text-gb-textMuted px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
       </div>
     );
   }
@@ -76,17 +76,17 @@ export function TeamReportsSection() {
       <div className="bg-white rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 px-1 pb-3">
           <div className="w-8 h-8 bg-[#E5E7EB] rounded-xl flex items-center justify-center shrink-0">
-            <Lock size={14} className="text-[#9CA3AF]" />
+            <Lock size={14} className="text-gb-textMuted" />
           </div>
           <div>
             <p className="font-semibold text-[#111318] text-sm leading-tight">{s.teamReports}</p>
-            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{t.admin.agencyExclusive}</p>
+            <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{t.admin.agencyExclusive}</p>
           </div>
         </div>
         <div className="px-1">
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] p-3.5 text-xs text-[#565A72]">
             {locked.message}
-            {locked.currentPlan && <span className="block mt-1 text-[#9CA3AF]">{fillTemplate(t.admin.currentPlanTemplate, { plan: locked.currentPlan })}</span>}
+            {locked.currentPlan && <span className="block mt-1 text-gb-textMuted">{fillTemplate(t.admin.currentPlanTemplate, { plan: locked.currentPlan })}</span>}
             <a href="/admin/subscription" className="inline-block mt-2 text-[#6355E4] font-semibold hover:underline">{t.admin.upgradeNowCta}</a>
           </div>
         </div>
@@ -102,7 +102,7 @@ export function TeamReportsSection() {
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{s.teamReports}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.trsSubtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.trsSubtitle}</p>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export function TeamReportsSection() {
                 {frequency === opt.value && <CheckCircle2 size={13} className="text-[#6355E4]" />}
                 <span className="text-xs font-semibold text-[#111318]">{opt.label}</span>
               </div>
-              <p className="text-[11px] text-[#9CA3AF] leading-tight">{opt.description}</p>
+              <p className="text-[11px] text-gb-textMuted leading-tight">{opt.description}</p>
             </button>
           ))}
         </div>

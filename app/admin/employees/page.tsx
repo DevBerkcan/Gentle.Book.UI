@@ -34,7 +34,7 @@ const MODAL_CLS = {
 };
 const INPUT_CLS = {
   inputWrapper: "bg-[#F6F5FA] border border-[#ECEBF2]/40 hover:border-[#6355E4] data-[focus=true]:border-[#6355E4]",
-  label: "text-[#8A8A8A] font-medium",
+  label: "text-gb-textSecondary font-medium",
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -514,7 +514,7 @@ export default function EmployeesPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1E1E] mb-1">{t.admin.employees}</h1>
-            <p className="text-sm text-[#8A8A8A]">{s.pageSubtitle}</p>
+            <p className="text-sm text-gb-textSecondary">{s.pageSubtitle}</p>
           </div>
           <Button
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold shadow-lg shadow-[#6355E4]/20"
@@ -546,7 +546,7 @@ export default function EmployeesPage() {
                     </div>
                     <div>
                       <h2 className="text-lg font-bold text-[#1E1E1E]">{s.deleteTitle}</h2>
-                      <p className="text-xs text-[#8A8A8A]">
+                      <p className="text-xs text-gb-textSecondary">
                         {selectedEmployeeForDelete?.name}
                       </p>
                     </div>
@@ -572,9 +572,9 @@ export default function EmployeesPage() {
                           </div>
                           <div className="flex-1">
                             <p className="font-semibold text-[#1E1E1E]">{selectedEmployeeForDelete.name}</p>
-                            <p className="text-sm text-[#8A8A8A]">{selectedEmployeeForDelete.role}</p>
+                            <p className="text-sm text-gb-textSecondary">{selectedEmployeeForDelete.role}</p>
                             {selectedEmployeeForDelete.location && (
-                              <p className="text-xs text-[#8A8A8A] mt-1 flex items-center gap-1">
+                              <p className="text-xs text-gb-textSecondary mt-1 flex items-center gap-1">
                                 <MapPin size={10} /> {selectedEmployeeForDelete.location}
                               </p>
                             )}
@@ -663,7 +663,7 @@ export default function EmployeesPage() {
                       <h2 className="text-lg font-bold text-[#1E1E1E]">
                         {selectedEmployeeForToggle?.isActive ? s.deactivateTitle : s.activateTitle}
                       </h2>
-                      <p className="text-xs text-[#8A8A8A]">{selectedEmployeeForToggle?.name}</p>
+                      <p className="text-xs text-gb-textSecondary">{selectedEmployeeForToggle?.name}</p>
                     </div>
                   </div>
                 </ModalHeader>
@@ -698,9 +698,9 @@ export default function EmployeesPage() {
                           </div>
                           <div className="flex-1">
                             <p className="font-semibold text-[#1E1E1E]">{selectedEmployeeForToggle.name}</p>
-                            <p className="text-sm text-[#8A8A8A]">{selectedEmployeeForToggle.role}</p>
+                            <p className="text-sm text-gb-textSecondary">{selectedEmployeeForToggle.role}</p>
                             {selectedEmployeeForToggle.location && (
-                              <p className="text-xs text-[#8A8A8A] mt-1 flex items-center gap-1">
+                              <p className="text-xs text-gb-textSecondary mt-1 flex items-center gap-1">
                                 <MapPin size={10} /> {selectedEmployeeForToggle.location}
                               </p>
                             )}
@@ -761,13 +761,13 @@ export default function EmployeesPage() {
           {[
             { label: s.statTotal, value: allEmployeesCount.total, cls: "text-[#1E1E1E]", glow: "#ECEBF2" },
             { label: t.admin.active, value: activeCount, cls: "text-[#6355E4]", glow: "#6355E4" },
-            { label: t.admin.inactive, value: inactiveCount, cls: "text-[#8A8A8A]", glow: "#ECEBF2" },
+            { label: t.admin.inactive, value: inactiveCount, cls: "text-gb-textSecondary", glow: "#ECEBF2" },
           ].map(({ label, value, cls, glow }) => (
             <GlowingEffect key={label} glowColor={glow} spread={40}>
               <Card className="border border-[#ECEBF2]/30 shadow-md relative z-[1]">
                 <CardBody className="p-4">
                   <div className={`text-2xl sm:text-3xl font-bold ${cls}`}>{value}</div>
-                  <div className="text-xs text-[#8A8A8A] mt-0.5">{label}</div>
+                  <div className="text-xs text-gb-textSecondary mt-0.5">{label}</div>
                 </CardBody>
               </Card>
             </GlowingEffect>
@@ -782,7 +782,7 @@ export default function EmployeesPage() {
             size="sm"
             color="default"
           />
-          <span className="text-sm text-[#8A8A8A]">{s.showInactiveLabel}</span>
+          <span className="text-sm text-gb-textSecondary">{s.showInactiveLabel}</span>
         </div>
 
         {/* Error */}
@@ -802,7 +802,7 @@ export default function EmployeesPage() {
             <div className="w-16 h-16 bg-[#F6F5FA] rounded-full flex items-center justify-center mx-auto mb-4">
               <Users size={28} className="text-[#ECEBF2]" />
             </div>
-            <p className="text-[#8A8A8A] font-medium">{s.emptyStateText}</p>
+            <p className="text-gb-textSecondary font-medium">{s.emptyStateText}</p>
             <Button
               className="mt-4 bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
               startContent={<Plus size={16} />}
@@ -842,16 +842,16 @@ export default function EmployeesPage() {
                           {emp.isActive ? t.admin.active : t.admin.inactive}
                         </Chip>
                       </div>
-                      <p className="text-sm text-[#8A8A8A] font-medium">{emp.role}</p>
+                      <p className="text-sm text-gb-textSecondary font-medium">{emp.role}</p>
                       {emp.location && (
-                        <p className="text-xs text-[#8A8A8A] mt-1 flex items-center gap-1">
+                        <p className="text-xs text-gb-textSecondary mt-1 flex items-center gap-1">
                           <MapPin size={10} /> {emp.location}
                         </p>
                       )}
-                      {emp.specialty && <p className="text-xs text-[#8A8A8A] mt-1 italic">{emp.specialty}</p>}
+                      {emp.specialty && <p className="text-xs text-gb-textSecondary mt-1 italic">{emp.specialty}</p>}
                       {emp.tagline && <p className="text-xs text-[#6355E4] mt-1">"{emp.tagline}"</p>}
                       {emp.username && (
-                        <p className="text-xs text-[#8A8A8A] mt-1 flex items-center gap-1">
+                        <p className="text-xs text-gb-textSecondary mt-1 flex items-center gap-1">
                           <Key size={10} /> {emp.username}
                         </p>
                       )}
@@ -871,7 +871,7 @@ export default function EmployeesPage() {
                       </Button>
                       <Button
                         isIconOnly size="sm" variant="flat"
-                        className="bg-[#F6F5FA] text-[#8A8A8A] hover:bg-[#ECEBF2]/30"
+                        className="bg-[#F6F5FA] text-gb-textSecondary hover:bg-[#ECEBF2]/30"
                         onPress={() => openSchedule(emp)}
                         title={s.scheduleAction}
                       >
@@ -926,7 +926,7 @@ export default function EmployeesPage() {
                     <h2 className="text-base font-bold text-[#1E1E1E]">
                       {editing ? s.editEmployeeTitle : s.addEmployeeTitle}
                     </h2>
-                    <p className="text-xs text-[#8A8A8A]">
+                    <p className="text-xs text-gb-textSecondary">
                       {editing ? fillTemplate(s.editEmployeeSubtitleTemplate, { name: editing.name }) : s.newEmployeeSubtitle}
                     </p>
                   </div>
@@ -1028,7 +1028,7 @@ export default function EmployeesPage() {
                         </Button>
                       </div>
                       )}
-                      <p className="text-[10px] text-[#8A8A8A]">{s.photoTaglineHint}</p>
+                      <p className="text-[10px] text-gb-textSecondary">{s.photoTaglineHint}</p>
                     </div>
                     );
                   })()}
@@ -1069,7 +1069,7 @@ export default function EmployeesPage() {
                     isDisabled={submitting}
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
                     classNames={INPUT_CLS}
-                    startContent={<MapPin size={16} className="text-[#8A8A8A]" />}
+                    startContent={<MapPin size={16} className="text-gb-textSecondary" />}
                   />
 
                   <Input
@@ -1080,7 +1080,7 @@ export default function EmployeesPage() {
                     isDisabled={submitting || (!!editing && !resetPassword)}
                     onChange={(e) => setForm({ ...form, username: e.target.value })}
                     classNames={INPUT_CLS}
-                    startContent={<Key size={16} className="text-[#8A8A8A]" />}
+                    startContent={<Key size={16} className="text-gb-textSecondary" />}
                   />
 
                   {!editing && (
@@ -1093,12 +1093,12 @@ export default function EmployeesPage() {
                       isDisabled={submitting}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       classNames={INPUT_CLS}
-                      startContent={<Lock size={16} className="text-[#8A8A8A]" />}
+                      startContent={<Lock size={16} className="text-gb-textSecondary" />}
                       endContent={
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-[#8A8A8A] hover:text-[#6355E4] transition-colors"
+                          className="text-gb-textSecondary hover:text-[#6355E4] transition-colors"
                           tabIndex={-1}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -1111,7 +1111,7 @@ export default function EmployeesPage() {
                     <>
                       {!resetPassword ? (
                         <div className="p-3 bg-[#F6F5FA] rounded-xl border border-[#ECEBF2]/30">
-                          <p className="text-sm text-[#8A8A8A] mb-2">{s.changePasswordPrompt}</p>
+                          <p className="text-sm text-gb-textSecondary mb-2">{s.changePasswordPrompt}</p>
                           <Button
                             size="sm"
                             variant="flat"
@@ -1133,12 +1133,12 @@ export default function EmployeesPage() {
                             isDisabled={submitting}
                             onChange={(e) => setForm({ ...form, password: e.target.value })}
                             classNames={INPUT_CLS}
-                            startContent={<Lock size={16} className="text-[#8A8A8A]" />}
+                            startContent={<Lock size={16} className="text-gb-textSecondary" />}
                             endContent={
                               <button
                                 type="button"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="text-[#8A8A8A] hover:text-[#6355E4] transition-colors"
+                                className="text-gb-textSecondary hover:text-[#6355E4] transition-colors"
                                 tabIndex={-1}
                               >
                                 {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -1172,7 +1172,7 @@ export default function EmployeesPage() {
                       />
                       <div>
                         <p className="text-sm font-semibold text-[#1E1E1E]">{formActive ? t.admin.active : t.admin.inactive}</p>
-                        <p className="text-xs text-[#8A8A8A]">
+                        <p className="text-xs text-gb-textSecondary">
                           {formActive ? s.activeStatusDesc : s.inactiveStatusDesc}
                         </p>
                       </div>
@@ -1222,7 +1222,7 @@ export default function EmployeesPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">{s.scheduleTitle}</h2>
-                    <p className="text-xs text-[#8A8A8A]">{scheduleEmployee?.name}</p>
+                    <p className="text-xs text-gb-textSecondary">{scheduleEmployee?.name}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1245,7 +1245,7 @@ export default function EmployeesPage() {
                               onChange={(e) => updateScheduleItem(day.value, 'isWorkingDay', e.target.checked)}
                               className="w-4 h-4 accent-[#ECEBF2] cursor-pointer"
                             />
-                            <label htmlFor={`sched-${day.value}`} className={`font-semibold text-sm cursor-pointer w-8 ${item.isWorkingDay ? 'text-[#1E1E1E]' : 'text-[#8A8A8A]'}`}>
+                            <label htmlFor={`sched-${day.value}`} className={`font-semibold text-sm cursor-pointer w-8 ${item.isWorkingDay ? 'text-[#1E1E1E]' : 'text-gb-textSecondary'}`}>
                               {day.label}
                             </label>
                             {item.isWorkingDay ? (
@@ -1256,7 +1256,7 @@ export default function EmployeesPage() {
                                   onChange={(e) => updateScheduleItem(day.value, 'startTime', e.target.value)}
                                   className="text-sm border border-gray-200 rounded-lg px-2 py-1 text-[#1E1E1E] bg-white"
                                 />
-                                <span className="text-[#8A8A8A] text-xs">–</span>
+                                <span className="text-gb-textSecondary text-xs">–</span>
                                 <input
                                   type="time"
                                   value={item.endTime}
@@ -1265,7 +1265,7 @@ export default function EmployeesPage() {
                                 />
                               </div>
                             ) : (
-                              <span className="text-xs text-[#8A8A8A]">{s.dayOff}</span>
+                              <span className="text-xs text-gb-textSecondary">{s.dayOff}</span>
                             )}
                           </div>
                         </div>
@@ -1306,7 +1306,7 @@ export default function EmployeesPage() {
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-[#1E1E1E]">{s.vacationTitle}</h2>
-                    <p className="text-xs text-[#8A8A8A]">{vacationEmployee?.name}</p>
+                    <p className="text-xs text-gb-textSecondary">{vacationEmployee?.name}</p>
                   </div>
                 </div>
               </ModalHeader>
@@ -1314,7 +1314,7 @@ export default function EmployeesPage() {
                 <div className="space-y-5">
                   {/* Existing vacations list */}
                   <div>
-                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-2">{s.recordedAbsences}</p>
+                    <p className="text-xs font-semibold text-gb-textSecondary uppercase tracking-wider mb-2">{s.recordedAbsences}</p>
                     {vacationLoading ? (
                       <div className="flex justify-center py-6">
                         <div className="animate-spin rounded-full h-7 w-7 border-b-4 border-blue-400" />
@@ -1322,7 +1322,7 @@ export default function EmployeesPage() {
                     ) : vacations.length === 0 ? (
                       <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         <CalendarDays size={24} className="mx-auto text-gray-300 mb-1" />
-                        <p className="text-sm text-[#8A8A8A]">{s.noAbsencesYet}</p>
+                        <p className="text-sm text-gb-textSecondary">{s.noAbsencesYet}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -1347,7 +1347,7 @@ export default function EmployeesPage() {
                                   {vacationTypeLabel(v.type)}
                                 </Chip>
                               </div>
-                              {v.note && <p className="text-xs text-[#8A8A8A] mt-0.5 truncate">{v.note}</p>}
+                              {v.note && <p className="text-xs text-gb-textSecondary mt-0.5 truncate">{v.note}</p>}
                             </div>
                             <Button
                               isIconOnly size="sm" variant="flat"
@@ -1365,11 +1365,11 @@ export default function EmployeesPage() {
 
                   {/* Add new vacation form */}
                   <div className="border-t border-gray-100 pt-4">
-                    <p className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wider mb-3">{s.newAbsenceSection}</p>
+                    <p className="text-xs font-semibold text-gb-textSecondary uppercase tracking-wider mb-3">{s.newAbsenceSection}</p>
                     <div className="space-y-3">
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.fromLabel}</label>
+                          <label className="text-xs text-gb-textSecondary font-medium mb-1 block">{s.fromLabel}</label>
                           <input
                             type="date"
                             value={vacationForm.startDate}
@@ -1378,7 +1378,7 @@ export default function EmployeesPage() {
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.toLabel}</label>
+                          <label className="text-xs text-gb-textSecondary font-medium mb-1 block">{s.toLabel}</label>
                           <input
                             type="date"
                             value={vacationForm.endDate}
@@ -1390,7 +1390,7 @@ export default function EmployeesPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.typeLabel}</label>
+                        <label className="text-xs text-gb-textSecondary font-medium mb-1 block">{s.typeLabel}</label>
                         <select
                           value={vacationForm.type}
                           onChange={(e) => setVacationForm(prev => ({ ...prev, type: e.target.value }))}
@@ -1403,7 +1403,7 @@ export default function EmployeesPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs text-[#8A8A8A] font-medium mb-1 block">{s.noteLabel}</label>
+                        <label className="text-xs text-gb-textSecondary font-medium mb-1 block">{s.noteLabel}</label>
                         <input
                           type="text"
                           placeholder={s.notePlaceholder}

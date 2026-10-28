@@ -61,20 +61,20 @@ export function BookingFlowOptions({
         <div className="flex items-center justify-between py-3 px-3.5 bg-[#F7F7F8] rounded-xl border border-[#F3F4F6]">
           <div>
             <p className="text-xs font-semibold text-[#111318]">{s.showPricesLabel}</p>
-            <p className="text-[10px] text-[#9CA3AF]">{s.showPricesHint}</p>
+            <p className="text-[10px] text-gb-textMuted">{s.showPricesHint}</p>
           </div>
           <Toggle on={config.showPrices ?? true} onToggle={() => updateConfig("showPrices", !(config.showPrices ?? true))} />
         </div>
 
         <div>
           <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-            <Sparkles size={11} className="text-[#6355E4]" />{s.buttonBadgeLabel} <span className="text-[#9CA3AF] font-normal">{s.optionalSuffix}</span>
+            <Sparkles size={11} className="text-[#6355E4]" />{s.buttonBadgeLabel} <span className="text-gb-textMuted font-normal">{s.optionalSuffix}</span>
           </p>
           <input type="text" value={config.ctaBadge ?? ""}
             onChange={(e) => updateConfig("ctaBadge", e.target.value)}
             placeholder={s.buttonBadgePlaceholder}
             className={inputCls} />
-          <p className="text-[10px] text-[#9CA3AF] mt-1.5">{s.buttonBadgeHint}</p>
+          <p className="text-[10px] text-gb-textMuted mt-1.5">{s.buttonBadgeHint}</p>
         </div>
       </div>
     </div>

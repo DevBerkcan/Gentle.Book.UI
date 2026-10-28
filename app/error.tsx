@@ -25,7 +25,7 @@ export default function GlobalError({
               <AlertTriangle size={28} className="text-white" />
             </div>
             <h1 className="text-2xl font-bold text-[#14162B] mb-2">Etwas ist schiefgelaufen</h1>
-            <p className="text-[#8A8A8A] text-sm mb-8">
+            <p className="text-gb-textSecondary text-sm mb-8">
               Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.
             </p>
             <button

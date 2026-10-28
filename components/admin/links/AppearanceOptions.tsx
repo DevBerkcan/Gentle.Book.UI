@@ -45,13 +45,13 @@ export function AppearanceOptions({
                   style={{ background: `linear-gradient(135deg, ${palette.primary}, ${palette.bg})` }} />
                 <div className="min-w-0">
                   <p className="text-[10px] font-semibold text-[#111318] leading-tight truncate">{palette.name}</p>
-                  <p className="text-[9px] text-[#9CA3AF] font-mono leading-tight">{palette.primary}</p>
+                  <p className="text-[9px] text-gb-textMuted font-mono leading-tight">{palette.primary}</p>
                 </div>
               </button>
             );
           })}
         </div>
-        <p className="text-[10px] text-[#9CA3AF] mt-2">{s.colorPaletteHint}</p>
+        <p className="text-[10px] text-gb-textMuted mt-2">{s.colorPaletteHint}</p>
       </div>
 
       {/* ── Branchenvorlage ─────────────────────────────────── */}
@@ -76,7 +76,7 @@ export function AppearanceOptions({
                   <p className="text-[10px] font-semibold text-[#111318] leading-tight truncate">{getIndustryPresetLabel(t, key)}</p>
                   <div className="flex items-center gap-1 mt-0.5">
                     <div className="w-2 h-2 rounded-full" style={{ background: preset.color }} />
-                    <span className="text-[9px] text-[#9CA3AF] font-mono truncate">{preset.color}</span>
+                    <span className="text-[9px] text-gb-textMuted font-mono truncate">{preset.color}</span>
                   </div>
                 </div>
               </button>
@@ -103,7 +103,7 @@ export function AppearanceOptions({
                 }`}>
                 <div className="w-full h-9 rounded-lg"
                   style={{ background: bgPrev, border: t.value === "minimal" ? "1px solid #E5E7EB" : "none" }} />
-                <span className={`text-[10px] font-semibold ${theme === t.value ? "text-[#6355E4]" : "text-[#9CA3AF]"}`}>
+                <span className={`text-[10px] font-semibold ${theme === t.value ? "text-[#6355E4]" : "text-gb-textMuted"}`}>
                   {t.label}
                 </span>
               </button>
@@ -193,7 +193,7 @@ export function AppearanceOptions({
               style={{ fontFamily: font }}
             >
               <span className="text-sm font-semibold text-[#111318]">Aa</span>
-              <span className="text-[9px] text-[#9CA3AF] leading-tight">{label}</span>
+              <span className="text-[9px] text-gb-textMuted leading-tight">{label}</span>
             </button>
           ))}
         </div>
@@ -202,7 +202,7 @@ export function AppearanceOptions({
       {/* ── Button-Farbe ─────────────────────────────────────── */}
       <div>
         <p className="text-[11px] font-semibold text-[#6B7280] mb-2 flex items-center gap-1.5">
-          <Pipette size={11} className="text-[#6355E4]" />{s.buttonColorLabel} <span className="text-[#9CA3AF] font-normal">{s.optionalSuffix}</span>
+          <Pipette size={11} className="text-[#6355E4]" />{s.buttonColorLabel} <span className="text-gb-textMuted font-normal">{s.optionalSuffix}</span>
         </p>
         <div className="flex items-center gap-3">
           <input type="color" value={config.ctaColor ?? primaryColor} onChange={(e) => updateConfig("ctaColor", e.target.value)}
@@ -217,7 +217,7 @@ export function AppearanceOptions({
           </div>
           {config.ctaColor && (
             <button onClick={() => updateConfig("ctaColor", undefined)}
-              className="text-[10px] text-[#9CA3AF] hover:text-[#374151] underline transition-colors">
+              className="text-[10px] text-gb-textMuted hover:text-[#374151] underline transition-colors">
               {s.resetBtn}
             </button>
           )}
@@ -302,14 +302,14 @@ export function AppearanceOptions({
       <div className="space-y-2">
         {[
           {
-            icon: <Smile size={13} className="text-[#9CA3AF]" />,
+            icon: <Smile size={13} className="text-gb-textMuted" />,
             label: s.welcomeToggleLabel,
             hint: s.welcomeToggleHint,
             value: config.showWelcome ?? false,
             onToggle: () => updateConfig("showWelcome", !config.showWelcome),
           },
           {
-            icon: <Zap size={13} className="text-[#9CA3AF]" />,
+            icon: <Zap size={13} className="text-gb-textMuted" />,
             label: s.confettiToggleLabel,
             hint: s.confettiToggleHint,
             value: config.confetti ?? false,
@@ -321,7 +321,7 @@ export function AppearanceOptions({
               {icon}
               <div>
                 <p className="text-xs font-semibold text-[#111318]">{label}</p>
-                <p className="text-[10px] text-[#9CA3AF]">{hint}</p>
+                <p className="text-[10px] text-gb-textMuted">{hint}</p>
               </div>
             </div>
             <Toggle on={value} onToggle={onToggle} />

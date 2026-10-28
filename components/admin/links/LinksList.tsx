@@ -53,7 +53,7 @@ export function LinksList({
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-[#111318] text-sm">{ctaText || t.booking.bookAppointment}</p>
-            <p className="text-xs text-[#9CA3AF]">{s.fixedLinkHint}</p>
+            <p className="text-xs text-gb-textMuted">{s.fixedLinkHint}</p>
           </div>
           <span className="text-[10px] bg-[#F3F4F6] text-[#6B7280] px-2.5 py-1 rounded-lg font-semibold">{s.fixedBadge}</span>
         </div>
@@ -61,7 +61,7 @@ export function LinksList({
 
       {/* ── Links List ───────────────────────────────────────────────────── */}
       {loading ? (
-        <div className="text-center py-16 text-[#9CA3AF]">
+        <div className="text-center py-16 text-gb-textMuted">
           <div className="inline-block w-5 h-5 border-2 border-[#E5E7EB] border-t-[#6355E4] rounded-full animate-spin mb-3" />
           <p className="text-sm">{s.loadingLinks}</p>
         </div>
@@ -70,7 +70,7 @@ export function LinksList({
           className="text-center py-14 bg-white rounded-2xl border border-dashed border-[#E5E7EB]">
           <Link2 size={32} className="text-[#E5E7EB] mx-auto mb-3" />
           <p className="text-[#111318] font-semibold text-sm">{s.noLinksYetTitle}</p>
-          <p className="text-sm text-[#9CA3AF] mt-1 mb-5">{s.noLinksYetDesc}</p>
+          <p className="text-sm text-gb-textMuted mt-1 mb-5">{s.noLinksYetDesc}</p>
           <button onClick={onShowAddForm}
             className="inline-flex items-center gap-1.5 text-sm bg-[#6355E4] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#4338CA] transition-colors">
             <Plus size={13} />{s.addFirstLinkBtn}
@@ -132,25 +132,25 @@ export function LinksList({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-[#111318] text-sm truncate">{link.title}</p>
-                      <p className="text-xs text-[#9CA3AF] truncate">{link.url}</p>
+                      <p className="text-xs text-gb-textMuted truncate">{link.url}</p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button onClick={() => handleToggleActive(link)}
                         className={`text-[11px] px-2.5 py-1 rounded-lg font-semibold transition-colors ${
                           link.isActive
                             ? "bg-[#D1FAE5] text-[#065F46] hover:bg-[#A7F3D0]"
-                            : "bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB]"
+                            : "bg-[#F3F4F6] text-gb-textMuted hover:bg-[#E5E7EB]"
                         }`}>
                         {link.isActive ? s.activeLabel : s.offLabel}
                       </button>
                       <button onClick={() => startEdit(link)}
                         aria-label={fillTemplate(s.editLinkAriaTemplate, { title: link.title })}
-                        className="p-1.5 text-[#9CA3AF] hover:text-[#6355E4] hover:bg-[#EEEBFC] transition-all rounded-lg">
+                        className="p-1.5 text-gb-textMuted hover:text-[#6355E4] hover:bg-[#EEEBFC] transition-all rounded-lg">
                         <Edit2 size={13} />
                       </button>
                       <button onClick={() => handleDelete(link.id, link.title)}
                         aria-label={fillTemplate(s.deleteLinkAriaTemplate, { title: link.title })}
-                        className="p-1.5 text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-all rounded-lg">
+                        className="p-1.5 text-gb-textMuted hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-all rounded-lg">
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -163,7 +163,7 @@ export function LinksList({
       )}
 
       {links.length > 0 && (
-        <p className="text-xs text-center text-[#9CA3AF] mt-4">
+        <p className="text-xs text-center text-gb-textMuted mt-4">
           {fillTemplate(s.activeLinksCountTemplate, { active: links.filter((l) => l.isActive).length, total: links.length })}
         </p>
       )}

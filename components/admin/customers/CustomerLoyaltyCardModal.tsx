@@ -48,10 +48,10 @@ export function CustomerLoyaltyCardModal({
             <div className="flex items-center justify-between w-full print:hidden">
               <div>
                 <p className="font-semibold text-[#111318] text-base">{t.admin.customersPage.loyaltyCardTitle}</p>
-                <p className="text-xs text-[#9CA3AF] mt-0.5">{fillTemplate(t.admin.customersPage.loyaltyCardPrintForTemplate, { name: customerName })}</p>
+                <p className="text-xs text-gb-textMuted mt-0.5">{fillTemplate(t.admin.customersPage.loyaltyCardPrintForTemplate, { name: customerName })}</p>
               </div>
               <button onClick={onClose}
-                className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
+                className="text-gb-textMuted hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
                 <X size={17} />
               </button>
             </div>
@@ -74,7 +74,7 @@ export function CustomerLoyaltyCardModal({
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-[#9CA3AF] text-center mt-1">{fillTemplate(t.admin.customersPage.rewardAtVisitTemplate, { threshold })}</p>
+              <p className="text-[11px] text-gb-textMuted text-center mt-1">{fillTemplate(t.admin.customersPage.rewardAtVisitTemplate, { threshold })}</p>
             </div>
 
             <button onClick={() => window.print()}

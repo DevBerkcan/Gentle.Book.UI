@@ -137,7 +137,7 @@ export default function BookingPage() {
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-[#8A8A8A] hover:text-[#ECEBF2] transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-gb-textSecondary hover:text-[#ECEBF2] transition-colors mb-6"
         >
           <Home size={20} />
           <span>Zurück zur Startseite</span>
@@ -154,7 +154,7 @@ export default function BookingPage() {
                       ? "bg-[#ECEBF2] text-white"
                       : currentStep === step
                       ? "bg-[#ECEBF2] text-white ring-4 ring-[#ECEBF2]/20"
-                      : "bg-[#F6F5FA] text-[#8A8A8A]"
+                      : "bg-[#F6F5FA] text-gb-textSecondary"
                   }`}
                 >
                   {currentStep > step ? <Check size={18} /> : step}

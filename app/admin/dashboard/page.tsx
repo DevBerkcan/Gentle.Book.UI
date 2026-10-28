@@ -234,7 +234,7 @@ export default function AdminDashboardPage() {
         >
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <p className="text-xs text-[#9CA3AF] font-medium">{todayDate}</p>
+              <p className="text-xs text-gb-textMuted font-medium">{todayDate}</p>
               <span className="flex items-center gap-1 text-[10px] font-bold text-[#065F46] bg-[#D1FAE5] px-2 py-0.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 {t.admin.dashboardPage.live}
@@ -309,7 +309,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-sm text-[#111318]">{t.admin.dashboardPage.setupChecklist}</p>
-                  <p className="text-[11px] text-[#9CA3AF]">
+                  <p className="text-[11px] text-gb-textMuted">
                     {fillTemplate(t.admin.dashboardPage.stepsCompletedTemplate, { completed: onboarding.completedSteps, total: onboarding.totalSteps })}
                   </p>
                 </div>
@@ -358,8 +358,8 @@ export default function AdminDashboardPage() {
                     ? <CheckCircle2 size={17} className="text-[#6355E4] flex-shrink-0" />
                     : <Circle size={17} className="text-[#D1D5DB] flex-shrink-0" />}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${done ? "line-through text-[#9CA3AF]" : "text-[#111318]"}`}>{label}</p>
-                    <p className="text-[11px] text-[#9CA3AF]">{desc}</p>
+                    <p className={`text-sm font-medium ${done ? "line-through text-gb-textMuted" : "text-[#111318]"}`}>{label}</p>
+                    <p className="text-[11px] text-gb-textMuted">{desc}</p>
                   </div>
                   {!done && <ChevronRight size={13} className="text-[#D1D5DB] flex-shrink-0" />}
                 </a>
@@ -409,7 +409,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center gap-2">
                 <BarChart2 size={15} className="text-[#6355E4]" />
                 <span className="text-sm font-semibold text-[#111318]">
-                  {t.admin.dashboardPage.planUsage} <span className="text-[#9CA3AF] font-normal">({usage.planDisplayName})</span>
+                  {t.admin.dashboardPage.planUsage} <span className="text-gb-textMuted font-normal">({usage.planDisplayName})</span>
                 </span>
               </div>
               <Link href="/admin/subscription"
@@ -493,9 +493,9 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between px-5 py-4 border-b border-[#F3F4F6]">
                 <div>
                   <h2 className="text-sm font-bold text-[#111318]">{t.admin.dashboardPage.today}</h2>
-                  <p className="text-[11px] text-[#9CA3AF]">{todayDate}</p>
+                  <p className="text-[11px] text-gb-textMuted">{todayDate}</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-[#9CA3AF] font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] text-gb-textMuted font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />{t.admin.dashboardPage.live}
                 </div>
               </div>
@@ -510,7 +510,7 @@ export default function AdminDashboardPage() {
                 ].map(({ value, label, color, bg }) => (
                   <div key={label} className={`text-center py-4 px-2 ${bg}`}>
                     <div className={`text-2xl font-bold tabular-nums ${color}`}>{value}</div>
-                    <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-medium uppercase tracking-wide">{label}</div>
+                    <div className="text-[10px] text-gb-textMuted mt-0.5 font-medium uppercase tracking-wide">{label}</div>
                   </div>
                 ))}
               </div>
@@ -532,14 +532,14 @@ export default function AdminDashboardPage() {
                           {/* Time */}
                           <div className="text-center min-w-[48px]">
                             <div className="text-sm font-bold text-[#111318] tabular-nums">{b.startTime}</div>
-                            <div className="text-[10px] text-[#9CA3AF]">{b.endTime}</div>
+                            <div className="text-[10px] text-gb-textMuted">{b.endTime}</div>
                           </div>
                           {/* Status dot */}
                           <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
                           {/* Info */}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-[#111318] truncate">{b.customerName}</p>
-                            <p className="text-xs text-[#9CA3AF] truncate">{b.serviceName}</p>
+                            <p className="text-xs text-gb-textMuted truncate">{b.serviceName}</p>
                           </div>
                           {/* Status badge */}
                           <span className={`hidden sm:inline-flex text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${s.bg} ${s.text}`}>
@@ -548,7 +548,7 @@ export default function AdminDashboardPage() {
                           {/* Price */}
                           <div className="text-right min-w-[60px]">
                             <div className="text-sm font-bold text-[#374151] tabular-nums">{formatPrice(b.price, b.currency)}</div>
-                            <div className="text-[10px] text-[#9CA3AF] font-mono">{b.bookingNumber.slice(-6)}</div>
+                            <div className="text-[10px] text-gb-textMuted font-mono">{b.bookingNumber.slice(-6)}</div>
                           </div>
                         </motion.div>
                       );
@@ -560,7 +560,7 @@ export default function AdminDashboardPage() {
                       <Calendar size={20} className="text-[#D1D5DB]" />
                     </div>
                     <p className="text-sm font-medium text-[#374151]">{t.admin.dashboardPage.noAppointmentsToday}</p>
-                    <p className="text-xs text-[#9CA3AF] mt-1">{t.admin.dashboardPage.enjoyFreeDay}</p>
+                    <p className="text-xs text-gb-textMuted mt-1">{t.admin.dashboardPage.enjoyFreeDay}</p>
                   </div>
                 )}
               </div>
@@ -599,7 +599,7 @@ export default function AdminDashboardPage() {
                       { label: t.admin.date,     value: new Date(nextBooking.date).toLocaleDateString(dateLocale) },
                     ].map(({ label, value }) => (
                       <div key={label} className="flex items-center justify-between gap-3">
-                        <span className="text-xs text-[#9CA3AF] flex-shrink-0">{label}</span>
+                        <span className="text-xs text-gb-textMuted flex-shrink-0">{label}</span>
                         <span className="text-xs font-semibold text-[#111318] text-right truncate">{value}</span>
                       </div>
                     ))}
@@ -632,10 +632,10 @@ export default function AdminDashboardPage() {
                     <div key={idx}
                       className="flex items-center gap-3 px-2.5 py-2.5 rounded-xl hover:bg-[#F7F7F8] transition-colors">
                       {/* Rank */}
-                      <span className="text-[11px] font-bold text-[#9CA3AF] w-4 text-center">{idx + 1}</span>
+                      <span className="text-[11px] font-bold text-gb-textMuted w-4 text-center">{idx + 1}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-[#111318] truncate">{s.serviceName}</p>
-                        <p className="text-[11px] text-[#9CA3AF]">{fillTemplate(t.admin.dashboardPage.bookedCountTemplate, { count: s.bookingCount })}</p>
+                        <p className="text-[11px] text-gb-textMuted">{fillTemplate(t.admin.dashboardPage.bookedCountTemplate, { count: s.bookingCount })}</p>
                       </div>
                       <span className="text-sm font-bold text-[#374151] whitespace-nowrap tabular-nums">
                         {formatPrice(defaultCurrency === "CHF" ? s.revenueCHF : s.revenueEUR, defaultCurrency)}

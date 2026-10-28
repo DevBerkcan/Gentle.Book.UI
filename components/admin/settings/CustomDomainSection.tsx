@@ -13,7 +13,7 @@ import type { Translations } from "@/lib/i18n/translations";
 import { useConfirm } from "@/components/ConfirmDialog";
 
 const inputCls =
-  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
+  "w-full border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all";
 
 function getStatusLabel(t: Translations): Record<string, { label: string; color: string; icon: typeof CheckCircle2 }> {
   const s = t.admin.settingsPage;
@@ -90,7 +90,7 @@ export function CustomDomainSection() {
   if (loading) {
     return (
       <div className="bg-white rounded-2xl overflow-hidden">
-        <div className="flex items-center gap-2 text-xs text-[#9CA3AF] px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
+        <div className="flex items-center gap-2 text-xs text-gb-textMuted px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>
       </div>
     );
   }
@@ -100,17 +100,17 @@ export function CustomDomainSection() {
       <div className="bg-white rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 px-1 pb-3">
           <div className="w-8 h-8 bg-[#E5E7EB] rounded-xl flex items-center justify-center shrink-0">
-            <Lock size={14} className="text-[#9CA3AF]" />
+            <Lock size={14} className="text-gb-textMuted" />
           </div>
           <div>
             <p className="font-semibold text-[#111318] text-sm leading-tight">{s.customDomain}</p>
-            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{t.admin.agencyExclusive}</p>
+            <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{t.admin.agencyExclusive}</p>
           </div>
         </div>
         <div className="px-1">
           <div className="rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] p-3.5 text-xs text-[#565A72]">
             {locked.message}
-            {locked.currentPlan && <span className="block mt-1 text-[#9CA3AF]">{fillTemplate(t.admin.currentPlanTemplate, { plan: locked.currentPlan })}</span>}
+            {locked.currentPlan && <span className="block mt-1 text-gb-textMuted">{fillTemplate(t.admin.currentPlanTemplate, { plan: locked.currentPlan })}</span>}
             <a href="/admin/subscription" className="inline-block mt-2 text-[#6355E4] font-semibold hover:underline">{t.admin.upgradeNowCta}</a>
           </div>
         </div>
@@ -129,7 +129,7 @@ export function CustomDomainSection() {
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{s.customDomain}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.cdsSubtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.cdsSubtitle}</p>
         </div>
       </div>
 
@@ -155,7 +155,7 @@ export function CustomDomainSection() {
         {statusInfo && StatusIcon && (
           <div className="flex items-center gap-1.5 text-xs" style={{ color: statusInfo.color }}>
             <StatusIcon size={13} /> {statusInfo.label}
-            {info?.requestedAt && <span className="text-[#9CA3AF]"> {fillTemplate(s.cdsRequestedOnTemplate, { date: new Date(info.requestedAt).toLocaleDateString(dateLocale) })}</span>}
+            {info?.requestedAt && <span className="text-gb-textMuted"> {fillTemplate(s.cdsRequestedOnTemplate, { date: new Date(info.requestedAt).toLocaleDateString(dateLocale) })}</span>}
           </div>
         )}
 

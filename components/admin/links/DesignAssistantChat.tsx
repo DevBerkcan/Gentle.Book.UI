@@ -135,12 +135,12 @@ export function DesignAssistantChat({
           </div>
           <div>
             <p className="font-semibold text-[#111318] text-sm leading-tight">{s.aiDesignAssistantTitle}</p>
-            <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.aiAssistantLockedSubtitle}</p>
+            <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.aiAssistantLockedSubtitle}</p>
           </div>
         </div>
         <div className="rounded-xl bg-[#F7F7F8] border border-[#E5E7EB] p-4 flex items-center justify-between gap-3">
           <p className="text-[11px] text-[#6B7280] leading-relaxed flex items-center gap-1.5">
-            <Lock size={12} className="text-[#9CA3AF] flex-shrink-0" />
+            <Lock size={12} className="text-gb-textMuted flex-shrink-0" />
             {fillTemplate(s.aiAssistantAvailableFromTemplate, { plan: "Agency" })}
           </p>
           <button
@@ -162,7 +162,7 @@ export function DesignAssistantChat({
         </div>
         <div>
           <p className="font-semibold text-[#111318] text-sm leading-tight">{s.aiDesignAssistantTitle}</p>
-          <p className="text-[11px] text-[#9CA3AF] leading-tight mt-0.5">{s.aiAssistantUnlockedSubtitle}</p>
+          <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.aiAssistantUnlockedSubtitle}</p>
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export function DesignAssistantChat({
           maxLength={MAX_MESSAGE_LENGTH}
           placeholder={s.assistantInputPlaceholder}
           disabled={loading}
-          className="flex-1 border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all disabled:opacity-60"
+          className="flex-1 border border-[#E5E7EB] bg-white rounded-xl px-3 py-2.5 text-sm text-[#111318] placeholder:text-gb-textMuted focus:outline-none focus:ring-2 focus:ring-[#6355E4]/25 focus:border-[#A5B4FC] transition-all disabled:opacity-60"
         />
         <button
           type="button"

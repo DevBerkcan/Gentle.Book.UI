@@ -123,10 +123,10 @@ export function SupportWidget() {
                       <Check size={26} className="text-emerald-600" />
                     </div>
                     <h3 className="font-bold text-[#1E1E1E] mb-1">Nachricht gesendet!</h3>
-                    <p className="text-sm text-[#8A8A8A]">
+                    <p className="text-sm text-gb-textSecondary">
                       Unser Team meldet sich so schnell wie möglich bei dir.
                     </p>
-                    <p className="text-xs text-[#8A8A8A] mt-3 flex items-center justify-center gap-1">
+                    <p className="text-xs text-gb-textSecondary mt-3 flex items-center justify-center gap-1">
                       <span className="w-1.5 h-1.5 bg-[#6355E4] rounded-full animate-pulse" />
                       {supportConfig.email}
                     </p>
@@ -138,7 +138,7 @@ export function SupportWidget() {
                   <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
                     {/* Subject presets */}
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide mb-2 block">Betreff</label>
+                      <label className="text-xs font-semibold text-gb-textSecondary uppercase tracking-wide mb-2 block">Betreff</label>
                       <div className="flex flex-wrap gap-1.5 mb-2.5">
                         {SUBJECT_PRESETS.map((p) => (
                           <button
@@ -147,7 +147,7 @@ export function SupportWidget() {
                             className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border ${
                               subject === p
                                 ? "bg-[#6355E4] text-white border-[#6355E4]"
-                                : "bg-white text-[#8A8A8A] border-gray-200 hover:border-[#6355E4]/40 hover:text-[#6355E4]"
+                                : "bg-white text-gb-textSecondary border-gray-200 hover:border-[#6355E4]/40 hover:text-[#6355E4]"
                             }`}
                           >
                             {p}
@@ -166,7 +166,7 @@ export function SupportWidget() {
 
                     {/* Message */}
                     <div>
-                      <label className="text-xs font-semibold text-[#8A8A8A] uppercase tracking-wide mb-2 block">Nachricht</label>
+                      <label className="text-xs font-semibold text-gb-textSecondary uppercase tracking-wide mb-2 block">Nachricht</label>
                       <textarea
                         rows={4}
                         placeholder="Beschreibe dein Anliegen so genau wie möglich…"

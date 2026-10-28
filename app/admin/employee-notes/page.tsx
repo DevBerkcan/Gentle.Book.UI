@@ -103,7 +103,7 @@ export default function EmployeeNotesPage() {
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
+            <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gb-textMuted pointer-events-none" />
           </div>
 
           {/* Message textarea */}
@@ -159,9 +159,9 @@ export default function EmployeeNotesPage() {
             </div>
           ) : sentNotes.length === 0 ? (
             <div className="bg-white rounded-2xl border border-[#E5E7EB] p-8 text-center">
-              <MessageSquare size={32} className="text-[#9CA3AF] mx-auto mb-2" />
+              <MessageSquare size={32} className="text-gb-textMuted mx-auto mb-2" />
               <p className="text-sm text-[#6B7280]">{t.admin.noteNoSent}</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">{t.admin.noteNoSentDesc}</p>
+              <p className="text-xs text-gb-textMuted mt-1">{t.admin.noteNoSentDesc}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -185,7 +185,7 @@ export default function EmployeeNotesPage() {
                     </div>
                     <p className="text-xs text-[#6B7280] line-clamp-2">{note.message}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-[#9CA3AF] flex-shrink-0">
+                  <div className="flex items-center gap-1 text-xs text-gb-textMuted flex-shrink-0">
                     <Clock size={11} />
                     {formatDate(note.createdAt)}
                   </div>

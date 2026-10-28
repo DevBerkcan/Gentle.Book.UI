@@ -211,7 +211,7 @@ export default function EmployeeDashboardPage() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <p className="text-sm text-[#9CA3AF] mb-0.5">{greeting(t)},</p>
+          <p className="text-sm text-gb-textMuted mb-0.5">{greeting(t)},</p>
           <h1 className="text-2xl font-bold text-[#111318] flex items-center gap-2">
             {displayName}
             <Sparkles size={18} className="text-[#6355E4]" />
@@ -225,13 +225,13 @@ export default function EmployeeDashboardPage() {
             href="/admin/blocked-slots"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white text-sm font-medium text-[#374151] hover:bg-[#F6F5FA] transition-colors"
           >
-            <Ban size={15} className="text-[#9CA3AF]" /> {s.absenceHeaderLink}
+            <Ban size={15} className="text-gb-textMuted" /> {s.absenceHeaderLink}
           </Link>
           <Link
             href="/admin/employee-notes"
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white text-sm font-medium text-[#374151] hover:bg-[#F6F5FA] transition-colors"
           >
-            <MessageSquare size={15} className="text-[#9CA3AF]" /> {s.sendNoteLink}
+            <MessageSquare size={15} className="text-gb-textMuted" /> {s.sendNoteLink}
           </Link>
           <Link
             href="/admin/calendar"
@@ -295,7 +295,7 @@ export default function EmployeeDashboardPage() {
                     : <><Trash2 size={12} />{t.admin.delete}</>}
                 </button>
               )}
-              <p className="text-[10px] text-[#9CA3AF]">{s.photoFormatHint}</p>
+              <p className="text-[10px] text-gb-textMuted">{s.photoFormatHint}</p>
             </div>
           </div>
           <div className="flex-1 flex flex-col gap-1.5">
@@ -334,7 +334,7 @@ export default function EmployeeDashboardPage() {
                   : profileSaved ? <CheckCircle size={14} /> : <Save size={14} />}
               </button>
             </div>
-            <p className="text-[10px] text-[#9CA3AF]">{s.taglineHint}</p>
+            <p className="text-[10px] text-gb-textMuted">{s.taglineHint}</p>
           </div>
         </div>
         {profileError && <p className="text-xs text-red-600 mt-3">{profileError}</p>}
@@ -356,7 +356,7 @@ export default function EmployeeDashboardPage() {
             className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-4"
           >
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-[#9CA3AF]">{stat.label}</p>
+              <p className="text-xs font-medium text-gb-textMuted">{stat.label}</p>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: stat.bg }}>
                 <stat.icon size={15} style={{ color: stat.color }} />
               </div>
@@ -428,14 +428,14 @@ export default function EmployeeDashboardPage() {
                 <span className="text-xs font-semibold text-[#6355E4]">
                   {formatPrice(nextBooking.price, nextBooking.currency ?? currency)}
                 </span>
-                <span className="text-[10px] text-[#9CA3AF]">#{nextBooking.bookingNumber}</span>
+                <span className="text-[10px] text-gb-textMuted">#{nextBooking.bookingNumber}</span>
               </div>
             </div>
           ) : (
             <div className="text-center py-6">
               <CheckCircle size={28} className="text-emerald-400 mx-auto mb-2" />
               <p className="text-sm font-medium text-[#374151]">{s.noMoreAppointmentsToday}</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">{s.niceDayMessage}</p>
+              <p className="text-xs text-gb-textMuted mt-1">{s.niceDayMessage}</p>
             </div>
           )}
         </motion.div>
@@ -467,7 +467,7 @@ export default function EmployeeDashboardPage() {
             <div className="text-center py-8">
               <Calendar size={32} className="text-[#E5E7EB] mx-auto mb-2" />
               <p className="text-sm font-medium text-[#374151]">{s.noAppointmentsToday}</p>
-              <p className="text-xs text-[#9CA3AF] mt-1">{s.enjoyFreeDay}</p>
+              <p className="text-xs text-gb-textMuted mt-1">{s.enjoyFreeDay}</p>
             </div>
           ) : (
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
@@ -484,7 +484,7 @@ export default function EmployeeDashboardPage() {
                     {/* Time */}
                     <div className="text-center w-12 flex-shrink-0">
                       <p className="text-sm font-bold text-[#111318]">{booking.startTime.slice(0,5)}</p>
-                      <p className="text-[10px] text-[#9CA3AF]">{booking.endTime.slice(0,5)}</p>
+                      <p className="text-[10px] text-gb-textMuted">{booking.endTime.slice(0,5)}</p>
                     </div>
 
                     {/* Divider */}
@@ -493,7 +493,7 @@ export default function EmployeeDashboardPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-[#111318] truncate">{booking.customerName}</p>
-                      <p className="text-xs text-[#9CA3AF] truncate">{booking.serviceName}</p>
+                      <p className="text-xs text-gb-textMuted truncate">{booking.serviceName}</p>
                     </div>
 
                     {/* Status */}
@@ -537,7 +537,7 @@ export default function EmployeeDashboardPage() {
                     <p className="text-xs font-bold text-[#374151]">
                       {new Date(booking.bookingDate + 'T00:00:00').toLocaleDateString(locale, { weekday: 'short' })}
                     </p>
-                    <p className="text-[10px] text-[#9CA3AF]">
+                    <p className="text-[10px] text-gb-textMuted">
                       {new Date(booking.bookingDate + 'T00:00:00').toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })}
                     </p>
                     <p className="text-xs font-semibold text-[#6355E4] mt-0.5">{booking.startTime.slice(0,5)}</p>
@@ -545,7 +545,7 @@ export default function EmployeeDashboardPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-[#111318] truncate">{booking.customerName}</p>
                     <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <span className="text-xs text-[#9CA3AF]">{booking.serviceName}</span>
+                      <span className="text-xs text-gb-textMuted">{booking.serviceName}</span>
                       {booking.customerPhone && (
                         <a href={`tel:${booking.customerPhone}`} className="text-xs text-[#6B7280] flex items-center gap-1 hover:text-[#6355E4]">
                           <Phone size={10} />{booking.customerPhone}
@@ -590,7 +590,7 @@ export default function EmployeeDashboardPage() {
               <link.icon size={18} style={{ color: link.color }} />
             </div>
             <p className="text-sm font-semibold text-[#111318]">{link.label}</p>
-            <ChevronRight size={14} className="text-[#9CA3AF] mt-1 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight size={14} className="text-gb-textMuted mt-1 group-hover:translate-x-1 transition-transform" />
           </Link>
         ))}
       </motion.div>

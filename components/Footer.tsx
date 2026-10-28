@@ -13,7 +13,7 @@ export const Footer = () => {
       transition={{ delay: 0.8 }}
       className="mt-12 pb-8 text-center"
     >
-      <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-xs text-[#8A8A8A]">
+      <div className="mb-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gb-textSecondary">
         <a
           href={legalConfig.imprint}
           className="transition-colors hover:text-[#ECEBF2] hover:underline"
@@ -48,7 +48,7 @@ export const Footer = () => {
         <a href={legalConfig.acceptableUse} className="hover:underline">Nutzungsrichtlinien</a>
       </div>
 
-      <p className="text-xs text-[#8A8A8A]">
+      <p className="text-xs text-gb-textSecondary">
         © {new Date().getFullYear()} GentleBook. Alle Rechte vorbehalten.
       </p>
     </motion.footer>
