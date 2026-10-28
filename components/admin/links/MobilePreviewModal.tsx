@@ -49,6 +49,7 @@ export function MobilePreviewModal({
                 <Eye size={13} className="text-[#6355E4]" />{s.livePreviewLabel}
               </p>
               <button onClick={onClose}
+                aria-label={t.close}
                 className="text-[#9CA3AF] hover:text-[#374151] p-1.5 hover:bg-[#F3F4F6] rounded-xl transition-colors">
                 <X size={17} />
               </button>

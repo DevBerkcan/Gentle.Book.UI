@@ -605,6 +605,7 @@ export default function AdminServicesPage() {
                         isIconOnly
                         variant="flat"
                         className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                        aria-label={fillTemplate(s.viewAriaLabelTemplate, { name: service.name })}
                         onPress={() => openServiceModal("view", service)}
                     >
                         <Eye size={14} />
@@ -614,6 +615,7 @@ export default function AdminServicesPage() {
                         isIconOnly
                         variant="flat"
                         className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                        aria-label={fillTemplate(s.editAriaLabelTemplate, { name: service.name })}
                         onPress={() => openServiceModal("edit", service)}
                     >
                         <Edit size={14} />
@@ -623,6 +625,7 @@ export default function AdminServicesPage() {
                         isIconOnly
                         variant="flat"
                         className="bg-red-50 text-red-500 hover:bg-red-100"
+                        aria-label={fillTemplate(s.deleteAriaLabelTemplate, { name: service.name })}
                         onPress={() => openDeleteModal(service)}
                     >
                         <Trash2 size={14} />
@@ -671,6 +674,7 @@ export default function AdminServicesPage() {
                             isIconOnly
                             variant="flat"
                             className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                            aria-label={fillTemplate(s.viewAriaLabelTemplate, { name: category.name })}
                             onPress={() => openCategoryModal("view", category)}
                         >
                             <Eye size={14} />
@@ -680,6 +684,7 @@ export default function AdminServicesPage() {
                             isIconOnly
                             variant="flat"
                             className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                            aria-label={fillTemplate(s.editAriaLabelTemplate, { name: category.name })}
                             onPress={() => openCategoryModal("edit", category)}
                         >
                             <Edit size={14} />
@@ -689,6 +694,7 @@ export default function AdminServicesPage() {
                             isIconOnly
                             variant="flat"
                             className="bg-red-50 text-red-500 hover:bg-red-100"
+                            aria-label={fillTemplate(s.deleteAriaLabelTemplate, { name: category.name })}
                             onPress={() => openDeleteModal(category)}
                             isDisabled={category.services.length > 0}
                         >
@@ -998,6 +1004,7 @@ export default function AdminServicesPage() {
                                                                     isIconOnly
                                                                     variant="flat"
                                                                     className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                                                                    aria-label={fillTemplate(s.editAriaLabelTemplate, { name: service.name })}
                                                                     onPress={() => openServiceModal("edit", service)}
                                                                 >
                                                                     <Edit size={14} />
@@ -1010,6 +1017,7 @@ export default function AdminServicesPage() {
                                                                         ? "bg-amber-50 text-amber-600 hover:bg-amber-100"
                                                                         : "bg-green-50 text-green-600 hover:bg-green-100"
                                                                         }`}
+                                                                    aria-label={fillTemplate(service.isActive ? s.deactivateAriaLabelTemplate : s.activateAriaLabelTemplate, { name: service.name })}
                                                                     onPress={() => handleToggleActive(service)}
                                                                 >
                                                                     {service.isActive ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -1019,6 +1027,7 @@ export default function AdminServicesPage() {
                                                                     isIconOnly
                                                                     variant="flat"
                                                                     className="bg-red-50 text-red-500 hover:bg-red-100"
+                                                                    aria-label={fillTemplate(s.deleteAriaLabelTemplate, { name: service.name })}
                                                                     onPress={() => openDeleteModal(service)}
                                                                 >
                                                                     <Trash2 size={14} />
@@ -1123,6 +1132,7 @@ export default function AdminServicesPage() {
                                                                         isIconOnly
                                                                         variant="flat"
                                                                         className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
+                                                                        aria-label={fillTemplate(s.editAriaLabelTemplate, { name: category.name })}
                                                                         onPress={() => openCategoryModal("edit", category)}
                                                                     >
                                                                         <Edit size={14} />
@@ -1132,6 +1142,7 @@ export default function AdminServicesPage() {
                                                                         isIconOnly
                                                                         variant="flat"
                                                                         className="bg-red-50 text-red-500 hover:bg-red-100"
+                                                                        aria-label={fillTemplate(s.deleteAriaLabelTemplate, { name: category.name })}
                                                                         onPress={() => openDeleteModal(category)}
                                                                         isDisabled={category.services.length > 0}
                                                                     >

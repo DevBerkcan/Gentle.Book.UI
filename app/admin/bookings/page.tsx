@@ -613,6 +613,7 @@ export default function AdminBookingsPage() {
         <div className="flex gap-2">
           <Button
             size="sm"
+            aria-label={`${t.admin.bookingsPage.changeStatusAction}: ${booking.bookingNumber}`}
             className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
             startContent={<Edit size={13} />}
             onPress={() => openStatusModal(booking)}
@@ -622,6 +623,7 @@ export default function AdminBookingsPage() {
           <Button
             size="sm"
             variant="flat"
+            aria-label={`${t.admin.delete}: ${booking.bookingNumber}`}
             className="bg-red-50 text-red-500 min-w-0 px-2"
             startContent={<Trash2 size={13} />}
             onPress={() => openDeleteModal(booking)}
@@ -690,6 +692,7 @@ export default function AdminBookingsPage() {
                   classNames={inputClassNames}
                 />
                 <Button
+                  aria-label={t.admin.search}
                   className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold self-end h-14 px-4"
                   onPress={commitSearch}
                 >
@@ -1026,7 +1029,7 @@ export default function AdminBookingsPage() {
               classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/40" }}
               className="flex-1"
             />
-            <Button className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold" onPress={commitSearch}>
+            <Button className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold" aria-label={t.admin.search} onPress={commitSearch}>
               <Search size={16} />
             </Button>
             <Button variant="flat" className="bg-[#F6F5FA] text-[#1E1E1E]"
@@ -1141,6 +1144,7 @@ export default function AdminBookingsPage() {
                                 variant="flat"
                                 className="bg-[#F6F5FA] text-[#6355E4] hover:bg-[#6355E4]/10"
                                 startContent={<Edit size={13} />}
+                                aria-label={`${t.admin.bookingsPage.changeStatusAction}: ${booking.bookingNumber}`}
                                 onPress={() => openStatusModal(booking)}>
 
                               </Button>
@@ -1149,6 +1153,7 @@ export default function AdminBookingsPage() {
                                 variant="flat"
                                 className="bg-red-50 text-red-500 hover:bg-red-100 min-w-0 px-2"
                                 startContent={<Trash2 size={13} />}
+                                aria-label={`${t.admin.delete}: ${booking.bookingNumber}`}
                                 onPress={() => openDeleteModal(booking)}
                               />
                             </div>

@@ -14,6 +14,7 @@ import {
   MapPin, Plus, Pencil, Star, X, ShieldCheck, UserPlus,
 } from 'lucide-react';
 import { ShimmerButton } from '@/components/ui/shimmer-button';
+import { Field } from '@/components/ui/field';
 import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSection';
 import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
@@ -152,19 +153,6 @@ function SectionCard({
         </div>
       </div>
       <div className="px-1 space-y-4">{children}</div>
-    </div>
-  );
-}
-
-/** Consistent text input (replaces NextUI Input where full custom styling is needed) */
-function Field({
-  label, description, children,
-}: { label: string; description?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-[#6B7280]">{label}</label>
-      {children}
-      {description && <p className="text-[10px] text-[#9CA3AF] leading-snug">{description}</p>}
     </div>
   );
 }
@@ -693,10 +681,10 @@ export default function AdminSettingsPage() {
               </Field>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label={t.admin.settingsPage.website}>
+              <Field label={t.admin.settingsPage.website} htmlFor="settings-website">
                 <div className="relative">
                   <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] pointer-events-none" />
-                  <input type="url" value={settings.website} onChange={(e) => set('website', e.target.value)}
+                  <input id="settings-website" type="url" value={settings.website} onChange={(e) => set('website', e.target.value)}
                     placeholder={t.admin.settingsPage.websitePlaceholder} className={`${inputCls} pl-8`} />
                 </div>
               </Field>
@@ -1001,16 +989,19 @@ export default function AdminSettingsPage() {
                   accentColor: t.admin.settingsPage.accentColor,
                 };
                 return (
-                  <Field key={key} label={labels[key]}>
+                  <Field key={key} label={labels[key]} htmlFor={`settings-${key}-hex`}>
                     <div className="flex items-center gap-2 border border-[#E5E7EB] rounded-xl px-2.5 py-2 bg-white hover:border-[#C7D2FE] transition-all">
                       <input
                         type="color"
+                        aria-hidden="true"
+                        tabIndex={-1}
                         value={settings[key]}
                         onChange={(e) => set(key, e.target.value)}
                         className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent p-0 flex-shrink-0"
                         style={{ padding: 0 }}
                       />
                       <input
+                        id={`settings-${key}-hex`}
                         type="text"
                         value={settings[key]}
                         onChange={(e) => set(key, e.target.value)}

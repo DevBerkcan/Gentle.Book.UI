@@ -34,6 +34,7 @@ export function LinksPageHeader({
         <div className="flex items-center gap-2">
           {tenantSlug && (
             <button onClick={onShowQr}
+              aria-label={s.qrCodeBtn}
               className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#6355E4] transition-all">
               <QrCode size={14} /><span className="hidden sm:inline">{s.qrCodeBtn}</span>
             </button>
@@ -41,6 +42,7 @@ export function LinksPageHeader({
           {tenantSlug && (
             <>
               <button onClick={onShowPreviewModal}
+                aria-label={s.previewBtn}
                 className="flex items-center gap-1.5 text-sm bg-white text-[#374151] px-3 py-2 rounded-xl border border-[#E5E7EB] hover:border-[#C7D2FE] hover:text-[#6355E4] transition-all lg:hidden">
                 <Eye size={14} /><span className="hidden sm:inline">{s.previewBtn}</span>
               </button>

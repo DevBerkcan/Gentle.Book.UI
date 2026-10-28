@@ -317,10 +317,12 @@ export default function AdminIntakeFormPage() {
                       <div key={field.id} className="p-4 flex items-center gap-3">
                         <div className="flex flex-col gap-0.5">
                           <button onClick={() => handleMove(field, -1)} disabled={idx === 0 || busyId === field.id}
+                            aria-label={fillTemplate(s.moveUpAriaTemplate, { label: field.label })}
                             className="text-[#9CA3AF] hover:text-[#6355E4] disabled:opacity-30">
                             <ArrowUp size={13} />
                           </button>
                           <button onClick={() => handleMove(field, 1)} disabled={idx === sortedFields.length - 1 || busyId === field.id}
+                            aria-label={fillTemplate(s.moveDownAriaTemplate, { label: field.label })}
                             className="text-[#9CA3AF] hover:text-[#6355E4] disabled:opacity-30">
                             <ArrowDown size={13} />
                           </button>
@@ -354,6 +356,7 @@ export default function AdminIntakeFormPage() {
                         <button
                           onClick={() => handleDelete(field)}
                           disabled={busyId === field.id}
+                          aria-label={fillTemplate(s.deleteFieldAriaTemplate, { label: field.label })}
                           className="text-[#9CA3AF] hover:text-[#991B1B] disabled:opacity-50"
                         >
                           {busyId === field.id ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}

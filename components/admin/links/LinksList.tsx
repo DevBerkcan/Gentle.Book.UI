@@ -117,10 +117,12 @@ export function LinksList({
                   <div className="flex items-center gap-3 px-4 py-3.5">
                     <div className="flex flex-col gap-0.5 flex-shrink-0">
                       <button onClick={() => moveLink(i, "up")} disabled={i === 0}
+                        aria-label={fillTemplate(s.moveUpAriaTemplate, { title: link.title })}
                         className="text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
                         <ArrowUp size={12} />
                       </button>
                       <button onClick={() => moveLink(i, "down")} disabled={i === links.length - 1}
+                        aria-label={fillTemplate(s.moveDownAriaTemplate, { title: link.title })}
                         className="text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
                         <ArrowDown size={12} />
                       </button>
@@ -142,10 +144,12 @@ export function LinksList({
                         {link.isActive ? s.activeLabel : s.offLabel}
                       </button>
                       <button onClick={() => startEdit(link)}
+                        aria-label={fillTemplate(s.editLinkAriaTemplate, { title: link.title })}
                         className="p-1.5 text-[#9CA3AF] hover:text-[#6355E4] hover:bg-[#EEEBFC] transition-all rounded-lg">
                         <Edit2 size={13} />
                       </button>
                       <button onClick={() => handleDelete(link.id, link.title)}
+                        aria-label={fillTemplate(s.deleteLinkAriaTemplate, { title: link.title })}
                         className="p-1.5 text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-all rounded-lg">
                         <Trash2 size={13} />
                       </button>
