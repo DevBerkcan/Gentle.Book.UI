@@ -1,7 +1,7 @@
 // app/admin/bookings/page.tsx
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Card, CardBody } from "@nextui-org/card";
@@ -283,6 +283,16 @@ export default function AdminBookingsPage() {
   const commitSearch = useCallback(() => {
     setFilter(prev => ({ ...prev, searchTerm: searchInput.trim() || undefined, page: 1 }));
   }, [searchInput]);
+
+  // Searches as the admin types (debounced) instead of requiring Enter/the search button —
+  // both still work for instant feedback. Skips the first run so mounting doesn't fire an
+  // extra, redundant request on top of the initial load below.
+  const searchMounted = useRef(false);
+  useEffect(() => {
+    if (!searchMounted.current) { searchMounted.current = true; return; }
+    const id = setTimeout(() => commitSearch(), 400);
+    return () => clearTimeout(id);
+  }, [commitSearch]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") commitSearch();

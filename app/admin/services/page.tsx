@@ -134,6 +134,7 @@ export default function AdminServicesPage() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
     const [showServicesGuide, setShowServicesGuide] = useState(false);
     const [guideStep, setGuideStep] = useState(0);
     const [tenantCurrency, setTenantCurrency] = useState("EUR");
@@ -199,6 +200,12 @@ export default function AdminServicesPage() {
             .catch(() => setLocations([]));
     }, []);
 
+    // Raw, unfiltered data for the current view mode — fetched once per view-mode change, not
+    // on every keystroke. Filtering/pagination below runs over this locally (no network call),
+    // which is also what lets search react to every keystroke instead of needing Enter.
+    const [allServices, setAllServices] = useState<AdminService[]>([]);
+    const [allCategories, setAllCategories] = useState<AdminServiceCategory[]>([]);
+
     const loadData = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -221,6 +228,7 @@ export default function AdminServicesPage() {
                     getAdminCategories(),
                     getEmployeesForAssignment(),
                 ]);
+                setEmployees(employeesData);
             }
 
             if (servicesData.length === 0 && categoriesData.length === 0) {
@@ -232,60 +240,65 @@ export default function AdminServicesPage() {
                 }
             }
 
-            // Filter based on search term
-            let filteredServices = servicesData;
-            let filteredCategories = categoriesData;
-
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                filteredServices = servicesData.filter(s =>
-                    s.name.toLowerCase().includes(term) ||
-                    s.categoryName.toLowerCase().includes(term) ||
-                    s.assignedEmployees?.some(emp => emp.name.toLowerCase().includes(term)) // Updated to check multiple employees
-                );
-
-                filteredCategories = categoriesData.filter(c =>
-                    c.name.toLowerCase().includes(term) ||
-                    (c.description?.toLowerCase().includes(term))
-                );
-            }
-
-            // Apply pagination based on view mode
-            if (viewMode === "services") {
-                setTotalCount(filteredServices.length);
-                setTotalPages(Math.ceil(filteredServices.length / pageSize));
-                const start = (page - 1) * pageSize;
-                const end = start + pageSize;
-                setServices(filteredServices.slice(start, end));
-                setCategories(categoriesData); // Keep full categories for modals
-            } else if (viewMode === "categories") {
-                setTotalCount(filteredCategories.length);
-                setTotalPages(Math.ceil(filteredCategories.length / pageSize));
-                const start = (page - 1) * pageSize;
-                const end = start + pageSize;
-                setCategories(filteredCategories.slice(start, end));
-                setServices(servicesData); // Derived from categories for category detail modals
-            } else {
-                setEmployees(employeesData);
-                setServices(servicesData);
-                setCategories(categoriesData);
-            }
-
+            setAllServices(servicesData);
+            setAllCategories(categoriesData);
         } catch (err: any) {
             setError(err.message || s.loadError);
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, searchTerm, viewMode, s.loadError]);
+    }, [viewMode, s.loadError]);
 
     useEffect(() => {
         void loadData();
     }, [loadData]);
 
+    // Filter + paginate the already-fetched data for the current view mode. Runs synchronously
+    // on every searchTerm/page change, so search no longer needs Enter or a round-trip.
+    useEffect(() => {
+        let filteredServices = allServices;
+        let filteredCategories = allCategories;
+
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filteredServices = allServices.filter(sv =>
+                sv.name.toLowerCase().includes(term) ||
+                sv.categoryName.toLowerCase().includes(term) ||
+                sv.assignedEmployees?.some(emp => emp.name.toLowerCase().includes(term))
+            );
+            filteredCategories = allCategories.filter(c =>
+                c.name.toLowerCase().includes(term) ||
+                (c.description?.toLowerCase().includes(term))
+            );
+        }
+
+        if (viewMode === "services") {
+            setTotalCount(filteredServices.length);
+            setTotalPages(Math.max(1, Math.ceil(filteredServices.length / pageSize)));
+            const start = (page - 1) * pageSize;
+            setServices(filteredServices.slice(start, start + pageSize));
+            setCategories(allCategories); // Keep full categories for modals
+        } else if (viewMode === "categories") {
+            setTotalCount(filteredCategories.length);
+            setTotalPages(Math.max(1, Math.ceil(filteredCategories.length / pageSize)));
+            const start = (page - 1) * pageSize;
+            setCategories(filteredCategories.slice(start, start + pageSize));
+            setServices(allServices); // Derived from categories for category detail modals
+        } else {
+            setServices(allServices);
+            setCategories(allCategories);
+        }
+    }, [allServices, allCategories, searchTerm, page, pageSize, viewMode]);
+
+    // Searching from something other than page 1 would otherwise show a stale/empty page
+    // until the admin manually paged back to 1.
+    useEffect(() => {
+        setPage(1);
+    }, [searchTerm]);
+
     const handleSearchKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             setPage(1);
-            loadData();
         }
     };
 
@@ -847,21 +860,14 @@ export default function AdminServicesPage() {
                                 />
                                 <Button
                                     className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
-                                    onPress={() => {
-                                        setPage(1);
-                                        loadData();
-                                    }}
+                                    onPress={() => setPage(1)}
                                 >
                                     {t.admin.search}
                                 </Button>
                                 {searchTerm && (
                                     <Button
                                         className="bg-[#F6F5FA] text-[#1E1E1E] font-semibold"
-                                        onPress={() => {
-                                            setSearchTerm("");
-                                            setPage(1);
-                                            loadData();
-                                        }}
+                                        onPress={() => setSearchTerm("")}
                                     >
                                         <X size={16} className="mr-2" />
                                         {s.reset}
@@ -896,11 +902,7 @@ export default function AdminServicesPage() {
                                         <Button
                                             size="sm"
                                             className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]"
-                                            onPress={() => {
-                                                setSearchTerm("");
-                                                setPage(1);
-                                                loadData();
-                                            }}
+                                            onPress={() => setSearchTerm("")}
                                         >
                                             {s.resetSearch}
                                         </Button>
@@ -1058,11 +1060,7 @@ export default function AdminServicesPage() {
                                         <Button
                                             size="sm"
                                             className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]"
-                                            onPress={() => {
-                                                setSearchTerm("");
-                                                setPage(1);
-                                                loadData();
-                                            }}
+                                            onPress={() => setSearchTerm("")}
                                         >
                                             {s.resetSearch}
                                         </Button>

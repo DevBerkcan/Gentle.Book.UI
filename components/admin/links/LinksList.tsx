@@ -118,12 +118,12 @@ export function LinksList({
                     <div className="flex flex-col gap-0.5 flex-shrink-0">
                       <button onClick={() => moveLink(i, "up")} disabled={i === 0}
                         aria-label={fillTemplate(s.moveUpAriaTemplate, { title: link.title })}
-                        className="text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
+                        className="p-1.5 -m-1.5 text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
                         <ArrowUp size={12} />
                       </button>
                       <button onClick={() => moveLink(i, "down")} disabled={i === links.length - 1}
                         aria-label={fillTemplate(s.moveDownAriaTemplate, { title: link.title })}
-                        className="text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
+                        className="p-1.5 -m-1.5 text-[#D1D5DB] hover:text-[#374151] disabled:opacity-20 transition-colors">
                         <ArrowDown size={12} />
                       </button>
                     </div>

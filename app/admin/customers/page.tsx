@@ -72,6 +72,7 @@ export default function CustomersPage() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
@@ -109,7 +110,7 @@ export default function CustomersPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await customersApi.getAll(searchTerm || undefined, page, pageSize);
+      const response = await customersApi.getAll(debouncedSearchTerm || undefined, page, pageSize);
       setCustomers(response.items);
       setTotalPages(response.totalPages);
       setTotalCount(response.totalCount);
@@ -118,11 +119,26 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, searchTerm, t]);
+  }, [page, pageSize, debouncedSearchTerm, t]);
 
   useEffect(() => {
     void loadCustomers();
   }, [loadCustomers]);
+
+  // Searches as the admin types (debounced) instead of requiring Enter/the search button —
+  // the button and Enter key below still exist for instant feedback.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(id);
+  }, [searchTerm]);
+
+  const commitSearchNow = () => {
+    setDebouncedSearchTerm(searchTerm);
+    setPage(1);
+  };
 
   async function loadCustomerDetails(id: string) {
     try {
@@ -254,10 +270,7 @@ export default function CustomersPage() {
   }
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      setPage(1);
-      loadCustomers();
-    }
+    if (e.key === "Enter") commitSearchNow();
   };
 
   const getStatusColor = (status: string) => {
@@ -415,10 +428,7 @@ export default function CustomersPage() {
               />
               <Button
                 className="bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-semibold"
-                onPress={() => {
-                  setPage(1);
-                  loadCustomers();
-                }}
+                onPress={commitSearchNow}
               >
                 {t.admin.bookingsPage.searchLabel}
               </Button>
@@ -450,8 +460,8 @@ export default function CustomersPage() {
                     className="mt-3 bg-[#F6F5FA] text-[#1E1E1E]"
                     onPress={() => {
                       setSearchTerm("");
+                      setDebouncedSearchTerm("");
                       setPage(1);
-                      loadCustomers();
                     }}
                   >
                     {t.admin.customersPage.resetSearch}
