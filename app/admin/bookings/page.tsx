@@ -284,15 +284,20 @@ export default function AdminBookingsPage() {
     setFilter(prev => ({ ...prev, searchTerm: searchInput.trim() || undefined, page: 1 }));
   }, [searchInput]);
 
-  // Searches as the admin types (debounced) instead of requiring Enter/the search button —
-  // both still work for instant feedback. Skips the first run so mounting doesn't fire an
-  // extra, redundant request on top of the initial load below.
-  const searchMounted = useRef(false);
-  useEffect(() => {
-    if (!searchMounted.current) { searchMounted.current = true; return; }
-    const id = setTimeout(() => commitSearch(), 400);
-    return () => clearTimeout(id);
-  }, [commitSearch]);
+  // Searches as the admin types (debounced), instead of requiring Enter/the search button —
+  // scheduled directly from the input's onChange (searchDebounceRef below) rather than from an
+  // effect, so there's no dependency-array/closure subtlety to get wrong.
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleSearchInputChange = (value: string) => {
+    setSearchInput(value);
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => {
+      setFilter(prev => ({ ...prev, searchTerm: value.trim() || undefined, page: 1 }));
+    }, 400);
+  };
+  useEffect(() => () => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+  }, []);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") commitSearch();
@@ -303,6 +308,7 @@ export default function AdminBookingsPage() {
   }
 
   function clearAllFilters() {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     setSearchInput("");
     setFilter({ page: 1, pageSize: 20 });
     setShowMobileFilters(false);
@@ -697,7 +703,7 @@ export default function AdminBookingsPage() {
                   placeholder={t.admin.bookingsPage.searchPlaceholder}
                   startContent={<Search size={16} className="text-gb-textSecondary" />}
                   value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
+                  onChange={(e) => handleSearchInputChange(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
                   classNames={inputClassNames}
                 />
@@ -1034,7 +1040,7 @@ export default function AdminBookingsPage() {
               placeholder={t.admin.bookingsPage.searchLabel + "..."}
               startContent={<Search size={16} className="text-gb-textSecondary" />}
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/40" }}
               className="flex-1"
