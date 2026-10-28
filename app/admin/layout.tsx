@@ -182,6 +182,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   if (isAuthenticated) {
     return (
       <div className="flex min-h-screen bg-[#F6F5FA]">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-[#1E1E1E] focus:px-4 focus:py-2 focus:rounded-xl focus:shadow-lg"
+        >
+          {t.admin.skipToContent}
+        </a>
         <AdminNav />
         {/* Sidebar spacer: collapsible width on desktop (var(--admin-sidebar-width)), 56px (top bar) on mobile */}
         <div className="flex-1 min-w-0 lg:ml-[var(--admin-sidebar-width,230px)] transition-[margin] duration-200 flex flex-col pt-14 lg:pt-0 overflow-x-hidden">
@@ -203,7 +209,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           {showTrialBanner && trialDaysLeft !== null && !trialExpired && (
             <TrialBanner daysLeft={trialDaysLeft} />
           )}
-          <main className="flex-1">
+          <main id="main-content" className="flex-1">
             {children}
           </main>
         </div>

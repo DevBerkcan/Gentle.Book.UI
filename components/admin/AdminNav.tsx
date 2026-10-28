@@ -226,6 +226,7 @@ export function AdminNav() {
                     key={href}
                     href={href}
                     title={isCollapsed ? label : undefined}
+                    aria-current={active ? "page" : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all group ${
                       isCollapsed ? "justify-center" : ""
                     } ${
