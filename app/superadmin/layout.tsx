@@ -181,9 +181,31 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
   );
 }
 
+const ROUTE_TITLES: Record<string, string> = {
+  '/superadmin/dashboard': 'Dashboard',
+  '/superadmin/revenue': 'Umsatz',
+  '/superadmin/agency-ai-costs': 'KI-Kosten',
+  '/superadmin/tenants': 'Buchungssysteme',
+  '/superadmin/requests': 'Abo-Anfragen',
+  '/superadmin/invoices': 'Rechnungen',
+  '/superadmin/pricing': 'Preise',
+  '/superadmin/at-risk': 'Gefährdete Kunden',
+  '/superadmin/email-logs': 'E-Mail Logs',
+  '/superadmin/activity': 'Aktivitäten',
+  '/superadmin/audit-log': 'Audit-Log',
+  '/superadmin/legal-documents': 'Rechtstexte',
+  '/superadmin/data-requests': 'Datenanfragen',
+};
+
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useSuperAdminAuth();
   const pathname = usePathname();
+
+  // Every route previously shared the one static <title> from the root layout.
+  useEffect(() => {
+    const matched = Object.entries(ROUTE_TITLES).find(([route]) => pathname?.startsWith(route));
+    document.title = matched ? `${matched[1]} · Super Admin · GentleBook` : 'Super Admin · GentleBook';
+  }, [pathname]);
 
   if (pathname === '/superadmin/login') {
     return <>{children}</>;

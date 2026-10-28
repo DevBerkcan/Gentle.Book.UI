@@ -127,6 +127,37 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [isEmployee, loading, pathname, router]);
 
+  // Every route previously shared the one static <title> from the root layout, so every admin
+  // tab/history entry looked identical ("GentleBook – Online Buchungssystem"). Derive a
+  // per-route title from the same labels the sidebar already uses.
+  useEffect(() => {
+    const ROUTE_TITLES: Record<string, string> = {
+      '/admin/dashboard': t.admin.dashboard,
+      '/admin/employee-dashboard': t.admin.myArea,
+      '/admin/calendar': t.admin.calendar,
+      '/admin/bookings': t.admin.bookings,
+      '/admin/waitlist': t.admin.waitlist,
+      '/admin/customers': t.admin.customers,
+      '/admin/services': t.admin.services,
+      '/admin/employees': t.admin.employees,
+      '/admin/blocked-slots': t.admin.absences,
+      '/admin/employee-notes': t.admin.noteToAdmin,
+      '/admin/tracking': t.admin.tracking,
+      '/admin/reviews': t.admin.reviews,
+      '/admin/inbox': t.admin.inbox,
+      '/admin/ai-service-finder': t.admin.aiServiceFinder,
+      '/admin/links': t.admin.myLinks,
+      '/admin/intake-form': t.admin.intakeForm,
+      '/admin/settings': t.admin.settings,
+      '/admin/api-keys': t.admin.apiAccess,
+      '/admin/subscription': t.admin.subscription,
+      '/admin/vouchers': t.admin.vouchers,
+      '/admin/onboarding': t.admin.setupWizard,
+    };
+    const matched = Object.entries(ROUTE_TITLES).find(([route]) => pathname?.startsWith(route));
+    document.title = matched ? `${matched[1]} · GentleBook` : 'GentleBook';
+  }, [pathname, t]);
+
   // Check subscription status for TenantAdmin
   useEffect(() => {
     if (!isAuthenticated || !isTenantAdmin) return;
