@@ -4,7 +4,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale, ShieldAlert } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale, ShieldAlert, Menu, X } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
@@ -45,6 +46,7 @@ function useSuperAdminAuth() {
 
 function SuperAdminNav({ logout }: { logout: () => void }) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   const [pendingRequests, setPendingRequests] = useState(0);
   const [atRiskCount, setAtRiskCount] = useState(0);
   const [pendingDataRequests, setPendingDataRequests] = useState(0);
@@ -67,6 +69,9 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     return () => clearInterval(id);
   }, []);
 
+  // Close drawer on route change
+  useEffect(() => { setOpen(false); }, [pathname]);
+
   const navItems = [
     { href: '/superadmin/dashboard',  label: 'Dashboard',       icon: LayoutDashboard },
     { href: '/superadmin/revenue',    label: 'Umsatz',          icon: TrendingUp },
@@ -83,8 +88,8 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/data-requests', label: 'Datenanfragen', icon: ShieldAlert, badge: pendingDataRequests },
   ];
 
-  return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-[#1a1a2e] text-white flex flex-col z-50">
+  const NavContent = () => (
+    <div className="flex flex-col h-full">
       <div className="p-5 border-b border-white/10 flex items-center gap-2.5">
         <GentleBookMark size={26} />
         <div>
@@ -93,7 +98,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {navItems.map(({ href, label, icon: Icon, badge }) => {
           const active = pathname.startsWith(href);
           return (
@@ -127,7 +132,51 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
           Abmelden
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-60 bg-[#1a1a2e] text-white flex-col z-50">
+        <NavContent />
+      </aside>
+
+      {/* ── Mobile/Tablet Top Bar ────────────────────────────────────── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/10 z-40 flex items-center justify-between px-4">
+        <div className="flex items-center gap-2.5">
+          <GentleBookMark size={24} />
+          <p className="font-semibold text-white text-sm leading-tight">gentlebook</p>
+        </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label={open ? 'Menü schließen' : 'Menü öffnen'}
+          className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/8"
+        >
+          {open ? <X size={22} /> : <Menu size={22} />}
+        </button>
+      </div>
+
+      {/* ── Mobile/Tablet Drawer ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              onClick={() => setOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+              className="lg:hidden fixed inset-y-0 left-0 w-[260px] bg-[#1a1a2e] border-r border-white/10 z-50"
+            >
+              <NavContent />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -142,7 +191,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex min-h-screen bg-[#F6F5FA]">
       <SuperAdminNav logout={logout} />
-      <main className="ml-60 flex-1 p-8">
+      <main className="lg:ml-60 flex-1 pt-14 lg:pt-0 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
         {children}
       </main>
     </div>

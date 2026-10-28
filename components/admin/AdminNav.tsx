@@ -337,13 +337,13 @@ export function AdminNav() {
   return (
     <>
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className={`hidden md:flex fixed inset-y-0 left-0 flex-col bg-[#1a1a2e] border-r border-white/5 z-40 transition-[width] duration-200 ${
+      <aside className={`hidden lg:flex fixed inset-y-0 left-0 flex-col bg-[#1a1a2e] border-r border-white/5 z-40 transition-[width] duration-200 ${
         collapsed ? "w-[72px]" : "w-[230px]"
       }`}>
         <SidebarContent />
         <button
           onClick={toggleCollapsed}
-          className="hidden md:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
+          className="hidden lg:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
           title={collapsed ? t.admin.expandSidebar : t.admin.collapseSidebar}
           aria-label={collapsed ? t.admin.expandSidebar : t.admin.collapseSidebar}
         >
@@ -352,7 +352,7 @@ export function AdminNav() {
       </aside>
 
       {/* ── Mobile Top Bar ───────────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/8 z-40 flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-[#1a1a2e] border-b border-white/8 z-40 flex items-center justify-between px-4">
         <Link href="/admin/dashboard" className="flex items-center">
           {logoUrl
             ? <Image src={resolveLogoUrl(logoUrl)!} alt={companyName ?? "Logo"} width={150} height={36} unoptimized className="h-9 w-[150px] object-contain object-left" />
@@ -369,6 +369,7 @@ export function AdminNav() {
           <NotificationBell dark />
           <button
             onClick={() => setOpen((v) => !v)}
+            aria-label={open ? t.admin.collapseSidebar : t.admin.expandSidebar}
             className="p-2 text-white/60 hover:text-white transition-colors rounded-lg hover:bg-white/8"
           >
             {open ? <X size={22} /> : <Menu size={22} />}
@@ -383,14 +384,14 @@ export function AdminNav() {
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               onClick={() => setOpen(false)}
             />
             {/* Drawer */}
             <motion.aside
               initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
               transition={{ type: "spring", stiffness: 340, damping: 30 }}
-              className="md:hidden fixed inset-y-0 left-0 w-[260px] bg-[#1a1a2e] border-r border-white/8 z-50"
+              className="lg:hidden fixed inset-y-0 left-0 w-[260px] bg-[#1a1a2e] border-r border-white/8 z-50"
             >
               <SidebarContent forceExpanded />
             </motion.aside>

@@ -184,7 +184,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen bg-[#F6F5FA]">
         <AdminNav />
         {/* Sidebar spacer: collapsible width on desktop (var(--admin-sidebar-width)), 56px (top bar) on mobile */}
-        <div className="flex-1 min-w-0 md:ml-[var(--admin-sidebar-width,230px)] transition-[margin] duration-200 flex flex-col pt-14 md:pt-0 overflow-x-hidden">
+        <div className="flex-1 min-w-0 lg:ml-[var(--admin-sidebar-width,230px)] transition-[margin] duration-200 flex flex-col pt-14 lg:pt-0 overflow-x-hidden">
           <ImpersonateBanner />
           {showOnboardingBanner && (
             <div className="bg-[#6355E4] px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
