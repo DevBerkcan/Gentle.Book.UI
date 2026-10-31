@@ -27,7 +27,7 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("de-DE", { day: "2-digit", month: "short" });
 }
 
-export function NotificationBell({ dark = false }: { dark?: boolean }) {
+export function NotificationBell({ dark = false, openUp = false }: { dark?: boolean; openUp?: boolean }) {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
@@ -92,7 +92,9 @@ export function NotificationBell({ dark = false }: { dark?: boolean }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+        <div className={`absolute w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden ${
+          openUp ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
+        }`}>
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <h3 className="font-semibold text-gray-900 text-sm">Benachrichtigungen</h3>

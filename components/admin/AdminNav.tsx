@@ -275,7 +275,7 @@ export function AdminNav() {
             >
               {lang === "de" ? "EN" : "DE"}
             </button>
-            <NotificationBell dark />
+            <NotificationBell dark openUp />
             <button
               onClick={logout}
               className="text-white/30 hover:text-red-400 transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-red-400/10"
@@ -294,7 +294,7 @@ export function AdminNav() {
               >
                 {lang === "de" ? "EN" : "DE"}
               </button>
-              <NotificationBell dark />
+              <NotificationBell dark openUp />
             </div>
             <div className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/6 transition-colors group">
               {avatarPhotoUrl ? (
