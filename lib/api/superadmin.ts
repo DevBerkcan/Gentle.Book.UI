@@ -258,6 +258,14 @@ export const superAdminApi = {
     return data as { tenantId: string; monthlyBudgetUsd: number | null };
   },
 
+  // ── AI budget top-up packages (sold + invoiced after a hard-cap alert) ─
+  async purchaseAiBudgetPackage(id: string, additionalBudgetUsd: number, priceEur: number, packageLabel: string) {
+    const { data } = await api.post(`/superadmin/tenants/${id}/ai-budget/purchase-package`, {
+      additionalBudgetUsd, priceEur, packageLabel,
+    });
+    return data as { tenantId: string; monthlyBudgetUsd: number; message: string };
+  },
+
   // ── AI budget increase requests ("customer wants more capacity") ─
   async getAiBudgetRequests(status: string = 'Pending') {
     const { data } = await api.get('/superadmin/ai-budget-requests', { params: { status } });

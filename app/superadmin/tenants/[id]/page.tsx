@@ -55,6 +55,7 @@ export default function TenantDetailPage() {
   const [aiBudgetInput, setAiBudgetInput] = useState('');
   const [savingAiBudget, setSavingAiBudget] = useState(false);
   const [decidingBudgetRequest, setDecidingBudgetRequest] = useState(false);
+  const [purchasingPackage, setPurchasingPackage] = useState<string | null>(null);
   const [domainInfo, setDomainInfo] = useState<{ domain: string | null; status: string; requestedAt: string | null } | null>(null);
   const [domainLoading, setDomainLoading] = useState(false);
   const [domainUpdating, setDomainUpdating] = useState(false);
@@ -396,6 +397,28 @@ export default function TenantDetailPage() {
       await loadAiUsage();
     } catch { /* silent fail */ }
     setDecidingBudgetRequest(false);
+  }
+
+  async function handlePurchaseAiBudgetPackage(additionalBudgetUsd: number, priceEur: number, packageLabel: string) {
+    const ok = await confirm({
+      title: `${packageLabel} buchen?`,
+      message: `+${additionalBudgetUsd}$ KI-Budget wird sofort freigeschaltet. Eine Rechnung über ${priceEur}€ wird per E-Mail an das Studio versendet.`,
+      confirmLabel: 'Buchen',
+      cancelLabel: 'Abbrechen',
+      variant: 'info',
+    });
+    if (!ok) return;
+
+    setPurchasingPackage(packageLabel);
+    try {
+      const result = await superAdminApi.purchaseAiBudgetPackage(id, additionalBudgetUsd, priceEur, packageLabel);
+      setAiUsage(null);
+      await loadAiUsage();
+      alert(result.message);
+    } catch (e: any) {
+      alert(e.response?.data?.message ?? 'Paket konnte nicht gebucht werden.');
+    }
+    setPurchasingPackage(null);
   }
 
   async function loadDomain() {
@@ -1038,6 +1061,27 @@ export default function TenantDetailPage() {
                           <ShieldAlert size={12} /> Budget aufgebraucht — KI-Aufrufe pausiert bis zur nächsten Periode, Features laufen im Fallback-Modus weiter.
                         </div>
                       )}
+                      <div className="rounded-lg border border-gray-200 p-3 space-y-2">
+                        <p className="text-xs font-semibold text-gray-700">KI-Budget-Paket verkaufen (sofort freigeschaltet + Rechnung per Mail)</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { label: 'Paket A', usd: 20, eur: 20 },
+                            { label: 'Paket B', usd: 50, eur: 50 },
+                            { label: 'Paket C', usd: 100, eur: 100 },
+                          ].map((pkg) => (
+                            <button
+                              key={pkg.label}
+                              onClick={() => handlePurchaseAiBudgetPackage(pkg.usd, pkg.eur, pkg.label)}
+                              disabled={purchasingPackage !== null}
+                              className="flex flex-col items-center py-2 rounded-lg border border-gray-200 bg-white hover:border-[#6355E4] hover:bg-[#6355E4]/5 disabled:opacity-50 transition-colors"
+                            >
+                              <span className="text-xs font-semibold text-gray-900">{pkg.label}</span>
+                              <span className="text-[11px] text-gray-400">+{pkg.usd}$ · {pkg.eur}€</span>
+                              {purchasingPackage === pkg.label && <span className="text-[10px] text-[#6355E4]">wird gebucht…</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                       {aiUsage.pendingBudgetRequest && (
                         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 space-y-2">
                           <p className="text-xs font-semibold text-amber-800">
