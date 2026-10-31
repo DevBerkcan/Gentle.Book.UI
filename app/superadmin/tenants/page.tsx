@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Plus, Building2, Clock, CheckCircle, XCircle, AlertCircle,
@@ -202,6 +203,7 @@ function SubscriptionCell({ sub }: { sub: TenantListItem['subscription'] }) {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function TenantsPage() {
+  const router = useRouter();
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -412,7 +414,8 @@ export default function TenantsPage() {
               return (
                 <div
                   key={t.id}
-                  className={`rounded-xl border p-4 ${isUrgent ? 'border-red-300 bg-red-50' : 'border-amber-200 bg-amber-50'}`}
+                  onClick={() => router.push(`/superadmin/tenants/${t.id}`)}
+                  className={`rounded-xl border p-4 cursor-pointer transition-shadow hover:shadow-md ${isUrgent ? 'border-red-300 bg-red-50' : 'border-amber-200 bg-amber-50'}`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
@@ -439,7 +442,7 @@ export default function TenantsPage() {
                       Läuft ab: <span className="font-medium">{formatTrialEnd((t.subscription as any)?.trialEndsAt)}</span>
                     </p>
                     <button
-                      onClick={() => handleExtendTrial(t)}
+                      onClick={(e) => { e.stopPropagation(); handleExtendTrial(t); }}
                       disabled={extendingTrial === t.id}
                       className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 shadow-sm"
                     >
@@ -628,6 +631,7 @@ export default function TenantsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-900 text-white text-xs font-medium uppercase tracking-wide">
@@ -645,7 +649,11 @@ export default function TenantsPage() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(t => (
-                <tr key={t.id} className="hover:bg-gray-50/70 transition-colors">
+                <tr
+                  key={t.id}
+                  onClick={() => router.push(`/superadmin/tenants/${t.id}`)}
+                  className="hover:bg-gray-50/70 transition-colors cursor-pointer"
+                >
 
                   {/* Color Dot */}
                   <td className="px-4 py-3">
@@ -702,7 +710,7 @@ export default function TenantsPage() {
                   </td>
 
                   {/* Plan Schnell-Wechsel */}
-                  <td className="px-4 py-3 hidden lg:table-cell">
+                  <td className="px-4 py-3 hidden lg:table-cell" onClick={(e) => e.stopPropagation()}>
                     <PlanQuickChange
                       tenantId={t.id}
                       currentPlan={t.subscription?.plan}
@@ -722,7 +730,7 @@ export default function TenantsPage() {
                   </td>
 
                   {/* Aktionen */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1">
                       {/* + 7 Tage — nur bei aktiven Trial-Tenants */}
                       {t.subscription?.isInTrial && (
@@ -776,6 +784,7 @@ export default function TenantsPage() {
               ))}
             </tbody>
           </table>
+          </div>
 
           {/* Footer */}
           <div className="px-4 py-3 border-t border-gray-100 bg-gray-50 flex items-center justify-between">

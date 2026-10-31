@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale, ShieldAlert, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Building2, LogOut, Mail, Activity, Bell, FileText, Euro, AlertTriangle, ScrollText, TrendingUp, Sparkles, Scale, ShieldAlert, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { superAdminApi } from '@/lib/api/superadmin';
 import { getSuperAdminToken, getSuperAdminUser, removeSuperAdminToken, removeSuperAdminUser } from '@/lib/auth/storage';
 import { GentleBookMark } from '@/components/admin/GentleBookLogo';
@@ -44,7 +44,9 @@ function useSuperAdminAuth() {
   return { logout };
 }
 
-function SuperAdminNav({ logout }: { logout: () => void }) {
+const SUPERADMIN_COLLAPSE_KEY = 'superadmin-sidebar-collapsed';
+
+function SuperAdminNav({ logout, collapsed, onToggleCollapsed }: { logout: () => void; collapsed: boolean; onToggleCollapsed: () => void }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [pendingRequests, setPendingRequests] = useState(0);
@@ -88,14 +90,18 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
     { href: '/superadmin/data-requests', label: 'Datenanfragen', icon: ShieldAlert, badge: pendingDataRequests },
   ];
 
-  const NavContent = () => (
+  const NavContent = ({ forceExpanded = false }: { forceExpanded?: boolean } = {}) => {
+    const isCollapsed = forceExpanded ? false : collapsed;
+    return (
     <div className="flex flex-col h-full">
-      <div className="p-5 border-b border-white/10 flex items-center gap-2.5">
+      <div className={`p-5 border-b border-white/10 flex items-center gap-2.5 ${isCollapsed ? 'justify-center px-3' : ''}`}>
         <GentleBookMark size={26} />
-        <div>
-          <p className="font-semibold text-white leading-tight">gentlebook</p>
-          <p className="text-[11px] text-gray-400 leading-tight">Super Admin</p>
-        </div>
+        {!isCollapsed && (
+          <div>
+            <p className="font-semibold text-white leading-tight">gentlebook</p>
+            <p className="text-[11px] text-gray-400 leading-tight">Super Admin</p>
+          </div>
+        )}
       </div>
 
       <nav className="flex-1 overflow-y-auto p-4 space-y-1">
@@ -105,15 +111,16 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
             <Link
               key={href}
               href={href}
+              title={isCollapsed ? label : undefined}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${isCollapsed ? 'justify-center' : ''} ${
                 active
                   ? 'bg-gradient-to-r from-[#6355E4] to-[#17A398] text-white font-medium shadow-lg shadow-[#6355E4]/25'
                   : 'text-gray-400 hover:bg-white/5 hover:text-white'
               }`}
             >
               <Icon size={18} />
-              <span className="flex-1">{label}</span>
+              {!isCollapsed && <span className="flex-1">{label}</span>}
               {badge != null && badge > 0 && (
                 <span className="bg-amber-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                   {badge}
@@ -127,20 +134,30 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
       <div className="p-4 border-t border-white/10">
         <button
           onClick={logout}
-          className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+          title={isCollapsed ? 'Abmelden' : undefined}
+          className={`flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors ${isCollapsed ? 'justify-center' : ''}`}
         >
           <LogOut size={18} />
-          Abmelden
+          {!isCollapsed && 'Abmelden'}
         </button>
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <>
       {/* ── Desktop Sidebar ──────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-60 bg-[#1a1a2e] text-white flex-col z-50">
+      <aside className={`hidden lg:flex fixed left-0 top-0 h-full bg-[#1a1a2e] text-white flex-col z-50 transition-[width] duration-200 ${collapsed ? 'w-[72px]' : 'w-60'}`}>
         <NavContent />
+        <button
+          onClick={onToggleCollapsed}
+          className="hidden lg:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 items-center justify-center text-white/50 hover:text-white hover:bg-[#23233a] transition-colors z-50 shadow-md"
+          title={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen'}
+          aria-label={collapsed ? 'Seitenleiste ausklappen' : 'Seitenleiste einklappen'}
+        >
+          {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
+        </button>
       </aside>
 
       {/* ── Mobile/Tablet Top Bar ────────────────────────────────────── */}
@@ -172,7 +189,7 @@ function SuperAdminNav({ logout }: { logout: () => void }) {
               transition={{ type: 'spring', stiffness: 340, damping: 30 }}
               className="lg:hidden fixed inset-y-0 left-0 w-[260px] bg-[#1a1a2e] border-r border-white/10 z-50"
             >
-              <NavContent />
+              <NavContent forceExpanded />
             </motion.aside>
           </>
         )}
@@ -200,6 +217,19 @@ const ROUTE_TITLES: Record<string, string> = {
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useSuperAdminAuth();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    setCollapsed(localStorage.getItem(SUPERADMIN_COLLAPSE_KEY) === 'true');
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(SUPERADMIN_COLLAPSE_KEY, String(next));
+      return next;
+    });
+  };
 
   // Every route previously shared the one static <title> from the root layout.
   useEffect(() => {
@@ -219,8 +249,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       >
         Zum Hauptinhalt springen
       </a>
-      <SuperAdminNav logout={logout} />
-      <main id="main-content" className="lg:ml-60 flex-1 pt-14 lg:pt-0 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+      <SuperAdminNav logout={logout} collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
+      <main id="main-content" className={`flex-1 pt-14 lg:pt-0 p-4 sm:p-6 lg:p-8 overflow-x-hidden transition-[margin] duration-200 ${collapsed ? 'lg:ml-[72px]' : 'lg:ml-60'}`}>
         {children}
       </main>
     </div>
