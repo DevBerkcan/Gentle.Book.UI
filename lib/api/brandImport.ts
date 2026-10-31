@@ -187,11 +187,20 @@ export async function pollBrandImportJob(
 ): Promise<BrandImportJobStatusDto> {
   const intervalMs = options.intervalMs ?? 2000;
   const maxAttempts = options.maxAttempts ?? 60; // ~2 minutes at 2s intervals
+  let consecutiveErrors = 0;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const job = await getBrandImportJob(jobId);
-    onUpdate(job);
-    if (job.status === "Ready" || job.status === "Failed") return job;
+    try {
+      const job = await getBrandImportJob(jobId);
+      consecutiveErrors = 0;
+      onUpdate(job);
+      if (job.status === "Ready" || job.status === "Failed") return job;
+    } catch (err) {
+      // A single transient blip (network hiccup, brief server restart) shouldn't abort a
+      // perfectly healthy analysis that's still running — only give up after repeated failures.
+      consecutiveErrors++;
+      if (consecutiveErrors > 3) throw err;
+    }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 

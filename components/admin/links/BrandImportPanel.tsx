@@ -93,8 +93,26 @@ export function BrandImportPanel({
   const [deselectedServiceNames, setDeselectedServiceNames] = useState<Set<string>>(new Set());
   const [applyingSection, setApplyingSection] = useState<ImportSection | null>(null);
   const [appliedSections, setAppliedSections] = useState<Set<ImportSection>>(new Set());
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   useEffect(() => { if (defaultWebsiteUrl) setUrl(defaultWebsiteUrl); }, [defaultWebsiteUrl]);
+
+  // Ticks the "please wait" countdown down to 0 after a rate-limit response.
+  useEffect(() => {
+    if (cooldownSeconds <= 0) return;
+    const id = setInterval(() => setCooldownSeconds((prev) => Math.max(0, prev - 1)), 1000);
+    return () => clearInterval(id);
+  }, [cooldownSeconds]);
+
+  function describeAnalysisError(err: any, fallback: string): string {
+    if (err?.response?.status === 429) {
+      const seconds = err.response.data?.retryAfterSeconds ?? 60;
+      setCooldownSeconds(seconds);
+      return fillTemplate(s.brandImportRateLimitedTemplate, { seconds });
+    }
+    if (err?.message === "timeout") return s.brandImportTimeoutError;
+    return err?.response?.data?.message ?? fallback;
+  }
 
   const selectedProposal = result?.proposals.find((p) => p.id === selectedProposalId) ?? null;
   const logoCandidates = result?.assets.filter((a) => a.assetType === "Logo") ?? [];
@@ -137,7 +155,7 @@ export function BrandImportPanel({
         setError(job.errorMessageSafe ?? t.admin.settingsPage.wbsAnalysisFailedError);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? t.admin.settingsPage.wbsAnalysisStartError);
+      setError(describeAnalysisError(err, t.admin.settingsPage.wbsAnalysisStartError));
     } finally {
       setAnalyzing(false);
       setStatus(null);
@@ -159,7 +177,7 @@ export function BrandImportPanel({
         setError(job.errorMessageSafe ?? t.admin.settingsPage.wbsAnalysisFailedError);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? s.reanalysisStartErrorToast);
+      setError(describeAnalysisError(err, s.reanalysisStartErrorToast));
     } finally {
       setAnalyzing(false);
       setStatus(null);
@@ -272,10 +290,11 @@ export function BrandImportPanel({
             <button
               type="button"
               onClick={handleAnalyze}
-              disabled={analyzing}
+              disabled={analyzing || cooldownSeconds > 0}
               className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#6355E4] px-3 py-2 text-xs font-semibold text-white hover:bg-[#5548CE] disabled:opacity-50"
             >
-              {analyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />} {t.admin.settingsPage.wbsCheckWebsite}
+              {analyzing ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              {cooldownSeconds > 0 ? fillTemplate(s.brandImportCooldownBtnTemplate, { seconds: cooldownSeconds }) : t.admin.settingsPage.wbsCheckWebsite}
             </button>
           </div>
 
@@ -300,9 +319,9 @@ export function BrandImportPanel({
               {s.detectedLabel} <span className="text-[#111318]">{result.websiteTitle ?? "Website"}</span>
             </p>
             <div className="flex items-center gap-1.5">
-              <button type="button" onClick={handleReanalyze} disabled={analyzing}
+              <button type="button" onClick={handleReanalyze} disabled={analyzing || cooldownSeconds > 0}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-[#6B7280] hover:text-[#111318] px-2 py-1 rounded-lg hover:bg-[#F3F4F6] disabled:opacity-50">
-                <RefreshCw size={11} className={analyzing ? "animate-spin" : ""} /> {s.reanalyzeBtn}
+                <RefreshCw size={11} className={analyzing ? "animate-spin" : ""} /> {cooldownSeconds > 0 ? fillTemplate(s.brandImportCooldownBtnTemplate, { seconds: cooldownSeconds }) : s.reanalyzeBtn}
               </button>
               <button type="button" onClick={handleDiscard} disabled={analyzing}
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-[#991B1B] hover:bg-[#FEE2E2] px-2 py-1 rounded-lg disabled:opacity-50">

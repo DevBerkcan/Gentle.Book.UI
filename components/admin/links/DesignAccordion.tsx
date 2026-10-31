@@ -4,7 +4,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Palette, ChevronDown, Loader2, Type, Eye } from "lucide-react";
+import { Palette, ChevronDown, Loader2, Type, Eye, History } from "lucide-react";
 import { TemplatePackPicker } from "./TemplatePackPicker";
 import { PageTemplatePicker } from "./PageTemplatePicker";
 import { BrandColorsEditor } from "./BrandColorsEditor";
@@ -24,7 +24,7 @@ export function DesignAccordion({
   showAdvanced, onToggleAdvanced,
   tenantSlug, onShowPreviewModal,
   websiteUrl, onBrandPreviewOverrideChange, onBrandImportApplied, showToast,
-  onApplyDesignSuggestion,
+  onApplyDesignSuggestion, onShowHistory,
 }: {
   designOpen: boolean;
   onToggleDesignOpen: () => void;
@@ -53,29 +53,39 @@ export function DesignAccordion({
   onBrandImportApplied: () => void;
   showToast: (type: "success" | "error", message: string) => void;
   onApplyDesignSuggestion: (suggestion: DesignSuggestion) => void;
+  onShowHistory: () => void;
 }) {
   const { t } = useTranslation();
   const s = t.admin.linksPage;
   return (
     <div className="mb-4 bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden">
-      <button
-        onClick={onToggleDesignOpen}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#F7F7F8] transition-colors"
-      >
-        <div className="flex items-center gap-3">
+      <div className="w-full flex items-center justify-between px-5 py-4 hover:bg-[#F7F7F8] transition-colors">
+        <button onClick={onToggleDesignOpen} className="flex items-center gap-3 flex-1 text-left min-w-0">
           <div className="w-8 h-8 rounded-xl bg-[#6355E4] flex items-center justify-center shadow-sm flex-shrink-0">
             <Palette size={14} className="text-white" />
           </div>
-          <div className="text-left">
+          <div className="text-left min-w-0">
             <p className="font-semibold text-[#111318] text-sm leading-tight">{s.pageDesignTitle}</p>
             {!designOpen && (
               <p className="text-[11px] text-gb-textMuted leading-tight mt-0.5">{s.pageDesignSubtitle}</p>
             )}
           </div>
-          {designSaving && <Loader2 size={12} className="animate-spin text-[#6355E4] ml-1" />}
+          {designSaving && <Loader2 size={12} className="animate-spin text-[#6355E4] ml-1 flex-shrink-0" />}
+        </button>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={(e) => { e.stopPropagation(); onShowHistory(); }}
+            title={s.designHistoryTitle}
+            aria-label={s.designHistoryTitle}
+            className="p-2 rounded-xl text-gb-textMuted hover:text-[#6355E4] hover:bg-[#F3F4F6] transition-colors"
+          >
+            <History size={15} />
+          </button>
+          <button onClick={onToggleDesignOpen} aria-label={designOpen ? s.collapseDesignLabel : s.expandDesignLabel}>
+            <ChevronDown size={15} className={`text-gb-textMuted transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
+          </button>
         </div>
-        <ChevronDown size={15} className={`text-gb-textMuted transition-transform duration-200 ${designOpen ? "rotate-180" : ""}`} />
-      </button>
+      </div>
 
       <AnimatePresence>
         {designOpen && (

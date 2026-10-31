@@ -6,6 +6,8 @@ import api from "@/lib/api/client";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { ToastStack } from "@/components/admin/links/ToastStack";
 import { QrCodeModal } from "@/components/admin/links/QrCodeModal";
+import { DesignHistoryPanel } from "@/components/admin/links/DesignHistoryPanel";
+import type { RestoredDesign } from "@/lib/api/designHistory";
 import { LinksPageHeader } from "@/components/admin/links/LinksPageHeader";
 import { DesignAccordion } from "@/components/admin/links/DesignAccordion";
 import { AddLinkForm } from "@/components/admin/links/AddLinkForm";
@@ -55,6 +57,7 @@ export default function AdminLinksPage() {
 
   const [tenantPlan, setTenantPlan] = useState<PlanTier>("starter");
   const [showQR, setShowQR] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [chatbotEnabled, setChatbotEnabled] = useState(false);
   const [chatbotSaving, setChatbotSaving] = useState(false);
@@ -171,6 +174,16 @@ export default function AdminLinksPage() {
 
   function updateTheme(t: Theme) { setTheme(t); saveDesign(t, primaryColor, config, true); }
   function updateColor(c: string) { setPrimaryColor(c); saveDesign(theme, c, config, true); }
+
+  function handleRestoredDesign(restored: RestoredDesign) {
+    // The restore endpoint already persisted this server-side (and snapshotted the design we're
+    // leaving, so it can be restored forward again) — just sync local state, no extra save call.
+    setPrimaryColor(restored.primaryColor);
+    setTheme(restored.linktreeStyle as Theme);
+    try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(restored.linktreeConfig) }); } catch {}
+    setPreviewKey((k) => k + 1);
+    showToast("success", s.designRestoredToast);
+  }
 
   const loadLinks = useCallback(async () => {
     setLoading(true);
@@ -330,6 +343,7 @@ export default function AdminLinksPage() {
     <div className="min-h-screen bg-[#F7F7F8] lg:flex lg:flex-row lg:overflow-hidden lg:h-screen">
       <ToastStack toasts={toasts} />
       <QrCodeModal open={showQR} onClose={() => setShowQR(false)} tenantSlug={tenantSlug ?? ""} />
+      <DesignHistoryPanel open={showHistory} onClose={() => setShowHistory(false)} onRestored={handleRestoredDesign} />
 
       {/* ══════════════════════════════════════════════════════════════════════
           LEFT EDITOR PANEL
@@ -373,6 +387,7 @@ export default function AdminLinksPage() {
             onBrandImportApplied={handleBrandImportApplied}
             showToast={showToast}
             onApplyDesignSuggestion={applyDesignSuggestion}
+            onShowHistory={() => setShowHistory(true)}
           />
 
           <div className="mt-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 flex items-center justify-between gap-4">
