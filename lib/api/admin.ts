@@ -615,6 +615,22 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
   return response.data;
 }
 
+// ── Support access log (TenantAdmin only) ──────────────────────────────────────
+// Lets a studio see when/why/by whom GentleBook support logged into their account via
+// impersonation — the tenant-facing half of the AVV's "nur auf Anlass, protokolliert" rule.
+
+export interface SupportAccessLogEntry {
+  id: string;
+  actorName: string | null;
+  details: string | null;
+  createdAt: string;
+}
+
+export async function getSupportAccessLog(page: number = 1, pageSize: number = 20): Promise<PagedResponse<SupportAccessLogEntry>> {
+  const response = await api.get('/admin/support-access-log', { params: { page, pageSize } });
+  return response.data;
+}
+
 // ── Bookings ──────────────────────────────────────────────────────────────────
 
 export async function getBookings(

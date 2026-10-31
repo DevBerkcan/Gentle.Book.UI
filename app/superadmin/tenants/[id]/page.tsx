@@ -262,9 +262,17 @@ export default function TenantDetailPage() {
   };
 
   const handleImpersonate = async () => {
+    const reason = await prompt({
+      title: 'Support-Zugriff begründen',
+      message: 'Dieser Zugriff wird protokolliert und ist für das Studio im eigenen Support-Log sichtbar.',
+      label: 'Grund / Ticket-Nr.',
+      placeholder: 'z.B. Ticket #4711 – Kunde bat um Hilfe bei einer Buchung',
+      confirmLabel: 'Einloggen',
+    });
+    if (!reason) return;
     setImpersonating(true);
     try {
-      const result = await superAdminApi.impersonate(id);
+      const result = await superAdminApi.impersonate(id, reason);
       setAccessToken(result.access_token);
       // AuthContext hydrates `user` (and from it isTenantAdmin/plan-gated nav items) purely from
       // this cached object on a fresh page load — never updating it here left the new tab reading

@@ -201,14 +201,17 @@ export const superAdminApi = {
   },
 
   // ── Impersonate ──────────────────────────────────────────────
-  async impersonate(tenantId: string): Promise<{
+  // Reason is required by the backend — written into the audit log the tenant itself can
+  // later see (AdminController.GetSupportAccessLog), per the "nur auf Anlass, protokolliert"
+  // support-access rule in the AVV.
+  async impersonate(tenantId: string, reason: string): Promise<{
     access_token: string;
     tenant_slug: string;
     tenant_name: string;
     user_email: string;
     user_id: string;
   }> {
-    const { data } = await api.post(`/superadmin/tenants/${tenantId}/impersonate`);
+    const { data } = await api.post(`/superadmin/tenants/${tenantId}/impersonate`, { reason });
     return data;
   },
 

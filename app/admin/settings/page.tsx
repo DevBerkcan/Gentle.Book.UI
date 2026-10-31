@@ -19,6 +19,7 @@ import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSec
 import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
 import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
+import { SupportAccessSection } from '@/components/admin/settings/SupportAccessSection';
 import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
 import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
 import type { Translations } from '@/lib/i18n/translations';
@@ -48,7 +49,7 @@ import {
 // warning:    #92400E on #FFFBEB / border #FDE68A
 // ─────────────────────────────────────────────────────────────────────────────
 
-function getSettingsNavItems(t: Translations): SettingsNavItem[] {
+function getSettingsNavItems(t: Translations, isTenantAdmin: boolean): SettingsNavItem[] {
   const s = t.admin.settingsPage;
   return [
     { id: 'section-logo', label: s.logo },
@@ -65,6 +66,7 @@ function getSettingsNavItems(t: Translations): SettingsNavItem[] {
     { id: 'section-booking', label: s.bookingSettings },
     { id: 'section-hours', label: s.openingHours },
     { id: 'section-password', label: s.changePassword },
+    ...(isTenantAdmin ? [{ id: 'section-support-access', label: s.supportAccessTitle }] : []),
   ];
 }
 
@@ -178,7 +180,7 @@ const emptyLocation = (currency = 'EUR', timeZone = 'Europe/Berlin'): BusinessLo
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function AdminSettingsPage() {
-  const { isEmployee } = useAuth();
+  const { isEmployee, isTenantAdmin } = useAuth();
   const { t, lang } = useTranslation();
   const cetLabel = lang === 'de' ? 'MEZ/MESZ' : 'CET/CEST';
   const router = useRouter();
@@ -502,7 +504,7 @@ export default function AdminSettingsPage() {
     setSettings((s) => ({ ...s, [key]: value }));
 
   const days = getDays(t);
-  const navItems = getSettingsNavItems(t);
+  const navItems = getSettingsNavItems(t, isTenantAdmin);
 
   // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -1274,6 +1276,12 @@ export default function AdminSettingsPage() {
               </button>
             </SectionCard>
           </form>
+
+          {isTenantAdmin && (
+            <div id="section-support-access" className="scroll-mt-6">
+              <SupportAccessSection />
+            </div>
+          )}
         </div>
 
           </div>
