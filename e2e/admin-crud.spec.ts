@@ -28,9 +28,15 @@ test.describe('Services admin CRUD', () => {
     const editedName = `${name} Edited`;
 
     await page.getByRole('button', { name: 'Neuer Service', exact: true }).click();
+    // The form keeps loading data (locations, employees) right after the modal opens; that
+    // re-render closes an already-open category popover, so a fast click on the option hit a
+    // detached element (flaky ~1 in 3 runs). Wait for the loads, then retry open+pick as one unit.
+    await page.waitForLoadState('networkidle');
     await page.getByLabel(/^Name/i).fill(name);
-    await page.getByText('Kategorie auswählen').click();
-    await page.getByRole('listbox', { name: /Kategorie/ }).getByText('E2E CRUD Category', { exact: true }).click();
+    await expect(async () => {
+      await page.getByText('Kategorie auswählen').click({ timeout: 3000 });
+      await page.getByRole('listbox', { name: /Kategorie/ }).getByText('E2E CRUD Category', { exact: true }).click({ timeout: 3000 });
+    }).toPass({ timeout: 20000 });
     await page.getByLabel(/^Preis/i).fill('15');
     await page.getByRole('button', { name: 'Erstellen', exact: true }).click();
 

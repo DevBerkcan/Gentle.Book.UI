@@ -53,3 +53,12 @@ export async function deleteWaitlistEntry(id: string): Promise<void> {
 export async function markWaitlistNotified(id: string): Promise<void> {
   await api.patch(`/waitlist/${id}/mark-notified`);
 }
+
+export interface WaitlistRefillWindow { offered: number; refilled: number; expired: number; refilledRevenue: number }
+export interface WaitlistStats { last30Days: WaitlistRefillWindow; total: WaitlistRefillWindow; currency: string; waitingNow: number }
+
+/** Admin: how many freed slots the waitlist refilled ("Abgesagte Termine nachbesetzen"). */
+export async function getWaitlistStats(): Promise<WaitlistStats> {
+  const res = await api.get('/waitlist/stats');
+  return res.data;
+}
