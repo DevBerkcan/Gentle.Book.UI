@@ -30,11 +30,17 @@ test.describe('Public booking wizard', () => {
     // — use getByRole/name for that reason, not a text filter. Pick the *second* enabled day, not
     // the first: the first is "today", which (depending on wall-clock time) can have every
     // remaining slot already in the past and therefore disabled.
+    // Then keep going to the next day while a day is fully booked — on a long-lived dev DB other
+    // tests fill up the shared employee's near-term days, which made a fixed day fail.
     await expect(page.getByText('Schritt 3 von 4')).toBeVisible();
-    const enabledDay = page.getByRole('button', { name: /^(Mo|Di|Mi|Do|Fr|Sa) \d{1,2}$/ }).nth(1);
-    await enabledDay.click();
+    const days = page.getByRole('button', { name: /^(Mo|Di|Mi|Do|Fr|Sa) \d{1,2}$/ });
     const timeSlot = page.locator('button:not([disabled])').filter({ hasText: /^\d{1,2}:\d{2}$/ }).first();
-    await expect(timeSlot).toBeVisible({ timeout: 10000 });
+    let found = false;
+    for (let i = 1; i < Math.min(await days.count(), 7) && !found; i++) {
+      await days.nth(i).click();
+      found = await timeSlot.waitFor({ state: 'visible', timeout: 4000 }).then(() => true, () => false);
+    }
+    expect(found, 'kein freier Termin in den nächsten Tagen').toBeTruthy();
     await timeSlot.click();
     await page.getByRole('button', { name: /Weiter/i }).click();
 

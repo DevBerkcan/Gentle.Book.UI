@@ -16,7 +16,9 @@ import {
   getWaitlist, deleteWaitlistEntry, markWaitlistNotified,
   type WaitlistEntry,
 } from '@/lib/api/waitlist';
-import { useTranslation } from '@/lib/i18n/LanguageContext';
+import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
+import { getWaitlistStats, type WaitlistStats } from '@/lib/api/waitlist';
+import { formatPrice } from '@/lib/utils/currency';
 import type { Translations } from '@/lib/i18n/translations';
 
 function getStatusLabel(t: Translations): Record<string, string> {
@@ -131,6 +133,9 @@ export default function AdminWaitlistPage() {
           {s.refreshBtn}
         </Button>
       </div>
+
+      {/* Wieder gefüllte Lücken */}
+      <RefillStats />
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
@@ -305,6 +310,41 @@ export default function AdminWaitlistPage() {
         </CardBody>
       </Card>
 
+    </div>
+  );
+}
+
+function RefillStats() {
+  const { t } = useTranslation();
+  const s = t.admin.waitlistPage;
+  const [stats, setStats] = useState<WaitlistStats | null>(null);
+  useEffect(() => { getWaitlistStats().then(setStats).catch(() => setStats(null)); }, []);
+  if (!stats || stats.total.offered === 0) return null;
+  const w = stats.last30Days;
+  const rate = w.offered > 0 ? Math.round((w.refilled / w.offered) * 100) : 0;
+  const tiles = [
+    { label: s.refillRefilled, value: String(w.refilled), cls: 'text-[#059669]' },
+    { label: s.refillOffered, value: String(w.offered), cls: 'text-[#111318]' },
+    { label: s.refillRate, value: `${rate} %`, cls: 'text-[#111318]' },
+    { label: s.refillRevenue, value: formatPrice(w.refilledRevenue, stats.currency), cls: 'text-[#6355E4]' },
+  ];
+  return (
+    <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm overflow-hidden" data-testid="waitlist-refill-stats">
+      <div className="px-5 py-4 border-b border-[#F3F4F6]">
+        <h2 className="text-sm font-bold text-[#111318]">{s.refillTitle}</h2>
+        <p className="text-[11px] text-gb-textMuted">{s.refillSubtitle}</p>
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#F3F4F6]">
+        {tiles.map((tile) => (
+          <div key={tile.label} className="px-5 py-4">
+            <p className={`text-2xl font-bold tabular-nums ${tile.cls}`}>{tile.value}</p>
+            <p className="text-[11px] font-medium text-gb-textMuted">{tile.label}</p>
+          </div>
+        ))}
+      </div>
+      <p className="px-5 py-2.5 text-[11px] text-gb-textMuted border-t border-[#F3F4F6]">
+        {fillTemplate(s.refillTotalTemplate, { refilled: stats.total.refilled, offered: stats.total.offered })}
+      </p>
     </div>
   );
 }
