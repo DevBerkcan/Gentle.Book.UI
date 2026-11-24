@@ -22,6 +22,9 @@ export function ReferralSection() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [locked, setLocked] = useState<{ message: string; currentPlan?: string } | null>(null);
+  // Load failed for a non-plan reason (e.g. frontend already live, backend not deployed yet):
+  // hide the section instead of showing a misleading upgrade hint.
+  const [hidden, setHidden] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,8 +33,9 @@ export function ReferralSection() {
       setAvailable(s.available);
       setEnabled(s.enabled);
       setRewardText(s.rewardText ?? "");
-    } catch {
-      setAvailable(false);
+    } catch (err: any) {
+      if (err?.response?.status === 402) setAvailable(false);
+      else setHidden(true);
     } finally {
       setLoading(false);
     }
@@ -59,6 +63,7 @@ export function ReferralSection() {
   if (loading) {
     return <div className="flex items-center gap-2 text-xs text-gb-textMuted px-1"><Loader2 size={13} className="animate-spin" /> {t.loading}</div>;
   }
+  if (hidden) return null;
 
   const header = (
     <div className="flex items-center gap-3 px-1 pb-4">
