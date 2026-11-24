@@ -200,6 +200,17 @@ export const superAdminApi = {
     return data as { domain: string | null; status: string };
   },
 
+  // ── Preisrechner-Link (Professional + Agency) ────────────────
+  async getTenantPriceCalculator(id: string) {
+    const { data } = await api.get(`/superadmin/tenants/${id}/price-calculator`);
+    return data as PriceCalculatorInfo;
+  },
+
+  async setTenantPriceCalculator(id: string, url: string | null) {
+    const { data } = await api.put(`/superadmin/tenants/${id}/price-calculator`, { url });
+    return data as PriceCalculatorInfo;
+  },
+
   // ── Impersonate ──────────────────────────────────────────────
   // Reason is required by the backend — written into the audit log the tenant itself can
   // later see (AdminController.GetSupportAccessLog), per the "nur auf Anlass, protokolliert"
@@ -653,4 +664,10 @@ export async function superAdminLogin(email: string, password: string) {
   }
 
   return res.json() as Promise<{ token: string; user: { id: string; email: string; firstName: string; lastName: string; role: string } }>;
+}
+
+export interface PriceCalculatorInfo {
+  url: string | null;
+  plan: string;
+  availableForPlan: boolean;
 }

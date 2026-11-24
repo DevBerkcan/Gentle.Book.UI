@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Calendar, BookOpen, Ban, LogOut,
   Users, Scissors, Settings, CreditCard, Link2,
   BarChart3, Menu, X, ChevronRight, ChevronLeft, MessageSquare, Inbox, ClipboardList, Bot, KeyRound, Star, FileText as IntakeIcon, Ticket,
+  Calculator, ExternalLink,
 } from "lucide-react";
 import { GentleBookMark } from "@/components/admin/GentleBookLogo";
 import { NotificationBell } from "@/components/admin/NotificationBell";
@@ -31,6 +32,7 @@ export function AdminNav() {
   const [industryType, setIndustryType] = useState<string | null>(null);
   const [plan, setPlan] = useState<string | null>(null);
   const [employeePhotoUrl, setEmployeePhotoUrl] = useState<string | null>(null);
+  const [priceCalculatorUrl, setPriceCalculatorUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isTenantAdmin) {
@@ -45,6 +47,23 @@ export function AdminNav() {
       }).catch(() => {});
     }
   }, [isTenantAdmin]);
+
+  // "Preisrechner" — external URL set by a SuperAdmin per studio. Mirrors
+  // Configuration/PriceCalculatorGate.cs (Professional + Agency only); the backend re-checks the
+  // plan and never returns the URL otherwise. A LocationAdmin may not be able to read
+  // /tenant/subscription, so for them we just ask the (plan-checked) endpoint directly.
+  const PRICE_CALCULATOR_PLANS = ["Professional", "Agency"];
+  const priceCalculatorPlanOk = plan != null && PRICE_CALCULATOR_PLANS.includes(plan);
+  useEffect(() => {
+    if (!isTenantAdmin || (!priceCalculatorPlanOk && !isLocationAdmin)) {
+      setPriceCalculatorUrl(null);
+      return;
+    }
+    api.get("/tenant/price-calculator").then((res) => {
+      const url: unknown = res.data?.data?.url ?? res.data?.url;
+      setPriceCalculatorUrl(typeof url === "string" && url.startsWith("https://") ? url : null);
+    }).catch(() => setPriceCalculatorUrl(null));
+  }, [isTenantAdmin, isLocationAdmin, priceCalculatorPlanOk]);
 
   useEffect(() => {
     if (isEmployee && user?.id) {
@@ -209,6 +228,25 @@ export function AdminNav() {
         </Link>
       </div>
 
+      {/* Preisrechner (external, new tab) — top left, directly under the logo */}
+      {priceCalculatorUrl && (
+        <div className="px-3 pt-3">
+          <a
+            href={priceCalculatorUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={isCollapsed ? `${t.admin.priceCalculator} – ${t.admin.priceCalculatorHint}` : t.admin.priceCalculatorHint}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-white border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25 transition-all ${
+              isCollapsed ? "justify-center" : ""
+            }`}
+          >
+            <Calculator size={17} className="text-[#17A398]" />
+            {!isCollapsed && <span className="flex-1">{t.admin.priceCalculator}</span>}
+            {!isCollapsed && <ExternalLink size={13} className="opacity-50" />}
+          </a>
+        </div>
+      )}
+
       {/* Nav Groups */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {groups.map((group) => (
@@ -361,6 +399,18 @@ export function AdminNav() {
           }
         </Link>
         <div className="flex items-center gap-1">
+          {priceCalculatorUrl && (
+            <a
+              href={priceCalculatorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${t.admin.priceCalculator} – ${t.admin.priceCalculatorHint}`}
+              title={t.admin.priceCalculator}
+              className="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/8"
+            >
+              <Calculator size={20} />
+            </a>
+          )}
           <button
             onClick={() => setLang(lang === "de" ? "en" : "de")}
             className="text-[10px] font-bold px-2 py-1 rounded-full border border-white/20 text-white/60 hover:text-white hover:bg-white/10 transition-all"
