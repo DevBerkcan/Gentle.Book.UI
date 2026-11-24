@@ -497,6 +497,8 @@ export interface CreateManualBookingDto {
   employeeId?: string | null;
   customerNotes: string | null;
   voucherCode?: string | null;
+  /** Book as a session of this treatment package (customer is taken from the package server-side). */
+  treatmentPackageId?: string | null;
 }
 
 export interface ManualBookingResponse {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { BookingPackagePanel } from "@/components/admin/bookings/BookingPackagePanel";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/de";
@@ -683,6 +684,9 @@ const handleCreateManualBooking = async () => {
                           <p className="text-sm text-[#1E1E1E] italic">"{selectedEvent.resource.customerNotes}"</p>
                         </div>
                       )}
+
+                      {/* Behandlungspaket + interne Kundennotiz */}
+                      <BookingPackagePanel bookingId={selectedEvent.resource.id} refreshKey={selectedEvent.resource.status} />
 
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                         <p className="font-semibold text-[#1E1E1E] mb-3">{t.admin.calendarPage.updateStatus}</p>
