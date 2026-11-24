@@ -40,8 +40,11 @@ export function CustomerPackagesPanel({ customerId }: { customerId: string }) {
     try {
       setPackages(await treatmentPackagesApi.getForCustomer(customerId));
       setAvailable(true);
-    } catch (err: any) {
-      if (err?.response?.status === 402 || err?.response?.status === 403) setAvailable(false);
+    } catch {
+      // 402 (plan), 403 (role) — and also 404/405 or network errors, e.g. while the frontend is
+      // already live but the backend with /treatment-packages isn't deployed yet: hide the panel
+      // instead of offering actions that can only fail.
+      setAvailable(false);
     } finally {
       setLoading(false);
     }
