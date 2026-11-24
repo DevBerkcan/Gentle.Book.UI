@@ -19,6 +19,7 @@ import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { HelpTip } from "@/components/ui/help-tip";
 import { FollowUpsCard } from "@/components/admin/dashboard/FollowUpsCard";
+import { ReferralStatsCard } from "@/components/admin/dashboard/ReferralStatsCard";
 
 // ── Design Tokens (matching AdminLinksPage & AdminSettingsPage) ───────────────
 // bg:         #F7F7F8
@@ -484,6 +485,9 @@ export default function AdminDashboardPage() {
 
         {/* ── Offene Folgetermine (Behandlungspakete) ───────────────────── */}
         <FollowUpsCard />
+
+        {/* ── Freunde machen Freude ─────────────────────────────────────── */}
+        <ReferralStatsCard />
 
         {/* ── Main Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

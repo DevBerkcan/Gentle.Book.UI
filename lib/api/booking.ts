@@ -98,6 +98,8 @@ export interface CreateBookingRequest {
   waitlistToken?: string;
   /** Personal treatment-package link token (validated server-side). */
   packageToken?: string;
+  /** "Freunde machen Freude" — referrer's public code from ?ref= (validated server-side). */
+  referralCode?: string;
 }
 
 export interface BookingResponse {

@@ -39,6 +39,7 @@ import { customersApi, CustomerListItem, CustomerDetail } from "@/lib/api/custom
 import { adminApi } from "@/lib/api/admin";
 import { CustomerLoyaltyPanel } from "@/components/admin/customers/CustomerLoyaltyPanel";
 import { CustomerPackagesPanel } from "@/components/admin/customers/CustomerPackagesPanel";
+import { CustomerPassPanel } from "@/components/admin/customers/CustomerPassPanel";
 import { CustomerLoyaltyCardModal } from "@/components/admin/customers/CustomerLoyaltyCardModal";
 import { useConfirm } from "@/components/ConfirmDialog";
 import moment from "moment";
@@ -853,6 +854,9 @@ export default function CustomersPage() {
 
                     {/* Behandlungspakete (Pro/Agency) */}
                     <CustomerPackagesPanel customerId={selectedCustomer.id} />
+
+                    {/* Studio-Pass + Freunde machen Freude */}
+                    <CustomerPassPanel customerId={selectedCustomer.id} />
 
                     {/* Loyalty Points (Agency) */}
                     <CustomerLoyaltyPanel customerId={selectedCustomer.id} />

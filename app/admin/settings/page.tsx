@@ -19,6 +19,7 @@ import { WebsiteBrandSection } from '@/components/admin/settings/WebsiteBrandSec
 import { CustomDomainSection } from '@/components/admin/settings/CustomDomainSection';
 import { TeamReportsSection } from '@/components/admin/settings/TeamReportsSection';
 import { LoyaltySection } from '@/components/admin/settings/LoyaltySection';
+import { ReferralSection } from '@/components/admin/settings/ReferralSection';
 import { SupportAccessSection } from '@/components/admin/settings/SupportAccessSection';
 import { SettingsNav, type SettingsNavItem } from '@/components/admin/settings/SettingsNav';
 import { useTranslation, fillTemplate } from '@/lib/i18n/LanguageContext';
@@ -59,6 +60,7 @@ function getSettingsNavItems(t: Translations, isTenantAdmin: boolean): SettingsN
     { id: 'section-domain', label: s.customDomain },
     { id: 'section-reports', label: s.teamReports },
     { id: 'section-loyalty', label: t.admin.customersPage.loyaltyPoints },
+    { id: 'section-referral', label: t.studioPass.settingsTitle },
     { id: 'section-locations', label: s.locations },
     { id: 'section-billing', label: s.billingAddress },
     { id: 'section-legal', label: s.legalLinks },
@@ -715,6 +717,11 @@ export default function AdminSettingsPage() {
           {/* ── Treuepunkte (Agency) ── */}
           <div id="section-loyalty" className="scroll-mt-6">
             <LoyaltySection />
+          </div>
+
+          {/* ── Freunde machen Freude (Pro/Agency) ── */}
+          <div id="section-referral" className="scroll-mt-6">
+            <ReferralSection />
           </div>
 
           {/* ── Standorte ── */}
