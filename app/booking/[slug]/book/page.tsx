@@ -79,6 +79,8 @@ function BookingPageInner() {
   // ever fetched for it — never customer data (the link may be forwarded).
   const [packageToken, setPackageToken] = useState<string | undefined>();
   const [packageLinkState, setPackageLinkState] = useState<'none' | 'valid' | 'invalid'>('none');
+  // "Freunde machen Freude" (?ref=CODE). Only forwarded — the server decides whether it counts.
+  const [referralCode, setReferralCode] = useState<string | undefined>();
   const [currentStep, setCurrentStep] = useState(1);
   // Switching steps (service → employee → date/time → contact) never reset scroll position —
   // on mobile, if the previous step had been scrolled down, the new step's heading could land
@@ -123,7 +125,10 @@ function BookingPageInner() {
   const [finderEnabled, setFinderEnabled] = useState(false);
 
   useEffect(() => {
-    setWaitlistToken(new URLSearchParams(window.location.search).get("waitlistToken") ?? undefined);
+    const params = new URLSearchParams(window.location.search);
+    setWaitlistToken(params.get("waitlistToken") ?? undefined);
+    const ref = params.get("ref");
+    if (ref && /^[A-Za-z0-9]{4,16}$/.test(ref)) setReferralCode(ref.toUpperCase());
   }, []);
 
   useEffect(() => {
@@ -331,6 +336,7 @@ function BookingPageInner() {
         employeeId: selectedEmployee?.id ?? null,
         waitlistToken,
         packageToken,
+        referralCode,
       }, slug);
       BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {}, selectedService.currency);
       router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
@@ -505,6 +511,16 @@ function BookingPageInner() {
           >
             <p className="font-semibold">{t.packages.publicBanner}</p>
             <p className="opacity-80">{t.packages.publicBannerText}</p>
+          </div>
+        )}
+        {referralCode && !packageToken && (
+          <div
+            style={{ borderRadius: getBorderRadius(buttonStyle), borderColor: `${primaryColor}55`, backgroundColor: `${primaryColor}0f` }}
+            className="mb-6 border px-4 py-3 text-sm"
+            data-testid="referral-banner"
+          >
+            <p className="font-semibold">{t.studioPass.refBanner}</p>
+            <p className="opacity-80">{t.studioPass.refBannerText}</p>
           </div>
         )}
         {packageLinkState === 'invalid' && (
