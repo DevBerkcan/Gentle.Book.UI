@@ -38,6 +38,7 @@ import {
 import { customersApi, CustomerListItem, CustomerDetail } from "@/lib/api/customers";
 import { adminApi } from "@/lib/api/admin";
 import { CustomerLoyaltyPanel } from "@/components/admin/customers/CustomerLoyaltyPanel";
+import { CustomerPackagesPanel } from "@/components/admin/customers/CustomerPackagesPanel";
 import { CustomerLoyaltyCardModal } from "@/components/admin/customers/CustomerLoyaltyCardModal";
 import { useConfirm } from "@/components/ConfirmDialog";
 import moment from "moment";
@@ -182,6 +183,17 @@ export default function CustomersPage() {
     setModalError(null);
     onOpen();
   }
+
+  // Deep link from the booking view ("Kundenkartei öffnen"): /admin/customers?customer=<id>
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("customer");
+    if (!id) return;
+    window.history.replaceState(null, "", "/admin/customers");
+    setModalMode("view");
+    setModalError(null);
+    void loadCustomerDetails(id);
+    onOpen();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openDeleteModal(customer: CustomerListItem) {
     setSelectedCustomer(null);
@@ -839,6 +851,9 @@ export default function CustomersPage() {
                       </div>
                     </div>
 
+                    {/* Behandlungspakete (Pro/Agency) */}
+                    <CustomerPackagesPanel customerId={selectedCustomer.id} />
+
                     {/* Loyalty Points (Agency) */}
                     <CustomerLoyaltyPanel customerId={selectedCustomer.id} />
 
@@ -853,10 +868,10 @@ export default function CustomersPage() {
                       </button>
                     )}
 
-                    {/* Notes */}
+                    {/* Notes (internal — never shown to the customer) */}
                     {selectedCustomer.notes && (
                       <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
-                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.admin.calendarPage.notes}</h3>
+                        <h3 className="font-semibold text-[#1E1E1E] text-sm mb-2">{t.packages.internalNotes}</h3>
                         <p className="text-sm text-[#1E1E1E] italic">"{selectedCustomer.notes}"</p>
                       </div>
                     )}

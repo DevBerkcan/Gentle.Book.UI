@@ -7,18 +7,18 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Save, Clock, ExternalLink, Copy, Check,
   Palette, Users, Link2, CreditCard, Mail, Phone, Globe, MapPin, Upload, ImageIcon, LogIn, Trash2,
-  RefreshCw, ShieldCheck, ShieldAlert, Download, FileText,
+  RefreshCw, ShieldCheck, ShieldAlert, Download, FileText, Calculator,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
-import { superAdminApi, UpdateTenantSettingsPayload, TenantStats, TenantBillingStatus, InvoiceItem, TenantAiUsageDetail } from '@/lib/api/superadmin';
+import { superAdminApi, PriceCalculatorInfo, UpdateTenantSettingsPayload, TenantStats, TenantBillingStatus, InvoiceItem, TenantAiUsageDetail } from '@/lib/api/superadmin';
 import { useConfirm } from '@/components/ConfirmDialog';
 import { usePrompt } from '@/components/PromptDialog';
 import { resolveLogoUrl } from '@/lib/utils/logo';
 import { setAccessToken, setAuthUser } from '@/lib/auth/storage';
 import { TrendingUp, BarChart2, Calendar, Users as UsersIcon2, BookOpen, XCircle as XC, Sparkles } from 'lucide-react';
 
-type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats' | 'domain';
+type Tab = 'branding' | 'users' | 'link' | 'subscription' | 'stats' | 'domain' | 'priceCalculator';
 
 export default function TenantDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -59,6 +59,12 @@ export default function TenantDetailPage() {
   const [domainInfo, setDomainInfo] = useState<{ domain: string | null; status: string; requestedAt: string | null } | null>(null);
   const [domainLoading, setDomainLoading] = useState(false);
   const [domainUpdating, setDomainUpdating] = useState(false);
+  const [priceCalc, setPriceCalc] = useState<PriceCalculatorInfo | null>(null);
+  const [priceCalcInput, setPriceCalcInput] = useState('');
+  const [priceCalcLoading, setPriceCalcLoading] = useState(false);
+  const [priceCalcSaving, setPriceCalcSaving] = useState(false);
+  const [priceCalcError, setPriceCalcError] = useState<string | null>(null);
+  const [priceCalcSaved, setPriceCalcSaved] = useState(false);
   const [impersonating, setImpersonating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   // Found during live pre-launch testing: the "Plan wechseln" cards' €29/€59 prices were
@@ -439,6 +445,51 @@ export default function TenantDetailPage() {
     setDomainLoading(false);
   }
 
+  async function loadPriceCalculator() {
+    setPriceCalcLoading(true);
+    setPriceCalcError(null);
+    try {
+      const data = await superAdminApi.getTenantPriceCalculator(id);
+      setPriceCalc(data);
+      setPriceCalcInput(data.url ?? '');
+    } catch (e: any) {
+      setPriceCalcError(e.response?.data?.message ?? 'Preisrechner-Link konnte nicht geladen werden.');
+    }
+    setPriceCalcLoading(false);
+  }
+
+  // Same rule as PriceCalculatorGate.Normalize on the server — checked here only for an
+  // immediate, understandable message; the backend re-validates every save.
+  function validatePriceCalcUrl(value: string): string | null {
+    const v = value.trim();
+    if (!v) return null;
+    const msg = 'Bitte eine vollständige HTTPS-Adresse eingeben, z. B. https://preisrechner.beispiel.de';
+    let u: URL;
+    try { u = new URL(v); } catch { return msg; }
+    if (u.protocol !== 'https:' || !u.hostname.includes('.')) return msg;
+    if (u.username || u.password) return 'Die Preisrechner-URL darf keine Zugangsdaten (benutzer:passwort@) enthalten.';
+    return null;
+  }
+
+  async function savePriceCalculator(remove = false) {
+    const value = remove ? '' : priceCalcInput;
+    const clientError = validatePriceCalcUrl(value);
+    if (clientError) { setPriceCalcError(clientError); return; }
+    setPriceCalcSaving(true);
+    setPriceCalcError(null);
+    setPriceCalcSaved(false);
+    try {
+      const data = await superAdminApi.setTenantPriceCalculator(id, value.trim() || null);
+      setPriceCalc(data);
+      setPriceCalcInput(data.url ?? '');
+      setPriceCalcSaved(true);
+      setTimeout(() => setPriceCalcSaved(false), 2500);
+    } catch (e: any) {
+      setPriceCalcError(e.response?.data?.message ?? 'Speichern fehlgeschlagen.');
+    }
+    setPriceCalcSaving(false);
+  }
+
   async function handleSetDomainStatus(status: 'PendingVerification' | 'Verified' | 'Failed') {
     setDomainUpdating(true);
     try {
@@ -455,6 +506,7 @@ export default function TenantDetailPage() {
     { key: 'subscription', label: 'Abo', icon: <CreditCard size={15} /> },
     { key: 'stats', label: 'Statistiken', icon: <BarChart2 size={15} /> },
     { key: 'domain', label: 'Domain', icon: <Globe size={15} /> },
+    { key: 'priceCalculator', label: 'Preisrechner', icon: <Calculator size={15} /> },
   ];
 
   return (
@@ -488,12 +540,12 @@ export default function TenantDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); if (tab.key === 'subscription') { loadBilling(); loadInvoices(); loadAiUsage(); } if (tab.key === 'domain') loadDomain(); }}
-            className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            onClick={() => { setActiveTab(tab.key); if (tab.key === 'stats' || tab.key === 'subscription') loadStats(); if (tab.key === 'subscription') { loadBilling(); loadInvoices(); loadAiUsage(); } if (tab.key === 'domain') loadDomain(); if (tab.key === 'priceCalculator') loadPriceCalculator(); }}
+            className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === tab.key
                 ? 'bg-white text-gray-900 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
@@ -1471,6 +1523,76 @@ export default function TenantDetailPage() {
                 >
                   Als fehlgeschlagen markieren
                 </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Preisrechner ──────────────────────────────────────────── */}
+      {activeTab === 'priceCalculator' && (
+        <div className="space-y-4">
+          {priceCalcLoading ? (
+            <div className="h-32 bg-white rounded-xl animate-pulse border border-gray-100" />
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Preisrechner-URL</h3>
+                <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  Der Studio-Admin sieht oben links im Admin-Bereich den Button „Preisrechner“, der diese Adresse in einem neuen Tab öffnet.
+                  Nur in den Tarifen Pro und Agency sichtbar.
+                </p>
+              </div>
+
+              {priceCalc && !priceCalc.availableForPlan && (
+                <div className="rounded-lg bg-amber-50 border border-amber-100 p-3 text-xs text-amber-800">
+                  Aktueller Tarif: <strong>{priceCalc.plan}</strong> — der Link bleibt gespeichert, wird dem Studio aber erst nach einem Upgrade auf Pro oder Agency angezeigt.
+                </div>
+              )}
+
+              <div>
+                <input
+                  type="url"
+                  inputMode="url"
+                  value={priceCalcInput}
+                  onChange={(e) => { setPriceCalcInput(e.target.value); setPriceCalcError(null); }}
+                  placeholder="https://preisrechner.beispiel.de/studio"
+                  aria-invalid={!!priceCalcError}
+                  className={`w-full px-3 py-2 rounded-lg border text-sm font-mono focus:outline-none focus:ring-2 ${
+                    priceCalcError ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:ring-[#6355E4]/20'
+                  }`}
+                />
+                {priceCalcError && <p className="text-xs text-red-600 mt-1.5">{priceCalcError}</p>}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => savePriceCalculator(false)}
+                  disabled={priceCalcSaving || !priceCalcInput.trim() || priceCalcInput.trim() === (priceCalc?.url ?? '')}
+                  className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-40"
+                >
+                  <Save size={13} /> {priceCalcSaving ? 'Speichert…' : 'Speichern'}
+                </button>
+                {priceCalc?.url && (
+                  <>
+                    <a
+                      href={priceCalc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    >
+                      <ExternalLink size={13} /> Testen
+                    </a>
+                    <button
+                      onClick={() => savePriceCalculator(true)}
+                      disabled={priceCalcSaving}
+                      className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-40"
+                    >
+                      <Trash2 size={13} /> Entfernen
+                    </button>
+                  </>
+                )}
+                {priceCalcSaved && <span className="flex items-center gap-1 text-xs text-green-600"><Check size={13} /> Gespeichert</span>}
               </div>
             </div>
           )}

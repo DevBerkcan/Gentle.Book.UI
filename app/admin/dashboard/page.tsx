@@ -18,6 +18,7 @@ import type { Translations } from "@/lib/i18n/translations";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { HelpTip } from "@/components/ui/help-tip";
+import { FollowUpsCard } from "@/components/admin/dashboard/FollowUpsCard";
 
 // ── Design Tokens (matching AdminLinksPage & AdminSettingsPage) ───────────────
 // bg:         #F7F7F8
@@ -480,6 +481,9 @@ export default function AdminDashboardPage() {
             </Link>
           ))}
         </motion.div>
+
+        {/* ── Offene Folgetermine (Behandlungspakete) ───────────────────── */}
+        <FollowUpsCard />
 
         {/* ── Main Grid ─────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

@@ -96,6 +96,8 @@ export interface CreateBookingRequest {
   customerNotes?: string;
   employeeId?: string | null;
   waitlistToken?: string;
+  /** Personal treatment-package link token (validated server-side). */
+  packageToken?: string;
 }
 
 export interface BookingResponse {

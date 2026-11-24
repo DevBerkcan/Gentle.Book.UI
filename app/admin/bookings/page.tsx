@@ -30,6 +30,8 @@ import {
 } from "@/lib/api/admin";
 import { isStatusTransitionAllowed } from "@/lib/utils/bookingStatusTransitions";
 import { IntakeFormAnswersPanel } from "@/components/admin/bookings/IntakeFormAnswersPanel";
+import { BookingPackagePanel } from "@/components/admin/bookings/BookingPackagePanel";
+import { treatmentPackagesApi } from "@/lib/api/treatmentPackages";
 import { getAvailability, getEmployees, type TimeSlot, type Employee } from "@/lib/api/booking";
 import { useAuth } from "@/lib/contexts/AuthContext";
 import { getAccessToken } from "@/lib/auth/storage";
@@ -69,6 +71,11 @@ export default function AdminBookingsPage() {
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  // "Termin buchen" for a treatment package (dashboard / Kundenkartei → ?bookPackage=<id>):
+  // customer + service are fixed by the package; the server books for the package's customer.
+  const [packageBooking, setPackageBooking] = useState<{
+    id: string; name: string; customerName: string; serviceId: string; serviceName: string;
+  } | null>(null);
   const [createdBooking, setCreatedBooking] = useState<ManualBookingResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -122,7 +129,7 @@ export default function AdminBookingsPage() {
 
   const handleEmployeeSelect = (employeeId: string) => {
     setSelectedEmployeeId(employeeId);
-    setBookingForm(prev => ({ ...prev, serviceId: '' }));
+    setBookingForm(prev => ({ ...prev, serviceId: packageBooking ? packageBooking.serviceId : '' }));
     loadServicesForEmployee(employeeId);
   };
 
@@ -238,6 +245,35 @@ export default function AdminBookingsPage() {
     }
   }, [bookingForm.bookingDate, bookingForm.serviceId, bookingForm.startTime, selectedEmployeeId]);
 
+  // Deep link "Termin buchen" for a treatment package.
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get('bookPackage');
+    if (!id) return;
+    window.history.replaceState(null, '', '/admin/bookings');
+    treatmentPackagesApi.getOne(id)
+      .then(({ package: pkg, customer }) => {
+        setSuccess(false);
+        setCreatedBooking(null);
+        setError(null);
+        setPackageBooking({
+          id: pkg.id, name: pkg.name, customerName: pkg.customerName,
+          serviceId: pkg.serviceId, serviceName: pkg.serviceName,
+        });
+        setBookingForm(prev => ({
+          ...prev,
+          serviceId: pkg.serviceId,
+          startTime: '',
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email ?? '',
+          phone: customer.phone ?? '',
+          voucherCode: '',
+        }));
+        onManualBookingModalOpen();
+      })
+      .catch((err) => toast.error(err?.response?.data?.message ?? t.packages.errorGeneric));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Load data on mount and whenever relevant filters/user scope change.
   useEffect(() => {
     void loadBookings();
@@ -332,6 +368,7 @@ export default function AdminBookingsPage() {
   }
 
   const resetManualBookingForm = () => {
+    setPackageBooking(null);
     setSuccess(false);
     setCreatedBooking(null);
     setError(null);
@@ -426,10 +463,12 @@ export default function AdminBookingsPage() {
         customerNotes: bookingForm.customerNotes?.trim() || null,
         employeeId: selectedEmployeeId || null,
         voucherCode: bookingForm.voucherCode?.trim() || null,
+        treatmentPackageId: packageBooking?.id ?? null,
       };
 
       // THIS IS THE KEY PART - ACTUALLY CALL checkEmailConflict
-      if (bookingData.email) {
+      // (skipped for package sessions: the customer is fixed by the package, not matched by email)
+      if (bookingData.email && !packageBooking) {
         const conflictCheck = await checkEmailConflict(
           bookingData.email,
           bookingData.firstName,
@@ -866,6 +905,9 @@ export default function AdminBookingsPage() {
 
                       {/* Intake form answers (Agency) */}
                       <IntakeFormAnswersPanel bookingId={selectedBookingDetails.id} />
+
+                      {/* Behandlungspaket + interne Kundennotiz */}
+                      <BookingPackagePanel bookingId={selectedBookingDetails.id} refreshKey={selectedBookingDetails.status} />
 
                       {/* Notes */}
                       {selectedBookingDetails.customerNotes && (
@@ -1470,6 +1512,24 @@ export default function AdminBookingsPage() {
                   <div className="space-y-4">
                     {error && <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
 
+                    {packageBooking && (
+                      <div className="p-3 rounded-xl border border-[#6355E4]/30 bg-[#6355E4]/5 text-sm text-[#1E1E1E] flex items-start justify-between gap-3" data-testid="package-booking-banner">
+                        <div>
+                          <p className="font-semibold">{t.packages.manualPackageLabel}</p>
+                          <p className="text-xs text-gb-textSecondary">
+                            {fillTemplate(t.packages.manualPackageFixedTemplate, { name: packageBooking.name, customer: packageBooking.customerName })}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setPackageBooking(null)}
+                          className="text-xs font-medium text-[#6355E4] hover:underline whitespace-nowrap"
+                        >
+                          {t.packages.manualPackageNone}
+                        </button>
+                      </div>
+                    )}
+
                     {/* Step 1: Employee */}
                     <div className="bg-[#F6F5FA] rounded-xl p-4 border border-[#ECEBF2]/20">
                       <p className="font-semibold text-[#1E1E1E] mb-3 text-sm">{t.admin.calendarPage.step1ChooseEmployee}</p>
@@ -1519,6 +1579,13 @@ export default function AdminBookingsPage() {
                         <div className="flex items-center gap-2 p-3 bg-white rounded-lg">
                           <Spinner size="sm" />
                           <span className="text-sm text-gb-textSecondary">{t.admin.calendarPage.loadingServices}</span>
+                        </div>
+                      ) : packageBooking ? (
+                        <div className="p-3 bg-white rounded-lg border border-[#ECEBF2]/30">
+                          <p className="text-sm font-semibold text-[#1E1E1E]">{packageBooking.serviceName}</p>
+                          {!employeeServices.some(s => s.id === packageBooking.serviceId) && (
+                            <p className="text-xs text-amber-700 mt-1">{t.packages.employeeNoService}</p>
+                          )}
                         </div>
                       ) : (
                         <Popover placement="bottom" isOpen={isServicePopoverOpen} onOpenChange={setIsServicePopoverOpen}>
@@ -1653,6 +1720,7 @@ export default function AdminBookingsPage() {
                           placeholder={t.admin.calendarPage.firstNamePlaceholder}
                           value={bookingForm.firstName}
                           onChange={(e) => setBookingForm({ ...bookingForm, firstName: e.target.value })}
+                          isReadOnly={!!packageBooking}
                           isRequired
                           isDisabled={submitting}
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
@@ -1662,6 +1730,7 @@ export default function AdminBookingsPage() {
                           placeholder={t.admin.calendarPage.lastNamePlaceholder}
                           value={bookingForm.lastName}
                           onChange={(e) => setBookingForm({ ...bookingForm, lastName: e.target.value })}
+                          isReadOnly={!!packageBooking}
                           isRequired
                           isDisabled={submitting}
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
@@ -1671,6 +1740,7 @@ export default function AdminBookingsPage() {
                           type="email"
                           value={bookingForm.email}
                           onChange={(e) => setBookingForm({ ...bookingForm, email: e.target.value })}
+                          isReadOnly={!!packageBooking}
                           isDisabled={submitting}
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />
@@ -1679,6 +1749,7 @@ export default function AdminBookingsPage() {
                           type="tel"
                           value={bookingForm.phone}
                           onChange={(e) => setBookingForm({ ...bookingForm, phone: e.target.value })}
+                          isReadOnly={!!packageBooking}
                           isDisabled={submitting}
                           classNames={{ inputWrapper: "bg-white border border-[#ECEBF2]/30" }}
                         />

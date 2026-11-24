@@ -75,6 +75,10 @@ function BookingPageInner() {
   const router = useRouter();
   const { lang, setLang, t } = useTranslation();
   const [waitlistToken, setWaitlistToken] = useState<string | undefined>();
+  // Personal treatment-package link (?serviceId=…&packageToken=…). Only validity + service are
+  // ever fetched for it — never customer data (the link may be forwarded).
+  const [packageToken, setPackageToken] = useState<string | undefined>();
+  const [packageLinkState, setPackageLinkState] = useState<'none' | 'valid' | 'invalid'>('none');
   const [currentStep, setCurrentStep] = useState(1);
   // Switching steps (service → employee → date/time → contact) never reset scroll position —
   // on mobile, if the previous step had been scrolled down, the new step's heading could land
@@ -121,6 +125,19 @@ function BookingPageInner() {
   useEffect(() => {
     setWaitlistToken(new URLSearchParams(window.location.search).get("waitlistToken") ?? undefined);
   }, []);
+
+  useEffect(() => {
+    if (!slug) return;
+    const token = new URLSearchParams(window.location.search).get("packageToken");
+    if (!token) return;
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/${slug}/package-link/${encodeURIComponent(token)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.valid) { setPackageToken(token); setPackageLinkState('valid'); }
+        else setPackageLinkState('invalid');
+      })
+      .catch(() => setPackageLinkState('invalid'));
+  }, [slug]);
 
   useEffect(() => {
     if (!slug) return;
@@ -313,6 +330,7 @@ function BookingPageInner() {
         customer: customerInfo,
         employeeId: selectedEmployee?.id ?? null,
         waitlistToken,
+        packageToken,
       }, slug);
       BookingEvents.bookingCompleted(booking.bookingNumber, selectedService.name, selectedService.price, {}, selectedService.currency);
       router.push(`/booking/confirmation/${booking.id}?slug=${slug}`);
@@ -478,6 +496,26 @@ function BookingPageInner() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {packageLinkState === 'valid' && (
+          <div
+            style={{ borderRadius: getBorderRadius(buttonStyle), borderColor: `${primaryColor}55`, backgroundColor: `${primaryColor}0f` }}
+            className="mb-6 border px-4 py-3 text-sm"
+            data-testid="package-link-banner"
+          >
+            <p className="font-semibold">{t.packages.publicBanner}</p>
+            <p className="opacity-80">{t.packages.publicBannerText}</p>
+          </div>
+        )}
+        {packageLinkState === 'invalid' && (
+          <div
+            style={{ borderRadius: getBorderRadius(buttonStyle) }}
+            className="mb-6 bg-amber-50 border border-amber-200 text-amber-900 text-sm px-4 py-3"
+            data-testid="package-link-invalid"
+          >
+            {t.packages.publicInvalid}
+          </div>
+        )}
 
         <div
           className={`shadow-2xl p-5 sm:p-8 ${isDark ? 'bg-white/10 backdrop-blur-md ring-1 ring-white/10' : 'bg-white ring-1'}`}
